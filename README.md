@@ -1,4 +1,4 @@
-# MassiveRecord
+# Massive Record
 
 HBase API and ORM using the HBase Thrift API.
 
@@ -16,9 +16,8 @@ HBase API and ORM using the HBase Thrift API.
 
 ## Requirements
 
-gem 'thrift', '0.5.0'
-
-The Thrift library used has been tested with hbase-0.89.20100924.
+  * Thrift Gem 0.5.0
+  * The Thrift library used has been tested with hbase-0.89.20100924.
 
 
 ## Terms to know
@@ -32,7 +31,36 @@ http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
 ## Installation
 
+### IRB
+
+Install the Ruby thrift library :
+
+    gem install thrift
+    
+Checkout the massive_record project and install it as a Gem :
+
+    git clone git@github.com:CompanyBook/massive_record.git
+    cd massive_record/
+    rake install massive_record.gemspec
+    
+Then in IRB :
+
+    require 'rubygems'
+    require 'massive_record'
+    
+    conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
+    
 ### Ruby on Rails
+
+    # Checkout the massive_record project :
+    git clone git@github.com:CompanyBook/massive_record.git
+    # The absolute path /etc/massive_record need to link to the project :
+    ln -s /my/path/to/massive_record /etc/massive_record
+    
+Add the following Gems in your Gemfile :
+    
+    gem 'thrift', '0.5.0'
+    gem 'massive_record', :path => '/etc/massive_record'
 
 Create an config/hbase.yml file with the following content :
   
@@ -58,16 +86,25 @@ Ruby Library using the HBase Thrift API.
 http://wiki.apache.org/hadoop/Hbase/ThriftApi
 
 The generated Ruby files can be found under lib/massive_record/thrift/
+The whole API (CRUD and more) is present in the Client object (Apache::Hadoop::Hbase::Thrift::Hbase::Client).
+The client can be easily initialized using the MassiveRecord connection :
 
+    conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
+    conn.open
+    
+    client = conn.client
+    # Do whatever you want with the client object
+    
 
 ## Ruby API
 
 Thrift API wrapper :
   
     # Init a new connection with HBase
-    conn = MassiveRecord::Connection.new('localhost', 9090)
-  
-    # OR init a connection using the hbase.yml file with Rails
+    conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
+    conn.open
+    
+    # OR init a connection using the config/hbase.yml file with Rails
     conn = MassiveRecord::Base.connection
   
     # Fetch tables name
