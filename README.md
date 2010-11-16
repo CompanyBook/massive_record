@@ -22,10 +22,10 @@ HBase API and ORM using the HBase Thrift API.
 
 ## Terms to know
 
-See introduction to HBase model architecture :
+See introduction to HBase model architecture :  
 http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture
 
-Understanding terminology of Table / Row / Column family / Column / Cell :
+Understanding terminology of Table / Row / Column family / Column / Cell :  
 http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
 
@@ -85,8 +85,8 @@ Create an config/hbase.yml file with the following content :
 Ruby Library using the HBase Thrift API.
 http://wiki.apache.org/hadoop/Hbase/ThriftApi
 
-The generated Ruby files can be found under lib/massive_record/thrift/
-The whole API (CRUD and more) is present in the Client object (Apache::Hadoop::Hbase::Thrift::Hbase::Client).
+The generated Ruby files can be found under lib/massive_record/thrift/  
+The whole API (CRUD and more) is present in the Client object (Apache::Hadoop::Hbase::Thrift::Hbase::Client).  
 The client can be easily initialized using the MassiveRecord connection :
 
     conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
@@ -136,9 +136,7 @@ Thrift API wrapper :
     table.all(limit: 10) # [MassiveRecord#erg9233456, MassiveRecord#erg98453456, ...]
   
   
-## Rails API - NOT working yet
-
-ORM :
+## Rails ORM - NOT working yet
 
     class Person < MassiveRecord::Base.table
     
