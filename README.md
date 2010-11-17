@@ -51,16 +51,11 @@ Then in IRB :
     conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
     
 ### Ruby on Rails
-
-    # Checkout the massive_record project :
-    git clone git@github.com:CompanyBook/massive_record.git
-    # The absolute path /etc/massive_record need to link to the project :
-    ln -s /my/path/to/massive_record /etc/massive_record
     
 Add the following Gems in your Gemfile :
     
     gem 'thrift', '0.5.0'
-    gem 'massive_record', :path => '/etc/massive_record'
+    gem 'massive_record', :git => 'git@github.com:CompanyBook/massive_record.git'
 
 Create an config/hbase.yml file with the following content :
   
