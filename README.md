@@ -39,7 +39,7 @@ Install the Ruby thrift library :
     
 Checkout the massive_record project and install it as a Gem :
 
-    git clone git@github.com:CompanyBook/massive_record.git
+    git clone git://github.com/CompanyBook/massive_record.git
     cd massive_record/
     rake install massive_record.gemspec
     
@@ -55,7 +55,7 @@ Then in IRB :
 Add the following Gems in your Gemfile :
     
     gem 'thrift', '0.5.0'
-    gem 'massive_record', :git => 'git@github.com:CompanyBook/massive_record.git'
+    gem 'massive_record', :git => 'git://github.com/CompanyBook/massive_record.git'
 
 Create an config/hbase.yml file with the following content :
   
