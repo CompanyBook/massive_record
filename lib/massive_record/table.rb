@@ -35,24 +35,29 @@ module MassiveRecord
     end
     
     def destroy
-      client.deleteTable(name)
+      disable
+      client.deleteTable(name).nil?
+    end
+    
+    def create_column_families(column_family_names)
+      column_family_names.each{|name| @column_families.push(ColumnFamily.new(name))}
     end
     
     def fetch_column_families
-      @column_families = client.getColumnDescriptors(name).collect do |column_name, description| 
-        MassiveRecord::ColumnFamily.new(column_name.split(":").first)
+      @column_families = client.getColumnDescriptors(name).collect do |name, description| 
+        ColumnFamily.new(name.split(":").first)
       end
     end
     
-    def column_families_names
+    def column_family_names
       client.getColumnDescriptors(name).collect{|column_name, description| column_name.split(":").first}
     end
     
     def scanner(opts = {})
       # list of column families to fetch from the db
-      cols = opts[:column_families_names] || column_families_names
+      cols = opts[:column_family_names] || column_family_names
       
-      s = MassiveRecord::Scanner.new(connection, self.name, cols)
+      s = Scanner.new(connection, self.name, cols)
       s.open
       s
     end

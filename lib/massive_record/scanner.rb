@@ -2,12 +2,12 @@ module MassiveRecord
   
   class Scanner
     
-    attr_accessor :connection, :table_name, :column_families_names, :opened_scanner
+    attr_accessor :connection, :table_name, :column_family_names, :opened_scanner
     
-    def initialize(connection, table_name, column_families_names)
+    def initialize(connection, table_name, column_family_names)
       @connection = connection
       @table_name = table_name
-      @column_families_names = column_families_names.collect{|n| "#{n.split(":").first}:"}
+      @column_family_names = column_family_names.collect{|n| "#{n.split(":").first}:"}
     end
     
     def client
@@ -16,7 +16,7 @@ module MassiveRecord
     
     def open
       begin
-        @opened_scanner ||= client.scannerOpen(table_name, "", column_families_names)
+        @opened_scanner ||= client.scannerOpen(table_name, "", column_family_names)
         true
       rescue => e
         false
@@ -37,7 +37,7 @@ module MassiveRecord
     end
     
     def populate_row(result)
-      MassiveRecord::Row.populate_from_t_row_result(result)
+      Row.populate_from_t_row_result(result)
     end
     
   end

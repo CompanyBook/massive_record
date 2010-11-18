@@ -8,7 +8,7 @@ module MassiveRecord
     end
 
     def self.connection
-      conn = MassiveRecord::Connection.new(config)
+      conn = Connection.new(config)
       conn.open
       conn
     end

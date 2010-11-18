@@ -112,15 +112,18 @@ Thrift API wrapper :
     column = MassiveRecord::ColumnFamily.new(:info)
     table.column_families.push(column)
   
+    # Or bulk add column families
+    table.create_column_families([:friends, :misc])
+    
     # Create the table
     table.save
   
     # Fetch column families from the database
-    table.fetch_column_families # => [ColumnFamily#RTY23423424]
-    table.column_families.collect(&:name) # => ["info"]
+    table.fetch_column_families # => [ColumnFamily#RTY4424, ColumnFamily#R475424, ColumnFamily#GHJ9424]
+    table.column_families.collect(&:name) # => ["info", "friends", "misc"]
   
     # Add a new row
-    row = Row.new
+    row = MassiveRecord::Row.new
     row.key = "my_unique_key"
     row.values = { "info:first_name" => "H", "info:last_name" => "Base", "info:email" => "h@base.com" }
     row.table = table
@@ -129,6 +132,9 @@ Thrift API wrapper :
     # Fetch rows
     table.first # => MassiveRecord#erg98453456
     table.all(limit: 10) # [MassiveRecord#erg9233456, MassiveRecord#erg98453456, ...]
+    
+    # Remove the table
+    table.destroy
   
   
 ## Rails ORM - NOT working yet

@@ -15,7 +15,7 @@ module MassiveRecord
     end
 
     def fetch_all_column_families
-      fetch_column_families(@table.column_families_names)
+      fetch_column_families(@table.column_family_names)
     end
     
     def fetch_column_families(list)
@@ -34,6 +34,14 @@ module MassiveRecord
     # = Parse columns / cells and create a Hash from them
     def values
       @values.present? ? @values : columns.inject({}) {|h, (column)| h[column.name] = column.cells.first.value; h}
+    end
+    
+    def parse_values(data)
+      data.each do |column_family_name, columns|
+        columns.each do |column_name, values|
+           @values["#{column_family_name}:#{column_name}"] = values
+        end
+      end
     end
     
     # = Parse columns cells and save them
@@ -59,7 +67,7 @@ module MassiveRecord
       result.columns.each do |name, value|
         cell = MassiveRecord::Cell.new({
           :value      => value.value,
-          :created_at => Time.at(value.timestamp / 1000)
+          :created_at => Time.at(value.timestamp / 1000, (value.timestamp % 1000) * 1000)
         })
         
         column = MassiveRecord::Column.new({
