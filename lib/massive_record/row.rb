@@ -51,7 +51,7 @@ module MassiveRecord
       @values.each do |k, v|
         m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
         m.column = k
-        m.value  = v
+        m.value  = serialize_value(v)
         
         mutations.push(m)
       end
@@ -59,18 +59,26 @@ module MassiveRecord
       @table.client.mutateRow(@table.name, key, mutations).nil?
     end    
     
+    def serialize_value(v)
+      if v.is_a?(String)
+        v
+      elsif v.is_a?(Hash) || v.is_a?(Array)
+        v.to_json
+      end
+    end
+    
     def self.populate_from_t_row_result(result)
       row                 = self.new
       row.key             = result.row
       row.column_families = result.columns.keys.collect{|k| k.split(":").first}.uniq
       
       result.columns.each do |name, value|
-        cell = MassiveRecord::Cell.new({
+        cell = Cell.new({
           :value      => value.value,
           :created_at => Time.at(value.timestamp / 1000, (value.timestamp % 1000) * 1000)
         })
         
-        column = MassiveRecord::Column.new({
+        column = Column.new({
           :name  => name,
           :cells => [cell]
         })
