@@ -47,6 +47,9 @@ module MassiveRecord
       @column_families = client.getColumnDescriptors(name).collect do |name, description| 
         ColumnFamily.new(name.split(":").first)
       end
+      
+      # Return amount of columns families fetched
+      @column_families.size
     end
     
     def column_family_names
@@ -56,8 +59,9 @@ module MassiveRecord
     def scanner(opts = {})
       # list of column families to fetch from the db
       cols = opts[:column_family_names] || column_family_names
+      sk   = opts[:start_key].to_s
       
-      s = Scanner.new(connection, self.name, cols)
+      s = Scanner.new(connection, self.name, cols, sk)
       s.open
       s
     end
@@ -68,6 +72,10 @@ module MassiveRecord
     
     def all(opts = {})
       scanner.fetch_rows(opts)
+    end
+    
+    def find(id)
+      scanner(:start_key => id).fetch_rows(:limit => 1).first
     end
     
     def exists?

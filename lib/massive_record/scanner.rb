@@ -2,21 +2,22 @@ module MassiveRecord
   
   class Scanner
     
-    attr_accessor :connection, :table_name, :column_family_names, :opened_scanner
+    attr_accessor :connection, :table_name, :column_family_names, :start_key, :opened_scanner
     
-    def initialize(connection, table_name, column_family_names)
+    def initialize(connection, table_name, column_family_names, start_key = "")
       @connection = connection
       @table_name = table_name
       @column_family_names = column_family_names.collect{|n| "#{n.split(":").first}:"}
+      @start_key = start_key
     end
     
     def client
       connection.client
     end
     
-    def open(row_id='')
+    def open
       begin
-        @opened_scanner ||= client.scannerOpen(table_name,row_id, column_family_names)
+        @opened_scanner ||= client.scannerOpen(table_name, start_key, column_family_names)
         true
       rescue => e
         false

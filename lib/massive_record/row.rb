@@ -4,10 +4,10 @@ module MassiveRecord
     
     attr_writer :table, :values
     
-    attr_accessor :key, :column_families, :columns
+    attr_accessor :id, :column_families, :columns
     
     def initialize(opts = {})
-      @key             = opts[:key]
+      @id             = opts[:id]
       @values          = opts[:values] || {}
       @table           = opts[:table]
       @column_families = opts[:column_families] || []
@@ -33,7 +33,7 @@ module MassiveRecord
     
     # = Parse columns / cells and create a Hash from them
     def values
-      @values.empty? ? @values : columns.inject({}) {|h, (column)| h[column.name] = column.cells.first.value; h}
+      !@values.empty? ? @values : columns.inject({"id" => id}) {|h, (column)| h[column.name] = column.cells.first.value; h}
     end
     
     def parse_values(data)
@@ -56,7 +56,7 @@ module MassiveRecord
         mutations.push(m)
       end
       
-      @table.client.mutateRow(@table.name, key, mutations).nil?
+      @table.client.mutateRow(@table.name, id, mutations).nil?
     end    
     
     def serialize_value(v)
@@ -69,7 +69,7 @@ module MassiveRecord
     
     def self.populate_from_t_row_result(result)
       row                 = self.new
-      row.key             = result.row
+      row.id              = result.row
       row.column_families = result.columns.keys.collect{|k| k.split(":").first}.uniq
       
       result.columns.each do |name, value|

@@ -9,7 +9,7 @@ describe MassiveRecord::Table do
     @table = MassiveRecord::Table.new(@connection, MR_CONFIG['table'])
   end
   
-  it "should not include the test table" do
+  it "should not exists is the database" do
     @connection.tables.should_not include(@table.name)
   end
   
@@ -17,7 +17,24 @@ describe MassiveRecord::Table do
     @table.save.should eql(true)
   end
   
-  it "should include the test table" do
+  it "should not have any column families" do
+    @table.column_families.should be_empty
+  end
+  
+  it "should fetch column families from the database" do
+    @table.fetch_column_families.should eql(0)
+    @table.column_families.size.should eql(0)
+  end
+  
+  it "should create a new column family" do
+    
+  end
+  
+  it "should contains one column family" do
+    
+  end
+  
+  it "should exists in the database" do
     @table.exists?.should eql(true)
   end
   

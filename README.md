@@ -123,7 +123,7 @@ Thrift API wrapper :
   
     # Add a new row
     row = MassiveRecord::Row.new
-    row.key = "my_unique_key"
+    row.id = "my_unique_id"
     row.values = { "info:first_name" => "H", "info:last_name" => "Base", "info:email" => "h@base.com" }
     row.table = table
     row.save
@@ -131,7 +131,8 @@ Thrift API wrapper :
     # Fetch rows
     table.first # => MassiveRecord#erg98453456
     table.all(limit: 10) # [MassiveRecord#erg9233456, MassiveRecord#erg98453456, ...]
-        
+    table.find("my_unique_id") # => MassiveRecord#erg98453456
+    
     # Remove the table
     table.destroy
   
