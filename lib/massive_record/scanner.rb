@@ -14,9 +14,9 @@ module MassiveRecord
       connection.client
     end
     
-    def open
+    def open(row_id='')
       begin
-        @opened_scanner ||= client.scannerOpen(table_name, "", column_family_names)
+        @opened_scanner ||= client.scannerOpen(table_name,row_id, column_family_names)
         true
       rescue => e
         false
