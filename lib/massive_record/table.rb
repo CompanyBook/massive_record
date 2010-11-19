@@ -7,7 +7,12 @@ module MassiveRecord
     def initialize(connection, table_name)
       @connection = connection
       @name = table_name.to_s
-      @column_families = []
+      init_column_families
+    end
+    
+    def init_column_families      
+      @column_families = ColumnFamiliesCollection.new
+      @column_families.table = self
     end
     
     def self.create(connection, table_name, column_families = [])
@@ -44,16 +49,20 @@ module MassiveRecord
     end
     
     def fetch_column_families
-      @column_families = client.getColumnDescriptors(name).collect do |name, description| 
-        ColumnFamily.new(name.split(":").first)
+      @column_families.clear
+      @column_families = client.getColumnDescriptors(name).collect do |column_name, description| 
+        ColumnFamily.new(column_name.split(":").first)  
       end
-      
-      # Return amount of columns families fetched
-      @column_families.size
+      @column_families
     end
     
     def column_family_names
-      client.getColumnDescriptors(name).collect{|column_name, description| column_name.split(":").first}
+      @column_families.collect{|column_family| column_family.name.to_s}
+    end
+    
+    def fetch_column_family_names
+      fetch_column_families
+      column_family_names
     end
     
     def scanner(opts = {})
@@ -80,6 +89,18 @@ module MassiveRecord
     
     def exists?
       connection.tables.include?(name)
+    end
+    
+    def regions
+      connection.client.getTableRegions(name).collect do |r|
+        {
+          :start_key => r.startKey,
+          :end_key => r.endKey,
+          :id => r.id,
+          :name => r.name,
+          :version => r.version
+        }
+      end
     end
     
   end

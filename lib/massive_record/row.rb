@@ -7,7 +7,7 @@ module MassiveRecord
     attr_accessor :id, :column_families, :columns
     
     def initialize(opts = {})
-      @id             = opts[:id]
+      @id              = opts[:id]
       @values          = opts[:values] || {}
       @table           = opts[:table]
       @column_families = opts[:column_families] || []
@@ -15,6 +15,7 @@ module MassiveRecord
     end
 
     def fetch_all_column_families
+      @table.fetch_column_family
       fetch_column_families(@table.column_family_names)
     end
     
