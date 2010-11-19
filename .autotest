@@ -1,0 +1,15 @@
+require 'autotest/restart'
+require 'autotest/growl'
+require 'autotest/fsevent'
+
+Autotest.add_hook(:initialize) {|at|
+  %w{.git .svn .hg .DS_Store ._* vendor tmp log doc}.each do |exception|
+    at.add_exception(exception)
+  end
+  at.clear_mappings         
+  # take out the default (test/test*rb)
+  at.add_mapping(%r{^lib/.*\.rb$}) {|f, _|
+    Dir['spec/**/*.rb']
+  }
+  nil
+}

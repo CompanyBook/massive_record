@@ -132,7 +132,7 @@ Thrift API wrapper :
     # Fetch rows
     table.first # => MassiveRecord#erg98453456
     table.all(limit: 10) # [MassiveRecord#erg9233456, MassiveRecord#erg98453456, ...]
-    
+        
     # Remove the table
     table.destroy
   

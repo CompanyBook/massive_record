@@ -20,7 +20,7 @@ module MassiveRecord
     
     def fetch_column_families(list)
       @column_families = table.column_families.collect do |column_name, description|
-        MassiveRecord::ColumnFamily.new(column_name.split(":").first, {
+        ColumnFamily.new(column_name.split(":").first, {
           :row          => self,
           :name         => description.name,
           :max_versions => description.maxVersions,
@@ -33,7 +33,7 @@ module MassiveRecord
     
     # = Parse columns / cells and create a Hash from them
     def values
-      @values.present? ? @values : columns.inject({}) {|h, (column)| h[column.name] = column.cells.first.value; h}
+      @values.empty? ? @values : columns.inject({}) {|h, (column)| h[column.name] = column.cells.first.value; h}
     end
     
     def parse_values(data)
