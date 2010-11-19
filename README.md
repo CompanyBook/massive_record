@@ -129,9 +129,10 @@ Thrift API wrapper :
     row.save
   
     # Fetch rows
-    table.first # => MassiveRecord#erg98453456
-    table.all(limit: 10) # [MassiveRecord#erg9233456, MassiveRecord#erg98453456, ...]
-    table.find("my_unique_id") # => MassiveRecord#erg98453456
+    table.first # => MassiveRecord#ID1
+    table.all(:limit => 10) # => [MassiveRecord#ID1, MassiveRecord#ID2, ...]
+    table.find("ID2") # => MassiveRecord#ID2
+    table.all(:limit => 3, :start => "ID2") # => [MassiveRecord#ID2, MassiveRecord#ID3, MassiveRecord#ID4]
     
     # Remove the table
     table.destroy

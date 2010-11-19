@@ -71,7 +71,7 @@ module MassiveRecord
     end
     
     def all(opts = {})
-      scanner.fetch_rows(opts)
+      scanner({:start_key => opts.delete(:start)}).fetch_rows(opts)
     end
     
     def find(id)
