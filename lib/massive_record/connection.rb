@@ -6,10 +6,8 @@ module MassiveRecord
     
     def initialize(opts = {})
       @timeout = 4000
-      
-      %w{host port}.each do |name|
-        send("#{name}=", opts[name.to_sym])
-      end
+      @host    = opts[:host]
+      @port    = opts[:port] || 9090
     end
         
     def transport
@@ -30,6 +28,10 @@ module MassiveRecord
     
     def tables
       client.getTableNames()
+    end
+    
+    def load_table(table_name)
+      MassiveRecord::Table.new(self, table_name)
     end
     
   end

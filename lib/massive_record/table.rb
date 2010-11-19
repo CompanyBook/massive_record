@@ -18,7 +18,7 @@ module MassiveRecord
     
     def save
       begin
-        client.createTable(name, @column_families.collect{|cf| cf.descriptor})
+        client.createTable(name, @column_families.collect{|cf| cf.descriptor}).nil?
       rescue Apache::Hadoop::Hbase::Thrift::AlreadyExists => ex
         "The table already exists."
       rescue => ex
@@ -68,6 +68,10 @@ module MassiveRecord
     
     def all(opts = {})
       scanner.fetch_rows(opts)
+    end
+    
+    def exists?
+      connection.tables.include?(name)
     end
     
   end

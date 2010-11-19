@@ -1,0 +1,3 @@
+host: somewhere.compute.amazonaws.com
+port: 9090
+table: massive_record_test

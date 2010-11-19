@@ -1,14 +1,27 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe "A new connection" do
+describe MassiveRecord::Connection do
+  
+  before(:each) do
+    @connection ||= MassiveRecord::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
+  end
   
   it "should have a host and port" do
-    host = "somewhere.at.amazon.com"
-    port = 9090
-
-    conn = MassiveRecord::Connection.new(:host => host, :port => port)
-    conn.host.should == host
-    conn.port.should == port
+    connections = [@connection, MassiveRecord::Connection.new(:host => "somewhere")]
+    
+    connections.each do |conn|
+      conn.host.to_s.should_not be_empty
+      conn.port.to_s.should_not be_empty
+    end
   end 
+  
+  it "should open the connection" do
+    @connection.open.class.should eql(Socket)
+  end
+  
+  it "should have a list of tables" do
+    @connection.open 
+    @connection.tables.class.should eql(Array)
+  end
   
 end

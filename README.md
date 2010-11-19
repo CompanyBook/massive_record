@@ -60,8 +60,7 @@ Add the following Gems in your Gemfile :
 Create an config/hbase.yml file with the following content :
   
     defaults: &defaults
-      user: hbase
-      host: somewhere.compute.amazonaws.com
+      host: somewhere.compute.amazonaws.com # No 'http', it's a Thrift connection
       port: 9090
 
     development:
@@ -116,7 +115,7 @@ Thrift API wrapper :
     table.create_column_families([:friends, :misc])
     
     # Create the table
-    table.save
+    table.save # will raise an exception if the table already exists
   
     # Fetch column families from the database
     table.fetch_column_families # => [ColumnFamily#RTY4424, ColumnFamily#R475424, ColumnFamily#GHJ9424]
