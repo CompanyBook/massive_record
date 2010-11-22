@@ -134,6 +134,9 @@ Thrift API wrapper :
     table.find("ID2") # => MassiveRecord#ID2
     table.all(:limit => 3, :start => "ID2") # => [MassiveRecord#ID2, MassiveRecord#ID3, MassiveRecord#ID4]
     
+    # Manipulate rows
+    table.first.destroy # => true
+    
     # Remove the table
     table.destroy
   
@@ -182,6 +185,16 @@ Thrift API wrapper :
     
     # Delete
     p.destroy
-  
+
+
+## Q&A
+
+How to add a new column family to an existing table?
+    
+    # Connect to the HBase console on the server itself and enter the following code :
+    disable 'status'
+    alter 'companies', { NAME => 'new_collumn_familiy' }
+    enable 'status'
+
 
 Copyright (c) 2010 Companybook, released under the MIT license
