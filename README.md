@@ -92,7 +92,7 @@ The client can be easily initialized using the MassiveRecord connection :
 
 ## Ruby API
 
-Thrift API wrapper :
+Thrift API wrapper (See spec/ folder for more examples) :
   
     # Init a new connection with HBase
     conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
@@ -124,7 +124,7 @@ Thrift API wrapper :
     # Add a new row
     row = MassiveRecord::Row.new
     row.id = "my_unique_id"
-    row.values = { "info:first_name" => "H", "info:last_name" => "Base", "info:email" => "h@base.com" }
+    row.values = { :info => { :first_name => "H", :last_name => "Base", :email => "h@base.com" } }
     row.table = table
     row.save
   

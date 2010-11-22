@@ -2,16 +2,17 @@ module MassiveRecord
     
   class Row
     
-    attr_writer :table, :values
+    attr_writer :table
     
-    attr_accessor :id, :column_families, :columns
+    attr_accessor :id, :column_families, :columns, :new_record
     
     def initialize(opts = {})
       @id              = opts[:id]
-      @values          = opts[:values] || {}
+      self.values      = opts[:values] || {}
       @table           = opts[:table]
       @column_families = opts[:column_families] || []
       @columns         = opts[:columns] || []
+      @new_record      = true
     end
 
     def fetch_all_column_families
@@ -34,15 +35,36 @@ module MassiveRecord
     
     # = Parse columns / cells and create a Hash from them
     def values
-      !@values.empty? ? @values : columns.inject({"id" => id}) {|h, (column)| h[column.name] = column.cells.first.value; h}
+      @values.empty? ? format_values : @values
     end
     
+    def format_values
+      @values = @columns.inject({"id" => id}) {|h, (column)| h[column.name] = column.cells.first.value; h}
+    end
+    
+    def values=(data)
+      @values = {}
+      update_values(data)
+    end
+        
     def parse_values(data)
+      update_values(data)
+    end
+    
+    def update_values(data = {})
       data.each do |column_family_name, columns|
         columns.each do |column_name, values|
-           @values["#{column_family_name}:#{column_name}"] = values
+          update_value(column_family_name, column_name, values)
         end
       end
+    end
+    
+    def update_value(column_family_name, column_name, value)
+      @values["#{column_family_name}:#{column_name}"] = value
+    end
+    
+    def merge_values(data)
+      
     end
     
     # = Parse columns cells and save them
@@ -70,8 +92,9 @@ module MassiveRecord
     
     def self.populate_from_t_row_result(result, connection, table_name)
       row                 = self.new
-      row.table           = Table.new(connection, table_name)
       row.id              = result.row
+      row.new_record      = false
+      row.table           = Table.new(connection, table_name)
       row.column_families = result.columns.keys.collect{|k| k.split(":").first}.uniq
       
       result.columns.each do |name, value|
@@ -93,6 +116,18 @@ module MassiveRecord
     
     def destroy
       @table.client.deleteAllRow(@table.name, @id).nil?
+    end
+    
+    def new_record?
+      @new_record
+    end
+    
+    def prev
+      self
+    end
+    
+    def next
+      self
     end
     
   end  

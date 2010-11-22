@@ -26,8 +26,8 @@ describe MassiveRecord::Table do
     context "and a new initialized table with column families" do 
     
       before(:each) do
-        @table.column_families.create(MassiveRecord::ColumnFamily.new(:info))
-        @table.column_families.create(:misc, :max_versions => 3)
+        @table.column_families.create(MassiveRecord::ColumnFamily.new(:info, :max_versions => 3))
+        @table.column_families.create(:misc)
       end
   
       it "should contains two column families" do
@@ -45,15 +45,43 @@ describe MassiveRecord::Table do
       it "should add a row" do
         row = MassiveRecord::Row.new
         row.id = "ID1"
-        row.values = { "info:first_name" => "H", "info:last_name" => "Base", "info:email" => "h@base.com" }
+        row.values = { :info =>  { :first_name => "John", :last_name => "Doe", :email => "john@base.com" } }
         row.table = @table
         row.save
       end
-  
+      
       it "should contains one row" do
         @table.all.size.should eql(1)
       end
-  
+      
+      it "should update row values" do
+        row = @table.first
+        row.values["info:first_name"].should eql("John")
+        
+        row.update_values({ :info =>  { :first_name => "Bob" } })
+        row.values["info:first_name"].should eql("Bob")
+        
+        row.update_value(:info, :email, "bob@base.com")
+        row.values["info:email"].should eql("bob@base.com")
+      end
+      
+      it "should save row changes" do
+        row = @table.first
+        row.update_values({ :info =>  { :first_name => "Bob" } })
+        row.save.should eql(true)
+      end
+      
+      it "should display the previous or next value (versioning) of the column 'info:first_name'" do
+        row = @table.first
+        row.values["info:first_name"].should eql("Bob")
+        
+        prev_row = row.prev
+        prev_row.values["info:first_name"].should eql("John")
+        
+        next_row = prev_row.next
+        next_row.values["info:first_name"].should eql("Bob")
+      end
+      
       it "should delete a row" do
         @table.first.destroy.should eql(true)
       end
