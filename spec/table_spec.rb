@@ -45,7 +45,16 @@ describe MassiveRecord::Table do
       it "should add a row" do
         row = MassiveRecord::Row.new
         row.id = "ID1"
-        row.values = { :info =>  { :first_name => "John", :last_name => "Doe", :email => "john@base.com" } }
+        row.values = { 
+          :info => { :first_name => "John", :last_name => "Doe", :email => "john@base.com" },
+          :misc => { 
+            :like => ["Eating", "Sleeping", "Coding"], 
+            :dislike => {
+              "Washing" => "Boring 6/10",
+              "Ironing" => "Boring 8/10"
+            }
+          }
+        }
         row.table = @table
         row.save
       end
@@ -58,28 +67,38 @@ describe MassiveRecord::Table do
         row = @table.first
         row.values["info:first_name"].should eql("John")
         
-        row.update_values({ :info =>  { :first_name => "Bob" } })
+        row.update_columns({ :info =>  { :first_name => "Bob" } })
         row.values["info:first_name"].should eql("Bob")
         
-        row.update_value(:info, :email, "bob@base.com")
+        row.update_column(:info, :email, "bob@base.com")
         row.values["info:email"].should eql("bob@base.com")
       end
       
       it "should save row changes" do
         row = @table.first
-        row.update_values({ :info =>  { :first_name => "Bob" } })
+        row.update_columns({ :info => { :first_name => "Bob" } })
         row.save.should eql(true)
       end
       
-      it "should display the previous or next value (versioning) of the column 'info:first_name'" do
+      it "should merge array data" do
+        row = @table.first
+        row.merge_columns({ :misc => { :like => ["Playing"] } })
+        row.columns["misc:like"].deserialize_value.should =~ ["Eating", "Sleeping", "Coding", "Playing"]
+      end
+      
+      it "should merge hash data" do
+        row = @table.first
+        row.merge_columns({ :misc => { :dislike => { "Ironing" => "Boring 10/10", "Running" => "Boring 5/10" } } })
+        row.columns["misc:dislike"].deserialize_value["Ironing"].should eql("Boring 10/10") # Check updated value
+        row.columns["misc:dislike"].deserialize_value.keys.should =~ ["Washing", "Ironing", "Running"] # Check new value
+      end
+      
+      it "should display the previous value (versioning) of the column 'info:first_name'" do
         row = @table.first
         row.values["info:first_name"].should eql("Bob")
         
         prev_row = row.prev
         prev_row.values["info:first_name"].should eql("John")
-        
-        next_row = prev_row.next
-        next_row.values["info:first_name"].should eql("Bob")
       end
       
       it "should delete a row" do

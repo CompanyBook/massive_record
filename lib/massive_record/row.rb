@@ -1,3 +1,5 @@
+require 'json'
+
 module MassiveRecord
     
   class Row
@@ -11,7 +13,7 @@ module MassiveRecord
       self.values      = opts[:values] || {}
       @table           = opts[:table]
       @column_families = opts[:column_families] || []
-      @columns         = opts[:columns] || []
+      @columns         = opts[:columns] || {}
       @new_record      = true
     end
 
@@ -35,60 +37,62 @@ module MassiveRecord
     
     # = Parse columns / cells and create a Hash from them
     def values
-      @values.empty? ? format_values : @values
-    end
-    
-    def format_values
-      @values = @columns.inject({"id" => id}) {|h, (column)| h[column.name] = column.cells.first.value; h}
+      @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.value; h}
     end
     
     def values=(data)
       @values = {}
-      update_values(data)
-    end
-        
-    def parse_values(data)
-      update_values(data)
+      update_columns(data)
     end
     
-    def update_values(data = {})
+    def update_columns(data = {})
       data.each do |column_family_name, columns|
         columns.each do |column_name, values|
-          update_value(column_family_name, column_name, values)
+          update_column(column_family_name, column_name, values)
         end
       end
     end
     
-    def update_value(column_family_name, column_name, value)
-      @values["#{column_family_name}:#{column_name}"] = value
+    def update_column(column_family_name, column_name, value)
+      column = "#{column_family_name}:#{column_name}"
+      
+      if @columns[column].nil?
+        @columns[column] = Cell.new({ :value => Cell.serialize_value(value), :created_at => Time.now })
+      else
+        @columns[column].serialize_value(value)
+      end
     end
     
-    def merge_values(data)
-      
+    # = Merge column values with new data : it implies that column values is a JSON encoded string
+    def merge_columns(data)
+      data.each do |column_family_name, columns|
+        columns.each do |column_name, values|
+          if values.is_a?(Hash)
+            column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value.merge(values)
+          elsif values.is_a?(Array)
+            column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value | values
+          else
+            column_value = values
+          end
+          update_column(column_family_name, column_name, column_value)
+        end
+      end
     end
     
     # = Parse columns cells and save them
     def save
       mutations = []
       
-      @values.each do |k, v|
+      @columns.each do |column_name, cell|
         m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
-        m.column = k
-        m.value  = serialize_value(v)
+        m.column = column_name
+        m.value  = cell.value
         
         mutations.push(m)
       end
       
       @table.client.mutateRow(@table.name, id, mutations).nil?
     end    
-    
-    def serialize_value(v)
-      if v.is_a?(String)
-        v
-      elsif v.is_a?(Hash) || v.is_a?(Array)
-        v.to_json
-      end
-    end
     
     def self.populate_from_t_row_result(result, connection, table_name)
       row                 = self.new
@@ -98,17 +102,10 @@ module MassiveRecord
       row.column_families = result.columns.keys.collect{|k| k.split(":").first}.uniq
       
       result.columns.each do |name, value|
-        cell = Cell.new({
+        row.columns[name] = Cell.new({
           :value      => value.value,
           :created_at => Time.at(value.timestamp / 1000, (value.timestamp % 1000) * 1000)
         })
-        
-        column = Column.new({
-          :name  => name,
-          :cells => [cell]
-        })
-        
-        row.columns.push(column)
       end
       
       row
@@ -123,10 +120,6 @@ module MassiveRecord
     end
     
     def prev
-      self
-    end
-    
-    def next
       self
     end
     

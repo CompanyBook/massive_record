@@ -68,9 +68,12 @@ module MassiveRecord
     def scanner(opts = {})
       # list of column families to fetch from the db
       cols = opts[:column_family_names] || column_family_names
-      sk   = opts[:start_key].to_s
       
-      s = Scanner.new(connection, self.name, cols, sk)
+      s = Scanner.new(connection, self.name, cols, {
+        :start_key  => opts[:start_key].to_s,
+        :created_at => opts[:created_at].to_s
+      })
+      
       s.open
       s
     end
