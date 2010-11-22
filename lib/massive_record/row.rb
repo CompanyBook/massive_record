@@ -68,8 +68,9 @@ module MassiveRecord
       end
     end
     
-    def self.populate_from_t_row_result(result)
+    def self.populate_from_t_row_result(result, connection, table_name)
       row                 = self.new
+      row.table           = Table.new(connection, table_name)
       row.id              = result.row
       row.column_families = result.columns.keys.collect{|k| k.split(":").first}.uniq
       
@@ -88,6 +89,10 @@ module MassiveRecord
       end
       
       row
+    end
+    
+    def destroy
+      @table.client.deleteAllRow(@table.name, @id).nil?
     end
     
   end  

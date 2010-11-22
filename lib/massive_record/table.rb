@@ -36,7 +36,7 @@ module MassiveRecord
     end    
     
     def disable
-      client.disableTable(name)
+      client.disableTable(name).nil?
     end
     
     def destroy
@@ -50,8 +50,8 @@ module MassiveRecord
     
     def fetch_column_families
       @column_families.clear
-      @column_families = client.getColumnDescriptors(name).collect do |column_name, description| 
-        ColumnFamily.new(column_name.split(":").first)  
+      client.getColumnDescriptors(name).each do |column_name, description| 
+        @column_families.push(ColumnFamily.new(column_name.split(":").first))
       end
       @column_families
     end

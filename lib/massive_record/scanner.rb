@@ -38,7 +38,7 @@ module MassiveRecord
     end
     
     def populate_row(result)
-      Row.populate_from_t_row_result(result)
+      Row.populate_from_t_row_result(result, connection, table_name)
     end
     
   end
