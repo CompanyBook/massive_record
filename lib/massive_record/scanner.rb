@@ -18,7 +18,7 @@ module MassiveRecord
     
     def open
       begin
-        if created_at.nil?
+        if created_at.to_s.empty?
           @opened_scanner ||= client.scannerOpen(table_name, start_key, column_family_names)
         else
           @opened_scanner ||= client.scannerOpenTs(table_name, start_key, column_family_names, created_at)
