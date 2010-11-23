@@ -68,9 +68,17 @@ module MassiveRecord
       data.each do |column_family_name, columns|
         columns.each do |column_name, values|
           if values.is_a?(Hash)
-            column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value.merge(values)
+            if @columns["#{column_family_name}:#{column_name}"].nil?
+              column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value.merge(values)
+            else
+              column_value = values
+            end            
           elsif values.is_a?(Array)
-            column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value | values
+            if @columns["#{column_family_name}:#{column_name}"].nil?
+              column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value | values
+            else
+              column_value = values
+            end            
           else
             column_value = values
           end
