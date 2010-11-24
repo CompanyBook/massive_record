@@ -104,11 +104,44 @@ describe MassiveRecord::Table do
       it "should delete a row" do
         @table.first.destroy.should eql(true)
       end
-  
+      
       it "should not contains any row" do
         @table.first.should eql(nil)
       end
-  
+      
+      it "should create 5 rows" do
+        1.upto(5).each do |i|
+          row = MassiveRecord::Row.new
+          row.id = "ID#{i}"
+          row.values = { :info => { :first_name => "John #{i}", :last_name => "Doe #{i}" } }
+          row.table = @table
+          row.save
+        end
+        
+        @table.all.size.should eql(5)
+      end
+      
+      it "should collect 5 IDs" do
+        @table.all.collect(&:id).should eql(1.upto(5).collect{|i| "ID#{i}"})
+      end
+      
+      it "should iterate through a collection of rows" do
+        @table.all.each do |row|
+          row.id.should_not eql(nil)
+        end
+      end
+      
+      it "should iterate through a collection of rows using a batch process" do
+        group_number = 0
+        @table.find_in_batches(:batch_size => 2, :start => "ID2") do |group|
+          group_number += 1
+          group.each do |row|
+            row.id.should_not eql(nil)
+          end
+        end        
+        group_number.should eql(2)
+      end
+      
       it "should exists in the database" do
         @table.exists?.should eql(true)
       end

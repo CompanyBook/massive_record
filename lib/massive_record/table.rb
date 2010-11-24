@@ -65,17 +65,14 @@ module MassiveRecord
       column_family_names
     end
     
-    def scanner(opts = {})
+    def scanner(opts = {})      
       # list of column families to fetch from the db
       cols = opts[:column_family_names] || column_family_names
       
-      s = Scanner.new(connection, self.name, cols, {
+      Scanner.new(connection, self.name, cols, {
         :start_key  => opts[:start_key].to_s,
         :created_at => opts[:created_at].to_s
       })
-      
-      s.open
-      s
     end
     
     def first
@@ -88,6 +85,30 @@ module MassiveRecord
     
     def find(id)
       scanner(:start_key => id).fetch_rows(:limit => 1).first
+    end
+    
+    def find_in_batches(opts = {}, &block)
+      raise "A block is required." unless block_given?
+      
+      opts[:limit]  = opts.delete(:batch_size) || 10
+      opts[:limit] += 1
+      
+      prev_results = []
+      
+      while (true) do
+        results = all(opts)
+        
+        if results != prev_results
+          prev_results.empty? ? results.pop : results.shift
+          if results.empty?
+            break
+          else
+            opts[:start] = results.last.id
+            yield results
+          end
+          prev_results = results
+        end
+      end
     end
     
     def exists?

@@ -31,6 +31,9 @@ module MassiveRecord
     
     def fetch_trows(opts = {})
       opts[:limit] ||= 10
+      
+      #client.scannerGet(@start_key)
+      open
       client.scannerGetList(opened_scanner, opts[:limit])
     end
     
