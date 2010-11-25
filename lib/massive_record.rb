@@ -14,6 +14,7 @@ require 'massive_record/connection'
 require 'massive_record/migration'
 
 # HBase classes
+require 'massive_record/tables_collection'
 require 'massive_record/table'
 require 'massive_record/row'
 require 'massive_record/column_families_collection'

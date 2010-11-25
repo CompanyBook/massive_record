@@ -27,7 +27,10 @@ module MassiveRecord
     end
     
     def tables
-      client.getTableNames()
+      collection = TablesCollection.new
+      collection.connection = self
+      client.getTableNames().each{|table_name| collection.push(table_name)}
+      collection
     end
     
     def load_table(table_name)

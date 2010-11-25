@@ -38,6 +38,11 @@ describe MassiveRecord::Table do
         @table.save.should eql(true)
       end
     
+      it "should load a table" do
+        @connection.load_table(MR_CONFIG['table']).class.should eql(MassiveRecord::Table)
+        @connection.tables.load(MR_CONFIG['table']).class.should eql(MassiveRecord::Table)
+      end
+      
       it "should fetch column families from the database" do
         @table.fetch_column_families.size.should eql(2)
       end
@@ -94,6 +99,8 @@ describe MassiveRecord::Table do
       end
       
       it "should display the previous value (versioning) of the column 'info:first_name'" do
+        pending
+      
         row = @table.first
         row.values["info:first_name"].should eql("Bob")
         
@@ -119,6 +126,13 @@ describe MassiveRecord::Table do
         end
         
         @table.all.size.should eql(5)
+      end
+      
+      it "should find 3 rows" do
+        ids = ["ID1", "ID2", "ID3"]
+        @table.find(ids).each do |row|
+          ids.include?(row.id).should eql(true)
+        end
       end
       
       it "should collect 5 IDs" do

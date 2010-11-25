@@ -21,7 +21,7 @@ describe MassiveRecord::Connection do
   
   it "should have a list of tables" do
     @connection.open 
-    @connection.tables.class.should eql(Array)
+    @connection.tables.class.should eql(MassiveRecord::TablesCollection)
   end
   
 end

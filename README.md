@@ -132,6 +132,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
     table.first # => MassiveRecord#ID1
     table.all(:limit => 10) # => [MassiveRecord#ID1, MassiveRecord#ID2, ...]
     table.find("ID2") # => MassiveRecord#ID2
+    table.find(["ID1", "ID2"]) # => [MassiveRecord#ID1, MassiveRecord#ID2]
     table.all(:limit => 3, :start => "ID2") # => [MassiveRecord#ID2, MassiveRecord#ID3, MassiveRecord#ID4]
     
     # Manipulate rows

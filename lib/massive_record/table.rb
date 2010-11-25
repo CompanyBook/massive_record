@@ -75,16 +75,16 @@ module MassiveRecord
       })
     end
     
-    def first
-      scanner.fetch_rows(:limit => 1).first
+    def first(opts = {})
+      scanner({:start_key => opts.delete(:start)}).fetch_rows(:limit => 1).first
     end
     
     def all(opts = {})
       scanner({:start_key => opts.delete(:start)}).fetch_rows(opts)
     end
     
-    def find(id)
-      scanner(:start_key => id).fetch_rows(:limit => 1).first
+    def find(arg)
+      arg.is_a?(Array) ? arg.collect{|id| first(:start => id)} : first(:start => arg)
     end
     
     def find_in_batches(opts = {}, &block)
