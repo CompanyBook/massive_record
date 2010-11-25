@@ -94,7 +94,7 @@ module MassiveRecord
       @columns.each do |column_name, cell|
         m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
         m.column = column_name
-        m.value  = cell.value
+        m.value  = cell.serialized_value
         
         mutations.push(m)
       end

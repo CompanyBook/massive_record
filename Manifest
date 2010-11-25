@@ -12,6 +12,7 @@ lib/massive_record/migration.rb
 lib/massive_record/row.rb
 lib/massive_record/scanner.rb
 lib/massive_record/table.rb
+lib/massive_record/tables_collection.rb
 lib/massive_record/thrift/hbase.rb
 lib/massive_record/thrift/hbase_constants.rb
 lib/massive_record/thrift/hbase_types.rb
