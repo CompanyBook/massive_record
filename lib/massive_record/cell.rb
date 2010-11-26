@@ -1,4 +1,4 @@
-require 'json'
+require 'yaml'
 
 module MassiveRecord
   
@@ -17,11 +17,11 @@ module MassiveRecord
     end
     
     def deserialize_value
-      @value.is_a?(String) ? Marshal.load(@value) : @value
+      @value.is_a?(String) ? YAML.load(@value) : @value
     end
     
     def self.serialize_value(v)
-      v.is_a?(String) ? v : Marshal.dump(v)
+      v.is_a?(String) ? v : v.to_yaml
     end
     
     def serialize_value(v)
