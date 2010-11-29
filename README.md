@@ -2,29 +2,10 @@
 
 HBase API and ORM using the HBase Thrift API.
 
-
-## TODO
-
-  * code documentation
-  * Rails ORM (ActiveModel etc.)
-  * rows update / delete methods
-  * write tests
-  * add generators for hbase.yml etc.
-  * add migration tools
-  * ...
-
-
-## Requirements
-
-  * Thrift Gem 0.5.0
-  * The Thrift library used has been tested with hbase-0.89.20100924.
-
-
-## Terms to know
-
+The Thrift library used has been tested with hbase-0.89.20100924.
+  
 See introduction to HBase model architecture :  
-http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture
-
+http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture  
 Understanding terminology of Table / Row / Column family / Column / Cell :  
 http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
