@@ -2,16 +2,16 @@ require 'spec_helper'
 
 describe MassiveRecord::Table do
   
-  context "with a new connection" do
+  describe "with a new connection" do
 
-    before(:each) do
+    before do
       @connection = MassiveRecord::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
       @connection.open
       
       @table = MassiveRecord::Table.new(@connection, MR_CONFIG['table'])
     end
   
-    context "and a new initialized table" do
+    describe "and a new initialized table" do
     
       it "should not exists is the database" do
         @connection.tables.should_not include(MR_CONFIG['table'])
@@ -23,19 +23,19 @@ describe MassiveRecord::Table do
 
     end
     
-    context "and a new initialized table with column families" do 
+    describe "and a new initialized table with column families" do 
     
-      before(:each) do
+      before do
         @table.column_families.create(MassiveRecord::ColumnFamily.new(:info, :max_versions => 3))
         @table.column_families.create(:misc)
       end
   
       it "should contains two column families" do
-        @table.column_families.size.should eql(2)
+        @table.column_families.size.should == 2
       end
   
       it "should create a test table" do
-        @table.save.should eql(true)
+        @table.save.should be_true
       end
     
       it "should load a table" do
@@ -44,7 +44,7 @@ describe MassiveRecord::Table do
       end
       
       it "should fetch column families from the database" do
-        @table.fetch_column_families.size.should eql(2)
+        @table.fetch_column_families.size.should == 2
       end
     
       it "should add a row" do
@@ -65,7 +65,7 @@ describe MassiveRecord::Table do
       end
       
       it "should contains one row" do
-        @table.all.size.should eql(1)
+        @table.all.size.should == 1
       end
       
       it "should update row values" do
@@ -82,7 +82,7 @@ describe MassiveRecord::Table do
       it "should save row changes" do
         row = @table.first
         row.update_columns({ :info => { :first_name => "Bob" } })
-        row.save.should eql(true)
+        row.save.should be_true
       end
       
       it "should merge data" do
@@ -121,11 +121,11 @@ describe MassiveRecord::Table do
       end
       
       it "should delete a row" do
-        @table.first.destroy.should eql(true)
+        @table.first.destroy.should be_true
       end
       
       it "should not contains any row" do
-        @table.first.should eql(nil)
+        @table.first.should be_nil
       end
       
       it "should create 5 rows" do
@@ -137,13 +137,13 @@ describe MassiveRecord::Table do
           row.save
         end
         
-        @table.all.size.should eql(5)
+        @table.all.size.should == 5
       end
       
       it "should find 3 rows" do
         ids = ["ID1", "ID2", "ID3"]
         @table.find(ids).each do |row|
-          ids.include?(row.id).should eql(true)
+          ids.include?(row.id).should be_true
         end
       end
       
@@ -153,7 +153,7 @@ describe MassiveRecord::Table do
       
       it "should iterate through a collection of rows" do
         @table.all.each do |row|
-          row.id.should_not eql(nil)
+          row.id.should_not be_nil
         end
       end
       
@@ -162,18 +162,18 @@ describe MassiveRecord::Table do
         @table.find_in_batches(:batch_size => 2, :start => "ID2") do |group|
           group_number += 1
           group.each do |row|
-            row.id.should_not eql(nil)
+            row.id.should_not be_nil
           end
         end        
-        group_number.should eql(2)
+        group_number.should == 2
       end
       
       it "should exists in the database" do
-        @table.exists?.should eql(true)
+        @table.exists?.should be_true
       end
   
       it "should destroy the test table" do
-        @table.destroy.should eql(true)
+        @table.destroy.should be_true
       end
   
     end
