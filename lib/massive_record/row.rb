@@ -37,7 +37,7 @@ module MassiveRecord
     
     # = Parse columns / cells and create a Hash from them
     def values
-      @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.value; h}
+      @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.deserialize_value; h}
     end
     
     def values=(data)

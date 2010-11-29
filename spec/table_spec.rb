@@ -104,6 +104,12 @@ describe MassiveRecord::Table do
         row.columns["misc:dislike"].deserialize_value.keys.should =~ ["Washing", "Ironing", "Running"] # Check new value
       end
       
+      it "should deserialize Array / Hash values from YAML automatically" do
+        row = @table.first
+        row.values["misc:like"].class.should eql(Array)
+        row.values["misc:dislike"].class.should eql(Hash)
+      end
+      
       it "should display the previous value (versioning) of the column 'info:first_name'" do
         pending
       

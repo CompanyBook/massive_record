@@ -17,7 +17,7 @@ module MassiveRecord
     end
     
     def deserialize_value
-      @value.is_a?(String) ? YAML.load(@value) : @value
+      is_yaml? ? YAML.load(@value) : @value
     end
     
     def self.serialize_value(v)
@@ -30,6 +30,10 @@ module MassiveRecord
     
     def serialized_value
       self.class.serialize_value(@value)
+    end
+    
+    def is_yaml?
+      !@value.match(/^--- \n/).nil?
     end
     
   end
