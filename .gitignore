@@ -1,3 +1,6 @@
-.DS_Store
 pkg/*
+*.gem
+.bundle
+.DS_Store
 spec/config.yml
+rdoc/
