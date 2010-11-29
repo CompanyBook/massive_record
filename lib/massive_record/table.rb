@@ -83,6 +83,12 @@ module MassiveRecord
       scanner({:start_key => opts.delete(:start)}).fetch_rows(opts)
     end
     
+    def find!(arg)
+      results = find(arg)
+      raise "Row not found." unless results.is_a?(MassiveRecord::Row) || (results.is_a?(Array) && !results.empty?)
+      results
+    end
+    
     def find(arg)
       arg.is_a?(Array) ? arg.collect{|id| first(:start => id)} : first(:start => arg)
     end
