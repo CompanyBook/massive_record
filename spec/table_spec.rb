@@ -85,6 +85,12 @@ describe MassiveRecord::Table do
         row.save.should eql(true)
       end
       
+      it "should merge data" do
+        row = @table.first
+        row.update_columns({ :misc => { :super_power => "Eating"} })
+        row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should eql(["misc:like", "misc:dislike", "misc:super_power"].sort)
+      end
+      
       it "should merge array data" do
         row = @table.first
         row.merge_columns({ :misc => { :like => ["Playing"] } })
