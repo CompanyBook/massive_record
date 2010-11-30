@@ -8,6 +8,10 @@ describe MassiveRecord::ORM::Table do
   
   describe "Init" do
     
+    it "should be true" do
+      pending
+    end
+    
   end
   
 end

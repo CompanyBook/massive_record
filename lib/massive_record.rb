@@ -21,3 +21,7 @@ require 'massive_record/column_families_collection'
 require 'massive_record/column_family'
 require 'massive_record/cell'
 require 'massive_record/scanner'
+
+# ORM
+require 'massive_record/orm/table'
+require 'massive_record/orm/column'
