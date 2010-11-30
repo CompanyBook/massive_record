@@ -130,6 +130,10 @@ Thrift API wrapper (See spec/ folder for more examples) :
       validates_presence_of :first_name, :last_name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
       
+      select :light, :info
+      select :full, [:info, :addresses, :friends, :misc]
+      select :manage, [:addresses, :friends]
+      
       column_family :info do
         field :first_name
         field :last_name
@@ -137,6 +141,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
         field :phone_number
         field :date_of_birth, Date
         field :newsletter, Boolean, :default => false
+        timestamps # created_at, updated_at are automatically managed on field update
       end
       
       column_family :addresses do
@@ -172,6 +177,8 @@ Thrift API wrapper (See spec/ folder for more examples) :
       field :county
       field :zip_code
       field :country, Country
+      
+      timestamps
       
       belongs_to :person
     
