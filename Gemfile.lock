@@ -3,6 +3,7 @@ PATH
   specs:
     massive_record (0.0.1)
       activemodel
+      activesupport
       thrift (>= 0.5.0)
 
 GEM
@@ -31,6 +32,7 @@ PLATFORMS
 
 DEPENDENCIES
   activemodel
+  activesupport
   massive_record!
   rspec (>= 2.1.0)
   thrift (>= 0.5.0)
