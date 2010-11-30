@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe MassiveRecord::Connection do
   
-  before(:each) do
+  before do
     @connection ||= MassiveRecord::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
   end
   

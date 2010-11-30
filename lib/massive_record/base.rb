@@ -17,7 +17,7 @@ module MassiveRecord
       # TODO
     end
     
-    def self.column_family
+    def self.column
       # TODO
     end
   

@@ -123,47 +123,96 @@ Thrift API wrapper (See spec/ folder for more examples) :
     table.destroy
   
   
-## Rails ORM - NOT working yet
+## ORM - In progress
 
     class Person < MassiveRecord::Base.table
+      
+      validates_presence_of :first_name, :last_name, :email
+      validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
+      
+      select :light, :info
+      select :full, [:info, :addresses, :friends, :misc]
+      select :manage, [:addresses, :friends]
+      
+      column_family :info do
+        field :first_name
+        field :last_name
+        field :email
+        field :phone_number
+        field :date_of_birth, Date
+        field :newsletter, Boolean, :default => false
+        timestamps # created_at, updated_at are automatically managed on field update
+      end
+      
+      column_family :addresses do
+        # Address objects are created from an Array of Hashes : [{ :country => 'Norge', ... }]
+        has_many :post_addresses, :class_name => 'Address', :inverse_of => :person, :address_type => :post
+        has_many :street_addresses, :class_name => 'Address', :inverse_of => :person, :address_type => :street
+      end
+      
+      column_family :friends do
+        # Friend objects are created from an Array of IDs : [56, 7756, 342, 54]
+        has_many :friends, :class_name => 'Friend', :collection => 'Ids', :inverse_of => :friend 
+      end
+      
+      column_family :misc do
+        field :status, Integer, :column => :st
+        field :websites, Hash # { :facebook_page => "XYZ", :blog => "XYZ" }
+      end
     
-      column_family :info
-      column_family :websites
-      column_family :address, Address
-    
-      alias_attribute :first_name,   'info:first_name'
-      alias_attribute :last_name,    'info:last_name'
-      alias_attribute :email,        'info:email'
-      alias_attribute :phone_number, 'info:phone_number'
-    
+      def name
+        "#{self.first_name} #{self.last_name}"
+      end
+      
+      def active?
+        self.status == 1
+      end
+      
     end
   
-    class Address < MassiveRecord::Base.column_family
-    
+    class Address < MassiveRecord::Base.column
+      
+      validates_format_of :zip_code, :with => /\[0-9]{6})\Z/i
+      
+      field :address_type
+      field :address
+      field :city
+      field :county
+      field :zip_code
+      field :country, Country
+      
+      timestamps
+      
       belongs_to :person
     
       def simple_format
-        "#{self.person.first_name} #{self.person.last_name} - #{self.street_address}, #{self.city}, #{self.country}"
-      end
-    
-      def phone_number
-        self.person.phone_number
+        "#{self.person.name} - #{address}, #{city}, #{country}"
       end
     
     end
   
+    class Friend < Person
+      
+      belongs_to :friend
+      
+      def is_cool?
+        self.first_name == "Bob"
+      end
+      
+    end
+    
     # New record
     p = Person.new
     p.first_name = "John"
     p.email = "hbase@companybook.no"
-    p.address = Address.new(street_address: "Philip Pedersensver 1", city: "Oslo", country: "Norway")
+    p.post_addresses.push << Address.new(address: "Philip Pedersensver 1", city: "Oslo", country: "Norway")
     p.save
   
     # Find
     p = Person.find("my_person_id")
     p.first_name # => John
-    p.address # => Address#s5645645
-    p.address.simple_format # => "John - Philip Pedersensver 1, Oslo, Norway"
+    p.post_addresses.first # => Address#s5645645
+    p.post_addresses.first.simple_format # => "John - Philip Pedersensver 1, Oslo, Norway"
     
     # Delete
     p.destroy
