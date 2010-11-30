@@ -11,4 +11,4 @@ Rspec.configure do |c|
   
 end
 
-Dir["#{SPEC_DIR}/support/*.rb"].each {|f| require f}
+Dir["#{SPEC_DIR}/models/*.rb"].each {|f| require f}
