@@ -23,5 +23,4 @@ require 'massive_record/cell'
 require 'massive_record/scanner'
 
 # ORM
-require 'massive_record/orm/table'
-require 'massive_record/orm/column'
+require 'massive_record/orm/base'

@@ -2,12 +2,21 @@ PATH
   remote: .
   specs:
     massive_record (0.0.1)
+      activemodel
+      activesupport
       thrift (>= 0.5.0)
 
 GEM
   remote: http://rubygems.org/
   specs:
+    activemodel (3.0.3)
+      activesupport (= 3.0.3)
+      builder (~> 2.1.2)
+      i18n (~> 0.4)
+    activesupport (3.0.3)
+    builder (2.1.2)
     diff-lcs (1.1.2)
+    i18n (0.4.2)
     rspec (2.1.0)
       rspec-core (~> 2.1.0)
       rspec-expectations (~> 2.1.0)
@@ -22,6 +31,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activemodel
+  activesupport
   massive_record!
   rspec (>= 2.1.0)
   thrift (>= 0.5.0)

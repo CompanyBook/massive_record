@@ -1,9 +1,6 @@
 module MassiveRecord
   module ORM
-    
-    class Table
-      
+    class Table < Base
     end
-    
   end
 end
