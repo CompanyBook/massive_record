@@ -145,12 +145,14 @@ Thrift API wrapper (See spec/ folder for more examples) :
       end
       
       column_family :addresses do
-        has_many :post_addresses, Address, :type => :post
-        has_many :street_addresses, Address, :type => :street
+        # Address objects are created from an Array of Hashes : [{ :country => 'Norge', ... }]
+        has_many :post_addresses, :class_name => 'Address', :inverse_of => :person, :address_type => :post
+        has_many :street_addresses, :class_name => 'Address', :inverse_of => :person, :address_type => :street
       end
       
       column_family :friends do
-        has_many :friends, Friend, :friend => self
+        # Friend objects are created from an Array of IDs : [56, 7756, 342, 54]
+        has_many :friends, :class_name => 'Friend', :collection => 'Ids', :inverse_of => :friend 
       end
       
       column_family :misc do
@@ -172,6 +174,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
       
       validates_format_of :zip_code, :with => /\[0-9]{6})\Z/i
       
+      field :address_type
       field :address
       field :city
       field :county
@@ -202,14 +205,14 @@ Thrift API wrapper (See spec/ folder for more examples) :
     p = Person.new
     p.first_name = "John"
     p.email = "hbase@companybook.no"
-    p.address = Address.new(address: "Philip Pedersensver 1", city: "Oslo", country: "Norway")
+    p.post_addresses.push << Address.new(address: "Philip Pedersensver 1", city: "Oslo", country: "Norway")
     p.save
   
     # Find
     p = Person.find("my_person_id")
     p.first_name # => John
-    p.address # => Address#s5645645
-    p.address.simple_format # => "John - Philip Pedersensver 1, Oslo, Norway"
+    p.post_addresses.first # => Address#s5645645
+    p.post_addresses.first.simple_format # => "John - Philip Pedersensver 1, Oslo, Norway"
     
     # Delete
     p.destroy
