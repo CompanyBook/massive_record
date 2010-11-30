@@ -22,5 +22,5 @@ require 'massive_record/column_family'
 require 'massive_record/cell'
 require 'massive_record/scanner'
 
-require 'massive_record/orm/table'
-require 'massive_record/orm/column'
+# ORM
+require 'massive_record/orm/base'

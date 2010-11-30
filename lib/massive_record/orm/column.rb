@@ -1,9 +1,7 @@
 module MassiveRecord
   module ORM
-    
-    class Column
+    class Column < Base
       
     end
-    
   end
 end

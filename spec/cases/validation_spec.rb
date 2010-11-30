@@ -4,7 +4,11 @@ require 'models/address'
 
 shared_examples_for "validateable massive record model" do
   it "should include ActiveModel::Validations" do
-    pending
+    @model.class.included_modules.should include(ActiveModel::Validations)
+  end
+
+  it "should respond to valid?" do
+    @model.should respond_to :valid?
   end
 end
 
