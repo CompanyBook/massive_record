@@ -15,19 +15,15 @@ end
 
 
 
+{
+  "MassiveRecord::Base::Table" => Person,
+  "MassiveRecord::Base::Column" => Address
+}.each do |orm_class, inherited_by_test_class|
+  describe orm_class do
+    before do
+      @model = inherited_by_test_class.new
+    end
 
-describe "MassiveRecord::Base::Table" do
-  before do
-    @model = Person.new
+    it_should_behave_like "validateable massive record model"
   end
-
-  it_should_behave_like "validateable massive record model"
-end
-
-describe "MassiveRecord::Base::Column" do
-  before do
-    @model = Address.new
-  end
-
-  it_should_behave_like "validateable massive record model"
 end
