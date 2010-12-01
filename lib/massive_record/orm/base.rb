@@ -1,6 +1,7 @@
 require 'active_model'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
+require 'massive_record/orm/persistence'
 
 module MassiveRecord
   module ORM
@@ -12,6 +13,12 @@ module MassiveRecord
         #
         def find(id, attributes = {})
           instantiate({:id => id}.merge(attributes))
+        end
+
+        def create(attributes = {})
+          new(attributes).tap do |record|
+            record.save
+          end
         end
 
         private
@@ -53,14 +60,8 @@ module MassiveRecord
         _run_initialize_callbacks
       end
 
-      
-      # Basic persistence methods - Needs to be implemented. Needed them
-      # for wrapping callbacks around them. At least I think I need them now ;-)
-      %w(save save! create create! destroy delete).each do |method|
-        define_method(method) do
-          true
-        end
-      end
+
+
 
       private
 
@@ -75,6 +76,7 @@ module MassiveRecord
 
 
 
+      include Persistence
       include ActiveModel::Translation
       include Validations
       include Callbacks
