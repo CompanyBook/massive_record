@@ -191,7 +191,7 @@ describe "callbacks for" do
     ]
   end
 
-  it "save should rund correct order" do
+  it "update should rund correct order" do
     thorbjorn = CallbackDeveloper.find(1)
     thorbjorn.save
     thorbjorn.history.should == [
@@ -220,6 +220,16 @@ describe "callbacks for" do
       [:before_save, :proc  ],
       [:before_save, :object],
       [:before_save, :block ],
+      [:before_update, :method],
+      [:before_update, :string],
+      [:before_update, :proc  ],
+      [:before_update, :object],
+      [:before_update, :block ],
+      [:after_update, :method],
+      [:after_update, :string],
+      [:after_update, :proc  ],
+      [:after_update, :object],
+      [:after_update, :block ],
       [:after_save, :method],
       [:after_save, :string],
       [:after_save, :proc  ],
