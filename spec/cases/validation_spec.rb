@@ -7,23 +7,38 @@ shared_examples_for "validateable massive record model" do
     @model.class.included_modules.should include(ActiveModel::Validations)
   end
 
-  it "should respond to valid?" do
-    @model.should respond_to :valid?
+  describe "behaviour from active model" do
+    it "should respond to valid?" do
+      @model.should respond_to :valid?
+    end
+
+    it "should respond to errors" do
+      @model.should respond_to :errors
+    end
+
+    it "should have one error" do
+      @invalidate_model.call(@model)
+      @model.valid?
+      @model.should have(1).error
+    end
   end
 end
 
 
-
-
-{
-  "MassiveRecord::Base::Table" => Person,
-  "MassiveRecord::Base::Column" => Address
-}.each do |orm_class, inherited_by_test_class|
-  describe orm_class do
-    before do
-      @model = inherited_by_test_class.new
-    end
-
-    it_should_behave_like "validateable massive record model"
+describe "MassiveRecord::Base::Table" do
+  before do
+    @model = Person.new :name => "Alice", :email => "alice@gmail.com", :age => 20
+    @invalidate_model = Proc.new { |p| p.name = nil }
   end
+
+  it_should_behave_like "validateable massive record model"
+end
+
+describe "MassiveRecord::Base::Column" do
+  before do
+    @model = Address.new :street => "Henrik Ibsens gate 1"
+    @invalidate_model = Proc.new { |a| a.street = nil }
+  end
+
+  it_should_behave_like "validateable massive record model"
 end
