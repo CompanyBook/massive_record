@@ -1,5 +1,8 @@
 require 'active_model'
+require 'massive_record/orm/attributes'
 require 'massive_record/orm/validations'
+require 'massive_record/orm/naming'
+require 'massive_record/orm/column_family'
 
 module MassiveRecord
   module ORM
@@ -20,7 +23,9 @@ module MassiveRecord
       # END OF TEMP CODE
 
       include ActiveModel::Translation
+      include Attributes
       include Validations
+      include Naming      
     end
   end
 end
