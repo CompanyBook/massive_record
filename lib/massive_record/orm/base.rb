@@ -19,6 +19,7 @@ module MassiveRecord
 
       # END OF TEMP CODE
 
+      include ActiveModel::Translation
       include Validations
     end
   end
