@@ -42,12 +42,12 @@ module MassiveRecord
         !!(new_record? ? create : update)
       end
 
-      def update
+      def create
+        @new_record = false
         true
       end
 
-      def create
-        @new_record = false
+      def update
         true
       end
     end
