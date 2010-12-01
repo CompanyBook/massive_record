@@ -20,10 +20,6 @@ module MassiveRecord
         create_or_update
       end
 
-      def create
-        create_or_update
-      end
-
       def destroy
         @destroyed = true
         true
