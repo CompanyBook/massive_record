@@ -9,7 +9,7 @@ module MassiveRecord
         :before_save, :around_save, :after_save,
         :before_create, :around_create, :after_create,
         :before_update, :around_update, :after_update,
-        #:before_destroy, :around_destroy, :after_destroy
+        :before_destroy, :around_destroy, :after_destroy
       ]
 
       included do
@@ -17,13 +17,20 @@ module MassiveRecord
         include ActiveModel::Validations::Callbacks
 
         define_model_callbacks :initialize, :find, :only => :after
-        define_model_callbacks :save, :create, :update
+        define_model_callbacks :save, :create, :update, :destroy
+      end
+
+
+
+      def destroy
+        _run_destroy_callbacks { super }
       end
 
 
 
 
       private
+
 
       def create_or_update
         _run_save_callbacks { super }

@@ -150,7 +150,7 @@ describe "callbacks for" do
     ]
   end
 
-  it "create should run correct order" do
+  it "create should run in correct order" do
     thorbjorn = CallbackDeveloper.create
     thorbjorn.history.should == [
       [:after_initialize, :method],
@@ -191,7 +191,7 @@ describe "callbacks for" do
     ]
   end
 
-  it "update should rund correct order" do
+  it "update should run in correct order" do
     thorbjorn = CallbackDeveloper.find(1)
     thorbjorn.save
     thorbjorn.history.should == [
@@ -235,6 +235,51 @@ describe "callbacks for" do
       [:after_save, :proc  ],
       [:after_save, :object],
       [:after_save, :block ]
+    ]
+  end
+
+  it "destroy should run in correct order" do
+    thorbjorn = CallbackDeveloper.find(1) 
+    thorbjorn.destroy
+    thorbjorn.history.should == [
+      [:after_find, :method],
+      [:after_find, :string],
+      [:after_find, :proc],
+      [:after_find, :object],
+      [:after_find, :block],
+      [:after_initialize, :method],
+      [:after_initialize, :string],
+      [:after_initialize, :proc  ],
+      [:after_initialize, :object],
+      [:after_initialize, :block ],
+      [:before_destroy, :method],
+      [:before_destroy, :string],
+      [:before_destroy, :proc  ],
+      [:before_destroy, :object],
+      [:before_destroy, :block ],
+      [:after_destroy, :method],
+      [:after_destroy, :string],
+      [:after_destroy, :proc  ],
+      [:after_destroy, :object],
+      [:after_destroy, :block ]
+    ]
+  end
+
+  it "should not run callbacks for destroy on delete" do
+    thorbjorn = CallbackDeveloper.find(1) 
+    thorbjorn.delete
+    thorbjorn.should be_destroyed
+    thorbjorn.history.should == [
+      [:after_find, :method],
+      [:after_find, :string],
+      [:after_find, :proc],
+      [:after_find, :object],
+      [:after_find, :block],
+      [:after_initialize, :method],
+      [:after_initialize, :string],
+      [:after_initialize, :proc  ],
+      [:after_initialize, :object],
+      [:after_initialize, :block ]
     ]
   end
 end
