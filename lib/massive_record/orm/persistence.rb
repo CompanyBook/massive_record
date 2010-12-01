@@ -16,7 +16,7 @@ module MassiveRecord
 
       
 
-      def save
+      def save(*)
         create_or_update
       end
 

@@ -5,8 +5,16 @@ module MassiveRecord
       include ActiveModel::Validations
 
 
-      def save
-        valid? ? super : false
+      def save(options = {})
+        perform_validation(options) ? super : false
+      end
+
+
+      private
+
+      def perform_validation(options = {})
+        perform_validation = options[:validate] != false
+        perform_validation ? valid? : true
       end
     end
   end
