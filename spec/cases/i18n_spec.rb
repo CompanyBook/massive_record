@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'models/person'
 
-describe "translation" do
+describe "translation and naming" do
   before do
     I18n.backend = I18n::Backend::Simple.new
   end
@@ -17,6 +17,16 @@ describe "translation" do
 
     it "should look up an by a symbol" do
       Person.human_attribute_name(:name).should == "person's name"
+    end
+  end
+
+  describe "of a model" do
+    before do
+      I18n.backend.store_translations 'en', :activemodel => {:models => {:person => 'A person object'}}
+    end
+
+    it "should return it's human name" do
+      Person.model_name.human.should == "A person object"
     end
   end
 end
