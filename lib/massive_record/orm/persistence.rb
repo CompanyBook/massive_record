@@ -1,12 +1,54 @@
 module MassiveRecord
   module ORM
     module Persistence
-      # Basic persistence methods - Needs to be implemented. Needed them
-      # for wrapping callbacks around them. At least I think I need them now ;-)
-      %w(save save! create create! destroy delete).each do |method|
-        define_method(method) do
-          true
-        end
+      def new_record?
+        @new_record
+      end
+
+      def persisted?
+        !(new_record? || destroyed?)
+      end
+
+      def destroyed?
+        @destroyed
+      end
+
+
+      
+
+      def save
+        create_or_update
+      end
+
+      def create
+        create_or_update
+      end
+
+      def destroy
+        @destroyed = true
+        true
+      end
+
+      def delete
+        @destroyed = true
+        true
+      end
+
+
+      private
+
+
+      def create_or_update
+        !!(new_record? ? create : update)
+      end
+
+      def update
+        true
+      end
+
+      def create
+        @new_record = false
+        true
       end
     end
   end

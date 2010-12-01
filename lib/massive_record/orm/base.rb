@@ -41,6 +41,8 @@ module MassiveRecord
       #
       def initialize(attributes = {})
         assign_and_define_methods_for attributes
+        @new_record = true
+        @destroyed = false
         _run_initialize_callbacks
       end
 
@@ -56,6 +58,8 @@ module MassiveRecord
       #   person.name # => 'Alice'
       def init_with(coder)
         assign_and_define_methods_for coder['attributes']
+        @new_record = false
+        @destroyed = false
         _run_find_callbacks
         _run_initialize_callbacks
       end
