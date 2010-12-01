@@ -1,5 +1,6 @@
 require 'active_model'
 require 'massive_record/orm/validations'
+require 'massive_record/orm/callbacks'
 
 module MassiveRecord
   module ORM
@@ -21,6 +22,7 @@ module MassiveRecord
 
       include ActiveModel::Translation
       include Validations
+      include Callbacks
     end
   end
 end
