@@ -2,6 +2,7 @@ require 'active_model'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/persistence'
+require 'massive_record/orm/errors'
 
 module MassiveRecord
   module ORM
