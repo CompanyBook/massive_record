@@ -74,7 +74,7 @@ end
 
 
 describe "callbacks for" do
-  describe "initialize" do
+  it "initialize should run in correct order" do
     thorbjorn = CallbackDeveloper.new
     thorbjorn.history.should == [
       [:after_initialize, :method],
@@ -85,7 +85,7 @@ describe "callbacks for" do
     ]
   end
 
-  describe "find" do
+  it "find should run in correct order" do
     thorbjorn = CallbackDeveloper.find(1)
     thorbjorn.history.should == [
       [:after_find, :method],
@@ -98,6 +98,55 @@ describe "callbacks for" do
       [:after_initialize, :proc],
       [:after_initialize, :object],
       [:after_initialize, :block]
+    ]
+  end
+  
+  it "valid for new record should run in correct order" do
+    thorbjorn = CallbackDeveloper.new
+    thorbjorn.valid?
+    thorbjorn.history.should == [
+      [:after_initialize, :method],
+      [:after_initialize, :string],
+      [:after_initialize, :proc],
+      [:after_initialize, :object],
+      [:after_initialize, :block],
+      [:before_validation, :method],
+      [:before_validation, :string],
+      [:before_validation, :proc],
+      [:before_validation, :object],
+      [:before_validation, :block],
+      [:after_validation, :method],
+      [:after_validation, :string],
+      [:after_validation, :proc],
+      [:after_validation, :object],
+      [:after_validation, :block]
+    ]
+  end
+
+  it "valid for exiting record should run in correct order" do
+    thorbjorn = CallbackDeveloper.find(1)
+    thorbjorn.valid?
+    thorbjorn.history.should == [
+      [:after_find, :method],
+      [:after_find, :string],
+      [:after_find, :proc],
+      [:after_find, :object],
+      [:after_find, :block],
+      [:after_initialize, :method],
+      [:after_initialize, :string],
+      [:after_initialize, :proc],
+      [:after_initialize, :object],
+      [:after_initialize, :block],
+      [:before_validation, :method],
+      [:before_validation, :string],
+      [:before_validation, :proc],
+      [:before_validation, :object],
+      [:before_validation, :block],
+      [:after_validation, :method],
+      [:after_validation, :string],
+      [:after_validation, :proc],
+      [:after_validation, :object],
+      [:after_validation, :block]
     ]
   end
 end
