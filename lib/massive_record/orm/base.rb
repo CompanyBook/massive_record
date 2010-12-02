@@ -1,6 +1,8 @@
 require 'active_model'
 require 'massive_record/orm/errors'
 require 'massive_record/orm/attribute_methods'
+require 'massive_record/orm/attribute_methods/write'
+require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/naming'
 require 'massive_record/orm/column_family'
@@ -28,8 +30,6 @@ module MassiveRecord
         end
       end
 
-
-
       #
       # Initialize a new object. Send in attributes which
       # we'll dynamically set up read- and write methods for
@@ -44,8 +44,6 @@ module MassiveRecord
 
         self.attributes = attributes
         
-        define_read_write_methods_for attributes.keys
-
         _run_initialize_callbacks
       end
 
@@ -63,39 +61,13 @@ module MassiveRecord
       #   person.init_with('attributes' => { 'name' => 'Alice' })
       #   person.name # => 'Alice'
       def init_with(coder)
-        @attributes = coder['attributes']
         @new_record = false
         @destroyed = false
 
-        define_read_write_methods_for @attributes.keys
+        self.attributes = coder['attributes']
 
         _run_find_callbacks
         _run_initialize_callbacks
-      end
-
-
-
-
-      private
-
-      # TEMP - just to make things work as previously
-      def attributes=(attrs)
-        @attributes = attrs
-      end
-
-      # TEMP - just to make things work as previously
-      def define_read_write_methods_for(attributes)
-        attributes.each do |attribute|
-          class_eval do
-            define_method(attribute) do
-              @attributes[attribute]
-            end
-
-            define_method("#{attribute}=") do |new_value|
-              @attributes[attribute] = new_value
-            end
-          end
-        end
       end
 
 
@@ -105,6 +77,7 @@ module MassiveRecord
       include Persistence
       include ActiveModel::Translation
       include AttributeMethods
+      include AttributeMethods::Write, AttributeMethods::Read
       include Validations
       include Naming      
       include Callbacks
