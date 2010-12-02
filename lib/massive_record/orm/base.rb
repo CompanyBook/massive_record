@@ -1,6 +1,8 @@
 require 'active_model'
 require 'massive_record/orm/errors'
 require 'massive_record/orm/attribute_methods'
+require 'massive_record/orm/attribute_methods/write'
+require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/naming'
 require 'massive_record/orm/column_family'
@@ -28,8 +30,6 @@ module MassiveRecord
         end
       end
 
-
-
       #
       # Initialize a new object. Send in attributes which
       # we'll dynamically set up read- and write methods for
@@ -38,15 +38,21 @@ module MassiveRecord
       # for describing column families and fields are in place
       #
       def initialize(attributes = {})
-        assign_and_define_methods_for attributes
+        @attributes = attributes_from_field_definition
         @new_record = true
         @destroyed = false
+
+        self.attributes = attributes
+        
         _run_initialize_callbacks
       end
 
       # Initialize an empty model object from +coder+.  +coder+ must contain
       # the attributes necessary for initializing an empty model object.  For
       # example:
+      #
+      # This should be used after finding a record from the database, as it will
+      # trust the coder's attributes and not load it with default values.
       #
       #   class Person < MassiveRecord::ORM::Table
       #   end
@@ -55,23 +61,13 @@ module MassiveRecord
       #   person.init_with('attributes' => { 'name' => 'Alice' })
       #   person.name # => 'Alice'
       def init_with(coder)
-        assign_and_define_methods_for coder['attributes']
         @new_record = false
         @destroyed = false
+
+        self.attributes = coder['attributes']
+
         _run_find_callbacks
         _run_initialize_callbacks
-      end
-
-
-
-
-      private
-
-      def assign_and_define_methods_for(attributes)
-        attributes.each do |attribute, value|
-          class_eval { attr_accessor attribute }
-          send("#{attribute}=", value)
-        end
       end
 
 
@@ -81,6 +77,7 @@ module MassiveRecord
       include Persistence
       include ActiveModel::Translation
       include AttributeMethods
+      include AttributeMethods::Write, AttributeMethods::Read
       include Validations
       include Naming      
       include Callbacks
