@@ -38,15 +38,23 @@ module MassiveRecord
       # for describing column families and fields are in place
       #
       def initialize(attributes = {})
-        assign_and_define_methods_for attributes
+        @attributes = attributes_from_field_definition
         @new_record = true
         @destroyed = false
+
+        self.attributes = attributes
+        
+        define_read_write_methods_for attributes.keys
+
         _run_initialize_callbacks
       end
 
       # Initialize an empty model object from +coder+.  +coder+ must contain
       # the attributes necessary for initializing an empty model object.  For
       # example:
+      #
+      # This should be used after finding a record from the database, as it will
+      # trust the coder's attributes and not load it with default values.
       #
       #   class Person < MassiveRecord::ORM::Table
       #   end
@@ -55,9 +63,12 @@ module MassiveRecord
       #   person.init_with('attributes' => { 'name' => 'Alice' })
       #   person.name # => 'Alice'
       def init_with(coder)
-        assign_and_define_methods_for coder['attributes']
+        @attributes = coder['attributes']
         @new_record = false
         @destroyed = false
+
+        define_read_write_methods_for @attributes.keys
+
         _run_find_callbacks
         _run_initialize_callbacks
       end
@@ -67,10 +78,23 @@ module MassiveRecord
 
       private
 
-      def assign_and_define_methods_for(attributes)
-        attributes.each do |attribute, value|
-          class_eval { attr_accessor attribute }
-          send("#{attribute}=", value)
+      # TEMP - just to make things work as previously
+      def attributes=(attrs)
+        @attributes = attrs
+      end
+
+      # TEMP - just to make things work as previously
+      def define_read_write_methods_for(attributes)
+        attributes.each do |attribute|
+          class_eval do
+            define_method(attribute) do
+              @attributes[attribute]
+            end
+
+            define_method("#{attribute}=") do |new_value|
+              @attributes[attribute] = new_value
+            end
+          end
         end
       end
 

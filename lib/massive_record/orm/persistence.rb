@@ -65,6 +65,21 @@ module MassiveRecord
       def update
         true
       end
+
+
+
+      #
+      # Returns a hash with fields
+      # 
+      # TODO  This one should read from the field definition
+      #       and return a populated hash with correct
+      #       keys for attributes and maybe give it's default value?
+      #       Right now it simply returns a hash as we have no
+      #       real concept of our fields.
+      #
+      def attributes_from_field_definition
+        Hash.new
+      end
     end
   end
 end
