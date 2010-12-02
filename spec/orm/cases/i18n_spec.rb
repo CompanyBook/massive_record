@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'models/person'
+require 'orm/models/person'
 
 describe "translation and naming" do
   before do

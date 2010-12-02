@@ -1,6 +1,6 @@
 require 'spec_helper'
-require 'models/person'
-require 'models/address'
+require 'orm/models/person'
+require 'orm/models/address'
 
 #
 # Some basic tests
