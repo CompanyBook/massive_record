@@ -29,4 +29,8 @@ describe "persistance" do
     basic.destroy
     basic.should_not be_persisted
   end
+
+  it "should be possible to create new objects" do
+    Basic.create.should be_persisted
+  end
 end

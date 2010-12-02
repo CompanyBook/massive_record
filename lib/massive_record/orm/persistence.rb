@@ -1,6 +1,17 @@
 module MassiveRecord
   module ORM
     module Persistence
+      extend ActiveSupport::Concern
+
+      module ClassMethods
+        def create(attributes = {})
+          new(attributes).tap do |record|
+            record.save
+          end
+        end
+      end
+
+
       def new_record?
         @new_record
       end

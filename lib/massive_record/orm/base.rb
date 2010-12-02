@@ -19,12 +19,6 @@ module MassiveRecord
           instantiate({:id => id}.merge(attributes))
         end
 
-        def create(attributes = {})
-          new(attributes).tap do |record|
-            record.save
-          end
-        end
-
         private
 
         def instantiate(record)
