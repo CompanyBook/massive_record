@@ -33,4 +33,10 @@ describe "persistance" do
   it "should be possible to create new objects" do
     Basic.create.should be_persisted
   end
+
+  it "should raise an error if validation fails on save!" do
+    basic = Basic.new
+    basic.should_receive(:create_or_update).and_return(false)
+    lambda { basic.save! }.should raise_error MassiveRecord::ORM::RecordNotSaved
+  end
 end

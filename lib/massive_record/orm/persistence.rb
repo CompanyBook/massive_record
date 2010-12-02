@@ -31,6 +31,10 @@ module MassiveRecord
         create_or_update
       end
 
+      def save!(*)
+        create_or_update or raise RecordNotSaved
+      end
+
       def touch
         true
       end
