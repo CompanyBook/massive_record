@@ -71,7 +71,10 @@ module MassiveRecord
       end
 
 
-
+      def ==(other)
+        other.equal?(self) || other.instance_of?(self.class) && id == other.id
+      end
+      alias_method :eql?, :==
 
 
       include Persistence
