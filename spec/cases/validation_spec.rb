@@ -46,6 +46,18 @@ shared_examples_for "validateable massive record model" do
       @model.save :validate => false
       @model.should be_persisted
     end
+
+    it "should raise record invalid if save! is called on invalid record" do
+      @invalidate_model.call(@model)
+      @model.should_receive(:valid?).and_return(false)
+      lambda { @model.save! }.should raise_error MassiveRecord::ORM::RecordInvalid
+    end
+
+    it "should raise record invalid if create! is called with invalid attributes" do
+      @invalidate_model.call(@model)
+      @model.class.stub(:new).and_return(@model)
+      lambda { @model.class.create! }.should raise_error MassiveRecord::ORM::RecordInvalid
+    end
   end
 end
 

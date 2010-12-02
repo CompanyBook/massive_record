@@ -1,11 +1,11 @@
 require 'active_model'
+require 'massive_record/orm/errors'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/naming'
 require 'massive_record/orm/column_family'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/persistence'
-require 'massive_record/orm/errors'
 
 module MassiveRecord
   module ORM
