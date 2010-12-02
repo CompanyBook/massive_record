@@ -4,6 +4,15 @@ class TestClass < MassiveRecord::ORM::Base
 end
 
 describe MassiveRecord::ORM::Base do
+  describe "#object" do
+    it "should have a table name" do
+      TestClass.table_name == "test_classes"
+    end
+    
+    it "should have a model name" do
+      TestClass.model_name == "TestClass"
+    end
+  end
   describe "#initialize" do
     it "should take a set of attributes and assign them as instance variables" do
       model = TestClass.new :foo => :bar
