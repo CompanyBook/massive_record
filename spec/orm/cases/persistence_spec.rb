@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'orm/models/basic' # TODO
+require 'orm/models/basic'
 
 describe "persistance" do
   it "should be a new record when calling new" do

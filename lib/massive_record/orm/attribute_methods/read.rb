@@ -16,7 +16,7 @@ module MassiveRecord
         private
 
         def attribute(attr_name)
-          read_attribute(attr_name.to_s)
+          read_attribute(attr_name)
         end
       end
     end
