@@ -22,6 +22,31 @@ shared_examples_for "validateable massive record model" do
       @model.should have(1).error
     end
   end
+
+  describe "persistance" do
+    it "should not interrupt saving of a model if its valid" do
+      @model.save.should be_true
+      @model.should be_persisted
+    end
+
+
+    it "should return false on save if record is not valid" do
+      @invalidate_model.call(@model)
+      @model.save.should be_false
+    end
+
+    it "should not save recurd if record is not valid" do
+      @invalidate_model.call(@model)
+      @model.save
+      @model.should be_new_record
+    end
+
+    it "should skip validation if asked to" do
+      @invalidate_model.call(@model)
+      @model.save :validate => false
+      @model.should be_persisted
+    end
+  end
 end
 
 
