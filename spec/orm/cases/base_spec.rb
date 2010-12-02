@@ -26,6 +26,10 @@ describe MassiveRecord::ORM::Base do
       model.init_with 'attributes' => {:foo => :bar}
       model.foo.should == :bar
     end
+
+    it "should return nil as id by default" do
+      TestClass.new.id.should be_nil
+    end
   end
 
   describe "equality" do

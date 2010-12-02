@@ -21,9 +21,13 @@ module MassiveRecord
       def attributes=(new_attributes)
         return unless new_attributes.is_a?(Hash)
         attributes = new_attributes.stringify_keys
-        # TODO  We might want to sanitize attributes
-        #       against field definition
-        @attributes = attributes
+
+        # TODO  We might want to sanitize attributes against field definition.
+        #       The insurances of that the id exists like I'm doing here might
+        #       (should? :-)) be handled another way too. I'm doing this for now
+        #       just to make sure that define_attribute_methods actually defines
+        #       read/write method for it.
+        @attributes = {:id => nil}.merge(attributes)
       end
 
       
