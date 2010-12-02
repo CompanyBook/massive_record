@@ -25,7 +25,9 @@ module MassiveRecord
       end
 
 
-
+      def reload
+        self
+      end
       
       def save(*)
         create_or_update
