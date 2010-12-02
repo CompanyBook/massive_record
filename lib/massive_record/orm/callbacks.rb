@@ -4,7 +4,7 @@ module MassiveRecord
       extend ActiveSupport::Concern
 
       CALLBACKS = [
-        :after_initialize, :after_find, #:after_touch, 
+        :after_initialize, :after_find, :after_touch, 
         :before_validation, :after_validation,
         :before_save, :around_save, :after_save,
         :before_create, :around_create, :after_create,
@@ -16,7 +16,7 @@ module MassiveRecord
         extend ActiveModel::Callbacks
         include ActiveModel::Validations::Callbacks
 
-        define_model_callbacks :initialize, :find, :only => :after
+        define_model_callbacks :initialize, :find, :touch, :only => :after
         define_model_callbacks :save, :create, :update, :destroy
       end
 
@@ -24,6 +24,10 @@ module MassiveRecord
 
       def destroy
         _run_destroy_callbacks { super }
+      end
+
+      def touch(*)
+        _run_touch_callbacks { super }
       end
 
 

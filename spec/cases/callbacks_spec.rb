@@ -100,6 +100,28 @@ describe "callbacks for" do
       [:after_initialize, :block]
     ]
   end
+
+  it "touch should run in correct order" do
+    thorbjorn = CallbackDeveloper.find(1)
+    thorbjorn.touch
+    thorbjorn.history.should == [
+      [:after_find, :method],
+      [:after_find, :string],
+      [:after_find, :proc],
+      [:after_find, :object],
+      [:after_find, :block],
+      [:after_initialize, :method],
+      [:after_initialize, :string],
+      [:after_initialize, :proc],
+      [:after_initialize, :object],
+      [:after_initialize, :block],
+      [:after_touch, :method],
+      [:after_touch, :string],
+      [:after_touch, :proc],
+      [:after_touch, :object],
+      [:after_touch, :block]
+    ]
+  end
   
   it "valid for new record should run in correct order" do
     thorbjorn = CallbackDeveloper.new

@@ -14,10 +14,14 @@ module MassiveRecord
       end
 
 
-      
 
+      
       def save(*)
         create_or_update
+      end
+
+      def touch
+        true
       end
 
       def destroy
