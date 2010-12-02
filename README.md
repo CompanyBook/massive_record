@@ -29,7 +29,7 @@ Then in IRB :
     require 'rubygems'
     require 'massive_record'
     
-    conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
+    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
     
 ### Ruby on Rails
     
@@ -64,7 +64,7 @@ The generated Ruby files can be found under lib/massive_record/thrift/
 The whole API (CRUD and more) is present in the Client object (Apache::Hadoop::Hbase::Thrift::Hbase::Client).  
 The client can be easily initialized using the MassiveRecord connection :
 
-    conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
+    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
     conn.open
     
     client = conn.client
@@ -76,20 +76,20 @@ The client can be easily initialized using the MassiveRecord connection :
 Thrift API wrapper (See spec/ folder for more examples) :
   
     # Init a new connection with HBase
-    conn = MassiveRecord::Connection.new(:host => 'localhost', :port => 9090)
+    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
     conn.open
     
     # OR init a connection using the config/hbase.yml file with Rails
-    conn = MassiveRecord::Base.connection
+    conn = MassiveRecord::Wrapper::Base.connection
   
     # Fetch tables name
     conn.tables # => ["companies", "news", "webpages"]
   
     # Init a table
-    table = MassiveRecord::Table.new(conn, :people)
+    table = MassiveRecord::Wrapper::Table.new(conn, :people)
   
     # Add a column family
-    column = MassiveRecord::ColumnFamily.new(:info)
+    column = MassiveRecord::Wrapper::ColumnFamily.new(:info)
     table.column_families.push(column)
   
     # Or bulk add column families
@@ -103,7 +103,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
     table.column_families.collect(&:name) # => ["info", "friends", "misc"]
   
     # Add a new row
-    row = MassiveRecord::Row.new
+    row = MassiveRecord::Wrapper::Row.new
     row.id = "my_unique_id"
     row.values = { :info => { :first_name => "H", :last_name => "Base", :email => "h@base.com" } }
     row.table = table
@@ -125,7 +125,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
 
 ## ORM - Basic ActiveModel / ActiveRecord behaviour (might be deprecated/removed at any time, but it might help simplify things as we work on ORM)
     
-    class Person < MassiveRecord::ORM::Base
+    class Person < MassiveRecord::Wrapper::ORM::Base
       # This will give you:
       #   - An initializer which takes attribute hash and assigns them to your object.
       #   - write and read methods for the attributes
@@ -137,7 +137,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
 ## ORM - In progress
 
 
-    class Person < MassiveRecord::Base.table
+    class Person < MassiveRecord::Wrapper::Base.table
       
       validates_presence_of :first_name, :last_name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
@@ -182,7 +182,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
       
     end
   
-    class Address < MassiveRecord::Base.column
+    class Address < MassiveRecord::Wrapper::Base.column
       
       validates_format_of :zip_code, :with => /\[0-9]{6})\Z/i
       

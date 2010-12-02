@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-describe MassiveRecord::Connection do
+describe MassiveRecord::Wrapper::Connection do
   
   before do
-    @connection ||= MassiveRecord::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
+    @connection ||= MassiveRecord::Wrapper::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
   end
   
   it "should have a host and port" do
-    connections = [@connection, MassiveRecord::Connection.new(:host => "somewhere")]
+    connections = [@connection, MassiveRecord::Wrapper::Connection.new(:host => "somewhere")]
     
     connections.each do |conn|
       conn.host.to_s.should_not be_empty
@@ -21,7 +21,7 @@ describe MassiveRecord::Connection do
   
   it "should have a list of tables" do
     @connection.open 
-    @connection.tables.class.should eql(MassiveRecord::TablesCollection)
+    @connection.tables.class.should eql(MassiveRecord::Wrapper::TablesCollection)
   end
   
 end

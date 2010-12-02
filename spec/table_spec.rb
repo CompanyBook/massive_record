@@ -1,14 +1,14 @@
 require 'spec_helper'
 
-describe MassiveRecord::Table do
+describe MassiveRecord::Wrapper::Table do
   
   describe "with a new connection" do
 
     before do
-      @connection = MassiveRecord::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
+      @connection = MassiveRecord::Wrapper::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
       @connection.open
       
-      @table = MassiveRecord::Table.new(@connection, MR_CONFIG['table'])
+      @table = MassiveRecord::Wrapper::Table.new(@connection, MR_CONFIG['table'])
     end
   
     describe "and a new initialized table" do
@@ -26,7 +26,7 @@ describe MassiveRecord::Table do
     describe "and a new initialized table with column families" do 
     
       before do
-        @table.column_families.create(MassiveRecord::ColumnFamily.new(:info, :max_versions => 3))
+        @table.column_families.create(MassiveRecord::Wrapper::ColumnFamily.new(:info, :max_versions => 3))
         @table.column_families.create(:misc)
       end
   
@@ -39,8 +39,8 @@ describe MassiveRecord::Table do
       end
     
       it "should load a table" do
-        @connection.load_table(MR_CONFIG['table']).class.should eql(MassiveRecord::Table)
-        @connection.tables.load(MR_CONFIG['table']).class.should eql(MassiveRecord::Table)
+        @connection.load_table(MR_CONFIG['table']).class.should eql(MassiveRecord::Wrapper::Table)
+        @connection.tables.load(MR_CONFIG['table']).class.should eql(MassiveRecord::Wrapper::Table)
       end
       
       it "should fetch column families from the database" do
@@ -48,7 +48,7 @@ describe MassiveRecord::Table do
       end
     
       it "should add a row" do
-        row = MassiveRecord::Row.new
+        row = MassiveRecord::Wrapper::Row.new
         row.id = "ID1"
         row.values = { 
           :info => { :first_name => "John", :last_name => "Doe", :email => "john@base.com" },
@@ -130,7 +130,7 @@ describe MassiveRecord::Table do
       
       it "should create 5 rows" do
         1.upto(5).each do |i|
-          row = MassiveRecord::Row.new
+          row = MassiveRecord::Wrapper::Row.new
           row.id = "ID#{i}"
           row.values = { :info => { :first_name => "John #{i}", :last_name => "Doe #{i}" } }
           row.table = @table
