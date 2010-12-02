@@ -26,6 +26,12 @@ module MassiveRecord
         end
 
 
+        def update(*)
+          # TODO  If we can do partial updates against hbase
+          #       then I think this is the place to put it.
+          #       Or else, remove this method :-)
+          super
+        end
 
 
         def write_attribute(attr_name, value)

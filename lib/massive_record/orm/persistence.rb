@@ -64,7 +64,7 @@ module MassiveRecord
         true
       end
 
-      def update
+      def update(attribute_names_to_update = attributes.keys)
         true
       end
 
