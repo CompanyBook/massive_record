@@ -1,5 +1,5 @@
 require 'active_model'
-require 'massive_record/orm/attributes'
+require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/naming'
 require 'massive_record/orm/column_family'
@@ -86,7 +86,7 @@ module MassiveRecord
 
       include Persistence
       include ActiveModel::Translation
-      include Attributes
+      include AttributeMethods
       include Validations
       include Naming      
       include Callbacks
