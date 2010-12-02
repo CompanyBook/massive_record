@@ -7,8 +7,6 @@ module MassiveRecord
       end
       
       module ClassMethods
-        extend ActiveModel::Naming
-        
         def table_name
           @table_name ||= self.to_s.demodulize.underscore.pluralize
         end
