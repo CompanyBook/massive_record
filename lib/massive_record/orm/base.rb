@@ -71,6 +71,11 @@ module MassiveRecord
       end
 
 
+      def to_param
+        id.to_s if id.present?
+      end
+
+
       def ==(other)
         other.equal?(self) || other.instance_of?(self.class) && id == other.id
       end

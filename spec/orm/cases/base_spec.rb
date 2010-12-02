@@ -54,4 +54,14 @@ describe MassiveRecord::ORM::Base do
       Basic.find(1).should_not == Person.find(2)
     end
   end
+
+  describe "#to_param" do
+    it "should return nil if no id has been set" do
+      Basic.new.to_param.should be_nil
+    end
+
+    it "should return the id if id has been set" do
+      Basic.new(:id => 1).to_param.should == "1"
+    end
+  end
 end
