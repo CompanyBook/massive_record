@@ -18,8 +18,12 @@ module MassiveRecord
         @attributes
       end
 
-      def attributes=(attr)
-        @attributes = attr.stringify_keys!
+      def attributes=(new_attributes)
+        return unless new_attributes.is_a?(Hash)
+        attributes = new_attributes.stringify_keys
+        # TODO  We might want to sanitize attributes
+        #       against field definition
+        @attributes = attributes
       end
 
       

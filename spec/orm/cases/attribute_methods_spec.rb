@@ -23,4 +23,11 @@ describe "attribute methods" do
   it "should be possible to read attributes" do
     @model.read_attribute(:foo).should == :bar
   end
+
+  describe "#attributes=" do
+    it "should simply return if incomming value is not a hash" do
+      @model.attributes = "FOO => BAR"
+      @model.attributes.keys.should include("foo")
+    end
+  end
 end
