@@ -19,8 +19,7 @@ module MassiveRecord
       end
 
       def attributes=(attr)
-        attr.stringify_keys!
-        @attributes = attr
+        @attributes = attr.stringify_keys!
       end
 
       
