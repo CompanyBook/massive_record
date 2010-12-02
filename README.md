@@ -122,8 +122,20 @@ Thrift API wrapper (See spec/ folder for more examples) :
     # Remove the table
     table.destroy
   
+
+## ORM - Basic ActiveModel / ActiveRecord behaviour (might be deprecated/removed at any time, but it might help simplify things as we work on ORM)
+    
+    class Person < MassiveRecord::ORM::Base
+      # This will give you:
+      #   - An initializer which takes attribute hash and assigns them to your object.
+      #   - write and read methods for the attributes
+      #   - Validations, as you expect from an ActiveRecord model.
+      #   - Callbacks, as you expect from an ActiveRecord model.
+      #   - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
+    end
   
 ## ORM - In progress
+
 
     class Person < MassiveRecord::Base.table
       
