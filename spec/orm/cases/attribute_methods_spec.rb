@@ -14,4 +14,13 @@ describe "attribute methods" do
     @model.foo = :foo
     @model.foo.should == :foo
   end
+
+  it "should be possible to write attributes" do
+    @model.write_attribute :foo, "baaaaar"
+    @model.foo.should == "baaaaar"
+  end
+
+  it "should be possible to read attributes" do
+    @model.read_attribute(:foo).should == :bar
+  end
 end

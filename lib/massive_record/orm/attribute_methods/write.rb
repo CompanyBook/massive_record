@@ -10,7 +10,7 @@ module MassiveRecord
         
 
         def write_attribute(attr_name, value)
-          @attributes[attr_name] = value
+          @attributes[attr_name.to_s] = value
         end
 
         private

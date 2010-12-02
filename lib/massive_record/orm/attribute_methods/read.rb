@@ -10,13 +10,13 @@ module MassiveRecord
         
 
         def read_attribute(attr_name)
-          @attributes[attr_name]
+          @attributes[attr_name.to_s]
         end
 
         private
 
         def attribute(attr_name)
-          read_attribute(attr_name)
+          read_attribute(attr_name.to_s)
         end
       end
     end
