@@ -5,7 +5,8 @@ module MassiveRecord
 
       module ClassMethods
         #
-        # Just a dummy version of this to make callbacks work
+        # Interface for retrieving objects based on key.
+        # Has some convenience behaviour like find :first, :last, :all.
         #
         def find(*args)
           raise ArgumentError.new("At least one argument required!") if args.empty?
