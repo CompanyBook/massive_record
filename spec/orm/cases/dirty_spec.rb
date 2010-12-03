@@ -20,12 +20,17 @@ describe "dirty" do
   end
 
   it "should know when a attribute is set to it's original value" do
-    pending
-
     original_name = @person.name
     @person.name = "Bob"
     @person.name = original_name
     @person.should_not be_changed
+  end
+
+  it "should always keep the objects original value as _was" do
+    original_name = @person.name
+    @person.name = "Bob"
+    @person.name = "Foo"
+    @person.name_was.should == original_name
   end
 
   it "should return what name was" do

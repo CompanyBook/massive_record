@@ -36,8 +36,38 @@ module MassiveRecord
 
         def write_attribute(attr_name, value)
           attr_name = attr_name.to_s
-          send("#{attr_name}_will_change!") unless read_attribute(attr_name) == value
+
+          if will_change_attribute?(attr_name, value)
+            if will_change_back_to_original_value?(attr_name, value)
+              changed_attributes.delete(attr_name)
+            else
+              super(attr_name, original_attribute_value(attr_name))
+              send("#{attr_name}_will_change!")
+            end
+          end
+
           super
+        end
+
+
+        private
+
+        def original_attribute_value(attr_name)
+          @original_attribute_values ||= {}
+
+          unless @original_attribute_values.has_key? attr_name
+            @original_attribute_values[attr_name] = send(attr_name)
+          end
+
+          @original_attribute_values[attr_name]
+        end
+
+        def will_change_attribute?(attr_name, value)
+          read_attribute(attr_name) != value
+        end
+
+        def will_change_back_to_original_value?(attr_name, value)
+          original_attribute_value(attr_name) == value
         end
       end
     end
