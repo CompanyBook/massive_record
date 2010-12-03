@@ -1,5 +1,6 @@
 require 'active_model'
 require 'massive_record/orm/errors'
+require 'massive_record/orm/finders'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
 require 'massive_record/orm/attribute_methods/read'
@@ -13,24 +14,6 @@ require 'massive_record/orm/persistence'
 module MassiveRecord
   module ORM
     class Base
-
-      class << self
-        #
-        # Just a dummy version of this to make callbacks work
-        #
-        def find(id, attributes = {})
-          instantiate({:id => id}.merge(attributes))
-        end
-
-        private
-
-        def instantiate(record)
-          allocate.tap do |model|
-            model.init_with('attributes' => record)
-          end
-        end
-      end
-
       #
       # Initialize a new object. Send in attributes which
       # we'll dynamically set up read- and write methods for
@@ -84,6 +67,7 @@ module MassiveRecord
 
 
       include Persistence
+      include Finders
       include ActiveModel::Translation
       include AttributeMethods
       include AttributeMethods::Write, AttributeMethods::Read
