@@ -131,6 +131,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
       #   - write and read methods for the attributes
       #   - Validations, as you expect from an ActiveRecord model.
       #   - Callbacks, as you expect from an ActiveRecord model.
+      #   - Information about changes on attributes.
       #   - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
     end
   

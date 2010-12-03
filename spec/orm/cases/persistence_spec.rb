@@ -39,4 +39,8 @@ describe "persistance" do
     basic.should_receive(:create_or_update).and_return(false)
     lambda { basic.save! }.should raise_error MassiveRecord::ORM::RecordNotSaved
   end
+
+  it "should respond to reload" do
+    Basic.new.should respond_to :reload
+  end
 end
