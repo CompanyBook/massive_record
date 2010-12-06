@@ -23,9 +23,14 @@ module MassiveRecord
       end
     
       def open
-        transport.open()
+        begin
+          transport.open()
+          true
+        rescue
+          raise MassiveRecord::ConnectionException.new, "Unable to connect to HBase on #{@host}, port #{@port}"
+        end
       end
-    
+      
       def tables
         collection = TablesCollection.new
         collection.connection = self
