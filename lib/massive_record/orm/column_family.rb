@@ -1,23 +1,23 @@
 module MassiveRecord
   module ORM
-    module ColumnFamily
+    class ColumnFamily
       
-      def self.included(base)
-        base.extend(ClassMethods)
+      attr_reader :name
+      
+      def initialize(name, &block)
+        @fields = []
+        @name = name
+        instance_eval &block
       end
       
-      module ClassMethods
-        
-        @@column_families = []
-        
-        def column_families
-          @@column_families
-        end
-        
-        def column_family(*args, &block)
-          @@column_families.push(args[0])
-        end
-        
+      def field(*args)
+        f = Field.new(*args)
+        f.column_family = @name
+        @fields.push(f)
+      end
+      
+      def fields
+        @fields.inject(Fields.new){|h, (field)| h[field.name] = field; h}
       end
       
     end
