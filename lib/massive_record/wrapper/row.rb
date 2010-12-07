@@ -99,16 +99,16 @@ module MassiveRecord
           mutations.push(m)
         end
       
-        @table.client.mutateRow(@table.name, id, mutations).nil?
+        @table.client.mutateRow(@table.name, id.to_s, mutations).nil?
       end    
     
-      def self.populate_from_t_row_result(result, connection, table_name)
+      def self.populate_from_t_row_result(result, connection, table_name, column_families = [])
         row                 = self.new
         row.id              = result.row
         row.new_record      = false
         row.table           = Table.new(connection, table_name)
-        row.column_families = result.columns.keys.collect{|k| k.split(":").first}.uniq
-      
+        row.column_families = column_families
+
         result.columns.each do |name, value|
           row.columns[name] = Cell.new({
             :value      => value.value,

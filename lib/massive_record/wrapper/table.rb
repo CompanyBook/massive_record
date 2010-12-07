@@ -66,9 +66,9 @@ module MassiveRecord
       end
     
       def scanner(opts = {})      
-        # list of column families to fetch from the db
+        # list of column families to fetch from hbase
         cols = opts[:column_family_names] || column_family_names
-      
+        
         Scanner.new(connection, self.name, cols, {
           :start_key  => opts[:start_key].to_s,
           :created_at => opts[:created_at].to_s
@@ -76,11 +76,11 @@ module MassiveRecord
       end
     
       def first(opts = {})
-        scanner({:start_key => opts.delete(:start)}).fetch_rows(:limit => 1).first
+        all(opts.merge(:limit => 1)).first
       end
     
       def all(opts = {})
-        scanner({:start_key => opts.delete(:start)}).fetch_rows(opts)
+        scanner({:start_key => opts.delete(:start), :column_family_names => opts.delete(:select)}).fetch_rows(opts)
       end
     
       def find!(arg)

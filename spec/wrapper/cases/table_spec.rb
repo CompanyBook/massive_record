@@ -68,6 +68,14 @@ describe MassiveRecord::Wrapper::Table do
         @table.all.size.should == 1
       end
       
+      it "should load the first row" do
+        @table.first.should be_a_kind_of(MassiveRecord::Wrapper::Row)
+      end
+      
+      it "should only load one column family" do
+        @table.first(:select => ["info"]).column_families.should == ["info"]
+      end
+      
       it "should update row values" do
         row = @table.first
         row.values["info:first_name"].should eql("John")
@@ -118,6 +126,16 @@ describe MassiveRecord::Wrapper::Table do
         
         prev_row = row.prev
         prev_row.values["info:first_name"].should eql("John")
+      end
+      
+      it "should be able to perform partial updates" do
+        row = @table.first(:select => ["misc"])
+        row.update_columns({ :misc => { :genre => "M" } })
+        row.save
+        
+        row = @table.first
+        row.values["info:first_name"].should == "Bob"
+        row.values["misc:genre"].should == "M"
       end
       
       it "should delete a row" do

@@ -3,11 +3,13 @@ module MassiveRecord
     class Scanner
     
       attr_accessor :connection, :table_name, :column_family_names, :start_key, :created_at, :opened_scanner
-    
+      attr_accessor :formatted_column_family_names, :column_family_names
+      
       def initialize(connection, table_name, column_family_names, opts = {})
         @connection = connection
         @table_name = table_name
-        @column_family_names = column_family_names.collect{|n| "#{n.split(":").first}:"}
+        @column_family_names = column_family_names.collect{|n| n.split(":").first}
+        @formatted_column_family_names = column_family_names.collect{|n| "#{n.split(":").first}:"}
         @start_key = opts[:start_key]
         @created_at = opts[:created_at]
       end
@@ -19,9 +21,9 @@ module MassiveRecord
       def open
         begin
           if created_at.to_s.empty?
-            @opened_scanner ||= client.scannerOpen(table_name, start_key, column_family_names)
+            @opened_scanner ||= client.scannerOpen(table_name, start_key, formatted_column_family_names)
           else
-            @opened_scanner ||= client.scannerOpenTs(table_name, start_key, column_family_names, created_at)
+            @opened_scanner ||= client.scannerOpenTs(table_name, start_key, formatted_column_family_names, created_at)
           end
           true
         rescue => e
@@ -46,7 +48,7 @@ module MassiveRecord
       end
     
       def populate_row(result)
-        Row.populate_from_t_row_result(result, connection, table_name)
+        Row.populate_from_t_row_result(result, connection, table_name, column_family_names)
       end
     
     end
