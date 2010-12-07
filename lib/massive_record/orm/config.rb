@@ -33,16 +33,7 @@ module MassiveRecord
 
 
         def table
-          MassiveRecord::Wrapper::Table.new(connection, table_name).tap do |t|
-            #
-            # TODO  Just a dummy find method to make it return something which makes the
-            #       test pass right now. Can be removed. Maybe the table should have a
-            #
-            #
-            def t.find(*args)
-              {:id => args[0]}.merge(args[1] || {})
-            end
-          end
+          MassiveRecord::Wrapper::Table.new(connection, table_name)
         end
         memoize :table
       end
