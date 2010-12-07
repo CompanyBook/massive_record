@@ -21,6 +21,8 @@ module MassiveRecord
                           else
                             raise ConnectionConfigurationMissing
                           end
+
+            @@connection.open
           end
           @@connection
         end

@@ -3,6 +3,11 @@ require 'orm/models/basic'
 require 'orm/models/person'
 
 describe "configuration" do
+  before do
+    @mock_connection = mock(MassiveRecord::Wrapper::Connection, :open => true)
+    MassiveRecord::Wrapper::Connection.stub(:new).and_return(@mock_connection)
+  end
+
   after do
     Basic.unmemoize_all
     Person.unmemoize_all
@@ -20,16 +25,14 @@ describe "configuration" do
     end
 
     it "should use the same connection if asked twice" do
-      @dummy_connection = "dummy_connection"
       Basic.connection_configuration = {:host => "foo", :port => 9001}
-      MassiveRecord::Wrapper::Connection.should_receive(:new).once.and_return(@dummy_connection)
+      MassiveRecord::Wrapper::Connection.should_receive(:new).once.and_return(@mock_connection)
       2.times { Basic.connection }
     end
 
     it "should use the same connection for different sub classes" do
-      @dummy_connection = "dummy_connection"
       Basic.connection_configuration = {:host => "foo", :port => 9001}
-      MassiveRecord::Wrapper::Connection.should_receive(:new).and_return(@dummy_connection)
+      MassiveRecord::Wrapper::Connection.should_receive(:new).and_return(@mock_connection)
       Basic.connection.should == Person.connection
     end
 
@@ -38,13 +41,20 @@ describe "configuration" do
       lambda { Basic.connection }.should raise_error MassiveRecord::ORM::ConnectionConfigurationMissing
     end
 
+    it "should return an opened connection" do
+      @mock_connection = mock(MassiveRecord::Wrapper::Connection)
+      @mock_connection.should_receive(:open)
+      MassiveRecord::Wrapper::Connection.should_receive(:new).and_return(@mock_connection)
+
+      Basic.connection
+    end
+
 
     describe "under Rails" do
       before do
         Basic.connection_configuration = {}
         module Rails; end
-        @dummy_connection = "dummy_connection"
-        MassiveRecord::Wrapper::Base.stub!(:connection).and_return(@dummy_connection)
+        MassiveRecord::Wrapper::Base.stub!(:connection).and_return(@mock_connection)
       end
       
       after do
@@ -52,8 +62,8 @@ describe "configuration" do
       end
 
       it "should simply call Wrapper::Base" do
-        MassiveRecord::Wrapper::Base.should_receive(:connection).and_return(@dummy_connection)
-        Basic.connection.should == @dummy_connection
+        MassiveRecord::Wrapper::Base.should_receive(:connection).and_return(@mock_connection)
+        Basic.connection.should == @mock_connection
       end
 
       it "should use connection_configuration if defined" do
