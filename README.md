@@ -154,8 +154,9 @@ Thrift API wrapper (See spec/ folder for more examples) :
         field :last_name
         field :email
         field :phone_number
-        field :date_of_birth, Date
-        field :newsletter, Boolean, :default => false
+        field :points, :integer, :default => 0
+        field :date_of_birth, :date
+        field :newsletter, :boolean, :default => false
         timestamps # created_at, updated_at are automatically managed on field update
       end
       
@@ -171,8 +172,8 @@ Thrift API wrapper (See spec/ folder for more examples) :
       end
       
       column_family :misc do
-        field :status, Integer, :column => :st
-        field :websites, Hash # { :facebook_page => "XYZ", :blog => "XYZ" }
+        field :status, :integer, :column => :st
+        field :websites, :hash # { :facebook_page => "XYZ", :blog => "XYZ" }
       end
     
       def name
