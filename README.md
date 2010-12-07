@@ -133,6 +133,8 @@ Thrift API wrapper (See spec/ folder for more examples) :
       #   - Callbacks, as you expect from an ActiveRecord model.
       #   - Information about changes on attributes.
       #   - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
+      #   - Easy access to hbase connection via Person.conncetion
+      #   - Easy access to hbase table via Person.table
     end
   
 ## ORM - In progress
