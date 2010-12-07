@@ -1,12 +1,15 @@
 require 'active_model'
+require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/memoizable'
+
 require 'massive_record/orm/errors'
+require 'massive_record/orm/config'
 require 'massive_record/orm/finders'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
 require 'massive_record/orm/validations'
-require 'massive_record/orm/naming'
 require 'massive_record/orm/column_family'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/persistence'
@@ -14,6 +17,14 @@ require 'massive_record/orm/persistence'
 module MassiveRecord
   module ORM
     class Base
+      
+      class << self
+        def table_name
+          @table_name ||= self.to_s.demodulize.underscore.pluralize
+        end
+      end
+
+
       #
       # Initialize a new object. Send in attributes which
       # we'll dynamically set up read- and write methods for
@@ -66,6 +77,7 @@ module MassiveRecord
       alias_method :eql?, :==
 
 
+      include Config
       include Persistence
       include Finders
       include ActiveModel::Translation
@@ -73,7 +85,6 @@ module MassiveRecord
       include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::Dirty
       include Validations
-      include Naming      
       include Callbacks
     end
   end
