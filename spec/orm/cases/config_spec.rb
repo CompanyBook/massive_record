@@ -30,6 +30,13 @@ describe "configuration" do
     2.times { Basic.connection }
   end
 
+  it "should be possible to reload the connection" do
+    @dummy_connection = "dummy_connection"
+    Basic.connection_configuration = {:host => "foo", :port => 9001}
+    MassiveRecord::Wrapper::Connection.should_receive(:new).twice.and_return(@dummy_connection)
+    2.times { Basic.connection(:reload) }
+  end
+
 
   describe "under Rails" do
     before do
