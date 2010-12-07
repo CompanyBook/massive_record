@@ -6,9 +6,14 @@ module MassiveRecord
     end
 
 
-    # Railsed by save! and create!
+    # Railsed by save! and create! if the record passes
+    # validation, but for some reason was not saved.
     class RecordNotSaved < MassiveRecordError
     end
-
+    
+    # Raised if a conncetion was being accessed, but no
+    # configuration was set to tell us how to connect.
+    class ConnectionConfigurationMissing < MassiveRecordError
+    end
   end
 end
