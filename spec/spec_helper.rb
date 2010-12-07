@@ -11,5 +11,7 @@ Rspec.configure do |c|
   
 end
 
+require 'orm/spec_helper'
+
 Dir["#{SPEC_DIR}/orm/models/*.rb"].each { |f| require f }
 Dir["#{SPEC_DIR}/support/**/*.rb"].each { |f| require f }
