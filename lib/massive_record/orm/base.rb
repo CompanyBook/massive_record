@@ -1,4 +1,7 @@
 require 'active_model'
+require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/memoizable'
+
 require 'massive_record/orm/errors'
 require 'massive_record/orm/config'
 require 'massive_record/orm/finders'

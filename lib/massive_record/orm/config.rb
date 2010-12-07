@@ -2,8 +2,25 @@ module MassiveRecord
   module ORM
     module Config
       extend ActiveSupport::Concern 
-      
+
+      included do
+        cattr_accessor :connection_configuration, :instance_writer => false
+        @@connection_configuration = {}
+      end
+
       module ClassMethods
+        extend ActiveSupport::Memoizable
+
+        def connection
+          if !connection_configuration.empty?
+            MassiveRecord::Wrapper::Connection.new(connection_configuration)
+          elsif defined? Rails
+            MassiveRecord::Wrapper::Base.connection
+          end
+        end
+        memoize :connection
+
+
         # TODO  To be changed..
         #
         #       Only put. in place to make it possible for find(:first) etc
