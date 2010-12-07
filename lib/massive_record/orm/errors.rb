@@ -15,5 +15,9 @@ module MassiveRecord
     # configuration was set to tell us how to connect.
     class ConnectionConfigurationMissing < MassiveRecordError
     end
+
+    # Raised on find(id) when id does not exist.
+    class RecordNotFound < MassiveRecordError
+    end
   end
 end
