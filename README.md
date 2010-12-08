@@ -125,7 +125,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
 
 ## ORM - Basic ActiveModel / ActiveRecord behaviour (might be deprecated/removed at any time, but it might help simplify things as we work on ORM)
     
-    class Person < MassiveRecord::Wrapper::ORM::Base
+    class Person < MassiveRecord::Wrapper::ORM::Table
       # This will give you:
       #   - An initializer which takes attribute hash and assigns them to your object.
       #   - write and read methods for the attributes
@@ -135,8 +135,31 @@ Thrift API wrapper (See spec/ folder for more examples) :
       #   - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
       #   - Easy access to hbase connection via Person.connection
       #   - Easy access to hbase table via Person.table
+      #   - Finder method, like Person.find("an_id")
+      #
+      # What needs to be done:
+      #   - Finder to support all (it kinda is implemnted but I know it breaks now)
+      #   - Casting of attributes
+      #   - Save back to hbase
+      
+
+      # 
+      # Example of usage with validations and column family definition
+      # 
+
+      validates_presence_of :name, :email
+      validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
+      
+      column_family :info do
+        field :name
+        field :email
+        field :phone_number
+        field :points, :integer, :default => 0
+        field :date_of_birth, :date
+        field :newsletter, :boolean, :default => false
+      end
     end
-  
+
 ## ORM - In progress
 
 
