@@ -79,7 +79,7 @@ describe "finders" do
     end
 
     it "should return the person object when found" do
-      pending
+      pending "Vincent will work at this. Take a look at lib/massive_record/orm/finders.rb. There is a TODO there :-)"
       person = Person.find("ID1")
       person.name.should == "John Doe"
       person.email.should == "john@base.com"

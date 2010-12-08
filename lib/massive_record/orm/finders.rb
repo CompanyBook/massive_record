@@ -34,6 +34,8 @@ module MassiveRecord
           #       hash which has keys like name, email and so on.
           #
 
+          # p attributes.values  # <<--- Hash which we need to transpose
+
           instantiate(attributes)
         end
 
