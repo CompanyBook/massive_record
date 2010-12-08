@@ -21,25 +21,20 @@ describe MassiveRecord::ORM::Table do
     end
     
     it "should a list of the available attributes" do
-      @person.attributes.class.should == Hash
-      @person.attributes.keys.sort.should == [:first_name, :last_name, :email, :date_of_birth, :status].sort
+      @person.attributes.should be_instance_of Hash
+      @person.attributes.keys.should include *%w(name email date_of_birth status)
     end
     
     it "should set a value" do
-      @person.first_name = "John"
-      @person.first_name.should == "John"
-    end
-    
-    it "should have a private attributes setter" do
-      @person.respond_to?("attributes=").should be_false 
+      @person.name = "John"
+      @person.name.should == "John"
     end
     
     it "should mass assign values" do
-      @person.send(:attributes=, { :first_name => "John", :last_name => "Doe" })
-      @person.first_name.should == "John"
-      @person.last_name.should == "Doe"
+      @person.attributes = {:name => "Foo", :age => 55}
+      @person.name.should == "Foo"
+      @person.age.should == 55
     end
-    
   end
   
   describe "and an existing Person instance" do
@@ -65,7 +60,8 @@ describe MassiveRecord::ORM::Table do
     end
     
     it "should parse Date format" do
-      @person.date_of_birth.class.should == Date
+      pending "casting is not in place, yet."
+      @person.date_of_birth.should be_instance_of Date
     end
     
     it "should parse Boolean format" do

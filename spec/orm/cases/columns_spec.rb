@@ -16,7 +16,7 @@ describe "Person" do
   end
   
   it "should have a list of attributes created from the column family 'info'" do
-    @person.attributes.keys.should include("first_name", "last_name", "email", "points", "date_of_birth", "status")
+    @person.attributes.keys.should include("name", "email", "points", "date_of_birth", "status")
   end
   
   it "should default an attribute to its default value" do
@@ -24,12 +24,12 @@ describe "Person" do
   end
   
   it "should parse a Date field properly" do
-    pending
+    pending "Casting not implemented, yet"
     @person.date_of_birth.should be_kind_of_a(Date)
   end
   
   it "should parse a Boolean field properly" do
-    pending
+    pending "Casting not implemented, yet"
     @person.status.should be_false
   end
   
