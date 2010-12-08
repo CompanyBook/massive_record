@@ -5,6 +5,8 @@ class TestClass < MassiveRecord::ORM::Base
 end
 
 describe MassiveRecord::ORM::Base do
+  include MockMassiveRecordConnection
+
   describe "#object" do
     it "should have a table name" do
       TestClass.table_name == "test_classes"

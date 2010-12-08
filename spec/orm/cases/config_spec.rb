@@ -3,6 +3,8 @@ require 'orm/models/basic'
 require 'orm/models/person'
 
 describe "configuration" do
+  include MockMassiveRecordConnection
+
   before do
     @mock_connection = mock(MassiveRecord::Wrapper::Connection, :open => true)
     MassiveRecord::Wrapper::Connection.stub(:new).and_return(@mock_connection)

@@ -3,10 +3,13 @@ require 'orm/models/basic'
 require 'orm/models/person'
 
 describe "finders" do
+  include MockMassiveRecordConnection
+
   describe "#find dry test" do
     before do
       @mocked_table = mock(MassiveRecord::Wrapper::Table).as_null_object
       Basic.stub(:table).and_return(@mocked_table)
+      @attributes = {:id => 1, :first_name => "Thorbjorn", :last_name => "Hermansen", :age => 29}
     end
 
     it "should have at least one argument" do
