@@ -22,8 +22,12 @@ module MassiveRecord
         return unless new_attributes.is_a?(Hash)
 
         new_attributes.each do |attr, value|
-          # TODO check if we respond to it, raise error if we don't
-          send("#{attr}=", value)
+          writer_method = "#{attr}="
+          if respond_to? writer_method
+            send(writer_method, value)
+          else
+            raise UnkownAttributeError.new("Unkown attribute: #{attr}")
+          end
         end
       end
 

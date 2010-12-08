@@ -19,5 +19,9 @@ module MassiveRecord
     # Raised on find(id) when id does not exist.
     class RecordNotFound < MassiveRecordError
     end
+
+    # Raised if an attribute is unkown
+    class UnkownAttributeError < MassiveRecordError
+    end
   end
 end

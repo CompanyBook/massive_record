@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'orm/models/basic'
+require 'orm/models/test_class'
 require 'orm/models/person'
 
 describe "finders" do
@@ -34,18 +34,18 @@ describe "finders" do
 
   %w(first last all).each do |method|
     it "should respond to #{method}" do
-      Basic.should respond_to method
+      TestClass.should respond_to method
     end
 
     it "should delegate #{method} to find with first argument as :#{method}" do
-      Basic.should_receive(:find).with(method.to_sym)
-      Basic.send(method)
+      TestClass.should_receive(:find).with(method.to_sym)
+      TestClass.send(method)
     end
 
     it "should delegate #{method}'s call to find with it's args as second argument" do
       options = {:foo => :bar}
-      Basic.should_receive(:find).with(anything, options)
-      Basic.send(method, options)
+      TestClass.should_receive(:find).with(anything, options)
+      TestClass.send(method, options)
     end
   end
 

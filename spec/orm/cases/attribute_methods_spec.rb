@@ -1,33 +1,43 @@
 require 'spec_helper'
-require 'orm/models/basic'
+require 'orm/models/person'
 
 describe "attribute methods" do
   before do
-    @model = Basic.new :foo => :bar
+    @model = Person.new :name => "John", :age => 15
   end
 
   it "should define reader method" do
-    @model.foo.should == :bar
+    @model.name.should == "John"
   end
 
   it "should define writer method" do
-    @model.foo = :foo
-    @model.foo.should == :foo
+    @model.name = "Bar"
+    @model.name.should == "Bar"
   end
 
   it "should be possible to write attributes" do
-    @model.write_attribute :foo, "baaaaar"
-    @model.foo.should == "baaaaar"
+    @model.write_attribute :name, "baaaaar"
+    @model.name.should == "baaaaar"
   end
 
   it "should be possible to read attributes" do
-    @model.read_attribute(:foo).should == :bar
+    @model.read_attribute(:name).should == "John"
   end
 
   describe "#attributes=" do
     it "should simply return if incomming value is not a hash" do
-      @model.attributes = "FOO => BAR"
-      @model.attributes.keys.should include("foo")
+      @model.attributes = "FOO BAR"
+      @model.attributes.keys.should include("name")
+    end
+
+    it "should mass assign attributes" do
+      @model.attributes = {:name => "Foo", :age => 20}
+      @model.name.should == "Foo"
+      @model.age.should == 20
+    end
+
+    it "should raise an error if we encounter an unkown attribute" do
+      lambda { @model.attributes = {:unkown => "foo"} }.should raise_error MassiveRecord::ORM::UnkownAttributeError
     end
   end
 end
