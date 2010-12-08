@@ -29,6 +29,12 @@ describe MassiveRecord::ORM::Base do
       model.foo.should == :bar
     end
 
+    it "should stringify keys set on attributes" do
+      model = TestClass.allocate
+      model.init_with 'attributes' => {:foo => :bar}
+      model.attributes.keys.should include("foo")
+    end
+
     it "should return nil as id by default" do
       TestClass.new.id.should be_nil
     end

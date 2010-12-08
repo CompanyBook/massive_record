@@ -61,7 +61,7 @@ module MassiveRecord
         @new_record = false
         @destroyed = false
 
-        self.attributes = coder['attributes']
+        self.attributes_raw = coder['attributes']
 
         _run_find_callbacks
         _run_initialize_callbacks
