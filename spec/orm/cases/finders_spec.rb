@@ -3,9 +3,9 @@ require 'orm/models/basic'
 require 'orm/models/person'
 
 describe "finders" do
-  include MockMassiveRecordConnection
-
   describe "#find dry test" do
+    include MockMassiveRecordConnection
+
     before do
       @mocked_table = mock(MassiveRecord::Wrapper::Table).as_null_object
       Basic.stub(:table).and_return(@mocked_table)
@@ -49,39 +49,41 @@ describe "finders" do
 
 
 
-  # TODO Uncomment this when DB gets back online..
-  # 
-  #describe "#find database test" do
-    #before(:all) do
-      #@connection_configuration = {:host => MR_CONFIG['host'], :port => MR_CONFIG['port']}
-      #@connection = MassiveRecord::Wrapper::Connection.new(@connection_configuration)
-      #@connection.open
-    #end
+  describe "#find database test" do
+    before(:all) do
+      @connection_configuration = {:host => MR_CONFIG['host'], :port => MR_CONFIG['port']}
+      @connection = MassiveRecord::Wrapper::Connection.new(@connection_configuration)
+      @connection.open
+    end
 
-    #before do
-      #Person.stub!(:table_name).and_return(MR_CONFIG['table'])
-      #Person.connection_configuration = @connection_configuration
-      #@table = MassiveRecord::Wrapper::Table.new(@connection, Person.table_name)
-      #@table.column_families.create(:info)
-      #@table.save
+    before do
+      Person.stub!(:table_name).and_return(MR_CONFIG['table'])
+      Person.connection_configuration = @connection_configuration
+      @table = MassiveRecord::Wrapper::Table.new(@connection, Person.table_name)
+      @table.column_families.create(:info)
+      @table.save
       
-      #@row = MassiveRecord::Wrapper::Row.new
-      #@row.id = "ID1"
-      #@row.values = {:info => {:first_name => "John", :last_name => "Doe", :email => "john@base.com", :age => 20}}
-      #@row.table = @table
-      #@row.save
-    #end
+      @row = MassiveRecord::Wrapper::Row.new
+      @row.id = "ID1"
+      @row.values = {:info => {:name => "John Doe", :email => "john@base.com", :age => "20"}}
+      @row.table = @table
+      @row.save
+    end
 
-    #after do
-      #@table.destroy 
-    #end
+    after do
+      @table.destroy 
+    end
 
-    #it "should return nil if id is not found" do
-      #lambda { Person.find("not_found") }.should raise_error MassiveRecord::ORM::RecordNotFound
-    #end
+    it "should return nil if id is not found" do
+      lambda { Person.find("not_found") }.should raise_error MassiveRecord::ORM::RecordNotFound
+    end
 
-    #it "should return the person object when found" do
-      #pending
-    #end
-  #end
+    it "should return the person object when found" do
+      pending
+      person = Person.find("ID1")
+      person.name.should == "John Doe"
+      person.email.should == "john@base.com"
+      person.age.should == "20"
+    end
+  end
 end

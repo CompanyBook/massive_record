@@ -20,6 +20,19 @@ module MassiveRecord
                         end
 
           raise RecordNotFound if attributes.blank?
+          
+          # TODO  We need to map column_family:column keys to what
+          #       is expected to be put in attributes; meaning that
+          #       if our schema is as follows:
+          #         
+          #         column_family :info do
+          #           field :name
+          #           field :email
+          #         end
+          #
+          #       it means that instantiate should be instantiated with
+          #       hash which has keys like name, email and so on.
+          #
 
           instantiate(attributes)
         end
