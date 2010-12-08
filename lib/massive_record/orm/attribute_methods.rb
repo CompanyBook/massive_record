@@ -15,7 +15,7 @@ module MassiveRecord
 
 
       def attributes
-        @attributes
+        @attributes ||= {}
       end
 
       def attributes=(new_attributes)
