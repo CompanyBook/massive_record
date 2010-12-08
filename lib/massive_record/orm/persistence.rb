@@ -69,18 +69,12 @@ module MassiveRecord
       end
 
 
-
-      #
-      # Returns a hash with fields
-      # 
-      # TODO  This one should read from the field definition
-      #       and return a populated hash with correct
-      #       keys for attributes and maybe give it's default value?
-      #       Right now it simply returns a hash as we have no
-      #       real concept of our fields.
-      #
       def attributes_from_field_definition
-        default_attributes_from_schema
+        if respond_to? :default_attributes_from_schema
+          default_attributes_from_schema
+        else
+          {}
+        end
       end
     end
   end
