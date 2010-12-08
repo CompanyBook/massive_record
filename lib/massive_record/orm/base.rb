@@ -36,12 +36,11 @@ module MassiveRecord
       # for describing column families and fields are in place
       #
       def initialize(attributes = {})
-        @attributes = attributes_from_field_definition
+        self.attributes_raw = attributes_from_field_definition
+        self.attributes = attributes
         @new_record = true
         @destroyed = false
 
-        self.attributes = attributes
-        
         _run_initialize_callbacks
       end
 

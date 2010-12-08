@@ -16,12 +16,10 @@ describe "Person" do
   end
   
   it "should have a list of attributes created from the column family 'info'" do
-    pending
-    @person.attributes.keys.sort.should include(["first_name", "last_name", "email", "points", "date_of_birth", "status"])
+    @person.attributes.keys.should include("first_name", "last_name", "email", "points", "date_of_birth", "status")
   end
   
   it "should default an attribute to its default value" do
-    pending
     @person.points.should == 1
   end
   

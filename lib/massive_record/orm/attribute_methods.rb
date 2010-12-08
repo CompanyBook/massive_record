@@ -20,14 +20,11 @@ module MassiveRecord
 
       def attributes=(new_attributes)
         return unless new_attributes.is_a?(Hash)
-        attributes = new_attributes.stringify_keys
 
-        # TODO  We might want to sanitize attributes against field definition.
-        #       The insurances of that the id exists like I'm doing here might
-        #       (should? :-)) be handled another way too. I'm doing this for now
-        #       just to make sure that define_attribute_methods actually defines
-        #       read/write method for it.
-        @attributes = {'id' => nil}.merge(attributes)
+        new_attributes.each do |attr, value|
+          # TODO check if we respond to it, raise error if we don't
+          send("#{attr}=", value)
+        end
       end
 
       
@@ -43,6 +40,20 @@ module MassiveRecord
       def respond_to?(*args)
         self.class.define_attribute_methods(attributes.keys) unless self.class.attribute_methods_generated?
         super
+      end
+
+      private
+
+      def attributes_raw=(new_attributes)
+        return unless new_attributes.is_a?(Hash)
+        attributes = new_attributes.stringify_keys
+        @attributes = {'id' => nil}.merge(attributes)
+      end
+
+      def attributes_from_field_definition
+        attributes = {'id' => nil}
+        attributes.merge! default_attributes_from_schema if respond_to? :default_attributes_from_schema
+        attributes
       end
     end
   end

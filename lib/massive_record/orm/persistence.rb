@@ -67,13 +67,6 @@ module MassiveRecord
       def update(attribute_names_to_update = attributes.keys)
         true
       end
-
-
-      def attributes_from_field_definition
-        attributes = {'id' => nil}
-        attributes.merge! default_attributes_from_schema if respond_to? :default_attributes_from_schema
-        attributes
-      end
     end
   end
 end
