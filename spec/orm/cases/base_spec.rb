@@ -15,6 +15,16 @@ describe MassiveRecord::ORM::Base do
     it "should have a model name" do
       TestClass.model_name == "TestClass"
     end
+    
+    it "should have a table name with prefix" do
+      MassiveRecord::ORM::Table.table_name_prefix = "_production"
+      TestClass.table_name == "test_classes_production"
+    end
+    
+    it "should have a table name with suffix" do
+      MassiveRecord::ORM::Table.table_name_suffix = "production_"
+      TestClass.table_name == "production_test_classes"
+    end
   end
 
   describe "#initialize" do

@@ -132,7 +132,7 @@ module MassiveRecord
           }
         end
       end
-    
+
     end
   end
 end

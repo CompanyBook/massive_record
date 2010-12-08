@@ -133,14 +133,14 @@ Thrift API wrapper (See spec/ folder for more examples) :
       #   - Callbacks, as you expect from an ActiveRecord model.
       #   - Information about changes on attributes.
       #   - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
-      #   - Easy access to hbase connection via Person.conncetion
+      #   - Easy access to hbase connection via Person.connection
       #   - Easy access to hbase table via Person.table
     end
   
 ## ORM - In progress
 
 
-    class Person < MassiveRecord::Wrapper::Base.table
+    class Person < MassiveRecord::ORM::Table
       
       validates_presence_of :first_name, :last_name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
@@ -186,7 +186,7 @@ Thrift API wrapper (See spec/ folder for more examples) :
       
     end
   
-    class Address < MassiveRecord::Wrapper::Base.column
+    class Address < MassiveRecord::ORM::Column
       
       validates_format_of :zip_code, :with => /\[0-9]{6})\Z/i
       

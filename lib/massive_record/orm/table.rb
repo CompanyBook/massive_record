@@ -1,7 +1,7 @@
 module MassiveRecord
   module ORM
     class Table < Base
-      
+
       def initialize(*)
         @attributes_schema = {}
         column_families.each{|cf| @attributes_schema = @attributes_schema.merge(cf.fields)}
@@ -29,7 +29,7 @@ module MassiveRecord
           h[v.name] = v.default
         end
         h
-      end
+      end      
       
     end
   end

@@ -1,5 +1,6 @@
 require 'active_model'
 require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/core_ext/class/attribute'
 require 'active_support/memoizable'
 
 require 'massive_record/orm/errors'
@@ -21,9 +22,15 @@ module MassiveRecord
   module ORM
     class Base
       
+      class_attribute :table_name_prefix, :instance_writer => false
+      self.table_name_prefix = ""
+      
+      class_attribute :table_name_suffix, :instance_writer => false
+      self.table_name_suffix = ""
+     
       class << self
         def table_name
-          @table_name ||= self.to_s.demodulize.underscore.pluralize
+          @table_name ||= table_name_prefix + self.to_s.demodulize.underscore.pluralize + table_name_prefix
         end
       end
 
