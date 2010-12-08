@@ -1,8 +1,5 @@
 require 'spec_helper'
-require 'orm/models/basic'
-
-class TestClass < MassiveRecord::ORM::Base
-end
+require 'orm/models/test_class'
 
 describe MassiveRecord::ORM::Base do
   include MockMassiveRecordConnection
@@ -69,17 +66,17 @@ describe MassiveRecord::ORM::Base do
     end
 
     it "should not be equal if class are different" do
-      Basic.find(1).should_not == Person.find(2)
+      TestClass.find(1).should_not == Person.find(2)
     end
   end
 
   describe "#to_param" do
     it "should return nil if no id has been set" do
-      Basic.new.to_param.should be_nil
+      TestClass.new.to_param.should be_nil
     end
 
     it "should return the id if id has been set" do
-      Basic.new(:id => 1).to_param.should == "1"
+      TestClass.new(:id => 1).to_param.should == "1"
     end
   end
 end
