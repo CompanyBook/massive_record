@@ -19,6 +19,8 @@ module MassiveRecord
                           table.find(*args)
                         end
 
+          raise RecordNotFound if attributes.blank?
+
           instantiate(attributes)
         end
 

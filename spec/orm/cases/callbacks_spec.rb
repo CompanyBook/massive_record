@@ -74,6 +74,8 @@ end
 
 
 describe "callbacks for" do
+  include MockMassiveRecordConnection
+
   it "initialize should run in correct order" do
     thorbjorn = CallbackDeveloper.new
     thorbjorn.history.should == [
