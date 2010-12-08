@@ -21,7 +21,10 @@ module MockMassiveRecordConnection
           # Defines a dummy find method which simply returns a hash where id is set to the first
           # argument (Like Person.find(1)).
           def table.find(*args)
-            {:id => args[0]}
+            row = MassiveRecord::Wrapper::Row.new
+            row.id = args[0]
+            row.values = { }
+            row
           end
           table
         end

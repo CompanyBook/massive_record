@@ -8,7 +8,6 @@ module MassiveRecord
           attribute_method_suffix ""
         end
         
-
         def read_attribute(attr_name)
           @attributes[attr_name.to_s]
         end

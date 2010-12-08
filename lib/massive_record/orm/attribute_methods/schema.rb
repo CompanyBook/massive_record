@@ -3,9 +3,22 @@ module MassiveRecord
     module AttributeMethods
       module Schema
         
-        def attributes_schema
-          @attributes_schema
+        extend ActiveSupport::Concern
+        
+        included do
+          class_attribute :attributes_schema, :instance_writer => false
+          self.attributes_schema = {}
         end
+                
+        def attributes_schema
+          self.class.attributes_schema
+        end
+
+        def default_attributes_from_schema
+          h = {}
+          attributes_schema.each{|k, v| h[v.name] = v.default}
+          h
+        end      
         
       end
     end

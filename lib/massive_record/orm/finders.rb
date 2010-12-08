@@ -13,30 +13,32 @@ module MassiveRecord
 
           type = args.shift if args.first.is_a? Symbol
 
-          attributes =  if type
-                          table.send(type, *args)
-                        else
-                          table.find(*args)
-                        end
+          row = if type
+                  table.send(type, *args)
+                else
+                  table.find(*args)
+                end
 
-          raise RecordNotFound if attributes.blank?
+          raise RecordNotFound if row.blank?
           
-          # TODO  We need to map column_family:column keys to what
-          #       is expected to be put in attributes; meaning that
-          #       if our schema is as follows:
-          #         
-          #         column_family :info do
-          #           field :name
-          #           field :email
-          #         end
+          # Map column_family:column keys to what
+          # is expected to be put in attributes; meaning that
+          # if our schema is as follows:
+          #   
+          #   column_family :info do
+          #     field :name
+          #     field :email
+          #   end
+          # 
+          # it means that instantiate should be instantiated with
+          # hash which has keys like name, email and so on.
           #
-          #       it means that instantiate should be instantiated with
-          #       hash which has keys like name, email and so on.
-          #
-
-          # p attributes.values  # <<--- Hash which we need to transpose
-
-          instantiate(attributes)
+          attributes = {}
+          attributes_schema.each do |key, field|
+            column = row.columns[field.unique_name]
+            attributes[field.name] = column.nil? ? nil : column.value
+          end
+          instantiate(attributes.merge({ :id => row.id }))
         end
 
         def first(*args)

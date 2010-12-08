@@ -8,23 +8,26 @@ describe "finders" do
 
     before do
       @mocked_table = mock(MassiveRecord::Wrapper::Table).as_null_object
-      Basic.stub(:table).and_return(@mocked_table)
-      @attributes = {:id => 1, :first_name => "Thorbjorn", :last_name => "Hermansen", :age => 29}
+      Person.stub(:table).and_return(@mocked_table)
+      
+      @row = MassiveRecord::Wrapper::Row.new
+      @row.id = "ID1"
+      @row.values = { :info => { :name => "John Doe", :age => "29" } }
     end
 
     it "should have at least one argument" do
-      lambda { Basic.find }.should raise_error ArgumentError
+      lambda { Person.find }.should raise_error ArgumentError
     end
 
     it "should ask the table to look up by it's id" do
-      @mocked_table.should_receive(:find).with(1).and_return(@attributes)
-      Basic.find(1)
+      @mocked_table.should_receive(:find).with(1).and_return(@row)
+      Person.find(1)
     end
 
     %w(first last all).each do |method|
       it "should call table's #{method} on find(:{method})" do
-        @mocked_table.should_receive(method).and_return(@attributes)
-        Basic.find(method.to_sym)
+        @mocked_table.should_receive(method).and_return(@row)
+        Person.find(method.to_sym)
       end
     end
   end
@@ -79,7 +82,7 @@ describe "finders" do
     end
 
     it "should return the person object when found" do
-      pending "Vincent will work at this. Take a look at lib/massive_record/orm/finders.rb. There is a TODO there :-)"
+      #pending "Vincent will work at this. Take a look at lib/massive_record/orm/finders.rb. There is a TODO there :-)"
       person = Person.find("ID1")
       person.name.should == "John Doe"
       person.email.should == "john@base.com"

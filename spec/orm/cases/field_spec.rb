@@ -47,4 +47,45 @@ describe "field" do
     @subject.type.should == :boolean
     @subject.default.should be_false
   end
+  
+  describe "#decode" do
+    it "should decode a boolean value" do
+      @subject = MassiveRecord::ORM::Field.new(:status, :boolean)
+      @subject.decode("1").should be_true
+      @subject.decode("0").should be_false
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+
+    it "should decode a string value" do
+      @subject = MassiveRecord::ORM::Field.new(:status, :string)
+      @subject.decode("value").should == "value"
+      @subject.decode("").should == ""
+      @subject.decode(nil).should be_nil
+    end
+
+    it "should decode an integer value" do
+      @subject = MassiveRecord::ORM::Field.new(:status, :integer)
+      @subject.decode("1").should == 1
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+
+    it "should decode a date type" do
+      today = Date.today
+      @subject = MassiveRecord::ORM::Field.new(:created_at, :date)
+      @subject.decode(today.to_s) == today
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+    
+    it "should decode a time type" do
+      today = Time.now
+      @subject = MassiveRecord::ORM::Field.new(:created_at, :time)
+      @subject.decode(today.to_s) == today
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+    
+  end
 end

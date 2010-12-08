@@ -14,6 +14,30 @@ module MassiveRecord
       def unique_name
         "#{column_family}:#{column}"
       end
+      
+      def decode(value)
+        return nil if value.nil?
+        
+        case type
+        when :string
+          value
+        when :boolean
+          value.empty? ? nil : !value.match(/^(true|1)$/i).nil?
+        when :integer
+          value.empty? ? nil : value.to_i
+        when :date
+          value.empty? ? nil : Date.parse(value)
+        when :time
+          value.empty? ? nil : Time.parse(value)
+        when :array
+          value
+        when :hash
+          value
+        else
+          value
+        end
+      end
+      
     end
   end
 end

@@ -30,7 +30,7 @@ module MassiveRecord
       
       def method_missing(method, *args, &block)
         unless self.class.attribute_methods_generated?
-          self.class.define_attribute_methods(attributes.keys)
+          self.class.define_attribute_methods(attributes.keys) #_schema.collect{|key, field| field.name})
           send(method, *args, &block)
         else
           super

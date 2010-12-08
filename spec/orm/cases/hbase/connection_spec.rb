@@ -8,14 +8,6 @@ describe "connection" do
       @connection ||= MassiveRecord::Wrapper::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
     end
     
-    it "should not be active" do
-      pending "Fails. Guess Vincent will look at this :-)"
-      @connection.active?.should be_false
-    end
-    
-  end
-  
-  describe "an " do
   end
   
 end

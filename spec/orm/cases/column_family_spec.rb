@@ -18,12 +18,12 @@ describe "column_family" do
   
   describe "fields" do
   
-    it "should have a two keys made of the column family name and column name" do
-      @subject.fields.keys.sort == ["info:first_name", "info:last_name"].to_s
+    it "should have a two keys made of the name" do
+      @subject.fields.keys.sort == ["first_name", "last_name"].to_s
     end
     
     it "should have a Field object" do
-      @subject.fields["info:first_name"].should be_a_kind_of(MassiveRecord::ORM::Field)
+      @subject.fields["first_name"].should be_a_kind_of(MassiveRecord::ORM::Field)
     end
   
   end
