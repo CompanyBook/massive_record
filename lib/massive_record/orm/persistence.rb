@@ -80,7 +80,7 @@ module MassiveRecord
       #       real concept of our fields.
       #
       def attributes_from_field_definition
-        Hash.new
+        default_attributes_from_schema
       end
     end
   end

@@ -17,7 +17,7 @@ module MassiveRecord
       end
       
       def fields
-        @fields.inject(Fields.new){|h, (field)| h[field.name] = field; h}
+        @fields.inject(Fields.new){|h, (field)| h[field.unique_name] = field; h}
       end
       
     end

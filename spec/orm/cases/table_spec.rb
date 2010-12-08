@@ -15,10 +15,10 @@ describe "table" do
       end
       
       @subject.column_family(:misc) do
-        field :status
+        field :status, :boolean, :default => false
       end      
       
-      @subject = @subject.new
+      @subject = MassiveRecord::ORM::Table.new
     end
     
     it "should have a collection of column families" do

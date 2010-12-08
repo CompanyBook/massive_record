@@ -3,9 +3,9 @@ module MassiveRecord
     class Table < Base
       
       def initialize(*)
-        super
         @attributes_schema = {}
         column_families.each{|cf| @attributes_schema = @attributes_schema.merge(cf.fields)}
+        super
       end
       
       @@column_families = {}
@@ -22,7 +22,15 @@ module MassiveRecord
       def column_families
         self.class.column_families
       end
-
+      
+      def default_attributes_from_schema
+        h = {}
+        @attributes_schema.each do |k, v|
+          h[v.name] = v.default
+        end
+        h
+      end
+      
     end
   end
 end
