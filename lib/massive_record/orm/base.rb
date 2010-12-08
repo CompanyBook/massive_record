@@ -36,7 +36,7 @@ module MassiveRecord
       # for describing column families and fields are in place
       #
       def initialize(attributes = {})
-        self.attributes_raw = attributes_from_field_definition
+        self.attributes_raw = attributes_from_field_definition.merge(attributes)
         self.attributes = attributes
         @new_record = true
         @destroyed = false
