@@ -14,13 +14,13 @@ describe MassiveRecord::ORM::Base do
     end
     
     it "should have a table name with prefix" do
-      MassiveRecord::ORM::Table.table_name_prefix = "_production"
-      TestClass.table_name == "test_classes_production"
+      MassiveRecord::ORM::Table.table_name_prefix = "production_"
+      TestClass.table_name == "production_test_classes"
     end
     
     it "should have a table name with suffix" do
-      MassiveRecord::ORM::Table.table_name_suffix = "production_"
-      TestClass.table_name == "production_test_classes"
+      MassiveRecord::ORM::Table.table_name_suffix = "_production"
+      TestClass.table_name == "test_classes_production"
     end
   end
 

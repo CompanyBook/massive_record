@@ -34,7 +34,7 @@ module MassiveRecord
      
       class << self
         def table_name
-          @table_name ||= table_name_prefix + self.to_s.demodulize.underscore.pluralize + table_name_prefix
+          @table_name ||= table_name_prefix + self.to_s.demodulize.underscore.pluralize + table_name_suffix
         end
       end
 
