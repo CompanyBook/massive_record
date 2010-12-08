@@ -70,11 +70,9 @@ module MassiveRecord
 
 
       def attributes_from_field_definition
-        if respond_to? :default_attributes_from_schema
-          default_attributes_from_schema
-        else
-          {}
-        end
+        attributes = {'id' => nil}
+        attributes.merge! default_attributes_from_schema if respond_to? :default_attributes_from_schema
+        attributes
       end
     end
   end

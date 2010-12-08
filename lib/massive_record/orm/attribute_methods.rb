@@ -27,7 +27,7 @@ module MassiveRecord
         #       (should? :-)) be handled another way too. I'm doing this for now
         #       just to make sure that define_attribute_methods actually defines
         #       read/write method for it.
-        @attributes = {:id => nil}.merge(attributes)
+        @attributes = {'id' => nil}.merge(attributes)
       end
 
       
