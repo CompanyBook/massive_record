@@ -7,7 +7,8 @@ class Person < MassiveRecord::ORM::Table
     field :first_name
     field :last_name
     field :email
-    field :points, :integer, :default => 0
+    field :age, :integer
+    field :points, :integer, :default => 1
     field :date_of_birth, :date
     field :status, :boolean, :default => false
   end

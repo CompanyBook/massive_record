@@ -49,6 +49,8 @@ describe "finders" do
 
 
 
+  # TODO Uncomment this when DB gets back online..
+  # 
   #describe "#find database test" do
     #before(:all) do
       #@connection_configuration = {:host => MR_CONFIG['host'], :port => MR_CONFIG['port']}
