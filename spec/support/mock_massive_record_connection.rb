@@ -31,6 +31,7 @@ module MockMassiveRecordConnection
       end
 
       after do
+        MassiveRecord::ORM::Base.descendants.each { |klass| klass.unmemoize_all }
         MassiveRecord::ORM::Base.reset_connection!
       end
     end

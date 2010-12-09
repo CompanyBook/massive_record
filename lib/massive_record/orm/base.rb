@@ -1,6 +1,7 @@
 require 'active_model'
 require 'active_support/core_ext/class/attribute_accessors'
 require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/class/subclasses'
 require 'active_support/memoizable'
 
 require 'massive_record/orm/errors'

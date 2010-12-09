@@ -10,11 +10,6 @@ describe "configuration" do
     MassiveRecord::Wrapper::Connection.stub(:new).and_return(@mock_connection)
   end
 
-  after do
-    TestClass.unmemoize_all
-    Person.unmemoize_all
-  end
-
   describe "connection" do
     it "should use connection_configuration if present" do
       MassiveRecord::Wrapper::Connection.should_receive(:new).with(TestClass.connection_configuration)
