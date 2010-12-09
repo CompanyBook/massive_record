@@ -1,5 +1,5 @@
 class TestClass < MassiveRecord::ORM::Table
-  column_family :info do
+  column_family :test_family do
     field :foo, :string
   end
 end
