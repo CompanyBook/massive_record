@@ -22,24 +22,11 @@ module MassiveRecord
 
           raise RecordNotFound if row.blank?
           
-          # Map column_family:column keys to what
-          # is expected to be put in attributes; meaning that
-          # if our schema is as follows:
-          #   
-          #   column_family :info do
-          #     field :name
-          #     field :email
-          #   end
-          # 
-          # it means that instantiate should be instantiated with
-          # hash which has keys like name, email and so on.
-          #
-          attributes = {}
-          attributes_schema.each do |key, field|
-            column = row.columns[field.unique_name]
-            attributes[field.name] = column.nil? ? nil : column.value
+          results = [row].flatten.collect do |row|
+            instantiate(transpose_hbase_columns_to_record_attributes(row))
           end
-          instantiate(attributes.merge({ :id => row.id }))
+
+          type && type == :all ? results : results.first
         end
 
         def first(*args)
@@ -57,6 +44,15 @@ module MassiveRecord
 
 
         private
+
+        def transpose_hbase_columns_to_record_attributes(row)
+          attributes = {:id => row.id}
+          attributes_schema.each do |key, field|
+            column = row.columns[field.unique_name]
+            attributes[field.name] = column.nil? ? nil : column.value
+          end
+          attributes
+        end
 
         def instantiate(record)
           allocate.tap do |model|
