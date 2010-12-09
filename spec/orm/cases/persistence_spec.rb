@@ -121,39 +121,46 @@ describe "persistance" do
     describe "database test" do
       include SetUpHbaseConnectionBeforeAll
       
-      #describe "create" do
-        #describe "when table does not exists" do
-          #before do
-            #@new_class = "Person_new_#{ActiveSupport::SecureRandom.hex(5)}"
-            #@new_class = Object.const_set(@new_class, Class.new(MassiveRecord::ORM::Table))
+      describe "create" do
+        describe "when table does not exists" do
+          before do
+            @new_class = "Person_new_#{ActiveSupport::SecureRandom.hex(5)}"
+            @new_class = Object.const_set(@new_class, Class.new(MassiveRecord::ORM::Table))
             
-            #@new_class.instance_eval do
-              #column_family do
-                #field :foo
-              #end
-            #end
+            @new_class.instance_eval do
+              column_family :bar do
+                field :foo
+              end
+            end
 
-            #@new_instance = @new_class.new :foo => "bar"
-          #end
+            @new_instance = @new_class.new :id => "id_of_foo", :foo => "bar"
+          end
 
-          #after do
-            ## TODO Delete the table called @new_class.table_name
-          #end
+          after do
+            @new_class.table.destroy if @connection.tables.include? @new_class.table_name
+          end
 
-          #it "table for new class should not exists" do
-            #@connection.tables.should_not include @new_class.table_name
-          #end
 
-          #it "should create the table" do
-            #pending "Will do this after save to a known table"
-            #@new_instance.save
-            #@connection.tables.should include @new_class.table_name
-          #end
-        #end
+          it "it should not exists" do
+            @connection.tables.should_not include @new_class.table_name
+          end
 
-        #describe "when table exists" do
-        #end
-      #end
+          it "should create the table" do
+            @new_instance.save
+            @connection.tables.should include @new_class.table_name
+          end
+
+          it "should create correct column families" do
+            @new_instance.save
+            @new_class.table.fetch_column_families.collect(&:name).should == ["bar"]
+          end
+        end
+
+
+        describe "when table exists" do
+          # TODO
+        end
+      end
 
       describe "update" do
         include CreatePersonBeforeEach
@@ -189,6 +196,18 @@ describe "persistance" do
           @person.name = @new_name
           @person.save
           @person.should_not be_changed # ..as it has been stored..
+        end
+
+        it "should raise error if column familiy needed does not exist" do
+          Person.instance_eval do
+            column_family :new do
+              field :new
+            end
+          end
+
+          @person = Person.find(@person.id)
+          @person.new = "new"
+          lambda { @person.save }.should raise_error MassiveRecord::ORM::ColumnFamiliesMissingError
         end
       end
     end

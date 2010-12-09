@@ -61,18 +61,58 @@ module MassiveRecord
       end
 
       def create
-        row = row_for_record
+        ensure_that_we_have_table_and_column_families!
 
-        @new_record = false
-        true
+        if saved = store_record_to_database
+          @new_record = false
+        end
+        saved
       end
 
       def update(attribute_names_to_update = attributes.keys)
+        ensure_that_we_have_table_and_column_families!
+
+        store_record_to_database(attribute_names_to_update)
+      end
+
+
+
+
+      #
+      # Takes care of the actual storing of the record to the database
+      # Both update and create is using this
+      #
+      def store_record_to_database(attribute_names_to_update = [])
         row = row_for_record
         row.values = attributes_to_row_values_hash(attribute_names_to_update)
         row.save
       end
 
+
+      #
+      # Iterates over tables and column families and ensure that we
+      # have what we need
+      #
+      def ensure_that_we_have_table_and_column_families!
+        if !self.class.connection.tables.include? self.class.table_name
+          missing_family_names = calculate_missing_family_names
+          self.class.table.create_column_families(missing_family_names) unless missing_family_names.empty?
+          self.class.table.save
+        end
+
+        raise ColumnFamiliesMissingError.new(calculate_missing_family_names) if !calculate_missing_family_names.empty?
+      end
+      
+      #
+      # Calculate which column families are missing in the database in
+      # context of what the schema instructs.
+      #
+      def calculate_missing_family_names
+        existing_family_names = self.class.table.fetch_column_families.collect(&:name) rescue []
+        expected_family_names = column_families.collect(&:name)
+
+        expected_family_names.collect(&:to_s) - existing_family_names.collect(&:to_s)
+      end
 
       #
       # Returns a Wrapper::Row class which we can manipulate this
