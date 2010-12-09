@@ -32,7 +32,7 @@ end
 #
 # Some real life object tests
 #
-class CallbackDeveloper < MassiveRecord::ORM::Base
+class CallbackDeveloper < MassiveRecord::ORM::Table
   class << self
     def callback_string(callback_method)
       "history << [#{callback_method.to_sym.inspect}, :string]"
