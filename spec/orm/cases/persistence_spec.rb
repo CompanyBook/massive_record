@@ -180,6 +180,12 @@ describe "persistance" do
 
           Person.find(@person.id).name.should == @new_name
         end
+
+        it "should not have any changes after save" do
+          @person.name = @new_name
+          @person.save
+          @person.should_not be_changed # ..as it has been stored..
+        end
       end
     end
   end
