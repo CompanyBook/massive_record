@@ -49,7 +49,7 @@ module MassiveRecord
           attributes = {:id => row.id}
           attributes_schema.each do |key, field|
             column = row.columns[field.unique_name]
-            attributes[field.name] = column.nil? ? nil : column.value
+            attributes[field.name] = column.nil? ? nil : column.deserialize_value
           end
           attributes
         end
