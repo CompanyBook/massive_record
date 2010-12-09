@@ -262,9 +262,9 @@ Thrift API wrapper (See spec/ folder for more examples) :
 How to add a new column family to an existing table?
     
     # Connect to the HBase console on the server itself and enter the following code :
-    disable 'status'
+    disable 'companies'
     alter 'companies', { NAME => 'new_collumn_familiy' }
-    enable 'status'
+    enable 'companies'
 
 
 Copyright (c) 2010 Companybook, released under the MIT license

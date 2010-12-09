@@ -13,20 +13,20 @@ module MassiveRecord
           raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.") if args.first.nil?
 
           type = args.shift if args.first.is_a? Symbol
-
-          row = if type
-                  table.send(type, *args)
-                else
-                  table.find(*args)
-                end
-
-          raise RecordNotFound if row.blank?
           
-          results = [row].flatten.collect do |row|
+          rows = if type
+                   table.send(type, *args)
+                 else
+                   table.find(*args)
+                 end
+          
+          raise RecordNotFound if rows.blank?
+          
+          results = [rows].flatten.collect do |row|
             instantiate(transpose_hbase_columns_to_record_attributes(row))
           end
 
-          type && type == :all ? results : results.first
+          args.first.is_a?(Array) || (type && type == :all) ? results : results.first
         end
 
         def first(*args)

@@ -159,11 +159,13 @@ describe MassiveRecord::Wrapper::Table do
         
         @table.all.size.should == 5
       end
-      
-      it "should find 3 rows" do
-        ids = ["ID1", "ID2", "ID3"]
-        @table.find(ids).each do |row|
-          ids.include?(row.id).should be_true
+            
+      it "should find rows" do
+        ids_list = [["ID1"], ["ID1", "ID2", "ID3"]]
+        ids_list.each do |ids|
+          @table.find(ids).each do |row|
+            ids.include?(row.id).should be_true
+          end
         end
       end
       
@@ -179,7 +181,7 @@ describe MassiveRecord::Wrapper::Table do
       
       it "should iterate through a collection of rows using a batch process" do
         group_number = 0
-        @table.find_in_batches(:batch_size => 2, :start => "ID2") do |group|
+        @table.find_in_batches(:batch_size => 2, :start => "ID2", :select => ["info"]) do |group|
           group_number += 1
           group.each do |row|
             row.id.should_not be_nil
