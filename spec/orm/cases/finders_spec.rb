@@ -28,12 +28,23 @@ describe "finders" do
       @mocked_table.should_receive(:find).with(1).and_return(@row)
       Person.find(1)
     end
+    
+    it "should ask the table to fetch rows from a list of ids" do
+      @mocked_table.should_receive(:find).with(["ID1"]).and_return([@row])
+      people = Person.find(["ID1"])
+      people.should be_instance_of Array
+      people.first.should be_instance_of Person
+      people.first.id.should == "ID1"
+    end
+    
+    it "should call table's first on find(:first)" do
+      @mocked_table.should_receive(:first).and_return(@row)
+      Person.find(:first)
+    end
 
-    %w(first all).each do |method|
-      it "should call table's #{method} on find(:{method})" do
-        @mocked_table.should_receive(method).and_return(@row)
-        Person.find(method.to_sym)
-      end
+    it "should call table's all on find(:all)" do
+      @mocked_table.should_receive(:all).and_return([@row])
+      Person.find(:all)
     end
   end
 

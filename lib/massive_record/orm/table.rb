@@ -7,7 +7,7 @@ module MassiveRecord
 
       def self.column_family(*args, &block)
         column_family = ColumnFamily.new(args[0], &block)
-        self.column_families.push(column_family)
+        self.column_families += [column_family]
         self.attributes_schema = self.attributes_schema.merge(column_family.fields)
       end
       
