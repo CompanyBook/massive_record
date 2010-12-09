@@ -10,10 +10,6 @@ module MassiveRecord
           self.attributes_schema = {}
         end
                 
-        def attributes_schema
-          self.class.attributes_schema
-        end
-
         def default_attributes_from_schema
           h = {}
           attributes_schema.each{|k, v| h[v.name] = v.default}
