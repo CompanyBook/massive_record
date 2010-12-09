@@ -61,11 +61,15 @@ module MassiveRecord
       end
 
       def create
+        row = row_for_record
+
         @new_record = false
         true
       end
 
       def update(attribute_names_to_update = attributes.keys)
+        row = row_for_record
+        
         true
       end
 

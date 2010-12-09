@@ -23,5 +23,12 @@ module MassiveRecord
     # Raised if an attribute is unkown
     class UnkownAttributeError < MassiveRecordError
     end
+
+    # Raised if id is missing when you try a save
+    # TODO  It might be that we some time later will offer a kind of
+    #       auto increment key functionality, and then this should only
+    #       be raised if that is disabled.
+    class IdMissing < MassiveRecordError
+    end
   end
 end

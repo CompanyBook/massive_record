@@ -114,8 +114,20 @@ describe "persistance" do
     end
 
     describe "database test" do
-      include CreatePersonBeforeEach
+      include SetUpHbaseConnectionBeforeAll
+      
+      describe "update" do
+        include CreatePersonBeforeEach
 
+        before do
+          @person = Person.find("ID1")
+        end
+
+        it "should not ask for row for record when no changes have been made (update is done through this object)" do
+          @person.should_not_receive(:row_for_record)
+          @person.save
+        end
+      end
     end
   end
 end
