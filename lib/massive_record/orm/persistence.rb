@@ -69,7 +69,7 @@ module MassiveRecord
 
       def update(attribute_names_to_update = attributes.keys)
         row = row_for_record
-        
+        # TODO update values and save it
         true
       end
 

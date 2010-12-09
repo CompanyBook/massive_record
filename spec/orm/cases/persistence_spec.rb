@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'orm/models/test_class'
+require 'active_support/secure_random'
 
 describe "persistance" do
   it "should be a new record when calling new" do
@@ -116,6 +117,40 @@ describe "persistance" do
     describe "database test" do
       include SetUpHbaseConnectionBeforeAll
       
+      #describe "create" do
+        #describe "when table does not exists" do
+          #before do
+            #@new_class = "Person_new_#{ActiveSupport::SecureRandom.hex(5)}"
+            #@new_class = Object.const_set(@new_class, Class.new(MassiveRecord::ORM::Table))
+            
+            #@new_class.instance_eval do
+              #column_family do
+                #field :foo
+              #end
+            #end
+
+            #@new_instance = @new_class.new :foo => "bar"
+          #end
+
+          #after do
+            ## TODO Delete the table called @new_class.table_name
+          #end
+
+          #it "table for new class should not exists" do
+            #@connection.tables.should_not include @new_class.table_name
+          #end
+
+          #it "should create the table" do
+            #pending "Will do this after save to a known table"
+            #@new_instance.save
+            #@connection.tables.should include @new_class.table_name
+          #end
+        #end
+
+        #describe "when table exists" do
+        #end
+      #end
+
       describe "update" do
         include CreatePersonBeforeEach
 
@@ -125,6 +160,20 @@ describe "persistance" do
 
         it "should not ask for row for record when no changes have been made (update is done through this object)" do
           @person.should_not_receive(:row_for_record)
+          @person.save
+        end
+
+        it "should only include changed attributes" do
+          pending
+
+          original_name = @person.name
+          new_name = original_name + original_name
+
+          row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
+          row.should_receive(:values).with({:info => {:name => new_name}})
+          @person.should_receive(:row_for_record).and_return(row)
+
+          @person.name = new_name
           @person.save
         end
       end
