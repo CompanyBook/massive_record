@@ -47,7 +47,7 @@ module MassiveRecord
         end
 
         def last(*args)
-          find(:last, *args)
+          raise "Sorry, not implemented!"
         end
 
         def all(*args)

@@ -29,7 +29,7 @@ describe "finders" do
       Person.find(1)
     end
 
-    %w(first last all).each do |method|
+    %w(first all).each do |method|
       it "should call table's #{method} on find(:{method})" do
         @mocked_table.should_receive(method).and_return(@row)
         Person.find(method.to_sym)
@@ -37,7 +37,7 @@ describe "finders" do
     end
   end
 
-  %w(first last all).each do |method|
+  %w(first all).each do |method|
     it "should respond to #{method}" do
       TestClass.should respond_to method
     end
@@ -84,10 +84,6 @@ describe "finders" do
 
     it "should find first person" do
       Person.first.should == @person
-    end
-
-    it "should find last person" do
-      Person.last.should == @bob
     end
 
     it "should find all" do
