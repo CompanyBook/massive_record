@@ -7,6 +7,10 @@ module MockMassiveRecordConnection
 
   included do
     before do
+      #
+      # The following is needed to make all READ from the DB to go through
+      #
+
       # Setting up expected connection configuration, or else an error will be raised
       MassiveRecord::ORM::Base.connection_configuration = {:host => "foo", :port => 9001}
 
@@ -29,7 +33,15 @@ module MockMassiveRecordConnection
         end
         table
       end
+
+      #
+      # The following is needed to make all WRITE to the DB to go through
+      #
+      # ..as you see, nothing is here yet ;)
     end
+
+
+
 
     after do
       MassiveRecord::ORM::Base.descendants.each { |klass| klass.unmemoize_all }

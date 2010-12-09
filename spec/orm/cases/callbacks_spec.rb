@@ -175,7 +175,7 @@ describe "callbacks for" do
   end
 
   it "create should run in correct order" do
-    thorbjorn = CallbackDeveloper.create
+    thorbjorn = CallbackDeveloper.create :id => "dummy"
     thorbjorn.history.should == [
       [:after_initialize, :method],
       [:after_initialize, :string],

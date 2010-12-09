@@ -63,8 +63,10 @@ end
 
 
 describe "MassiveRecord::Base::Table" do
+  include MockMassiveRecordConnection
+
   before do
-    @model = Person.new :name => "Alice", :email => "alice@gmail.com", :age => 20
+    @model = Person.new :id => "1", :name => "Alice", :email => "alice@gmail.com", :age => 20
     @invalidate_model = Proc.new { |p| p.name = nil }
   end
 
@@ -72,8 +74,10 @@ describe "MassiveRecord::Base::Table" do
 end
 
 describe "MassiveRecord::Base::Column" do
+  include MockMassiveRecordConnection
+
   before do
-    @model = Address.new :street => "Henrik Ibsens gate 1"
+    @model = Address.new :id => "1", :street => "Henrik Ibsens gate 1"
     @invalidate_model = Proc.new { |a| a.street = nil }
   end
 
