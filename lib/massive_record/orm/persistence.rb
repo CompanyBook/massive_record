@@ -68,6 +68,17 @@ module MassiveRecord
       def update(attribute_names_to_update = attributes.keys)
         true
       end
+
+
+
+      def row_for_record
+        raise IdMissing.new("You must set an ID before save.") if id.blank?
+
+        MassiveRecord::Wrapper::Row.new({
+          :id => id,
+          :table => self.class.table
+        })
+      end
     end
   end
 end

@@ -77,6 +77,23 @@ describe "persistance" do
   end
 
 
+  describe "#row_for_record" do
+    include MockMassiveRecordConnection
+
+    it "should raise error if id is not set" do
+      lambda { Person.new.send(:row_for_record) }.should raise_error MassiveRecord::ORM::IdMissing
+    end
+
+    it "should return a row with id set" do
+      Person.new({:id => "foo"}).send(:row_for_record).id.should == "foo"
+    end
+
+    it "should return a row with table set" do
+      Person.new({:id => "foo"}).send(:row_for_record).table.should == Person.table
+    end
+  end
+
+
 
   describe "save" do
     describe "dry test" do
