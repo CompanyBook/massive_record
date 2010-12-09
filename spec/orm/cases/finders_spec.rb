@@ -60,16 +60,40 @@ describe "finders" do
   describe "#find database test" do
     include CreatePersonBeforeEach
 
+    before do
+      @person = Person.find("ID1")
+
+      @row = MassiveRecord::Wrapper::Row.new
+      @row.id = "ID2"
+      @row.values = {:info => {:name => "Bob", :email => "bob@base.com", :age => "26"}}
+      @row.table = @table
+      @row.save
+
+      @bob = Person.find("ID2")
+    end
+
     it "should return nil if id is not found" do
       lambda { Person.find("not_found") }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
 
     it "should return the person object when found" do
-      #pending "Vincent will work at this. Take a look at lib/massive_record/orm/finders.rb. There is a TODO there :-)"
-      person = Person.find("ID1")
-      person.name.should == "John Doe"
-      person.email.should == "john@base.com"
-      person.age.should == "20"
+      @person.name.should == "John Doe"
+      @person.email.should == "john@base.com"
+      @person.age.should == "20"
+    end
+
+    it "should find first person" do
+      Person.first.should == @person
+    end
+
+    it "should find last person" do
+      Person.last.should == @bob
+    end
+
+    it "should find all" do
+      all = Person.all
+      all.should include @person, @bob
+      all.length.should == 2
     end
   end
 end
