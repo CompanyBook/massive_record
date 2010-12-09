@@ -74,6 +74,8 @@ describe MassiveRecord::Wrapper::Table do
       
       it "should only load one column family" do
         @table.first(:select => ["info"]).column_families.should == ["info"]
+        @table.all(:limit => 1, :select => ["info"]).first.column_families.should == ["info"]
+        @table.find("ID1", :select => ["info"]).column_families.should == ["info"]
       end
       
       it "should update row values" do

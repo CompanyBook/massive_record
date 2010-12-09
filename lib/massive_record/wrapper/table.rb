@@ -83,14 +83,16 @@ module MassiveRecord
         scanner({:start_key => opts.delete(:start), :column_family_names => opts.delete(:select)}).fetch_rows(opts)
       end
     
-      def find!(arg)
-        results = find(arg)
+      def find!(*args)
+        results = find(*args)
         raise "Row not found." unless results.is_a?(MassiveRecord::Wrapper::Row) || (results.is_a?(Array) && !results.empty?)
         results
       end
     
-      def find(arg)
-        arg.is_a?(Array) ? arg.collect{|id| first(:start => id)} : first(:start => arg)
+      def find(*args)
+        arg  = args[0]
+        opts = args[1] || {}
+        arg.is_a?(Array) ? arg.collect{|id| first(opts.merge(:start => id))} : first(opts.merge(:start => arg))
       end
     
       def find_in_batches(opts = {}, &block)
