@@ -1,8 +1,10 @@
 require 'spec_helper'
 
 describe "dirty" do
+  include MockMassiveRecordConnection
+
   before do
-    @person = Person.new :name => "Alice", :age => 20, :email => "foo@bar.com"
+    @person = Person.new :id => 1, :name => "Alice", :age => 20, :email => "foo@bar.com"
   end
 
   it "should not be changed after created" do

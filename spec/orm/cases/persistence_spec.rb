@@ -43,4 +43,36 @@ describe "persistance" do
   it "should respond to reload" do
     TestClass.new.should respond_to :reload
   end
+  
+
+
+  describe "#reload" do
+    include CreatePersonBeforeEach
+
+    before do
+      @person = Person.find("ID1")
+    end
+
+    it "should reload models attribute" do
+      original_name = @person.name
+      @person.name = original_name + original_name
+      @person.reload
+      @person.name.should == original_name
+    end
+
+    it "should not be considered changed after reload" do
+      original_name = @person.name
+      @person.name = original_name + original_name
+      @person.reload
+      @person.should_not be_changed
+    end
+
+    it "should return self" do
+      @person.reload.should == @person
+    end
+
+    it "should raise error on new record" do
+      lambda { Person.new.reload }.should raise_error MassiveRecord::ORM::RecordNotFound
+    end
+  end
 end

@@ -10,6 +10,7 @@ module MassiveRecord
         #
         def find(*args)
           raise ArgumentError.new("At least one argument required!") if args.empty?
+          raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.") if args.first.nil?
 
           type = args.shift if args.first.is_a? Symbol
 

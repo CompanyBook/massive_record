@@ -17,6 +17,11 @@ describe "finders" do
 
     it "should have at least one argument" do
       lambda { Person.find }.should raise_error ArgumentError
+      
+    end
+
+    it "should raise RecordNotFound if id is nil" do
+      lambda { Person.find(nil) }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
 
     it "should ask the table to look up by it's id" do
@@ -53,29 +58,7 @@ describe "finders" do
 
 
   describe "#find database test" do
-    before(:all) do
-      @connection_configuration = {:host => MR_CONFIG['host'], :port => MR_CONFIG['port']}
-      @connection = MassiveRecord::Wrapper::Connection.new(@connection_configuration)
-      @connection.open
-    end
-
-    before do
-      Person.stub!(:table_name).and_return(MR_CONFIG['table'])
-      Person.connection_configuration = @connection_configuration
-      @table = MassiveRecord::Wrapper::Table.new(@connection, Person.table_name)
-      @table.column_families.create(:info)
-      @table.save
-      
-      @row = MassiveRecord::Wrapper::Row.new
-      @row.id = "ID1"
-      @row.values = {:info => {:name => "John Doe", :email => "john@base.com", :age => "20"}}
-      @row.table = @table
-      @row.save
-    end
-
-    after do
-      @table.destroy 
-    end
+    include CreatePersonBeforeEach
 
     it "should return nil if id is not found" do
       lambda { Person.find("not_found") }.should raise_error MassiveRecord::ORM::RecordNotFound

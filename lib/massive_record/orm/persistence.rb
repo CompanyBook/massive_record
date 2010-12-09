@@ -26,6 +26,7 @@ module MassiveRecord
 
 
       def reload
+        self.attributes_raw = self.class.find(id).attributes
         self
       end
       
