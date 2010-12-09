@@ -156,6 +156,8 @@ describe "persistance" do
 
         before do
           @person = Person.find("ID1")
+          @original_name = @person.name
+          @new_name = @original_name + @original_name
         end
 
         it "should not ask for row for record when no changes have been made (update is done through this object)" do
@@ -164,17 +166,19 @@ describe "persistance" do
         end
 
         it "should only include changed attributes" do
-          pending
-
-          original_name = @person.name
-          new_name = original_name + original_name
-
           row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
-          row.should_receive(:values).with({:info => {:name => new_name}})
+          row.should_receive(:values=).with({:info => {"name" => @new_name}})
           @person.should_receive(:row_for_record).and_return(row)
 
-          @person.name = new_name
+          @person.name = @new_name
           @person.save
+        end
+
+        it "should persist the changes" do
+          @person.name = @new_name
+          @person.save
+
+          Person.find(@person.id).name.should == @new_name
         end
       end
     end

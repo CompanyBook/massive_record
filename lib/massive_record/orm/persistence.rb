@@ -69,12 +69,15 @@ module MassiveRecord
 
       def update(attribute_names_to_update = attributes.keys)
         row = row_for_record
-        # TODO update values and save it
-        true
+        row.values = attributes_to_row_values_hash(attribute_names_to_update)
+        row.save
       end
 
 
-
+      #
+      # Returns a Wrapper::Row class which we can manipulate this
+      # record in the database with
+      #
       def row_for_record
         raise IdMissing.new("You must set an ID before save.") if id.blank?
 
@@ -82,6 +85,20 @@ module MassiveRecord
           :id => id,
           :table => self.class.table
         })
+      end
+
+      #
+      # Returns attributes on a form which Wrapper::Row expects
+      #
+      def attributes_to_row_values_hash(only_attr_names = [])
+        values = Hash.new { |hash, key| hash[key] = Hash.new }
+
+        attributes_schema.each do |attr_name, orm_field|
+          next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
+          values[orm_field.column_family][attr_name] = send(attr_name)
+        end
+
+        values
       end
     end
   end
