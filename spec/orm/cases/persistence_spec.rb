@@ -75,4 +75,30 @@ describe "persistance" do
       lambda { Person.new.reload }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
   end
+
+
+
+  describe "save" do
+    describe "dry test" do
+      include MockMassiveRecordConnection
+      
+      it "should delegate save to create if its a new record" do
+        person = Person.new :name => "Bob", :age => 33
+        person.should_receive(:create)
+        person.save
+      end
+
+      it "should delegate save to update if its a persisted record" do
+        person = Person.new :id => 14, :name => "Bob", :age => 33
+        person.should_receive(:new_record?).and_return(false)
+        person.should_receive(:update)
+        person.save
+      end
+    end
+
+    describe "database test" do
+      include CreatePersonBeforeEach
+
+    end
+  end
 end
