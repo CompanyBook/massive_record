@@ -16,7 +16,7 @@ describe MassiveRecord::Wrapper::Connection do
   end 
   
   it "should not be active" do
-    pending
+    pending "should we implement this, Vincent? :-)"
     @connection.active?.should be_false
   end
    
@@ -30,7 +30,7 @@ describe MassiveRecord::Wrapper::Connection do
   end
   
   it "should not be active if it is closed" do 
-    pending
+    pending "should we implement this, Vincent? :-)"
     @connection.close.should be_true
     @connection.active?.should be_false
   end

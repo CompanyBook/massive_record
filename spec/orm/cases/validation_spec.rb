@@ -63,19 +63,30 @@ end
 
 
 describe "MassiveRecord::Base::Table" do
+  include MockMassiveRecordConnection
+
   before do
-    @model = Person.new :name => "Alice", :email => "alice@gmail.com", :age => 20
+    @model = Person.new :id => "1", :name => "Alice", :email => "alice@gmail.com", :age => 20
     @invalidate_model = Proc.new { |p| p.name = nil }
   end
 
   it_should_behave_like "validateable massive record model"
 end
 
-describe "MassiveRecord::Base::Column" do
-  before do
-    @model = Address.new :street => "Henrik Ibsens gate 1"
-    @invalidate_model = Proc.new { |a| a.street = nil }
-  end
+#
+# TODO  We might have to decouple some stuff when it comes to calling
+#       save on a column, as it's save call should populate up to it's parent
+#       and so..
+#
+#       Guess we have some thinking to do..
+#
+#describe "MassiveRecord::Base::Column" do
+  #include MockMassiveRecordConnection
 
-  it_should_behave_like "validateable massive record model"
-end
+  #before do
+    #@model = Address.new :id => "1", :street => "Henrik Ibsens gate 1"
+    #@invalidate_model = Proc.new { |a| a.street = nil }
+  #end
+
+  #it_should_behave_like "validateable massive record model"
+#end

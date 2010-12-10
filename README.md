@@ -135,12 +135,13 @@ Thrift API wrapper (See spec/ folder for more examples) :
       #   - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
       #   - Easy access to hbase connection via Person.connection
       #   - Easy access to hbase table via Person.table
-      #   - Finder method, like Person.find("an_id")
+      #   - Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
+      #   - Save methods (will create or update based on new-record-state)
+      #   - Auto-creation of table and column families on save if table does not exists.
       #
       # What needs to be done:
-      #   - Finder to support all (it kinda is implemnted but I know it breaks now)
       #   - Casting of attributes
-      #   - Save back to hbase
+      #   - Destroy a record
       
 
       # 

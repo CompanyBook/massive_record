@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'orm/models/person'
+require 'orm/models/test_class'
 
 describe "Person" do
   
@@ -7,12 +8,13 @@ describe "Person" do
     @person = Person.new
   end
   
-  it "should parse a list of columns" do
-    pending
-  end
-  
   it "should have a list of column families" do
     Person.column_families.collect(&:name).should include(:info)
+  end
+
+  it "should keep different column families per sub class" do
+    Person.column_families.collect(&:name).should == [:info]
+    TestClass.column_families.collect(&:name).should == [:test_family] 
   end
   
   it "should have a list of attributes created from the column family 'info'" do
