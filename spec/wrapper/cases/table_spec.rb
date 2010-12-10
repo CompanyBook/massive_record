@@ -121,7 +121,7 @@ describe MassiveRecord::Wrapper::Table do
       end
       
       it "should display the previous value (versioning) of the column 'info:first_name'" do
-        pending
+        pending "should we implement this, Vincent? :-)"
       
         row = @table.first
         row.values["info:first_name"].should eql("Bob")

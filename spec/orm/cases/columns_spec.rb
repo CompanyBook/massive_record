@@ -8,10 +8,6 @@ describe "Person" do
     @person = Person.new
   end
   
-  it "should parse a list of columns" do
-    pending
-  end
-  
   it "should have a list of column families" do
     Person.column_families.collect(&:name).should include(:info)
   end
