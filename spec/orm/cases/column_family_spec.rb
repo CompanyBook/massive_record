@@ -1,14 +1,7 @@
 require 'spec_helper'
 
-shared_examples_for "Column Family description" do
-  
-  it "should have a name" do
-    @subject.name.should == :info
-  end
-  
-end
-
 describe "column_family" do
+  include MockMassiveRecordConnection
   
   describe "fields" do
     
@@ -19,8 +12,10 @@ describe "column_family" do
       end
     end
   
-    it_should_behave_like "Column Family description"
-  
+    it "should have a name" do
+      @subject.name.should == :info
+    end
+
     it "should have a collection a fields" do
       @subject.fields.should be_a_kind_of(MassiveRecord::ORM::Fields)
     end
@@ -47,12 +42,10 @@ describe "column_family" do
       end
     end
     
-    it_should_behave_like "Column Family description"    
-    
     it "should have autoload set to true" do
       @subject.autoload.should be_true
     end
-    
+        
   end
   
 end

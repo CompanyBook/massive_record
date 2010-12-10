@@ -71,6 +71,10 @@ describe MassiveRecord::Wrapper::Table do
       it "should load the first row" do
         @table.first.should be_a_kind_of(MassiveRecord::Wrapper::Row)
       end
+        
+      it "should list 5 column names" do
+        @table.column_names.size.should == 5
+      end
       
       it "should only load one column family" do
         @table.first(:select => ["info"]).column_families.should == ["info"]
