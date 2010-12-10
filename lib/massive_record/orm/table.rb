@@ -17,11 +17,6 @@ module MassiveRecord
         self.column_families += [column_family]
         self.attributes_schema = self.attributes_schema.merge(column_family.fields)
       end
-        
-      # TODO  I think this can be removed? class_attribute gives it to us
-      def column_families
-        self.class.column_families
-      end
     end
   end
 end
