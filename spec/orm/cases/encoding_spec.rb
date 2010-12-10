@@ -4,6 +4,7 @@ require 'orm/models/person'
 
 describe "encoding" do
   include SetUpHbaseConnectionBeforeAll
+  include SetPersonsTableNameToTestTable
 
   it "should be able to store UTF-8 encoded strings" do
     pending "!!!!!!!!!!!! ---------------------------- >>>> Vincent: I think you have encountered something similar before? Want to take a look at this? :-)"
