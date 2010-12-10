@@ -44,7 +44,7 @@ module MockMassiveRecordConnection
         def table.fetch_column_families
           MassiveRecord::ORM::Table.descendants.collect(&:column_families).flatten
         end
-
+        
         table
       end
 

@@ -64,6 +64,10 @@ module MassiveRecord
         fetch_column_families
         column_family_names
       end
+      
+      def column_names
+        first.column_names
+      end
     
       def scanner(opts = {})      
         # list of column families to fetch from hbase

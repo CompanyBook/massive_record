@@ -22,6 +22,10 @@ module SetPersonsTableNameToTestTable
       Person.stub!(:table_name).and_return(MR_CONFIG['table'])
       Person.connection_configuration = @connection_configuration
     end
+
+    after do
+      Person.table.destroy if @connection.tables.include? Person.table_name
+    end
   end
 end
 
@@ -43,10 +47,6 @@ module CreatePersonBeforeEach
       @row.values = {:info => {:name => "John Doe", :email => "john@base.com", :age => "20"}}
       @row.table = @table
       @row.save
-    end
-
-    after do
-      @table.destroy 
     end
   end
 end

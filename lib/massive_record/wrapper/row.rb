@@ -14,7 +14,11 @@ module MassiveRecord
         @columns         = opts[:columns] || {}
         @new_record      = true
       end
-
+      
+      def column_names
+        columns.keys
+      end
+    
       def fetch_all_column_families
         @table.fetch_column_family
         fetch_column_families(@table.column_family_names)
