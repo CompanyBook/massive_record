@@ -154,11 +154,24 @@ describe "persistance" do
             @new_instance.save
             @new_class.table.fetch_column_families.collect(&:name).should == ["bar"]
           end
+
+          it "should store the new instance" do
+            @new_instance.save
+            @new_class.find(@new_instance.id).should == @new_instance
+          end
         end
 
 
         describe "when table exists" do
-          # TODO
+          include CreatePersonBeforeEach
+
+          it "should store (create) new objects" do
+            person = Person.new :id => "new_id", :name => "Thorbjorn", :age => "22"
+            person.save!
+            person_from_db = Person.find(person.id)
+            person_from_db.should == person
+            person_from_db.name.should == "Thorbjorn"
+          end
         end
       end
 
