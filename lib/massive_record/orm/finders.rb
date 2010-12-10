@@ -13,12 +13,23 @@ module MassiveRecord
           raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.") if args.first.nil?
 
           type = args.shift if args.first.is_a? Symbol
+          find_many = type == :all
           
-          rows = if type
-                   table.send(type, *args)
-                 else
-                   table.find(*args)
-                 end
+          rows =  if type
+                    table.send(type, *args) # first() / all()
+                  else
+                    options = args.extract_options!
+                    ids = args.first
+
+                    if args.first.kind_of?(Array)
+                      find_many = true
+                    elsif args.length > 1
+                      find_many = true
+                      ids = args
+                    end
+
+                    table.find(ids, options)
+                  end
           
           raise RecordNotFound if rows.blank?
           
@@ -26,7 +37,7 @@ module MassiveRecord
             instantiate(transpose_hbase_columns_to_record_attributes(row))
           end
 
-          args.first.is_a?(Array) || (type && type == :all) ? results : results.first
+          find_many ? results : results.first
         end
 
         def first(*args)

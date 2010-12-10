@@ -13,6 +13,10 @@ describe "finders" do
       @row = MassiveRecord::Wrapper::Row.new
       @row.id = "ID1"
       @row.values = { :info => { :name => "John Doe", :age => "29" } }
+
+      @row_2 = MassiveRecord::Wrapper::Row.new
+      @row_2.id = "ID2"
+      @row_2.values = { :info => { :name => "Bob", :age => "18" } }
     end
 
     it "should have at least one argument" do
@@ -25,16 +29,26 @@ describe "finders" do
     end
 
     it "should ask the table to look up by it's id" do
-      @mocked_table.should_receive(:find).with(1).and_return(@row)
+      @mocked_table.should_receive(:find).with(1, anything).and_return(@row)
       Person.find(1)
     end
     
-    it "should ask the table to fetch rows from a list of ids" do
-      @mocked_table.should_receive(:find).with(["ID1"]).and_return([@row])
-      people = Person.find(["ID1"])
+    it "should ask the table to fetch rows from a list of ids given as array" do
+      @mocked_table.should_receive(:find).with(["ID1", "ID2"], anything).and_return([@row, @row_2])
+      people = Person.find(["ID1", "ID2"])
       people.should be_instance_of Array
       people.first.should be_instance_of Person
       people.first.id.should == "ID1"
+      people.last.id.should == "ID2"
+    end
+    
+    it "should ask table to fetch rows from a list of ids given as arguments" do
+      @mocked_table.should_receive(:find).with(["ID1", "ID2"], anything).and_return([@row, @row_2])
+      people = Person.find("ID1", "ID2")
+      people.should be_instance_of Array
+      people.first.should be_instance_of Person
+      people.first.id.should == "ID1"
+      people.last.id.should == "ID2"
     end
     
     it "should call table's first on find(:first)" do
