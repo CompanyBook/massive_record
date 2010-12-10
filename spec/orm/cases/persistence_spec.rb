@@ -223,6 +223,28 @@ describe "persistance" do
           lambda { @person.save }.should raise_error MassiveRecord::ORM::ColumnFamiliesMissingError
         end
       end
+
+    
+
+
+
+      describe "remove record" do
+        before do
+          @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        end
+
+        it "should be removed by destroy" do
+          @person.destroy
+          @person.should be_destroyed
+          Person.all.length.should == 0
+        end
+
+        it "should be removed by delete" do
+          @person.destroy
+          @person.should be_destroyed
+          Person.all.length.should == 0
+        end
+      end
     end
   end
 end
