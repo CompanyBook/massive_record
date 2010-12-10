@@ -65,6 +65,16 @@ describe "finders" do
       @mocked_table.should_receive(:all).and_return([@row])
       Person.find(:all)
     end
+
+    it "should return empty array on all if no results was found" do
+      @mocked_table.should_receive(:all).and_return([])
+      Person.all.should == []
+    end
+
+    it "should return nil on first if no results was found" do
+      @mocked_table.should_receive(:first).and_return(nil)
+      Person.first.should be_nil
+    end
   end
 
   %w(first all).each do |method|
