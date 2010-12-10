@@ -50,6 +50,11 @@ describe "finders" do
       people.first.id.should == "ID1"
       people.last.id.should == "ID2"
     end
+
+    it "should raise error if not all multiple ids are found" do
+      @mocked_table.should_receive(:find).with(["ID1", "ID2"], anything).and_return([@row])
+      lambda { Person.find("ID1", "ID2") }.should raise_error MassiveRecord::ORM::RecordNotFound
+    end
     
     it "should call table's first on find(:first)" do
       @mocked_table.should_receive(:first).and_return(@row)

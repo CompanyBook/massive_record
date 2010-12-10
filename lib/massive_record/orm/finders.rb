@@ -14,6 +14,7 @@ module MassiveRecord
 
           type = args.shift if args.first.is_a? Symbol
           find_many = type == :all
+          expected_result_size = nil
           
           rows =  if type
                     table.send(type, *args) # first() / all()
@@ -28,10 +29,15 @@ module MassiveRecord
                       ids = args
                     end
 
+                    expected_result_size = ids.length if ids.is_a? Array
                     table.find(ids, options)
                   end
           
           raise RecordNotFound if rows.blank?
+          
+          if expected_result_size && expected_result_size != rows.length
+            raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{rows.length}")
+          end
           
           results = [rows].flatten.collect do |row|
             instantiate(transpose_hbase_columns_to_record_attributes(row))
