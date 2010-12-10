@@ -138,10 +138,11 @@ Thrift API wrapper (See spec/ folder for more examples) :
       #   - Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
       #   - Save methods (will create or update based on new-record-state)
       #   - Auto-creation of table and column families on save if table does not exists.
+      #   - Destroy a record
       #
       # What needs to be done:
       #   - Casting of attributes
-      #   - Destroy a record
+      #   - Serialization of array/hashes (?  Don't think thats wokring, although I think the wrapper stores things as YAML if its not a string)
       
 
       # 

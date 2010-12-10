@@ -54,8 +54,6 @@ module MockMassiveRecordConnection
       #
       # The following is needed to make all WRITE to the DB to go through
       #
-      # ..as you see, nothing is here yet ;)
-      
       new_row_method = MassiveRecord::Wrapper::Row.method(:new)
       MassiveRecord::Wrapper::Row.stub!(:new) do |*args|
         row = new_row_method.call(*args)
@@ -64,6 +62,9 @@ module MockMassiveRecordConnection
           true
         end
 
+        def row.destroy
+          true
+        end
         row
       end
     end

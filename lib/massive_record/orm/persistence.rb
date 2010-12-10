@@ -43,14 +43,9 @@ module MassiveRecord
       end
 
       def destroy
-        @destroyed = true
-        true
+        @destroyed = row_for_record.destroy
       end
-
-      def delete
-        @destroyed = true
-        true
-      end
+      alias_method :delete, :destroy
 
 
       private
