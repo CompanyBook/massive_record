@@ -32,7 +32,7 @@ end
 #
 # Some real life object tests
 #
-class CallbackDeveloper < MassiveRecord::ORM::Base
+class CallbackDeveloper < MassiveRecord::ORM::Table
   class << self
     def callback_string(callback_method)
       "history << [#{callback_method.to_sym.inspect}, :string]"
@@ -175,7 +175,7 @@ describe "callbacks for" do
   end
 
   it "create should run in correct order" do
-    thorbjorn = CallbackDeveloper.create
+    thorbjorn = CallbackDeveloper.create :id => "dummy"
     thorbjorn.history.should == [
       [:after_initialize, :method],
       [:after_initialize, :string],

@@ -4,9 +4,7 @@ module MassiveRecord
   module Wrapper  
     class Row
     
-      attr_writer :table
-    
-      attr_accessor :id, :column_families, :columns, :new_record
+      attr_accessor :id, :column_families, :columns, :new_record, :table
     
       def initialize(opts = {})
         @id              = opts[:id]

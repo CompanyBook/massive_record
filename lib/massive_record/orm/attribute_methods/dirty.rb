@@ -25,15 +25,6 @@ module MassiveRecord
           end
         end
 
-
-        def update(*)
-          # TODO  If we can do partial updates against hbase
-          #       then I think this is the place to put it.
-          #       Or else, remove this method :-)
-          super
-        end
-
-
         def write_attribute(attr_name, value)
           attr_name = attr_name.to_s
 
@@ -51,6 +42,10 @@ module MassiveRecord
 
 
         private
+
+        def update(*)
+          changes.empty? ? true : super(changes.keys)
+        end
 
         def original_attribute_value(attr_name)
           @original_attribute_values ||= {}

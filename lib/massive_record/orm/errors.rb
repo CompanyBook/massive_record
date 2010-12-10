@@ -23,5 +23,20 @@ module MassiveRecord
     # Raised if an attribute is unkown
     class UnkownAttributeError < MassiveRecordError
     end
+
+    # Raised if id is missing when you try a save
+    # TODO  It might be that we some time later will offer a kind of
+    #       auto increment key functionality, and then this should only
+    #       be raised if that is disabled.
+    class IdMissing < MassiveRecordError
+    end
+
+    class ColumnFamiliesMissingError < MassiveRecordError
+      attr_reader :missing_column_families
+      def initialize(missing_column_families)
+        @missing_column_families = missing_column_families
+        super("hbase are missing some column families: #{@missing_column_families.join(' ')}. Please migrate the database.")
+      end
+    end
   end
 end
