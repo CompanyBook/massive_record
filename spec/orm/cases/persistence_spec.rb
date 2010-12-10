@@ -154,11 +154,24 @@ describe "persistance" do
             @new_instance.save
             @new_class.table.fetch_column_families.collect(&:name).should == ["bar"]
           end
+
+          it "should store the new instance" do
+            @new_instance.save
+            @new_class.find(@new_instance.id).should == @new_instance
+          end
         end
 
 
         describe "when table exists" do
-          # TODO
+          include CreatePersonBeforeEach
+
+          it "should store (create) new objects" do
+            person = Person.new :id => "new_id", :name => "Thorbjorn", :age => "22"
+            person.save!
+            person_from_db = Person.find(person.id)
+            person_from_db.should == person
+            person_from_db.name.should == "Thorbjorn"
+          end
         end
       end
 
@@ -208,7 +221,64 @@ describe "persistance" do
           @person = Person.find(@person.id)
           @person.new = "new"
           lambda { @person.save }.should raise_error MassiveRecord::ORM::ColumnFamiliesMissingError
+
+          # Clen up the inserted column family above
+          # TODO  Might want to wrap this inside of the column families object?
+          Person.instance_eval do
+            attributes_schema.delete("new")
+            column_families.delete_if { |family| family.name == :new }
+          end
         end
+      end
+    end
+  end
+
+
+
+
+  describe "remove record" do
+    describe "dry run" do
+      include MockMassiveRecordConnection
+
+      before do
+        @person = Person.new :id => "id1"
+        @person.stub!(:new_record?).and_return(false)
+        @row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
+        @person.should_receive(:row_for_record).and_return(@row)
+      end
+
+
+      it "should not be destroyed if wrapper returns false" do
+        @row.should_receive(:destroy).and_return(false)
+        @person.destroy
+        @person.should_not be_destroyed
+      end
+
+      it "should be destroyed if wrapper returns true" do
+        @row.should_receive(:destroy).and_return(true)
+        @person.destroy
+        @person.should be_destroyed
+      end
+    end
+
+    describe "database test" do
+      include SetUpHbaseConnectionBeforeAll
+      include SetPersonsTableNameToTestTable
+
+      before do
+        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+      end
+
+      it "should be removed by destroy" do
+        @person.destroy
+        @person.should be_destroyed
+        Person.all.length.should == 0
+      end
+
+      it "should be removed by delete" do
+        @person.delete
+        @person.should be_destroyed
+        Person.all.length.should == 0
       end
     end
   end

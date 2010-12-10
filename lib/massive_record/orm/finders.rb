@@ -33,13 +33,13 @@ module MassiveRecord
                     table.find(ids, options)
                   end
           
-          raise RecordNotFound if rows.blank?
+          raise RecordNotFound if rows.blank? && type.nil?
           
           if expected_result_size && expected_result_size != rows.length
             raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{rows.length}")
           end
           
-          results = [rows].flatten.collect do |row|
+          results = [rows].compact.flatten.collect do |row|
             instantiate(transpose_hbase_columns_to_record_attributes(row))
           end
 
