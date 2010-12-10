@@ -14,15 +14,26 @@ module SetUpHbaseConnectionBeforeAll
 end
 
 
+module SetPersonsTableNameToTestTable
+  extend ActiveSupport::Concern
+
+  included do
+    before do
+      Person.stub!(:table_name).and_return(MR_CONFIG['table'])
+      Person.connection_configuration = @connection_configuration
+    end
+  end
+end
+
+
 module CreatePersonBeforeEach
   extend ActiveSupport::Concern
 
   included do
     include SetUpHbaseConnectionBeforeAll
+    include SetPersonsTableNameToTestTable
 
     before do
-      Person.stub!(:table_name).and_return(MR_CONFIG['table'])
-      Person.connection_configuration = @connection_configuration
       @table = MassiveRecord::Wrapper::Table.new(@connection, Person.table_name)
       @table.column_families.create(:info)
       @table.save
