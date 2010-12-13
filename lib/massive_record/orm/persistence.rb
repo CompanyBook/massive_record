@@ -42,6 +42,21 @@ module MassiveRecord
         create_or_update or raise RecordNotSaved
       end
 
+      def update_attribute(attr_name, value)
+        send("#{attr_name}=", value)
+        save(:validate => false)
+      end
+
+      def update_attributes(attributes)
+        self.attributes = attributes
+        save
+      end
+
+      def update_attributes!(attributes)
+        self.attributes = attributes
+        save!
+      end
+
       def touch
         true
       end
