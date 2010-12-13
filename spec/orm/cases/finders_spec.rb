@@ -29,8 +29,8 @@ describe "finders" do
     end
 
     it "should ask the table to look up by it's id" do
-      @mocked_table.should_receive(:find).with(1, anything).and_return(@row)
-      Person.find(1)
+      @mocked_table.should_receive(:find).with("ID1", anything).and_return(@row)
+      Person.find("ID1")
     end
     
     it "should ask the table to fetch rows from a list of ids given as array" do
@@ -74,6 +74,16 @@ describe "finders" do
     it "should return nil on first if no results was found" do
       @mocked_table.should_receive(:first).and_return(nil)
       Person.first.should be_nil
+    end
+
+    it "should raise an error if not exactly the id is found" do
+      @mocked_table.should_receive(:find).and_return(@row)
+      lambda { Person.find("ID") }.should raise_error(MassiveRecord::ORM::RecordNotFound)
+    end
+
+    it "should raise error if not all ids are found" do
+      @mocked_table.should_receive(:find).and_return([@row, @row_2])
+      lambda { Person.find("ID", "ID2") }.should raise_error(MassiveRecord::ORM::RecordNotFound)
     end
   end
 
