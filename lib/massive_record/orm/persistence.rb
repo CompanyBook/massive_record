@@ -47,7 +47,7 @@ module MassiveRecord
       end
 
       def destroy
-        @destroyed = row_for_record.destroy
+        @destroyed = row_for_record.destroy and freeze
       end
       alias_method :delete, :destroy
 

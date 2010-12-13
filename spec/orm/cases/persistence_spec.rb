@@ -259,6 +259,22 @@ describe "persistance" do
         @person.destroy
         @person.should be_destroyed
       end
+
+      it "should be frozen after destroy" do
+        @person.destroy
+        @person.should be_frozen
+      end
+
+      it "should be frozen after delete" do
+        @person.delete
+        @person.should be_frozen
+      end
+      
+      it "should not be frozen if wrapper returns false" do
+        @row.should_receive(:destroy).and_return(false)
+        @person.destroy
+        @person.should_not be_frozen
+      end
     end
 
     describe "database test" do
