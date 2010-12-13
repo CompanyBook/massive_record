@@ -280,6 +280,18 @@ describe "persistance" do
         @person.should be_destroyed
         Person.all.length.should == 0
       end
+
+      describe "#destroy_all" do
+        it "should remove all when calling remove_all" do
+          Person.create! :id => "id2", :name => "Going to die :-(", :age => 99
+          Person.destroy_all
+          Person.all.length.should == 0
+        end
+
+        it "should return an array of all removed objects" do
+          Person.destroy_all.should == [@person]
+        end
+      end
     end
   end
 end

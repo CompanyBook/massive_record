@@ -9,6 +9,10 @@ module MassiveRecord
             record.save
           end
         end
+
+        def destroy_all
+          all.each { |record| record.destroy }
+        end
       end
 
 
