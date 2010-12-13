@@ -259,6 +259,22 @@ describe "persistance" do
         @person.destroy
         @person.should be_destroyed
       end
+
+      it "should be frozen after destroy" do
+        @person.destroy
+        @person.should be_frozen
+      end
+
+      it "should be frozen after delete" do
+        @person.delete
+        @person.should be_frozen
+      end
+      
+      it "should not be frozen if wrapper returns false" do
+        @row.should_receive(:destroy).and_return(false)
+        @person.destroy
+        @person.should_not be_frozen
+      end
     end
 
     describe "database test" do
@@ -279,6 +295,18 @@ describe "persistance" do
         @person.delete
         @person.should be_destroyed
         Person.all.length.should == 0
+      end
+
+      describe "#destroy_all" do
+        it "should remove all when calling remove_all" do
+          Person.create! :id => "id2", :name => "Going to die :-(", :age => 99
+          Person.destroy_all
+          Person.all.length.should == 0
+        end
+
+        it "should return an array of all removed objects" do
+          Person.destroy_all.should == [@person]
+        end
       end
     end
   end
