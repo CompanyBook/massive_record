@@ -79,4 +79,10 @@ describe MassiveRecord::ORM::Base do
       TestClass.new(:id => 1).to_param.should == "1"
     end
   end
+
+  it "should be able to freeze objects" do
+    test_object = TestClass.new
+    test_object.freeze
+    test_object.should be_frozen
+  end
 end

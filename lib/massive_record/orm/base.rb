@@ -91,6 +91,15 @@ module MassiveRecord
       alias_method :eql?, :==
 
 
+      def freeze
+        @attributes.freeze
+      end
+
+      def frozen?
+        @attributes.frozen?
+      end
+
+
       include Config
       include Persistence
       include Finders
