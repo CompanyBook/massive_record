@@ -22,9 +22,9 @@ module MassiveRecord
         when :string
           value
         when :boolean
-          value.empty? ? nil : !value.match(/^(true|1)$/i).nil?
+          value.to_s.empty? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
         when :integer
-          value.empty? ? nil : value.to_i
+          value.to_s.empty? ? nil : value.to_i
         when :date
           value.empty? ? nil : Date.parse(value)
         when :time

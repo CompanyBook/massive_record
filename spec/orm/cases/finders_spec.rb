@@ -119,7 +119,7 @@ describe "finders" do
     it "should return the person object when found" do
       @person.name.should == "John Doe"
       @person.email.should == "john@base.com"
-      @person.age.should == "20"
+      @person.age.should == 20
     end
 
     it "should find first person" do

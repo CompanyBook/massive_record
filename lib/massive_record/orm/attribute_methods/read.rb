@@ -9,7 +9,7 @@ module MassiveRecord
         end
         
         def read_attribute(attr_name)
-          @attributes[attr_name.to_s]
+          attributes_schema[attr_name].nil? ? @attributes[attr_name.to_s] : attributes_schema[attr_name].decode(@attributes[attr_name.to_s])
         end
 
         private

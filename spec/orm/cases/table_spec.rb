@@ -26,7 +26,6 @@ describe "table" do
     end
     
     it "should have one autoloaded column family" do
-      p @subject.autoloaded_column_family_names
       @subject.autoloaded_column_family_names.should be_a_kind_of(Array)
       @subject.autoloaded_column_family_names.size.should == 1
       @subject.autoloaded_column_family_names.first.should == :sandbox

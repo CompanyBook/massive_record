@@ -6,6 +6,9 @@ describe "Person" do
   
   before do
     @person = Person.new
+    @person.points = "25"
+    @person.date_of_birth = "19850730"
+    @person.status = "0"
   end
   
   it "should have a list of column families" do
@@ -22,16 +25,14 @@ describe "Person" do
   end
   
   it "should default an attribute to its default value" do
-    @person.points.should == 1
+    @person.points.should == 25
   end
   
   it "should parse a Date field properly" do
-    pending "Casting not implemented, yet"
-    @person.date_of_birth.should be_kind_of_a(Date)
+    @person.date_of_birth.should be_a_kind_of(Date)
   end
   
   it "should parse a Boolean field properly" do
-    pending "Casting not implemented, yet"
     @person.status.should be_false
   end
   
