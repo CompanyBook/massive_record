@@ -23,6 +23,7 @@ require 'massive_record/orm/persistence'
 module MassiveRecord
   module ORM
     class Base
+      include ActiveModel::Conversion
       
       # Add a prefix or a suffix to the table name
       # example:
@@ -77,11 +78,6 @@ module MassiveRecord
 
         _run_find_callbacks
         _run_initialize_callbacks
-      end
-
-
-      def to_param
-        id.to_s if id.present?
       end
 
 
