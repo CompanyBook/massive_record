@@ -71,12 +71,22 @@ describe MassiveRecord::ORM::Base do
   end
 
   describe "#to_param" do
-    it "should return nil if no id has been set" do
+    it "should return nil if new record" do
       TestClass.new.to_param.should be_nil
     end
 
-    it "should return the id if id has been set" do
-      TestClass.new(:id => 1).to_param.should == "1"
+    it "should return the id if persisted" do
+      TestClass.create!(:id => 1).to_param.should == "1"
+    end
+  end
+
+  describe "#to_key" do
+    it "should return nil if new record" do
+      TestClass.new.to_key.should be_nil
+    end
+
+    it "should return id in an array persisted" do
+      TestClass.create!(:id => "1").to_key.should == ["1"]
     end
   end
 
