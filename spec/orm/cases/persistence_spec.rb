@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'orm/models/test_class'
 require 'active_support/secure_random'
 
-describe "persistance" do
+describe "persistence" do
   describe "state" do
     include MockMassiveRecordConnection
 
@@ -233,6 +233,47 @@ describe "persistance" do
     end
   end
 
+
+
+  describe "update attribute" do
+    describe "dry run" do
+      include MockMassiveRecordConnection
+
+      before do
+        @person = Person.create! :id => "new_id", :name => "Thorbjorn", :age => "22"
+      end
+
+      it "should update given attriubte when valid" do
+        @person.update_attribute(:name, "new").should be_true
+      end
+
+      it "should update given attribute when invalid" do
+        @person.update_attribute(:name, nil).should be_true
+      end
+    end
+  end
+
+  describe "update attributes" do
+    describe "dry run" do
+      include MockMassiveRecordConnection
+
+      before do
+        @person = Person.create! :id => "new_id", :name => "Thorbjorn", :age => "22"
+      end
+
+      it "should update given attriubtes when valid" do
+        @person.update_attributes(:name => "new", :age => "66").should be_true
+      end
+
+      it "should not update given attributes when one is invalid" do
+        @person.update_attributes(:name => nil, :age => "66").should be_false
+      end
+
+      it "should raise error when called with a bang" do
+        lambda { @person.update_attributes!(:name => nil, :age => "66") }.should raise_error MassiveRecord::ORM::RecordInvalid
+      end
+    end
+  end
 
 
 
