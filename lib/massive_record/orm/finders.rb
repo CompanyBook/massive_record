@@ -16,34 +16,47 @@ module MassiveRecord
           find_many = type == :all
           expected_result_size = nil
           
-          rows =  if type
-                    table.send(type, *args) # first() / all()
-                  else
-                    options = args.extract_options!
-                    ids = args.first
+          result_from_table = if type
+                                table.send(type, *args) # first() / all()
+                              else
+                                options = args.extract_options!
+                                what_to_find = args.first
+                                expected_result_size = 1
 
-                    if args.first.kind_of?(Array)
-                      find_many = true
-                    elsif args.length > 1
-                      find_many = true
-                      ids = args
-                    end
+                                if args.first.kind_of?(Array)
+                                  find_many = true
+                                elsif args.length > 1
+                                  find_many = true
+                                  what_to_find = args
+                                end
 
-                    expected_result_size = ids.length if ids.is_a? Array
-                    table.find(ids, options)
-                  end
+                                expected_result_size = what_to_find.length if what_to_find.is_a? Array
+                                table.find(what_to_find, options)
+                              end
+
+          # Filter out unexpected IDs (unless type is set (all/first), in that case
+          # we have no expectations on the returned rows' ids)
+          unless type || result_from_table.blank?
+            if find_many
+              result_from_table.select! { |result| what_to_find.include? result.id }
+            else 
+              if result_from_table.id != what_to_find
+                result_from_table = nil
+              end
+            end
+          end
+
+          raise RecordNotFound if result_from_table.blank? && type.nil?
           
-          raise RecordNotFound if rows.blank? && type.nil?
-          
-          if expected_result_size && expected_result_size != rows.length
-            raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{rows.length}")
+          if find_many && expected_result_size && expected_result_size != result_from_table.length
+            raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{result_from_table.length}")
           end
           
-          results = [rows].compact.flatten.collect do |row|
+          records = [result_from_table].compact.flatten.collect do |row|
             instantiate(transpose_hbase_columns_to_record_attributes(row))
           end
 
-          find_many ? results : results.first
+          find_many ? records : records.first
         end
 
         def first(*args)
