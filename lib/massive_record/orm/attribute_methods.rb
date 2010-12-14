@@ -17,6 +17,13 @@ module MassiveRecord
       def attributes
         @attributes ||= {}
       end
+      
+      # TODO : Need to be removed after the id attribute is moved out of the attributes hash
+      def attributes_without_id
+        a = attributes.dup
+        a.delete("id")
+        a
+      end
 
       def attributes=(new_attributes)
         return unless new_attributes.is_a?(Hash)
