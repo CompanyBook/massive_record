@@ -3,7 +3,7 @@ require 'orm/models/person'
 
 describe "attribute methods" do
   before do
-    @model = Person.new :name => "John", :age => 15
+    @model = Person.new :id => 5, :name => "John", :age => 15
   end
 
   it "should define reader method" do
@@ -22,6 +22,14 @@ describe "attribute methods" do
 
   it "should be possible to read attributes" do
     @model.read_attribute(:name).should == "John"
+  end
+  
+  it "should contains the id in the attributes getter" do
+    @model.attributes.should include("id")
+  end
+
+  it "should not contains the id in the attributes_without_id getter" do
+    @model.attributes_without_id.should_not include("id")
   end
 
   describe "#attributes=" do
