@@ -100,7 +100,7 @@ module MassiveRecord
         
           mutations.push(m)
         end
-      
+
         @table.client.mutateRow(@table.name, id.to_s, mutations).nil?
       end    
     

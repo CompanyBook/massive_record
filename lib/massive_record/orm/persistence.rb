@@ -149,9 +149,9 @@ module MassiveRecord
 
         attributes_schema.each do |attr_name, orm_field|
           next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
-          values[orm_field.column_family][attr_name] = send(attr_name)
+          values[orm_field.column_family][orm_field.column.to_s] = send(attr_name)
         end
-
+        
         values
       end
     end

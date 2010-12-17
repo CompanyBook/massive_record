@@ -97,6 +97,24 @@ describe "persistence" do
       Person.new({:id => "foo"}).send(:row_for_record).table.should == Person.table
     end
   end
+  
+  describe "#attributes_to_row_values_hash" do
+    before do
+      @person = Person.new({ :id => "new_id", :name => "Vincent", :points => 15 })
+    end
+    
+    it "should include the 'pts' field in the database which has 'points' as an alias" do
+      @person.points = 20
+      
+      attributes = @person.attributes.keys
+      attributes.delete("id")
+      attributes.delete("points")
+      attributes.push("pts")
+      
+      @person.points_changed?.should be_true
+      @person.send(:attributes_to_row_values_hash, @person.attributes.keys)[:info].keys.should include(*attributes)
+    end
+  end
 
 
   describe "update attribute" do
