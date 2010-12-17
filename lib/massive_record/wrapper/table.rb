@@ -32,7 +32,7 @@ module MassiveRecord
       end
     
       def client
-        connection.client
+        connection
       end    
     
       def disable
@@ -128,7 +128,7 @@ module MassiveRecord
       end
     
       def regions
-        connection.client.getTableRegions(name).collect do |r|
+        connection.getTableRegions(name).collect do |r|
           {
             :start_key => r.startKey,
             :end_key => r.endKey,

@@ -30,7 +30,8 @@ describe MassiveRecord::Wrapper::Connection do
   end
   
   it "should not be active if it is closed" do 
-    pending "should we implement this, Vincent? :-)"
+    @connection.open
+    @connection.active?.should be_true
     @connection.close.should be_true
     @connection.active?.should be_false
   end
@@ -40,4 +41,13 @@ describe MassiveRecord::Wrapper::Connection do
     @connection.tables.should be_a_kind_of(MassiveRecord::Wrapper::TablesCollection)
   end
   
+  it "should reconnect on IOError" do
+    @connection.open
+    @connection.transport.open?.should be_true
+    @connection.getTableNames().should be_a_kind_of(Array)
+    
+    @connection.close
+    @connection.transport.open?.should be_false
+    @connection.getTableNames().should be_a_kind_of(Array)
+  end
 end

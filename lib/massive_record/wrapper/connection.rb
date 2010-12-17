@@ -9,20 +9,15 @@ module MassiveRecord
         @host    = opts[:host]
         @port    = opts[:port] || 9090
       end
-        
+      
       def transport
         @transport ||= Thrift::BufferedTransport.new(Thrift::Socket.new(@host, @port, @timeout))
       end
-    
-      def protocol
-        Thrift::BinaryProtocol.new(transport)
-      end
-    
-      def client
-        @client ||= Apache::Hadoop::Hbase::Thrift::Hbase::Client.new(protocol)
-      end
-    
+      
       def open
+        protocol = Thrift::BinaryProtocol.new(transport)
+        @client = Apache::Hadoop::Hbase::Thrift::Hbase::Client.new(protocol)
+        
         begin
           transport.open()
           true
@@ -31,15 +26,39 @@ module MassiveRecord
         end
       end
       
+      def close
+        @transport.close.nil?
+      end
+          
+      def client
+        @client
+      end
+      
+      def active?
+        @transport.open?
+      end
+      
       def tables
         collection = TablesCollection.new
         collection.connection = self
-        client.getTableNames().each{|table_name| collection.push(table_name)}
+        getTableNames().each{|table_name| collection.push(table_name)}
         collection
       end
     
       def load_table(table_name)
         MassiveRecord::Wrapper::Table.new(self, table_name)
+      end
+    
+      # Wrapp HBase API to be able to catch errors and try reconnect
+      def method_missing(method, *args)
+        begin
+          open if not @client
+          client.send(method, *args) if @client
+        rescue IOError
+          @client = nil
+          open
+          client.send(method, *args) if @client
+        end
       end
     
     end

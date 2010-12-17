@@ -15,7 +15,7 @@ module MassiveRecord
       end
     
       def client
-        connection.client
+        connection
       end
     
       def open
