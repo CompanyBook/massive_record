@@ -49,6 +49,12 @@ describe "field" do
   end
   
   describe "#decode" do
+    it "should return vale if value is of correct class" do
+      today = Date.today
+      @subject = MassiveRecord::ORM::Field.new(:created_at, :date)
+      @subject.decode(today) == today
+    end
+
     it "should decode a boolean value" do
       @subject = MassiveRecord::ORM::Field.new(:status, :boolean)
       @subject.decode("1").should be_true
@@ -86,6 +92,5 @@ describe "field" do
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
     end
-    
   end
 end

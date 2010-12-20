@@ -25,6 +25,7 @@ module SetPersonsTableNameToTestTable
 
     after do
       Person.table.destroy if @connection.tables.include? Person.table_name
+      Person.reset_connection!
     end
   end
 end

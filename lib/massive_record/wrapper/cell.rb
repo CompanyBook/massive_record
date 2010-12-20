@@ -1,7 +1,6 @@
 module MassiveRecord
   module Wrapper
     class Cell
-    
       attr_writer :value
       attr_accessor :created_at
     
@@ -31,9 +30,8 @@ module MassiveRecord
       end
     
       def is_yaml?
-        !@value.match(/^--- \n/).nil?
+        @value =~ /^--- \n/ || @value =~ /^--- {}/
       end
-    
     end
   end
 end
