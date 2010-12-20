@@ -95,4 +95,29 @@ describe MassiveRecord::ORM::Base do
     test_object.freeze
     test_object.should be_frozen
   end
+
+
+  describe "#inspect" do
+    before do
+      @person = Person.new({
+        :name => "Bob",
+        :age => 3,
+        :date_of_birth => Date.today
+      })
+    end
+
+    it "should wrap inspection string inside of #< >" do
+      @person.inspect.should match(/^#<.*?>$/);
+    end
+
+    it "should contain it's class name" do
+      @person.inspect.should include("Person")
+    end
+
+    it "should contain a nice list of it's attributes" do
+      i = @person.inspect
+      i.should include(%q{name: "Bob"})
+      i.should include(%q{age: 3})
+    end
+  end
 end

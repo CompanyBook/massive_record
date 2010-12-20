@@ -96,6 +96,30 @@ module MassiveRecord
       end
 
 
+
+      def inspect
+        attributes_as_string = attributes_schema.keys.collect do |attr_name|
+          "#{attr_name}: #{attribute_for_inspect(attr_name)}"
+        end.join(', ')
+
+        "#<#{self.class}: #{attributes_as_string}>"
+      end
+
+
+      def attribute_for_inspect(attr_name)
+        value = read_attribute(attr_name)
+
+        if value.is_a?(String) && value.length > 50
+          "#{value[0..50]}...".inspect
+        elsif value.is_a?(Date) || value.is_a?(Time)
+          %("#{value.to_s}")
+        else
+          value.inspect
+        end
+      end
+
+      
+
       include Config
       include Persistence
       include Finders
@@ -108,6 +132,8 @@ module MassiveRecord
     end
   end
 end
+
+
 
 require 'massive_record/orm/table'
 require 'massive_record/orm/column'
