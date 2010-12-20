@@ -17,6 +17,12 @@ module MassiveRecord
       
       def decode(value)
         return nil if value.nil?
+
+        if type == :boolean
+          return value if value === TrueClass || value === FalseClass
+        else
+          return value if value.class == type.to_s.classify.constantize
+        end
         
         case type
         when :string
