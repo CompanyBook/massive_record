@@ -3,9 +3,12 @@ require 'orm/models/person'
 require 'orm/models/test_class'
 
 describe "Person" do
-  
+  include SetUpHbaseConnectionBeforeAll
+  include SetPersonsTableNameToTestTable
+
   before do
     @person = Person.new
+    @person.id = "test"
     @person.points = "25"
     @person.date_of_birth = "19850730"
     @person.status = "0"
@@ -35,5 +38,11 @@ describe "Person" do
   it "should parse a Boolean field properly" do
     @person.status.should be_false
   end
-  
+
+  it "should decode/encode empty hashes correctly" do
+    @person.addresses = {}
+    @person.save! :validate => false
+    @person.reload
+    @person.addresses.should be_instance_of Hash
+  end
 end

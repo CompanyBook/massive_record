@@ -57,7 +57,8 @@ describe MassiveRecord::Wrapper::Table do
             :dislike => {
               "Washing" => "Boring 6/10",
               "Ironing" => "Boring 8/10"
-            }
+            },
+            :empty => {}
           }
         }
         row.table = @table
@@ -73,7 +74,7 @@ describe MassiveRecord::Wrapper::Table do
       end
         
       it "should list 5 column names" do
-        @table.column_names.size.should == 5
+        @table.column_names.size.should == 6
       end
       
       it "should only load one column family" do
@@ -102,7 +103,7 @@ describe MassiveRecord::Wrapper::Table do
       it "should merge data" do
         row = @table.first
         row.update_columns({ :misc => { :super_power => "Eating"} })
-        row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should eql(["misc:like", "misc:dislike", "misc:super_power"].sort)
+        row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should eql(["misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
       end
       
       it "should merge array data" do
@@ -122,6 +123,7 @@ describe MassiveRecord::Wrapper::Table do
         row = @table.first
         row.values["misc:like"].class.should eql(Array)
         row.values["misc:dislike"].class.should eql(Hash)
+        row.values["misc:empty"].class.should eql(Hash)
       end
       
       it "should display the previous value (versioning) of the column 'info:first_name'" do
