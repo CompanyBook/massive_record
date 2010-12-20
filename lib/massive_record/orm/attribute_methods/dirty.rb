@@ -8,20 +8,20 @@ module MassiveRecord
 
         def save(*)
           if status = super
-            changed_attributes.clear
+            clear_dirty_states!
           end
           status
         end
 
         def save!(*)
           super.tap do
-            changed_attributes.clear
+            clear_dirty_states!
           end
         end
 
         def reload(*)
           super.tap do
-            changed_attributes.clear
+            clear_dirty_states!
           end
         end
 
@@ -63,6 +63,11 @@ module MassiveRecord
 
         def will_change_back_to_original_value?(attr_name, value)
           original_attribute_value(attr_name) == value
+        end
+
+        def clear_dirty_states!
+          changed_attributes.clear
+          @original_attribute_values.clear if @original_attribute_values
         end
       end
     end
