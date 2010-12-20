@@ -58,7 +58,8 @@ describe MassiveRecord::Wrapper::Table do
               "Washing" => "Boring 6/10",
               "Ironing" => "Boring 8/10"
             },
-            :empty => {}
+            :empty => {},
+            :an_integer => 1
           }
         }
         row.table = @table
@@ -74,7 +75,7 @@ describe MassiveRecord::Wrapper::Table do
       end
         
       it "should list 5 column names" do
-        @table.column_names.size.should == 6
+        @table.column_names.size.should == 7
       end
       
       it "should only load one column family" do
@@ -103,7 +104,9 @@ describe MassiveRecord::Wrapper::Table do
       it "should merge data" do
         row = @table.first
         row.update_columns({ :misc => { :super_power => "Eating"} })
-        row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should eql(["misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
+        row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should(
+          eql(["misc:an_integer", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
+        )
       end
       
       it "should merge array data" do
