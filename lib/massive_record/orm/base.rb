@@ -129,6 +129,10 @@ module MassiveRecord
       include AttributeMethods::Dirty
       include Validations
       include Callbacks
+
+
+      alias [] read_attribute
+      alias []= write_attribute
     end
   end
 end
