@@ -34,7 +34,10 @@ module MassiveRecord
       end
 
       def delete_all_table_contents
-        each_orm_class_where_table_exists { |klass| klass.connection.client.deleteAllRow(klass.table_name, "*") }
+        each_orm_class_where_table_exists { |klass| 
+          klass.destroy_all
+          # klass.connection.client.deleteAllRow(klass.table_name, "*")
+        }
       end
 
       def delete_all_tables
