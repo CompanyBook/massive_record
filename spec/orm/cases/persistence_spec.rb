@@ -423,6 +423,7 @@ describe "persistence" do
 
       it "should be able to do atomic increments" do
         @person.atomic_increment!(:age).should == 30
+        @person.age.should == 30
         @person.reload
         @person.age.should == 30
       end
