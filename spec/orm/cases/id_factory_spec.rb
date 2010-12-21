@@ -6,10 +6,6 @@ describe "id factory" do
     MassiveRecord::ORM::IdFactory.included_modules.should include(Singleton)
   end
 
-  it "should return an instance of self" do
-    MassiveRecord::ORM::IdFactory.instance.should be_instance_of MassiveRecord::ORM::IdFactory
-  end
-
   describe "#next_for" do
     describe "dry" do
       include MockMassiveRecordConnection
@@ -42,10 +38,27 @@ describe "id factory" do
 
 
     describe "database" do
-      
+      include SetUpHbaseConnectionBeforeAll
+      include SetTableNamesToTestTable
 
       before do
         @factory = MassiveRecord::ORM::IdFactory.instance
+      end
+
+      it "should increment start a new sequence on 1" do
+        @factory.next_for(Person).should == 1
+      end
+
+      it "should increment value one by one" do
+        5.times do |index|
+          expected_id = index + 1
+          @factory.next_for(Person).should == expected_id
+        end
+      end
+
+      it "should maintain ids separate for each table" do
+        3.times { @factory.next_for(Person) }
+        @factory.next_for("cars").should == 1
       end
     end
   end
