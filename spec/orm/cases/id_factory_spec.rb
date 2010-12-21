@@ -33,6 +33,11 @@ describe "id factory" do
         @factory.should_receive(:next_id).with(hash_including(:table => "people"))
         @factory.next_for(Person)
       end
+
+      it "should have class method next_for and delegate it to it's instance" do
+        @factory.should_receive(:next_for).with("cars")
+        MassiveRecord::ORM::IdFactory.next_for("cars")
+      end
     end
 
 

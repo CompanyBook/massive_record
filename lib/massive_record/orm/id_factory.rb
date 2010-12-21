@@ -2,6 +2,16 @@ require 'singleton'
 
 module MassiveRecord
   module ORM
+
+    #
+    # A factory class for unique IDs for any given tables.
+    #
+    # Usage:
+    #   IdFactory.next_for(:cars) # => 1
+    #   IdFactory.next_for(:cars) # => 2
+    #   IdFactory.next_for(AClassRespondingToTableName)         # => 1
+    #   IdFactory.next_for("a_class_responding_to_table_names") # => 2
+    #
     class IdFactory < Table
       include Singleton
 
@@ -34,6 +44,15 @@ module MassiveRecord
         @instance = new unless @instance
         @instance
       end
+
+      #
+      # Delegates to the instance, just a shout cut.
+      #
+      def self.next_for(table)
+        instance.next_for(table)
+      end
+
+
 
       #
       # Returns a new and unique id for a given table name
