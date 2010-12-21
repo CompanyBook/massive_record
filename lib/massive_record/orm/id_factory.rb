@@ -12,13 +12,27 @@ module MassiveRecord
         autoload
       end
 
-
+      #
+      # Returns the factory, singleton class.
+      # It will be a reloaded version each time instance
+      # is retrieved, or else it will fetch self from the
+      # database, or if all other fails return a new of self.
+      #
       def self.instance
         if table_exists?
-          @instance = find(ID) rescue new
-        else
-          @instance = new
+          begin
+            if @instance
+              @instance.reload
+            else
+              @instance = find(ID)
+            end
+          rescue RecordNotFound
+            @instance = nil
+          end
         end
+
+        @instance = new unless @instance
+        @instance
       end
 
       #
@@ -47,9 +61,7 @@ module MassiveRecord
         table_name = options.delete :table
 
         create_field_or_ensure_type_integer_for(table_name)
-        increment!(table_name)
-
-        self[table_name]
+        atomic_increment!(table_name)
       end
 
 
@@ -60,6 +72,7 @@ module MassiveRecord
           ensure_type_integer_for(table_name)
         else
           create_field_for(table_name)
+          ensure_that_we_have_table_and_column_families!
         end
       end
 
@@ -76,7 +89,7 @@ module MassiveRecord
       def create_field_for(table_name)
         column_family_for_tables.field(table_name, :integer)
         self.class.attributes_schema = self.class.attributes_schema.merge(column_family_for_tables.fields)
-        @attributes[table_name.to_s] = nil
+        @attributes[table_name.to_s] = 0
         self.class.undefine_attribute_methods
       end
       
@@ -86,6 +99,7 @@ module MassiveRecord
       #
       def ensure_type_integer_for(table_name)
         column_family_for_tables.fields[table_name].type = :integer
+        self[table_name] = 0 if self[table_name].blank?
       end
 
 
