@@ -12,6 +12,12 @@ module MassiveRecord
     #   IdFactory.next_for(AClassRespondingToTableName)         # => 1
     #   IdFactory.next_for("a_class_responding_to_table_names") # => 2
     #
+    #
+    # Storage:
+    #   Stored in id_factories table, under column family named tables.
+    #   Field name equals to tables it has generated ids for, and it's
+    #   values is integers (if the adapter supports it).
+    #
     class IdFactory < Table
       include Singleton
 
