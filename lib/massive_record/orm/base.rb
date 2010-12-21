@@ -118,7 +118,13 @@ module MassiveRecord
         end
       end
 
-      
+      def id
+        if read_attribute(:id).blank? && respond_to?(:default_id)
+          @attributes["id"] = default_id
+        end
+
+        read_attribute(:id)
+      end
 
       include Config
       include Persistence
