@@ -59,7 +59,7 @@ describe MassiveRecord::Wrapper::Table do
               "Ironing" => "Boring 8/10"
             },
             :empty => {},
-            :an_integer => 1
+            :value_to_increment => "1"
           }
         }
         row.table = @table
@@ -105,7 +105,7 @@ describe MassiveRecord::Wrapper::Table do
         row = @table.first
         row.update_columns({ :misc => { :super_power => "Eating"} })
         row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should(
-          eql(["misc:an_integer", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
+          eql(["misc:value_to_increment", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
         )
       end
       
@@ -147,6 +147,23 @@ describe MassiveRecord::Wrapper::Table do
         row = @table.first
         row.values["info:first_name"].should == "Bob"
         row.values["misc:genre"].should == "M"
+      end
+
+      it "should be able to do atomic increment call on values" do
+        row = @table.first
+        row.values["misc:value_to_increment"].should == "1"
+
+        result = row.atomic_increment("misc:value_to_increment")
+        result.should == "2"
+      end
+
+      it "should be able to pass inn what to incremet by" do
+        row = @table.first
+        row.values["misc:value_to_increment"].should == "2"
+        row.atomic_increment("misc:value_to_increment", 2)
+
+        row = @table.first
+        row.values["misc:value_to_increment"].should == "4"
       end
       
       it "should delete a row" do
