@@ -38,5 +38,10 @@ module MassiveRecord
         super("hbase are missing some column families: #{@missing_column_families.join(' ')}. Please migrate the database.")
       end
     end
+
+    # Raised when trying to manipulate non-numeric fields by operations
+    # requiring a number to work on.
+    class NotNumericalFieldError < MassiveRecordError
+    end
   end
 end

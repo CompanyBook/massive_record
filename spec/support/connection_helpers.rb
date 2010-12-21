@@ -26,6 +26,7 @@ module SetPersonsTableNameToTestTable
     after do
       Person.table.destroy if @connection.tables.include? Person.table_name
       Person.reset_connection!
+      MassiveRecord::ORM::Base.descendants.each { |klass| klass.unmemoize_all }
     end
   end
 end

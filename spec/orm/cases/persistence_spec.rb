@@ -365,4 +365,122 @@ describe "persistence" do
       end
     end
   end
+
+
+
+  describe "increment" do
+    describe "dry" do
+      include MockMassiveRecordConnection
+
+      before do
+        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+      end
+
+      it "should being able to increment age" do
+        @person.increment(:age)
+        @person.age.should == 30
+      end
+
+      it "should be able to increment age by given value" do
+        @person.increment(:age, 2)
+        @person.age.should == 31
+      end
+
+      it "should return object self" do
+        @person.increment(:age, 2).should == @person
+      end
+
+      it "should support increment values which currently are nil" do
+        @person.age = nil
+        @person.increment(:age)
+        @person.age.should == 1
+      end
+
+      it "should complain if users tries to increment non-integer fields" do
+        @person.name = nil
+        lambda { @person.increment(:name) }.should raise_error MassiveRecord::ORM::NotNumericalFieldError
+      end
+    end
+
+    describe "with database" do
+      include SetUpHbaseConnectionBeforeAll
+      include SetPersonsTableNameToTestTable
+
+      before do
+        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+      end
+
+      it "should delegate it's call to increment" do
+        @person.should_receive(:increment).with(:age, 1).and_return(@person)
+        @person.increment! :age
+      end
+
+      it "should update object in database when called with a bang" do
+        @person.increment! :age
+        @person.reload
+        @person.age.should == 30
+      end
+
+      it "should be able to do atomic increments" do
+        @person.atomic_increment!(:age).should == 30
+        @person.reload
+        @person.age.should == 30
+      end
+    end
+  end
+
+  describe "decrement" do
+    describe "dry" do
+      include MockMassiveRecordConnection
+
+      before do
+        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+      end
+
+      it "should being able to decrement age" do
+        @person.decrement(:age)
+        @person.age.should == 28
+      end
+
+      it "should be able to decrement age by given value" do
+        @person.decrement(:age, 2)
+        @person.age.should == 27
+      end
+
+      it "should return object self" do
+        @person.decrement(:age, 2).should == @person
+      end
+
+      it "should support decrement values which currently are nil" do
+        @person.age = nil
+        @person.decrement(:age)
+        @person.age.should == -1
+      end
+
+      it "should complain if users tries to decrement non-integer fields" do
+        @person.name = nil
+        lambda { @person.decrement(:name) }.should raise_error MassiveRecord::ORM::NotNumericalFieldError
+      end
+    end
+
+    describe "with database" do
+      include SetUpHbaseConnectionBeforeAll
+      include SetPersonsTableNameToTestTable
+
+      before do
+        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+      end
+
+      it "should delegate it's call to decrement" do
+        @person.should_receive(:decrement).with(:age, 1).and_return(@person)
+        @person.decrement! :age
+      end
+
+      it "should update object in database when called with a bang" do
+        @person.decrement! :age
+        @person.reload
+        @person.age.should == 28
+      end
+    end
+  end
 end

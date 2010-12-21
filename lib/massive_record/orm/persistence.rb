@@ -57,6 +57,8 @@ module MassiveRecord
         save!
       end
 
+      # TODO  This actually does nothing atm, but it's here and callbacks on it
+      #       is working.
       def touch
         true
       end
@@ -66,6 +68,43 @@ module MassiveRecord
       end
       alias_method :delete, :destroy
 
+
+
+
+      def increment(attr_name, by = 1)
+        raise NotNumericalFieldError unless attributes_schema[attr_name.to_s].type == :integer
+        self[attr_name] ||= 0
+        self[attr_name] += by
+        self
+      end
+
+      def increment!(attr_name, by = 1)
+        increment(attr_name, by).update_attribute(attr_name, self[attr_name])
+      end
+
+      # Atomic increment of an attribute. Please note that it's the
+      # adapter (or the wrapper) which needs to guarantee that the update
+      # is atomic, and as of writing this the Thrift adapter / wrapper does
+      # not do this anatomic.
+      def atomic_increment!(attr_name, by = 1)
+        attr_name = attr_name.to_s
+
+        row = row_for_record
+        row.values = attributes_to_row_values_hash([attr_name])
+        row.atomic_increment(attributes_schema[attr_name].unique_name, by).to_i
+      end
+
+      def decrement(attr_name, by = 1)
+        raise NotNumericalFieldError unless attributes_schema[attr_name.to_s].type == :integer
+        self[attr_name] ||= 0
+        self[attr_name] -= by
+        self
+      end
+
+      def decrement!(attr_name, by = 1)
+        decrement(attr_name, by).update_attribute(attr_name, self[attr_name])
+      end
+      
 
       private
 
