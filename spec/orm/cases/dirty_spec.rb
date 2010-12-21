@@ -73,7 +73,7 @@ describe "dirty" do
 
   describe "database run" do
     include SetUpHbaseConnectionBeforeAll
-    include SetPersonsTableNameToTestTable
+    include SetTableNamesToTestTable
 
     before do
       @person = Person.new

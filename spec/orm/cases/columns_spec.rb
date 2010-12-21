@@ -4,7 +4,7 @@ require 'orm/models/test_class'
 
 describe "Person" do
   include SetUpHbaseConnectionBeforeAll
-  include SetPersonsTableNameToTestTable
+  include SetTableNamesToTestTable
 
   before do
     @person = Person.new

@@ -334,7 +334,7 @@ describe "persistence" do
 
     describe "database test" do
       include SetUpHbaseConnectionBeforeAll
-      include SetPersonsTableNameToTestTable
+      include SetTableNamesToTestTable
 
       before do
         @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
@@ -404,7 +404,7 @@ describe "persistence" do
 
     describe "with database" do
       include SetUpHbaseConnectionBeforeAll
-      include SetPersonsTableNameToTestTable
+      include SetTableNamesToTestTable
 
       before do
         @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
@@ -465,7 +465,7 @@ describe "persistence" do
 
     describe "with database" do
       include SetUpHbaseConnectionBeforeAll
-      include SetPersonsTableNameToTestTable
+      include SetTableNamesToTestTable
 
       before do
         @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
