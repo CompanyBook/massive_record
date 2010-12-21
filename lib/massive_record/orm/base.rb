@@ -141,3 +141,4 @@ end
 
 require 'massive_record/orm/table'
 require 'massive_record/orm/column'
+require 'massive_record/orm/id_factory'
