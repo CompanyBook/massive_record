@@ -4,6 +4,22 @@ module MassiveRecord
       attr_writer :value
       attr_accessor :created_at
     
+
+
+      class << self
+        def serialize_value(v)
+          serialize?(v) ? v.to_yaml : v.to_s
+        end
+
+
+        private
+
+        def serialize?(v)
+          ![String, Fixnum].include?(v.class)
+        end
+      end
+
+
       def initialize(opts = {})
         @value = opts[:value]
         @created_at = opts[:created_at]
@@ -15,10 +31,6 @@ module MassiveRecord
     
       def deserialize_value
         is_yaml? ? YAML.load(@value) : @value
-      end
-    
-      def self.serialize_value(v)
-        v.is_a?(String) ? v : v.to_yaml
       end
     
       def serialize_value(v)

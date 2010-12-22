@@ -118,8 +118,27 @@ module MassiveRecord
         end
       end
 
-      
+      def id
+        if read_attribute(:id).blank? && respond_to?(:default_id)
+          @attributes["id"] = default_id
+        end
 
+        read_attribute(:id)
+      end
+
+
+
+
+
+      private
+
+      def next_id
+        IdFactory.next_for(self.class).to_s
+      end
+    end
+
+
+    Base.class_eval do
       include Config
       include Persistence
       include Finders
@@ -129,11 +148,18 @@ module MassiveRecord
       include AttributeMethods::Dirty
       include Validations
       include Callbacks
+
+
+      alias [] read_attribute
+      alias []= write_attribute
     end
   end
 end
 
 
 
+
+
 require 'massive_record/orm/table'
 require 'massive_record/orm/column'
+require 'massive_record/orm/id_factory'

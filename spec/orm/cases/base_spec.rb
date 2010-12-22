@@ -120,4 +120,19 @@ describe MassiveRecord::ORM::Base do
       i.should include(%q{age: 3})
     end
   end
+
+  describe "attribute read / write alias" do
+    before do
+      @test_object = TestClass.new :foo => 'bar'
+    end
+
+    it "should read attributes by object[attr]" do
+      @test_object[:foo].should == 'bar'
+    end
+
+    it "should write attributes by object[attr] = new_value" do
+      @test_object["foo"] = "new_value"
+      @test_object.foo.should == "new_value"
+    end
+  end
 end

@@ -36,6 +36,11 @@ module MassiveRecord
           MassiveRecord::Wrapper::Table.new(connection, table_name)
         end
         memoize :table
+
+
+        def table_exists?
+          connection.tables.include?(table_name)
+        end
       end
     end
   end

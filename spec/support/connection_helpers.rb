@@ -1,3 +1,5 @@
+require 'massive_record/spec/support/simple_database_cleaner'
+
 module SetUpHbaseConnectionBeforeAll
   extend ActiveSupport::Concern
 
@@ -13,19 +15,15 @@ module SetUpHbaseConnectionBeforeAll
   end
 end
 
-
-module SetPersonsTableNameToTestTable
+module SetTableNamesToTestTable
   extend ActiveSupport::Concern
 
   included do
-    before do
-      Person.stub!(:table_name).and_return(MR_CONFIG['table'])
-      Person.connection_configuration = @connection_configuration
-    end
+    include MassiveRecord::Rspec::SimpleDatabaseCleaner
 
     after do
-      Person.table.destroy if @connection.tables.include? Person.table_name
-      Person.reset_connection!
+      MassiveRecord::ORM::Base.reset_connection!
+      MassiveRecord::ORM::Base.descendants.each { |klass| klass.unmemoize_all }
     end
   end
 end
@@ -36,7 +34,7 @@ module CreatePersonBeforeEach
 
   included do
     include SetUpHbaseConnectionBeforeAll
-    include SetPersonsTableNameToTestTable
+    include SetTableNamesToTestTable
 
     before do
       @table = MassiveRecord::Wrapper::Table.new(@connection, Person.table_name)

@@ -12,6 +12,7 @@ describe "configuration" do
 
   describe "connection" do
     it "should use connection_configuration if present" do
+      TestClass.reset_connection!
       MassiveRecord::Wrapper::Connection.should_receive(:new).with(TestClass.connection_configuration)
       TestClass.connection
     end
