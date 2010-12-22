@@ -24,6 +24,19 @@ describe "auto setting of ids" do
     Person.class_eval { undef_method :default_id }
   end
 
+  it "should have id based on whatever default_id defines, even if it is private method" do
+    Person.class_eval do
+      private
+      def default_id
+        [name, age].join("-")
+      end
+    end
+
+    @person.id.should == "thorbjorn-29"
+
+    Person.class_eval { undef_method :default_id }
+  end
+
   describe "#next_id" do
     it "should ask IdFactory for a next id for self" do
       Person.class_eval do
