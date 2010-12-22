@@ -50,6 +50,10 @@ describe "id factory" do
         @factory = MassiveRecord::ORM::IdFactory.instance
       end
 
+      after do
+        MassiveRecord::ORM::IdFactory.destroy_all
+      end
+
       it "should increment start a new sequence on 1" do
         @factory.next_for(Person).should == 1
       end
