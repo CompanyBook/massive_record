@@ -126,6 +126,19 @@ module MassiveRecord
         read_attribute(:id)
       end
 
+
+
+
+
+      private
+
+      def next_id
+        IdFactory.next_for(self.class).to_s
+      end
+    end
+
+
+    Base.class_eval do
       include Config
       include Persistence
       include Finders
@@ -142,6 +155,8 @@ module MassiveRecord
     end
   end
 end
+
+
 
 
 
