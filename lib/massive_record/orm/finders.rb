@@ -72,6 +72,10 @@ module MassiveRecord
         end
 
 
+        def exists?(id)
+          !!find(id) rescue false
+        end
+
 
         private
 

@@ -142,4 +142,16 @@ describe "finders" do
       all.length.should == 2
     end
   end
+
+  describe "#exists?" do
+    include CreatePersonBeforeEach
+
+    it "should return true if a row exists with given id" do
+      Person.exists?("ID1").should be_true
+    end
+
+    it "should return false if a row does not exists with given id" do
+      Person.exists?("unkown").should be_false
+    end
+  end
 end
