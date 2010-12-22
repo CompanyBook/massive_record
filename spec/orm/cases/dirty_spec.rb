@@ -68,6 +68,39 @@ describe "dirty" do
         @person.should_not be_changed
       end
     end
+
+    describe "previous changes" do
+      it "should be blank before save" do
+        @person.previous_changes.should be_blank
+      end
+
+      it "should equal to changes before save" do
+        @person.name = "Bob"
+        changes_before_save = @person.changes
+
+        @person.save
+
+        @person.changes.should be_empty
+        @person.previous_changes.should == changes_before_save
+      end
+
+      it "should equal to changes before save!" do
+        @person.name = "Bob"
+        changes_before_save = @person.changes
+
+        @person.save!
+
+        @person.changes.should be_empty
+        @person.previous_changes.should == changes_before_save
+      end
+
+      it "should be nil after a reload" do
+        @person.name = "Bob"
+        @person.save
+        @person.reload
+        @person.previous_changes.should be_blank
+      end
+    end
   end
 
 

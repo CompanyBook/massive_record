@@ -8,14 +8,18 @@ module MassiveRecord
 
         def save(*)
           if status = super
+            changes_before_save = changes
             clear_dirty_states!
+            @previously_changed = changes_before_save
           end
           status
         end
 
         def save!(*)
           super.tap do
+            changes_before_save = changes
             clear_dirty_states!
+            @previously_changed = changes_before_save
           end
         end
 
@@ -68,6 +72,7 @@ module MassiveRecord
         def clear_dirty_states!
           changed_attributes.clear
           @original_attribute_values.clear if @original_attribute_values
+          @previously_changed.clear if @previously_changed
         end
       end
     end
