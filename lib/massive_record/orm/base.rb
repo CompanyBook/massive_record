@@ -5,6 +5,7 @@ require 'active_support/core_ext/class/subclasses'
 require 'active_support/core_ext/string'
 require 'active_support/memoizable'
 
+require 'massive_record/orm/schema'
 require 'massive_record/orm/errors'
 require 'massive_record/orm/config'
 require 'massive_record/orm/finders'
