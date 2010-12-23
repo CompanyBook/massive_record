@@ -3,13 +3,20 @@ require 'spec_helper'
 describe MassiveRecord::ORM::Schema::ColumnFamily do
   describe "initializer" do
     it "should take a name" do
-      column_family = MassiveRecord::ORM::Schema::ColumnFamily.new "family_name"
+      column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name"
       column_family.name.should == "family_name"
+    end
+
+    it "should take the column families it belongs to" do
+      families = MassiveRecord::ORM::Schema::ColumnFamilies.new
+      column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name"
+      column_family.column_families = families
+      column_family.column_families.should == families
     end
   end
 
   it "should cast name to string" do
-    column_family = MassiveRecord::ORM::Schema::ColumnFamily.new(:name)
+    column_family = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :name)
     column_family.name.should == "name"
   end
 
@@ -18,16 +25,16 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
   end
 
   it "should compare two column families based on name" do
-    column_family_1 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name)
-    column_family_2 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name)
+    column_family_1 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :name)
+    column_family_2 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :name)
 
     column_family_1.should == column_family_2
     column_family_1.eql?(column_family_2).should be_true
   end
 
   it "should have the same hash value for two families with the same name" do
-    column_family_1 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name)
-    column_family_2 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name)
+    column_family_1 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :name)
+    column_family_2 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :name)
 
     column_family_1.hash.should == column_family_2.hash
   end

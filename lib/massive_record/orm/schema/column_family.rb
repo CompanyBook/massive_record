@@ -2,10 +2,15 @@ module MassiveRecord
   module ORM
     module Schema
       class ColumnFamily
+        attr_accessor :column_families
         attr_reader :name
 
-        def initialize(name)
-          self.name = name
+        def initialize(*args)
+          options = args.extract_options!
+          options.symbolize_keys!
+
+          self.name = options[:name]
+          self.column_families = options[:column_families]
         end
 
         def ==(other)
@@ -17,7 +22,6 @@ module MassiveRecord
           name.hash
         end
 
-        
         private
         
         def name=(name)
