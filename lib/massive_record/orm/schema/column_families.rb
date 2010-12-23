@@ -1,7 +1,9 @@
+require 'set'
+
 module MassiveRecord
   module ORM
     module Schema
-      class ColumnFamilies < Hash
+      class ColumnFamilies < Set
 
       end
     end
