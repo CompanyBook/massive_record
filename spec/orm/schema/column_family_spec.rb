@@ -58,19 +58,18 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
   end
 
 
-  describe "fields" do
+
+  describe "delegation to fields" do
     before do
       @families = MassiveRecord::ORM::Schema::ColumnFamilies.new
       @column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :column_families => @families
     end
 
-    it "should be possible to add fields" do
-      @column_family << MassiveRecord::ORM::Schema::Field.new
-    end
-
-    it "should not be possible to add two fields with the same name" do
-      @column_family << MassiveRecord::ORM::Schema::Field.new(:name => "attr")
-      @column_family.add?(MassiveRecord::ORM::Schema::Field.new(:name => "attr")).should be_nil
+    %w(add add? <<).each do |method_to_delegate_to_fields|
+      it "should delegate #{method_to_delegate_to_fields} to fields" do
+        @column_family.fields.should_receive(method_to_delegate_to_fields)
+        @column_family.send(method_to_delegate_to_fields)
+      end
     end
   end
 end
