@@ -2,8 +2,15 @@ module MassiveRecord
   module ORM
     module Schema
       class ColumnFamily
+        include ActiveModel::Validations
+
         attr_accessor :column_families
         attr_reader :name
+
+
+        validates_presence_of :name
+        validate { errors.add(:column_families, :blank) if column_families.nil? }
+
 
         def initialize(*args)
           options = args.extract_options!
@@ -25,7 +32,6 @@ module MassiveRecord
         private
         
         def name=(name)
-          raise ArgumentError.new("Name can't be blank!") if name.blank?
           @name = name.to_s
         end
       end

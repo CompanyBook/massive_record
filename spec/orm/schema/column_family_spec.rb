@@ -15,13 +15,31 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
     end
   end
 
+  describe "validations" do
+    before do
+      @families = MassiveRecord::ORM::Schema::ColumnFamilies.new
+      @column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :column_families => @families
+    end
+
+    it "should be valid from before hook" do
+      @column_family.should be_valid
+    end
+
+    it "should not be valid with a blank name" do
+      @column_family.send(:name=, nil)
+      @column_family.should_not be_valid
+    end
+
+    it "should not be valid without column_families" do
+      @column_family.column_families = nil
+      @column_family.should_not be_valid
+    end
+  end
+
+
   it "should cast name to string" do
     column_family = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :name)
     column_family.name.should == "name"
-  end
-
-  it "should not allow blank name" do
-    lambda { MassiveRecord::ORM::Schema::ColumnFamily.new(nil) }.should raise_error ArgumentError
   end
 
   it "should compare two column families based on name" do
