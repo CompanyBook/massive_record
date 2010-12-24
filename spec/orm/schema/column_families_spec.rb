@@ -15,22 +15,29 @@ describe MassiveRecord::ORM::Schema::ColumnFamilies do
     @column_families.first.should == family
   end
 
-  it "should not be possible to add two column families with the same name" do
-    family_1 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
-    family_2 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
-    @column_families << family_1
-    @column_families.add?(family_2).should be_nil
-  end
+  describe "add column families to the set" do
+    it "should not be possible to add two column families with the same name" do
+      family_1 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
+      family_2 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
+      @column_families << family_1
+      @column_families.add?(family_2).should be_nil
+    end
 
-  it "should add self to column_family when familiy is added" do
-    family = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
-    @column_families << family
-    family.column_families.should == @column_families
-  end
+    it "should add self to column_family when familiy is added" do
+      family = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
+      @column_families << family
+      family.column_families.should == @column_families
+    end
 
-  it "should add self to column_family when familiy is added with a question" do
-    family = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
-    @column_families.add? family
-    family.column_families.should == @column_families
+    it "should add self to column_family when familiy is added with a question" do
+      family = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
+      @column_families.add? family
+      family.column_families.should == @column_families
+    end
+
+    it "should raise error if invalid column familiy is added" do
+      invalid_family = MassiveRecord::ORM::Schema::ColumnFamily.new
+      lambda { @column_families << invalid_family }.should raise_error MassiveRecord::ORM::Schema::InvalidColumnFamily
+    end
   end
 end
