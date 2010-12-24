@@ -10,6 +10,27 @@ describe MassiveRecord::ORM::Schema::Field do
     end
   end
 
+  describe "validations" do
+    before do
+      @fields = MassiveRecord::ORM::Schema::Fields.new
+      @field = MassiveRecord::ORM::Schema::Field.new :name => "field_name", :fields => @fields
+    end
+
+    it "should be valid from before hook" do
+      @field.should be_valid
+    end
+
+    it "should not be valid if name is blank" do
+      @field.send(:name=, nil)
+      @field.should_not be_valid
+    end
+    
+    it "should not be valid without fields to belong to" do
+      @field.fields = nil
+      @field.should_not be_valid
+    end
+  end
+
   it "should cast name to string" do
     field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
     field.name.should == "name"

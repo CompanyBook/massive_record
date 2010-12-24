@@ -2,11 +2,19 @@ module MassiveRecord
   module ORM
     module Schema
       class Field
-        attr_accessor :name, :column_family, :column, :type, :default
+        include ActiveModel::Validations
+
+        attr_accessor :name, :column_family, :column, :type, :default, :fields
+
+
+        validates_presence_of :name
+        validate { errors.add(:fields, :blank) if fields.nil? }
+
 
         def initialize(*args)
           options = args.extract_options!.to_options
 
+          self.fields = options[:fields]
           self.name = options[:name]
           self.column = options[:column]
           self.column_family = options[:column_family]
