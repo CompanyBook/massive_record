@@ -56,4 +56,21 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
 
     column_family_1.hash.should == column_family_2.hash
   end
+
+
+  describe "fields" do
+    before do
+      @families = MassiveRecord::ORM::Schema::ColumnFamilies.new
+      @column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :column_families => @families
+    end
+
+    it "should be possible to add fields" do
+      @column_family << MassiveRecord::ORM::Schema::Field.new
+    end
+
+    it "should not be possible to add two fields with the same name" do
+      @column_family << MassiveRecord::ORM::Schema::Field.new(:name => "attr")
+      @column_family.add?(MassiveRecord::ORM::Schema::Field.new(:name => "attr")).should be_nil
+    end
+  end
 end

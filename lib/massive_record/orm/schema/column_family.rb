@@ -5,16 +5,21 @@ module MassiveRecord
         include ActiveModel::Validations
 
         attr_accessor :column_families
-        attr_reader :name
+        attr_reader :name, :fields
 
 
         validates_presence_of :name
         validate { errors.add(:column_families, :blank) if column_families.nil? }
 
 
+        delegate :add, :add?, :<<, :to => :fields
+
+
         def initialize(*args)
           options = args.extract_options!
           options.symbolize_keys!
+
+          @fields = Fields.new
 
           self.name = options[:name]
           self.column_families = options[:column_families]
