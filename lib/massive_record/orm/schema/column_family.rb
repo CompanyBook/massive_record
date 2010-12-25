@@ -20,6 +20,7 @@ module MassiveRecord
           options.symbolize_keys!
 
           @fields = Fields.new
+          @fields.contained_in = self
 
           self.name = options[:name]
           self.column_families = options[:column_families]
@@ -32,6 +33,19 @@ module MassiveRecord
 
         def hash
           name.hash
+        end
+
+        def contained_in=(column_families)
+          self.column_families = column_families
+        end
+
+        def contained_in
+          column_families
+        end
+
+        def attribute_name_taken?(name, check_only_self = false)
+          name = name.to_s
+          check_only_self || contained_in.nil? ? fields.attribute_name_taken?(name, true) : contained_in.attribute_name_taken?(name)
         end
 
         private

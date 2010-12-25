@@ -65,4 +65,42 @@ describe MassiveRecord::ORM::Schema::Fields do
       @fields.attribute_names.should include("name", "phone")
     end
   end
+
+  describe "#attribute_name_taken?" do
+    before do
+      @name_field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
+      @phone_field = MassiveRecord::ORM::Schema::Field.new(:name => :phone)
+      @fields << @name_field << @phone_field
+    end
+
+    describe "with no contained_in" do
+      it "should return true if name is taken" do
+        @fields.attribute_name_taken?("phone").should be_true
+      end
+
+      it "should accept and return true if name, given as a symbol, is taken" do
+        @fields.attribute_name_taken?(:phone).should be_true
+      end
+
+      it "should return false if name is not taken" do
+        @fields.attribute_name_taken?("not_taken").should be_false
+      end
+    end
+
+    describe "with contained_in set" do
+      before do
+        @fields.contained_in = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "Family"
+      end
+
+      it "should ask object it is contained in for the truth about if attribute name is taken" do
+        @fields.contained_in.should_receive(:attribute_name_taken?).and_return true
+        @fields.attribute_name_taken?(:foo).should be_true
+      end
+
+      it "should not ask object it is contained in if asked not to" do
+        @fields.contained_in.should_not_receive(:attribute_name_taken?)
+        @fields.attribute_name_taken?(:foo, true).should be_false
+      end
+    end
+  end
 end

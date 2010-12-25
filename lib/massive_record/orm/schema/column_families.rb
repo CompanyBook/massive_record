@@ -23,6 +23,11 @@ module MassiveRecord
         def attribute_names
           to_hash.keys
         end
+
+
+        def attribute_name_taken?(name)
+          false # FIXME
+        end
       end
     end
   end

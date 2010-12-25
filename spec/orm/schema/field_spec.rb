@@ -29,6 +29,11 @@ describe MassiveRecord::ORM::Schema::Field do
       @field.fields = nil
       @field.should_not be_valid
     end
+
+    it "should not be valid if it's parent some how knows that it's name has been taken" do
+      @fields.should_receive(:attribute_name_taken?).with("field_name").and_return true
+      @field.should_not be_valid
+    end
   end
 
   it "should cast name to string" do

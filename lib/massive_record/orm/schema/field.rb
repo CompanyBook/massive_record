@@ -8,7 +8,10 @@ module MassiveRecord
 
 
         validates_presence_of :name
-        validate { errors.add(:fields, :blank) if fields.nil? }
+        validate do
+          errors.add(:fields, :blank) if fields.nil?
+          errors.add(:name, :taken) if fields.try(:attribute_name_taken?, name)
+        end
 
 
         def initialize(*args)

@@ -13,6 +13,11 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
       column_family.column_families = families
       column_family.column_families.should == families
     end
+
+    it "should set fields contained_in" do
+      column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name"
+      column_family.fields.contained_in.should == column_family
+    end
   end
 
   describe "validations" do
@@ -69,6 +74,45 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
       it "should delegate #{method_to_delegate_to_fields} to fields" do
         @column_family.fields.should_receive(method_to_delegate_to_fields)
         @column_family.send(method_to_delegate_to_fields)
+      end
+    end
+  end
+
+  describe "#attribute_name_taken?" do
+    before do
+      @column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :column_families => @families
+      @name_field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
+      @phone_field = MassiveRecord::ORM::Schema::Field.new(:name => :phone)
+      @column_family << @name_field << @phone_field
+    end
+
+    describe "with no contained_in" do
+      it "should return true if name is taken" do
+        @column_family.attribute_name_taken?("phone").should be_true
+      end
+
+      it "should accept and return true if name, given as a symbol, is taken" do
+        @column_family.attribute_name_taken?(:phone).should be_true
+      end
+
+      it "should return false if name is not taken" do
+        @column_family.attribute_name_taken?("not_taken").should be_false
+      end
+    end
+
+    describe "with contained_in set" do
+      before do
+        @column_family.contained_in = MassiveRecord::ORM::Schema::ColumnFamilies
+      end
+
+      it "should ask object it is contained in for the truth about if attribute name is taken" do
+        @column_family.contained_in.should_receive(:attribute_name_taken?).and_return true
+        @column_family.attribute_name_taken?(:foo).should be_true
+      end
+
+      it "should not ask object it is contained in if asked not to" do
+        @column_family.contained_in.should_not_receive(:attribute_name_taken?)
+        @column_family.attribute_name_taken?(:foo, true).should be_false
       end
     end
   end
