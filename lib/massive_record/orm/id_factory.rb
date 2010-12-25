@@ -25,7 +25,7 @@ module MassiveRecord
       ID = "id_factory"
 
       column_family COLUMN_FAMILY_FOR_TABLES do
-        autoload
+        autoload_fields
       end
 
       #
@@ -133,7 +133,7 @@ module MassiveRecord
       end
 
       def column_family_for_tables
-        @column_family_for_tables ||= column_families.detect { |c| c.name == COLUMN_FAMILY_FOR_TABLES }
+        @column_family_for_tables ||= column_families.family(COLUMN_FAMILY_FOR_TABLES)
       end
     end
   end

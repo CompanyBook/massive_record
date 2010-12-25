@@ -61,6 +61,15 @@ module MassiveRecord
           self << Field.new(options)
         end
 
+        # TODO TEST this
+        def populate_fields_from_row_columns(columns)
+          columns.keys.each do |column_family_and_column_name|
+            family_name, column_name = column_family_and_column_name.split(":")
+            self << Field.new(:name => column_name) if family_name == name
+          end
+        end
+
+        # Internal DSL method
         def autoload_fields
           @autoload_fields = true
         end
@@ -70,6 +79,7 @@ module MassiveRecord
           @autoload_fields == true
         end
         alias_method :autoload?, :autoload_fields? # FIXME deprecated
+
 
         private
         
