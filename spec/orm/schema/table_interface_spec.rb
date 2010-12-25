@@ -82,4 +82,14 @@ describe MassiveRecord::ORM::Schema::TableInterface do
 
     TestInterface.new.attributes_schema["name"].type.should == :string
   end
+
+  it "should make a column familiy auto load it's fields" do
+    class TestInterface
+      column_family :info do
+        autoload_fields
+      end
+    end
+
+    TestInterface.autoloaded_column_family_names.should == ["info"]
+  end
 end

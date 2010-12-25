@@ -29,6 +29,10 @@ module MassiveRecord
             attributes_schema.each { |attribute_name, field| defaults[attribute_name] = field.default }
             defaults
           end
+
+          def autoloaded_column_family_names
+            column_families.families_with_auto_loading_fields.collect(&:name)
+          end
         end
 
 

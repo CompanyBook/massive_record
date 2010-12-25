@@ -26,6 +26,10 @@ module MassiveRecord
           known_family
         end
 
+        def families_with_auto_loading_fields
+          select { |field| field.autoload_fields? }
+        end
+
 
         def to_hash
           inject({}) do |hash, column_family|
