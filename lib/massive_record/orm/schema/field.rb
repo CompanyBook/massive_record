@@ -21,7 +21,7 @@ module MassiveRecord
           self.name = options[:name]
           self.column = options[:column]
           self.column_family = options[:column_family]
-          self.type = options[:type]
+          self.type = options[:type] || :string
           self.default = options[:default]
         end
 
@@ -32,6 +32,10 @@ module MassiveRecord
 
         def hash
           name.hash
+        end
+
+        def type=(type)
+          @type = type.to_sym
         end
 
         private

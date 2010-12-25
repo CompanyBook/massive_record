@@ -51,6 +51,15 @@ module MassiveRecord
           check_only_self || contained_in.nil? ? fields.attribute_name_taken?(name, true) : contained_in.attribute_name_taken?(name)
         end
 
+
+        # Internal DSL method
+        def field(*args)
+          options = args.extract_options!
+          options[:name] = args[0]
+          options[:type] = args[1]
+          self << Field.new(options)
+        end
+
         private
         
         def name=(name)

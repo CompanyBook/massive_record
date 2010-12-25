@@ -2,11 +2,19 @@ require 'spec_helper'
 
 describe MassiveRecord::ORM::Schema::Field do
   describe "initializer" do
-    %w(name column_family column type default).each do |attr_name|
+    %w(name column_family column default).each do |attr_name|
       it "should set #{attr_name}" do
         field = MassiveRecord::ORM::Schema::Field.new attr_name => "a_value"
         field.send(attr_name).should == "a_value"
       end
+    end
+
+    it "should set type, cast it to a symbol" do
+      MassiveRecord::ORM::Schema::Field.new(:type => "a_value").type.should == :a_value
+    end
+
+    it "should default to type string" do
+      MassiveRecord::ORM::Schema::Field.new(:name => "a_value").type.should == :string
     end
   end
 
