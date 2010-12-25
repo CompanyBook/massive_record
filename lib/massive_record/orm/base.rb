@@ -15,7 +15,6 @@ require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
-require 'massive_record/orm/attribute_methods/schema'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/column_family'
 require 'massive_record/orm/callbacks'
@@ -145,7 +144,7 @@ module MassiveRecord
       include Finders
       include ActiveModel::Translation
       include AttributeMethods
-      include AttributeMethods::Schema, AttributeMethods::Write, AttributeMethods::Read
+      include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::Dirty
       include Validations
       include Callbacks

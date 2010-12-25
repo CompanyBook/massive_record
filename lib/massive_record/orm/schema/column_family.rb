@@ -60,6 +60,10 @@ module MassiveRecord
           self << Field.new(options)
         end
 
+        def autoload
+          # FIXME TODO
+        end
+
         private
         
         def name=(name)
