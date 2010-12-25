@@ -63,4 +63,50 @@ describe MassiveRecord::ORM::Schema::Field do
 
     field_1.hash.should == field_2.hash
   end
+
+  describe "#decode" do
+    it "should return vale if value is of correct class" do
+      today = Date.today
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :date)
+      @subject.decode(today) == today
+    end
+
+    it "should decode a boolean value" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :boolean)
+      @subject.decode("1").should be_true
+      @subject.decode("0").should be_false
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+
+    it "should decode a string value" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode("value").should == "value"
+      @subject.decode("").should == ""
+      @subject.decode(nil).should be_nil
+    end
+
+    it "should decode an integer value" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
+      @subject.decode("1").should == 1
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+
+    it "should decode a date type" do
+      today = Date.today
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :date)
+      @subject.decode(today.to_s) == today
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+    
+    it "should decode a time type" do
+      today = Time.now
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+      @subject.decode(today.to_s) == today
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+  end
 end

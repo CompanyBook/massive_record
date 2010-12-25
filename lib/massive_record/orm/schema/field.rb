@@ -38,6 +38,37 @@ module MassiveRecord
           @type = type.to_sym
         end
 
+        def decode(value)
+          return nil if value.nil?
+
+          if type == :boolean
+            return value if value === TrueClass || value === FalseClass
+          else
+            return value if value.class == type.to_s.classify.constantize
+          end
+          
+          case type
+          when :string
+            value
+          when :boolean
+            value.to_s.empty? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
+          when :integer
+            value.to_s.empty? ? nil : value.to_i
+          when :date
+            value.empty? ? nil : Date.parse(value)
+          when :time
+            value.empty? ? nil : Time.parse(value)
+          when :array
+            value
+          when :hash
+            value
+          else
+            value
+          end
+        end
+
+
+
         private
 
         def name=(name)
