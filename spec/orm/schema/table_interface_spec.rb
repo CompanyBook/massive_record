@@ -48,4 +48,15 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestInterface.attributes_schema["age"].type.should == :integer
     TestInterface.attributes_schema["age"].default.should == 1
   end
+
+  it "should raise an error if you try to add same field name twice" do
+    lambda { 
+      class TestInterface
+        column_family :info do
+          field :name
+          field :name
+        end
+      end
+    }.should raise_error MassiveRecord::ORM::Schema::InvalidField
+  end
 end
