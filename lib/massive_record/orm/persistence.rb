@@ -161,8 +161,8 @@ module MassiveRecord
       # context of what the schema instructs.
       #
       def calculate_missing_family_names
-        existing_family_names = self.class.table.fetch_column_families.collect(&:name) rescue []
-        expected_family_names = column_families.collect(&:name)
+        existing_family_names = self.class.table.fetch_column_families.collect(&:name)
+        expected_family_names = column_families ? column_families.collect(&:name) : []
 
         expected_family_names.collect(&:to_s) - existing_family_names.collect(&:to_s)
       end

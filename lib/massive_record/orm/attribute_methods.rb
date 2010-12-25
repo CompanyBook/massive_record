@@ -63,7 +63,7 @@ module MassiveRecord
 
       def attributes_from_field_definition
         attributes = {'id' => nil}
-        attributes.merge! default_attributes_from_schema if respond_to? :default_attributes_from_schema
+        attributes.merge! self.class.default_attributes_from_schema if self.class.respond_to? :default_attributes_from_schema
         attributes
       end
     end

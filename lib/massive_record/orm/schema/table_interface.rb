@@ -17,11 +17,11 @@ module MassiveRecord
           end
 
           def known_attribute_names
-            column_families.attribute_names
+            column_families.present? ? column_families.attribute_names : []
           end
 
           def attributes_schema
-            column_families.to_hash
+            column_families.present? ? column_families.to_hash : {}
           end
 
           def default_attributes_from_schema
@@ -31,7 +31,7 @@ module MassiveRecord
           end
 
           def autoloaded_column_family_names
-            column_families.families_with_auto_loading_fields.collect(&:name)
+            column_families.present? ? column_families.families_with_auto_loading_fields.collect(&:name) : []
           end
         end
 
