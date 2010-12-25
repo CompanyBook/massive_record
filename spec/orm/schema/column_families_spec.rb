@@ -39,6 +39,17 @@ describe MassiveRecord::ORM::Schema::ColumnFamilies do
       invalid_family = MassiveRecord::ORM::Schema::ColumnFamily.new
       lambda { @column_families << invalid_family }.should raise_error MassiveRecord::ORM::Schema::InvalidColumnFamily
     end
+
+    it "should raise an error if a two column families are added with the same field names" do
+      family_1 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :misc)
+      family_2 = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
+
+      family_1 << MassiveRecord::ORM::Schema::Field.new(:name => "Foo")
+      @column_families << family_1
+      
+      family_2 << MassiveRecord::ORM::Schema::Field.new(:name => "Foo")
+      lambda { @column_families << family_2 }.should raise_error MassiveRecord::ORM::Schema::InvalidColumnFamily
+    end
   end
 
   describe "#to_hash" do

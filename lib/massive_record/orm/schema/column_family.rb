@@ -9,7 +9,10 @@ module MassiveRecord
 
 
         validates_presence_of :name
-        validate { errors.add(:column_families, :blank) if column_families.nil? }
+        validate do
+          errors.add(:column_families, :blank) if column_families.nil?
+          errors.add(:base, :invalid_fields) unless fields.all? { |field| field.valid? }
+        end
 
 
         delegate :add, :add?, :<<, :to_hash, :attribute_names, :to => :fields

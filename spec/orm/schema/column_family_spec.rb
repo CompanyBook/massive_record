@@ -39,6 +39,13 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
       @column_family.column_families = nil
       @column_family.should_not be_valid
     end
+
+    it "should not be valid if one of it's field is not valid" do
+      @field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
+      @column_family << @field
+      @field.should_receive(:valid?).and_return(false)
+      @column_family.should_not be_valid
+    end
   end
 
 
