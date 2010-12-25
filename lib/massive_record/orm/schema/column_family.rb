@@ -12,7 +12,7 @@ module MassiveRecord
         validate { errors.add(:column_families, :blank) if column_families.nil? }
 
 
-        delegate :add, :add?, :<<, :to_hash, :to => :fields
+        delegate :add, :add?, :<<, :to_hash, :attribute_names, :to => :fields
 
 
         def initialize(*args)

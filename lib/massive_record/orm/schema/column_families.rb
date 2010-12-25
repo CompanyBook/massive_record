@@ -19,6 +19,10 @@ module MassiveRecord
             hash
           end
         end
+
+        def attribute_names
+          to_hash.keys
+        end
       end
     end
   end

@@ -73,4 +73,35 @@ describe MassiveRecord::ORM::Schema::ColumnFamilies do
       @column_families.to_hash.should include("other" => @other_field)
     end
   end
+
+  describe "#attribute_names" do
+    before do
+      @column_families = MassiveRecord::ORM::Schema::ColumnFamilies.new
+      @column_family_info = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :info
+      @column_family_misc = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :misc
+
+      @column_families << @column_family_info << @column_family_misc
+
+      @name_field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
+      @phone_field = MassiveRecord::ORM::Schema::Field.new(:name => :phone)
+      @column_family_info << @name_field << @phone_field
+
+      @misc_field = MassiveRecord::ORM::Schema::Field.new(:name => :misc)
+      @other_field = MassiveRecord::ORM::Schema::Field.new(:name => :other)
+      @column_family_misc << @misc_field << @other_field
+    end
+
+    it "should return nil if no fields are added" do
+      @column_families.clear
+      @column_families.attribute_names.should == []
+    end
+
+    it "should contain added fields from info" do
+      @column_families.attribute_names.should include("name", "phone")
+    end
+
+    it "should contain added fields from misc" do
+      @column_families.attribute_names.should include("misc", "other")
+    end
+  end
 end

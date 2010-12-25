@@ -48,4 +48,21 @@ describe MassiveRecord::ORM::Schema::Fields do
       @fields.to_hash.should include("phone" => @phone_field)
     end
   end
+
+  describe "#attribute_names" do
+    before do
+      @name_field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
+      @phone_field = MassiveRecord::ORM::Schema::Field.new(:name => :phone)
+      @fields << @name_field << @phone_field
+    end
+
+    it "should return nil if no fields are added" do
+      @fields.clear
+      @fields.attribute_names.should == []
+    end
+
+    it "should contain added fields" do
+      @fields.attribute_names.should include("name", "phone")
+    end
+  end
 end
