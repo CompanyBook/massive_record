@@ -125,4 +125,19 @@ describe MassiveRecord::ORM::Schema::Field do
       @field.unique_name.should == "info:field_name"
     end
   end
+
+  describe "#column" do
+    before do
+      @field = MassiveRecord::ORM::Schema::Field.new :name => "field_name"
+    end
+
+    it "should default to name" do
+      @field.column.should == "field_name"
+    end
+
+    it "should be overridable" do
+      @field.column = "new"
+      @field.column.should == "new"
+    end
+  end
 end

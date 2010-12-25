@@ -39,6 +39,11 @@ module MassiveRecord
         end
 
 
+        def column
+          @column || name
+        end
+
+        
         def unique_name
           raise "Can't generate a unique name as I don't have a column family!" if column_family.nil?
           [column_family.name, name].join(":")
@@ -47,6 +52,9 @@ module MassiveRecord
         def column_family
           fields.try :contained_in
         end
+
+
+
 
         def decode(value)
           return nil if value.nil?
