@@ -4,7 +4,7 @@ module MassiveRecord
       class Field
         include ActiveModel::Validations
 
-        attr_accessor :name, :column_family, :column, :type, :default, :fields
+        attr_accessor :name, :column, :type, :default, :fields
 
 
         validates_presence_of :name
@@ -20,10 +20,10 @@ module MassiveRecord
           self.fields = options[:fields]
           self.name = options[:name]
           self.column = options[:column]
-          self.column_family = options[:column_family]
           self.type = options[:type] || :string
           self.default = options[:default]
         end
+
 
         def ==(other)
           other.instance_of?(self.class) && other.hash == hash
@@ -36,6 +36,16 @@ module MassiveRecord
 
         def type=(type)
           @type = type.to_sym
+        end
+
+
+        def unique_name
+          raise "Can't generate a unique name as I don't have a column family!" if column_family.nil?
+          [column_family.name, name].join(":")
+        end
+
+        def column_family
+          fields.try :contained_in
         end
 
         def decode(value)

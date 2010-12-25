@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe MassiveRecord::ORM::Schema::Field do
   describe "initializer" do
-    %w(name column_family column default).each do |attr_name|
+    %w(name column default).each do |attr_name|
       it "should set #{attr_name}" do
         field = MassiveRecord::ORM::Schema::Field.new attr_name => "a_value"
         field.send(attr_name).should == "a_value"
@@ -107,6 +107,22 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(today.to_s) == today
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+    end
+  end
+
+  describe "#unique_name" do
+    before do
+      @family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :info
+      @field = MassiveRecord::ORM::Schema::Field.new :name => "field_name"
+    end
+
+    it "should raise an error if it has no contained_in" do
+      lambda { @field.unique_name }.should raise_error "Can't generate a unique name as I don't have a column family!"
+    end
+
+    it "should return correct unique name" do
+      @family << @field
+      @field.unique_name.should == "info:field_name"
     end
   end
 end
