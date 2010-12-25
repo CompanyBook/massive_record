@@ -26,7 +26,7 @@ module MassiveRecord
 
 
         def attribute_name_taken?(name)
-          false # FIXME
+          attribute_names.include? name.to_s
         end
       end
     end

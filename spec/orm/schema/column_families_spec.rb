@@ -104,4 +104,42 @@ describe MassiveRecord::ORM::Schema::ColumnFamilies do
       @column_families.attribute_names.should include("misc", "other")
     end
   end
+
+  describe "#attribute_name_taken?" do
+    before do
+      @column_families = MassiveRecord::ORM::Schema::ColumnFamilies.new
+      @column_family_info = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :info
+      @column_family_misc = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :misc
+
+      @column_families << @column_family_info << @column_family_misc
+
+      @name_field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
+      @phone_field = MassiveRecord::ORM::Schema::Field.new(:name => :phone)
+      @column_family_info << @name_field << @phone_field
+
+      @misc_field = MassiveRecord::ORM::Schema::Field.new(:name => :misc)
+      @other_field = MassiveRecord::ORM::Schema::Field.new(:name => :other)
+      @column_family_misc << @misc_field << @other_field
+    end
+
+    it "should return true if name is taken" do
+      @column_families.attribute_name_taken?("phone").should be_true
+    end
+
+    it "should accept and return true if name, given as a symbol, is taken" do
+      @column_families.attribute_name_taken?(:other).should be_true
+    end
+
+    it "should return false if name is not taken" do
+      @column_families.attribute_name_taken?("not_taken").should be_false
+    end
+
+    it "should return the same answer if asked from a field" do
+      @name_field.fields.attribute_name_taken?("misc").should be_true
+    end
+
+    it "should return false if only asked to check inside of it's own set" do
+      @name_field.fields.attribute_name_taken?("misc", true).should be_false
+    end
+  end
 end
