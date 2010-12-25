@@ -30,4 +30,22 @@ describe MassiveRecord::ORM::Schema::Fields do
       lambda { @fields << invalid_field }.should raise_error MassiveRecord::ORM::Schema::InvalidField
     end
   end
+
+  describe "#to_hash" do
+    before do
+      @name_field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
+      @phone_field = MassiveRecord::ORM::Schema::Field.new(:name => :phone)
+      @fields << @name_field << @phone_field
+    end
+
+    it "should return nil if no fields are added" do
+      @fields.clear
+      @fields.to_hash.should == {}
+    end
+
+    it "should contain added fields" do
+      @fields.to_hash.should include("name" => @name_field)
+      @fields.to_hash.should include("phone" => @phone_field)
+    end
+  end
 end

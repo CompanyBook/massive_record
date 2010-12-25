@@ -12,6 +12,13 @@ module MassiveRecord
           super
         end
         alias_method :<<, :add
+
+        def to_hash
+          inject({}) do |hash, column_family|
+            hash.update(column_family.to_hash)
+            hash
+          end
+        end
       end
     end
   end

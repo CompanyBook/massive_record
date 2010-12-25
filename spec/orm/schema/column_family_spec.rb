@@ -65,7 +65,7 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
       @column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :column_families => @families
     end
 
-    %w(add add? <<).each do |method_to_delegate_to_fields|
+    %w(add add? << to_hash).each do |method_to_delegate_to_fields|
       it "should delegate #{method_to_delegate_to_fields} to fields" do
         @column_family.fields.should_receive(method_to_delegate_to_fields)
         @column_family.send(method_to_delegate_to_fields)

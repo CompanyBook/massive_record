@@ -10,6 +10,14 @@ module MassiveRecord
           super
         end
         alias_method :<<, :add
+
+
+        def to_hash
+          inject({}) do |hash, field|
+            hash[field.name] = field
+            hash
+          end
+        end
       end
     end
   end
