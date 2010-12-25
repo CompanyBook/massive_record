@@ -4,9 +4,13 @@ class TestInterface
   include MassiveRecord::ORM::Schema::TableInterface
 end
 
+class TestInterfaceSubClass < TestInterface
+end
+
 describe MassiveRecord::ORM::Schema::TableInterface do
   after do
     TestInterface.column_families = nil
+    TestInterfaceSubClass.column_families = nil
   end
 
 
@@ -91,5 +95,16 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     end
 
     TestInterface.autoloaded_column_family_names.should == ["info"]
+  end
+
+  it "should not be shared amonb subclasses" do
+    class TestInterface
+      column_family :info do
+        autoload_fields
+      end
+    end
+
+    TestInterface.column_families.should_not be_nil
+    TestInterfaceSubClass.column_families.should be_nil
   end
 end
