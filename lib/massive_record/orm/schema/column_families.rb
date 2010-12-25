@@ -13,6 +13,20 @@ module MassiveRecord
         end
         alias_method :<<, :add
 
+
+        def family(name)
+          detect { |family| family.name == name.to_s }
+        end
+
+        def family_or_new(name)
+          unless known_family = family(name)
+            known_family = ColumnFamily.new(:name => name)
+            add(known_family)
+          end
+          known_family
+        end
+
+
         def to_hash
           inject({}) do |hash, column_family|
             hash.update(column_family.to_hash)
