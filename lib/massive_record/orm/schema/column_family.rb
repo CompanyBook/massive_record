@@ -4,7 +4,7 @@ module MassiveRecord
       class ColumnFamily
         include ActiveModel::Validations
 
-        attr_accessor :column_families
+        attr_accessor :column_families, :autoload_fields
         attr_reader :name, :fields
 
 
@@ -27,6 +27,7 @@ module MassiveRecord
 
           self.name = options[:name]
           self.column_families = options[:column_families]
+          self.autoload_fields = options[:autoload_fields] || options[:autoload] # FIXME deprecated
         end
 
         def ==(other)
@@ -60,9 +61,15 @@ module MassiveRecord
           self << Field.new(options)
         end
 
-        def autoload
-          # FIXME TODO
+        def autoload_fields
+          @autoload_fields = true
         end
+        alias_method :autoload, :autoload_fields # FIXME deprecated
+
+        def autoload_fields?
+          @autoload_fields == true
+        end
+        alias_method :autoload?, :autoload_fields? # FIXME deprecated
 
         private
         

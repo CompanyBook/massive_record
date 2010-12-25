@@ -18,6 +18,16 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
       column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name"
       column_family.fields.contained_in.should == column_family
     end
+
+    it "should set autoload to true" do
+      column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :autoload => true
+      column_family.should be_autoload
+    end
+
+    it "should set autoload_fields to true" do
+      column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :autoload_fields => true
+      column_family.should be_autoload_fields
+    end
   end
 
   describe "validations" do
