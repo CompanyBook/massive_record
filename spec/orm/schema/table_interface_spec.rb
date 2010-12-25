@@ -59,4 +59,27 @@ describe MassiveRecord::ORM::Schema::TableInterface do
       end
     }.should raise_error MassiveRecord::ORM::Schema::InvalidField
   end
+
+  it "should give us default attributes from schema" do
+    class TestInterface
+      column_family :info do
+        field :name
+        field :age, :integer, :default => 1
+      end
+    end
+
+    defaults = TestInterface.default_attributes_from_schema
+    defaults["name"].should be_nil
+    defaults["age"].should == 1
+  end
+
+  it "should make attributes_schema readable from instances" do
+    class TestInterface
+      column_family :info do
+        field :name
+      end
+    end
+
+    TestInterface.new.attributes_schema["name"].type.should == :string
+  end
 end
