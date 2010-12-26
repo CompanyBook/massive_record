@@ -15,7 +15,7 @@ describe "table" do
     end
     
     @subject.column_family(:sandbox) do
-      autoload
+      autoload_fields
     end
   end
 
