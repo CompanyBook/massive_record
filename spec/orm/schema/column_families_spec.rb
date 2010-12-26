@@ -183,21 +183,4 @@ describe MassiveRecord::ORM::Schema::ColumnFamilies do
       @column_families.family_by_name_or_new("info").should == @family_info
     end
   end
-
-  describe "#families_with_auto_loading_fields" do
-    before do
-      @family_info = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
-      @family_misc = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :misc)
-      @column_families << @family_info << @family_misc
-    end
-
-    it "should be empty if no families are auto loading" do
-      @column_families.families_with_auto_loading_fields.should be_empty
-    end
-
-    it "should include families which are auto loading fields" do
-      @family_info.autoload_fields = true
-      @column_families.families_with_auto_loading_fields.should include @family_info
-    end
-  end
 end
