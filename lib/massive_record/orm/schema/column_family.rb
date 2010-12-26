@@ -93,10 +93,7 @@ module MassiveRecord
 
         # Internal DSL method
         def field(*args)
-          options = args.extract_options!
-          options[:name] = args[0]
-          options[:type] = args[1]
-          self << Field.new(options)
+          self << Field.new_with_arguments_from_dsl(*args)
         end
 
 

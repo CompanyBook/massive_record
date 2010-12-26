@@ -13,6 +13,20 @@ module MassiveRecord
           errors.add(:name, :taken) if fields.try(:attribute_name_taken?, name)
         end
 
+      
+        #
+        # Creates a new field based on arguments from DSL
+        # args: name, type, options
+        #
+        def self.new_with_arguments_from_dsl(*args)
+          field_options = args.extract_options!
+          field_options[:name] = args[0]
+          field_options[:type] = args[1]
+
+          new(field_options)
+        end
+
+
 
         def initialize(*args)
           options = args.extract_options!.to_options

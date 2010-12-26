@@ -18,6 +18,23 @@ describe MassiveRecord::ORM::Schema::Field do
     end
   end
 
+  describe "new_with_arguments_from_dsl" do
+    it "should take the first argument as name" do
+      field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info")
+      field.name.should == "info"
+    end
+
+    it "should take the second argument as type" do
+      field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info", "integer")
+      field.type.should == :integer
+    end
+
+    it "should take the rest as options" do
+      field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info", "integer", :default => 0)
+      field.default.should == 0
+    end
+  end
+
   describe "validations" do
     before do
       @fields = MassiveRecord::ORM::Schema::Fields.new

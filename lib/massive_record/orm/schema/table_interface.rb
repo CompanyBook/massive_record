@@ -19,13 +19,11 @@ module MassiveRecord
           def add_field_to_column_family(family_name, *field_args)
             ensure_column_families_exists
 
-            field_options = field_args.extract_options!
-            field_options[:name] = field_args[0]
-            field_options[:type] = field_args[1]
-
-            field = Field.new(field_options)
+            field = Field.new_with_arguments_from_dsl(*field_args)
             column_families.family_by_name_or_new(family_name) << field
+
             undefine_attribute_methods if respond_to? :undefine_attribute_methods
+
             field
           end
 
