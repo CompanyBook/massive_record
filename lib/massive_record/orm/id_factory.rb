@@ -112,9 +112,8 @@ module MassiveRecord
       #       column-family?
       #
       def create_field_for(table_name)
-        column_family_for_tables << Schema::Field.new(:name => table_name, :type => :integer)
+        self.class.add_field_to_column_family COLUMN_FAMILY_FOR_TABLES, table_name, :integer
         @attributes[table_name.to_s] = 0
-        self.class.undefine_attribute_methods
       end
       
       #
