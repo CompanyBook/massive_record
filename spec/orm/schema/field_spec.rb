@@ -139,5 +139,10 @@ describe MassiveRecord::ORM::Schema::Field do
       @field.column = "new"
       @field.column.should == "new"
     end
+
+    it "should be returned as a string" do
+      @field.column = :new
+      @field.column.should == "new"
+    end
   end
 end

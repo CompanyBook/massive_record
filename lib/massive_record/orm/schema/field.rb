@@ -53,6 +53,11 @@ module MassiveRecord
           fields.try :contained_in
         end
 
+        def column=(column)
+          column = column.to_s unless column.nil?
+          @column = column
+        end
+
 
 
 
