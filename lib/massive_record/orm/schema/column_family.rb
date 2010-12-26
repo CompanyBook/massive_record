@@ -25,9 +25,15 @@ module MassiveRecord
           @fields = Fields.new
           @fields.contained_in = self
 
+          if options.has_key? :autoload
+            # TODO remove this for next version
+            ActiveSupport::Deprecation.warn("autoload is deprecated as an intitializer option. Please use autoload_fields instead!")
+            options[:autoload_fields] = options.delete :autoload
+          end
+
           self.name = options[:name]
           self.column_families = options[:column_families]
-          self.autoload_fields = options[:autoload_fields] || options[:autoload] # FIXME deprecated
+          self.autoload_fields = options[:autoload_fields]
         end
 
         def ==(other)
@@ -68,7 +74,12 @@ module MassiveRecord
         def autoload_fields?
           @autoload_fields == true
         end
-        alias_method :autoload?, :autoload_fields? # FIXME deprecated
+
+        def autoload?
+          # TODO remove this method for next version
+          ActiveSupport::Deprecation.warn("ColumnFamily#autoload? is deprecated. Please use autoload_fields? instead")
+          autoload_fields?
+        end
 
 
         private
@@ -93,7 +104,12 @@ module MassiveRecord
         def autoload_fields
           @autoload_fields = true
         end
-        alias_method :autoload, :autoload_fields # FIXME deprecated
+
+        def autoload
+          # TODO remove this method for next version
+          ActiveSupport::Deprecation.warn("ColumnFamily#autoload DSL call is deprecated. Please use autoload_fields instead")
+          autoload
+        end
       end
     end
   end
