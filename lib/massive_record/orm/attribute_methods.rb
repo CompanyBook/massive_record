@@ -5,11 +5,8 @@ module MassiveRecord
       include ActiveModel::AttributeMethods      
 
       module ClassMethods
-        # TODO  Remove the attributes-argument and read it from the
-        #       fields definition of the class instead (You'll have to
-        #       update two calls to it as well made in method_missing / respond_to?)
-        def define_attribute_methods(attr_names)
-          super(attr_names)
+        def define_attribute_methods
+          super(known_attribute_names)
         end
       end
 
@@ -41,7 +38,7 @@ module MassiveRecord
       
       def method_missing(method, *args, &block)
         unless self.class.attribute_methods_generated?
-          self.class.define_attribute_methods(attributes.keys)
+          self.class.define_attribute_methods
           send(method, *args, &block)
         else
           super
@@ -49,7 +46,7 @@ module MassiveRecord
       end
 
       def respond_to?(*args)
-        self.class.define_attribute_methods(attributes.keys) unless self.class.attribute_methods_generated?
+        self.class.define_attribute_methods unless self.class.attribute_methods_generated?
         super
       end
 
