@@ -87,7 +87,7 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
       @column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :column_families => @families
     end
 
-    %w(add add? << to_hash attribute_names).each do |method_to_delegate_to_fields|
+    %w(add add? << to_hash attribute_names field_by_name).each do |method_to_delegate_to_fields|
       it "should delegate #{method_to_delegate_to_fields} to fields" do
         @column_family.fields.should_receive(method_to_delegate_to_fields)
         @column_family.send(method_to_delegate_to_fields)
@@ -131,6 +131,26 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
         @column_family.contained_in.should_not_receive(:attribute_name_taken?)
         @column_family.attribute_name_taken?(:foo, true).should be_false
       end
+    end
+  end
+
+
+  describe "#populate_fields_from_column_names" do
+    before do
+      @column_names = %w(info:name info:phone misc:other)
+      @column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :info
+    end
+
+    it "should extract columns belonging to own column family" do
+      @column_family.populate_fields_from_column_names(@column_names)
+      @column_family.should have(2).fields
+      @column_family.fields.should include(MassiveRecord::ORM::Schema::Field.new(:name => :name))
+      @column_family.fields.should include(MassiveRecord::ORM::Schema::Field.new(:name => :phone))
+    end
+
+    it "should be possible to ask it to populate same set of columns twice" do
+      2.times { @column_family.populate_fields_from_column_names(@column_names) }
+      @column_family.should have(2).fields
     end
   end
 end

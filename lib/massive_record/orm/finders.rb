@@ -84,7 +84,7 @@ module MassiveRecord
           # Parse the row results to auto populate the instance attributes (see autoload option on column_family)
           unless autoloaded_column_family_names.blank?
             autoloaded_column_family_names.each do |name|
-              column_families.family(name).populate_fields_from_row_columns(row.columns)
+              column_families.family_by_name(name).populate_fields_from_column_names(row.columns.keys)
             end
           end
           # Parse the schema to populate the instance attributes

@@ -13,6 +13,10 @@ module MassiveRecord
         end
         alias_method :<<, :add
 
+        def field_by_name(name)
+          name = name.to_s
+          detect { |field| field.name == name }
+        end
 
         def attribute_name_taken?(name, check_only_self = false)
           name = name.to_s

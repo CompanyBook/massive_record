@@ -154,7 +154,7 @@ describe MassiveRecord::ORM::Schema::ColumnFamilies do
     end
   end
 
-  describe "#family and or_new" do
+  describe "#family_by_name and or_new" do
     before do
       @family_info = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :info)
       @family_misc = MassiveRecord::ORM::Schema::ColumnFamily.new(:name => :misc)
@@ -162,25 +162,25 @@ describe MassiveRecord::ORM::Schema::ColumnFamilies do
     end
 
     it "should return nil if name is not found" do
-      @column_families.family("foo").should be_nil
+      @column_families.family_by_name("foo").should be_nil
     end
 
     it "should return family object for given name" do
-      @column_families.family("info").should == @family_info
+      @column_families.family_by_name("info").should == @family_info
     end
 
     it "should return family object for given name as symbol" do
-      @column_families.family(:info).should == @family_info
+      @column_families.family_by_name(:info).should == @family_info
     end
 
     it "should create and add new family on to self" do
-      family = @column_families.family_or_new("foo")
+      family = @column_families.family_by_name_or_new("foo")
       family.should be_instance_of MassiveRecord::ORM::Schema::ColumnFamily
       @column_families.should include(family)
     end
 
     it "should simply return known method when asked for family_or_new when name exists" do
-      @column_families.family_or_new("info").should == @family_info
+      @column_families.family_by_name_or_new("info").should == @family_info
     end
   end
 

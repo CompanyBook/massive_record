@@ -13,7 +13,7 @@ module MassiveRecord
         module ClassMethods
           def column_family(name, &block)
             self.column_families = ColumnFamilies.new if column_families.nil?
-            column_families.family_or_new(name).instance_eval(&block)
+            column_families.family_by_name_or_new(name).instance_eval(&block)
           end
 
           def known_attribute_names

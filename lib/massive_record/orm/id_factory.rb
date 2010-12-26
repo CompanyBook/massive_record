@@ -112,8 +112,7 @@ module MassiveRecord
       #       column-family?
       #
       def create_field_for(table_name)
-        column_family_for_tables.field(table_name, :integer)
-        self.class.attributes_schema = self.class.attributes_schema.merge(column_family_for_tables.fields)
+        column_family_for_tables << Schema::Field.new(:name => table_name, :type => :integer)
         @attributes[table_name.to_s] = 0
         self.class.undefine_attribute_methods
       end
@@ -123,7 +122,7 @@ module MassiveRecord
       # This is needed as the autoload functionlaity sets all types to strings.
       #
       def ensure_type_integer_for(table_name)
-        column_family_for_tables.fields[table_name].type = :integer
+        column_family_for_tables.field_by_name(table_name).type = :integer
         self[table_name] = 0 if self[table_name].blank?
       end
 
@@ -133,7 +132,7 @@ module MassiveRecord
       end
 
       def column_family_for_tables
-        @column_family_for_tables ||= column_families.family(COLUMN_FAMILY_FOR_TABLES)
+        @column_family_for_tables ||= column_families.family_by_name(COLUMN_FAMILY_FOR_TABLES)
       end
     end
   end

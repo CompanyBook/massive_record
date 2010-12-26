@@ -103,4 +103,24 @@ describe MassiveRecord::ORM::Schema::Fields do
       end
     end
   end
+
+  describe "#field_by_name" do
+    before do
+      @name_field = MassiveRecord::ORM::Schema::Field.new(:name => :name)
+      @phone_field = MassiveRecord::ORM::Schema::Field.new(:name => :phone)
+      @fields << @name_field << @phone_field
+    end
+
+    it "should return nil if nothing is found" do
+      @fields.field_by_name("unkown").should be_nil
+    end
+
+    it "should return found field" do
+      @fields.field_by_name("name").should == @name_field
+    end
+
+    it "should return found field given as symbol" do
+      @fields.field_by_name(:name).should == @name_field
+    end
+  end
 end

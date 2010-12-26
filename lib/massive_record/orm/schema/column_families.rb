@@ -14,12 +14,12 @@ module MassiveRecord
         alias_method :<<, :add
 
 
-        def family(name)
+        def family_by_name(name)
           detect { |family| family.name == name.to_s }
         end
 
-        def family_or_new(name)
-          unless known_family = family(name)
+        def family_by_name_or_new(name)
+          unless known_family = family_by_name(name)
             known_family = ColumnFamily.new(:name => name)
             add(known_family)
           end

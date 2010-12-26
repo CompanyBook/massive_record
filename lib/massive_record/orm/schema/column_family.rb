@@ -15,7 +15,7 @@ module MassiveRecord
         end
 
 
-        delegate :add, :add?, :<<, :to_hash, :attribute_names, :to => :fields
+        delegate :add, :add?, :<<, :to_hash, :attribute_names, :field_by_name, :to => :fields
 
 
         def initialize(*args)
@@ -53,27 +53,17 @@ module MassiveRecord
         end
 
 
-        # Internal DSL method
-        def field(*args)
-          options = args.extract_options!
-          options[:name] = args[0]
-          options[:type] = args[1]
-          self << Field.new(options)
-        end
-
-        # TODO TEST this
-        def populate_fields_from_row_columns(columns)
-          columns.keys.each do |column_family_and_column_name|
+        #
+        # Extracts the fields belonging to this column family.
+        # column_names should be an array with full column names like
+        # [info:name, info:phone, misc:other].
+        #
+        def populate_fields_from_column_names(column_names)
+          column_names.each do |column_family_and_column_name|
             family_name, column_name = column_family_and_column_name.split(":")
-            self << Field.new(:name => column_name) if family_name == name
+            self.add? Field.new(:name => column_name) if family_name == name
           end
         end
-
-        # Internal DSL method
-        def autoload_fields
-          @autoload_fields = true
-        end
-        alias_method :autoload, :autoload_fields # FIXME deprecated
 
         def autoload_fields?
           @autoload_fields == true
@@ -86,6 +76,24 @@ module MassiveRecord
         def name=(name)
           @name = name.to_s
         end
+        
+
+
+
+        # Internal DSL method
+        def field(*args)
+          options = args.extract_options!
+          options[:name] = args[0]
+          options[:type] = args[1]
+          self << Field.new(options)
+        end
+
+
+        # Internal DSL method
+        def autoload_fields
+          @autoload_fields = true
+        end
+        alias_method :autoload, :autoload_fields # FIXME deprecated
       end
     end
   end
