@@ -104,15 +104,8 @@ describe "persistence" do
     end
     
     it "should include the 'pts' field in the database which has 'points' as an alias" do
-      @person.points = 20
-      
-      attributes = @person.attributes.keys
-      attributes.delete("id")
-      attributes.delete("points")
-      attributes.push("pts")
-      
-      @person.points_changed?.should be_true
-      @person.send(:attributes_to_row_values_hash, @person.attributes.keys)[:info].keys.should include(*attributes)
+      @person.send(:attributes_to_row_values_hash)["info"].keys.should include("pts")
+      @person.send(:attributes_to_row_values_hash)["info"].keys.should_not include("points")
     end
   end
 
