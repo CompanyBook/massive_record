@@ -128,24 +128,4 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
       end
     end
   end
-
-
-  describe "#populate_fields_from_column_names" do
-    before do
-      @column_names = %w(info:name info:phone misc:other)
-      @column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :info
-    end
-
-    it "should extract columns belonging to own column family" do
-      @column_family.populate_fields_from_column_names(@column_names)
-      @column_family.should have(2).fields
-      @column_family.fields.should include(MassiveRecord::ORM::Schema::Field.new(:name => :name))
-      @column_family.fields.should include(MassiveRecord::ORM::Schema::Field.new(:name => :phone))
-    end
-
-    it "should be possible to ask it to populate same set of columns twice" do
-      2.times { @column_family.populate_fields_from_column_names(@column_names) }
-      @column_family.should have(2).fields
-    end
-  end
 end

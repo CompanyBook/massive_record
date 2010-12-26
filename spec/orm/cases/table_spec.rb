@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe "table" do
-
   before do
     @subject = MassiveRecord::ORM::Table
     
@@ -24,21 +23,12 @@ describe "table" do
   end
   
   describe "column_families" do
-        
     it "should have a collection of column families" do
       @subject.column_families.should be_a_kind_of(Set)
-    end
-    
-    it "should have one autoloaded column family" do
-      @subject.autoloaded_column_family_names.should be_a_kind_of(Array)
-      @subject.autoloaded_column_family_names.size.should == 1
-      @subject.autoloaded_column_family_names.first.should == "sandbox"
     end
     
     it "should have an attributes schema" do
       @subject.attributes_schema.should include("first_name", "last_name", "status")
     end
-    
   end
-    
 end

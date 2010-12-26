@@ -59,17 +59,6 @@ module MassiveRecord
         end
 
 
-        #
-        # Extracts the fields belonging to this column family.
-        # column_names should be an array with full column names like
-        # [info:name, info:phone, misc:other].
-        #
-        def populate_fields_from_column_names(column_names)
-          column_names.each do |column_family_and_column_name|
-            family_name, column_name = column_family_and_column_name.split(":")
-            self.add? Field.new(:name => column_name) if family_name == name
-          end
-        end
 
         def autoload_fields?
           @autoload_fields == true

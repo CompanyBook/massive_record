@@ -87,16 +87,6 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestInterface.new.attributes_schema["name"].type.should == :string
   end
 
-  it "should make a column familiy auto load it's fields" do
-    class TestInterface
-      column_family :info do
-        autoload_fields
-      end
-    end
-
-    TestInterface.autoloaded_column_family_names.should == ["info"]
-  end
-
   it "should not be shared amonb subclasses" do
     class TestInterface
       column_family :info do
@@ -144,6 +134,38 @@ describe MassiveRecord::ORM::Schema::TableInterface do
       test_interface = TestInterface.new
       test_interface.should_receive("age=").with(1)
       test_interface.add_field_to_column_family :info, :age, :integer, :default => 1
+    end
+  end
+
+
+
+  describe "autoload_column_families_and_fields_with" do
+    before do
+      class TestInterface
+        column_family :info do
+          autoload_fields
+        end
+
+        column_family :misc do
+          field :text
+        end
+      end
+
+      @column_names = %w(info:name misc:other)
+    end
+
+    it "should not add fields to misc" do
+      TestInterface.column_families.family_by_name("misc").should_not_receive(:add?)
+      TestInterface.autoload_column_families_and_fields_with(@column_names)
+    end
+
+    it "should add fields to info" do
+      TestInterface.column_families.family_by_name("info").should_receive(:add?)
+      TestInterface.autoload_column_families_and_fields_with(@column_names)
+    end
+
+    it "should be possible to run twice" do
+      2.times { TestInterface.autoload_column_families_and_fields_with(@column_names) }
     end
   end
 end
