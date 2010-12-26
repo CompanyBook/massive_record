@@ -107,4 +107,32 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestInterface.column_families.should_not be_nil
     TestInterfaceSubClass.column_families.should be_nil
   end
+
+
+  describe "dynamically adding a field" do
+    it "should be possible to dynamically add a field" do
+      TestInterface.add_field_to_column_family :info, :name, :default => "NA"
+
+      TestInterface.should have(1).column_families
+
+      family = TestInterface.column_families.first
+      family.name.should == "info"
+
+      family.fields.first.name.should == "name"
+      family.fields.first.default.should == "NA"
+    end
+
+    it "should be possible to set field's type just like the DSL" do
+      TestInterface.add_field_to_column_family :info, :age, :integer, :default => 0
+
+      TestInterface.column_families.first.fields.first.name.should == "age"
+      TestInterface.column_families.first.fields.first.type.should == :integer
+      TestInterface.column_families.first.fields.first.default.should == 0
+    end
+
+    it "should call class' undefine_attribute_methods to make sure it regenerates for newly added" do
+      TestInterface.should_receive(:undefine_attribute_methods)
+      TestInterface.add_field_to_column_family :info, :name, :default => "NA"
+    end
+  end
 end
