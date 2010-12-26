@@ -23,8 +23,10 @@ module MassiveRecord
             field_options[:name] = field_args[0]
             field_options[:type] = field_args[1]
 
-            column_families.family_by_name_or_new(family_name) << Field.new(field_options)
+            field = Field.new(field_options)
+            column_families.family_by_name_or_new(family_name) << field
             undefine_attribute_methods if respond_to? :undefine_attribute_methods
+            field
           end
 
           def known_attribute_names
@@ -55,6 +57,13 @@ module MassiveRecord
 
         def attributes_schema
           self.class.attributes_schema
+        end
+
+        
+        def add_field_to_column_family(*args)
+          new_field = self.class.add_field_to_column_family(*args)
+          method = "#{new_field.name}="
+          send(method, new_field.default) if respond_to? method
         end
       end
     end

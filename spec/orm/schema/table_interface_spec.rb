@@ -134,5 +134,16 @@ describe MassiveRecord::ORM::Schema::TableInterface do
       TestInterface.should_receive(:undefine_attribute_methods)
       TestInterface.add_field_to_column_family :info, :name, :default => "NA"
     end
+
+    it "should return the new field" do
+      field = TestInterface.add_field_to_column_family :info, :age, :integer, :default => 0
+      field.should == TestInterface.column_families.first.fields.first
+    end
+
+    it "should insert the new field's default value right away" do
+      test_interface = TestInterface.new
+      test_interface.should_receive("age=").with(1)
+      test_interface.add_field_to_column_family :info, :age, :integer, :default => 1
+    end
   end
 end

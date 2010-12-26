@@ -107,13 +107,9 @@ module MassiveRecord
       # Feels a bit hackish, hooking in and doing some of what the
       # autoload-functionality of column_family block above does too.
       # But at least, we can "dynamicly" assign new attributes to this object.
-      # 
-      # TODO  Maybe something the ORM should provide instead and put them in a default
-      #       column-family?
       #
       def create_field_for(table_name)
-        self.class.add_field_to_column_family COLUMN_FAMILY_FOR_TABLES, table_name, :integer
-        @attributes[table_name.to_s] = 0
+        add_field_to_column_family COLUMN_FAMILY_FOR_TABLES, table_name, :integer, :default => 0
       end
       
       #
