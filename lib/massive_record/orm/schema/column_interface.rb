@@ -30,6 +30,17 @@ module MassiveRecord
             fields << Field.new_with_arguments_from_dsl(*args)
           end
 
+          def add_field(*args)
+            ensure_fields_exists
+
+            field = Field.new_with_arguments_from_dsl(*args)
+            fields << field
+
+            undefine_attribute_methods if respond_to? :undefine_attribute_methods
+
+            field
+          end
+
           #
           # Entrypoint for the CommonInterface
           #
@@ -41,6 +52,12 @@ module MassiveRecord
           def ensure_fields_exists
             self.fields = Fields.new if fields.nil?
           end
+        end
+
+        def add_field(*args)
+          new_field = self.class.add_field(*args)
+          method = "#{new_field.name}="
+          send(method, new_field.default) if respond_to? method
         end
       end
     end

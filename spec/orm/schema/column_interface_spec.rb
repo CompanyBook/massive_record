@@ -74,4 +74,42 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     defaults["name"].should be_nil
     defaults["age"].should == 1
   end
+
+
+  describe "dynamically adding a field" do
+    it "should be possible to dynamically add a field" do
+      TestColumnInterface.add_field :name, :default => "NA"
+
+      TestColumnInterface.should have(1).fields
+
+      field = TestColumnInterface.fields.first
+
+      field.name.should == "name"
+      field.default.should == "NA"
+    end
+
+    it "should be possible to set field's type just like the DSL" do
+      TestColumnInterface.add_field :age, :integer, :default => 0
+
+      TestColumnInterface.fields.first.name.should == "age"
+      TestColumnInterface.fields.first.type.should == :integer
+      TestColumnInterface.fields.first.default.should == 0
+    end
+
+    it "should call class' undefine_attribute_methods to make sure it regenerates for newly added" do
+      TestColumnInterface.should_receive(:undefine_attribute_methods)
+      TestColumnInterface.add_field :name, :default => "NA"
+    end
+
+    it "should return the new field" do
+      field = TestColumnInterface.add_field :age, :integer, :default => 0
+      field.should == TestColumnInterface.fields.first
+    end
+
+    it "should insert the new field's default value right away" do
+      test_interface = TestColumnInterface.new
+      test_interface.should_receive("age=").with(1)
+      test_interface.add_field :age, :integer, :default => 1
+    end
+  end
 end
