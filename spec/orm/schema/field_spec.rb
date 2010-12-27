@@ -59,6 +59,18 @@ describe MassiveRecord::ORM::Schema::Field do
       @fields.should_receive(:attribute_name_taken?).with("field_name").and_return true
       @field.should_not be_valid
     end
+
+    MassiveRecord::ORM::Schema::Field::TYPES.each do |type|
+      it "should be valid with type #{type}" do
+        @field.type = type
+        @field.should be_valid
+      end
+    end
+
+    it "should not be valid with foo as type" do
+      @field.type = :foo
+      @field.should_not be_valid
+    end
   end
 
   it "should cast name to string" do

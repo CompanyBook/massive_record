@@ -4,10 +4,13 @@ module MassiveRecord
       class Field
         include ActiveModel::Validations
 
+        TYPES = [:string, :integer, :boolean, :array, :hash, :date, :time]
+
         attr_accessor :name, :column, :type, :default, :fields
 
 
         validates_presence_of :name
+        validates_inclusion_of :type, :in => TYPES
         validate do
           errors.add(:fields, :blank) if fields.nil?
           errors.add(:name, :taken) if fields.try(:attribute_name_taken?, name)
