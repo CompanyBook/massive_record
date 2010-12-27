@@ -79,9 +79,10 @@ module MassiveRecord
           # Returns a hash with attribute name as keys, default values read from field as value.
           #
           def default_attributes_from_schema
-            defaults = {}
-            attributes_schema.each { |attribute_name, field| defaults[attribute_name] = field.default }
-            defaults
+            attributes_schema.inject({}) do |hash, (attribute_name, field)|
+              hash[attribute_name] = field.default
+              hash
+            end
           end
 
 
