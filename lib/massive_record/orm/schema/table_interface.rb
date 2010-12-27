@@ -16,14 +16,6 @@ module MassiveRecord
 
         module ClassMethods
           #
-          # Entrypoint for the CommonInterface
-          #
-          def schema_source
-            column_families
-          end
-
-
-          #
           # DSL method exposed into class. Makes it possible to do:
           #
           # class Person < MassiveRecord::ORM::Table
@@ -76,6 +68,13 @@ module MassiveRecord
 
 
           private
+          #
+          # Entrypoint for the CommonInterface
+          #
+          def schema_source
+            column_families
+          end
+
           def ensure_column_families_exists
             self.column_families = ColumnFamilies.new if column_families.nil?
           end
