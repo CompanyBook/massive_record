@@ -46,6 +46,14 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestColumnInterface.attributes_schema["age"].default.should == 1
   end
 
+  it "should make attributes_schema readable from instances" do
+    class TestColumnInterface
+      field :name
+    end
+
+    TestColumnInterface.new.attributes_schema["name"].type.should == :string
+  end
+
   it "should have a list of known attribute names" do
     class TestColumnInterface
       field :name, :string

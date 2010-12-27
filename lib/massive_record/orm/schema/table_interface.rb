@@ -7,14 +7,14 @@ module MassiveRecord
         extend ActiveSupport::Concern
 
         included do
+          include CommonInterface
+
           class_attribute :column_families, :instance_writer => false
           self.column_families = nil
         end
 
 
         module ClassMethods
-          include CommonInterface
-
           #
           # Entrypoint for the CommonInterface
           #
@@ -82,11 +82,6 @@ module MassiveRecord
         end
 
 
-        def attributes_schema
-          self.class.attributes_schema
-        end
-
-        
         #
         # Same as defined in class method, but also sets the default value
         # in current object it was called from.

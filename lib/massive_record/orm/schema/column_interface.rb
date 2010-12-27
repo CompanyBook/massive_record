@@ -7,12 +7,13 @@ module MassiveRecord
         extend ActiveSupport::Concern
 
         included do
+          include CommonInterface
+
           class_attribute :fields, :instance_writer => false
           self.fields = nil
         end
 
         module ClassMethods
-          include CommonInterface
 
           #
           # DSL method exposed into class. Makes it possible to do:
