@@ -1,3 +1,5 @@
+require 'massive_record/orm/schema/common_interface'
+
 module MassiveRecord
   module ORM
     module Schema
@@ -10,6 +12,8 @@ module MassiveRecord
         end
 
         module ClassMethods
+          include CommonInterface
+
           #
           # DSL method exposed into class. Makes it possible to do:
           #
@@ -26,32 +30,11 @@ module MassiveRecord
           end
 
           #
-          # Returns a hash where attribute names are keys and it's field
-          # is the value.
+          # Entrypoint for the CommonInterface
           #
-          def attributes_schema
-            fields.present? ? fields.to_hash : {}
+          def schema_source
+            fields
           end
-
-          #
-          # Returns an array of known attributes based on all fields found
-          # in all column families.
-          #
-          def known_attribute_names
-            fields.present? ? fields.attribute_names : []
-          end
-
-
-          #
-          # Returns a hash with attribute name as keys, default values read from field as value.
-          #
-          def default_attributes_from_schema
-            attributes_schema.inject({}) do |hash, (attribute_name, field)|
-              hash[attribute_name] = field.default
-              hash
-            end
-          end
-
 
           private
           def ensure_fields_exists
