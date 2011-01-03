@@ -10,8 +10,7 @@ module MassiveRecord
         undef_method :first, :last, :all, :exists?, :destroy_all
       end
 
-      undef_method :create, :new_record?, :persisted?, :destroyed?,
-        :reload, :save, :save!, :update_attribute, :update_attributes,
+      undef_method :create, :reload, :save, :save!, :update_attribute, :update_attributes,
         :update_attributes!, :touch, :destroy, :increment!, :atomic_increment!,
         :decrement!, :delete
     end
