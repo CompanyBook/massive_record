@@ -25,7 +25,7 @@ module MassiveRecord
       ID = "id_factory"
 
       column_family COLUMN_FAMILY_FOR_TABLES do
-        autoload
+        autoload_fields
       end
 
       #
@@ -107,15 +107,9 @@ module MassiveRecord
       # Feels a bit hackish, hooking in and doing some of what the
       # autoload-functionality of column_family block above does too.
       # But at least, we can "dynamicly" assign new attributes to this object.
-      # 
-      # TODO  Maybe something the ORM should provide instead and put them in a default
-      #       column-family?
       #
       def create_field_for(table_name)
-        column_family_for_tables.field(table_name, :integer)
-        self.class.attributes_schema = self.class.attributes_schema.merge(column_family_for_tables.fields)
-        @attributes[table_name.to_s] = 0
-        self.class.undefine_attribute_methods
+        add_field_to_column_family COLUMN_FAMILY_FOR_TABLES, table_name, :integer, :default => 0
       end
       
       #
@@ -123,7 +117,7 @@ module MassiveRecord
       # This is needed as the autoload functionlaity sets all types to strings.
       #
       def ensure_type_integer_for(table_name)
-        column_family_for_tables.fields[table_name].type = :integer
+        column_family_for_tables.field_by_name(table_name).type = :integer
         self[table_name] = 0 if self[table_name].blank?
       end
 
@@ -133,7 +127,7 @@ module MassiveRecord
       end
 
       def column_family_for_tables
-        @column_family_for_tables ||= column_families.detect { |c| c.name == COLUMN_FAMILY_FOR_TABLES }
+        @column_family_for_tables ||= column_families.family_by_name(COLUMN_FAMILY_FOR_TABLES)
       end
     end
   end

@@ -123,35 +123,30 @@ Thrift API wrapper (See spec/ folder for more examples) :
     table.destroy
   
 
-## ORM - Basic ActiveModel / ActiveRecord behaviour (might be deprecated/removed at any time, but it might help simplify things as we work on ORM)
+## ORM - Basic ActiveModel / ActiveRecord behaviour
     
-    class Person < MassiveRecord::Wrapper::ORM::Table
-      # This will give you:
-      #   - An initializer which takes attribute hash and assigns them to your object.
-      #   - write and read methods for the attributes
-      #   - Validations, as you expect from an ActiveRecord model.
-      #   - Callbacks, as you expect from an ActiveRecord model.
-      #   - Information about changes on attributes.
-      #   - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
-      #   - Easy access to hbase connection via Person.connection
-      #   - Easy access to hbase table via Person.table
-      #   - Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
-      #   - Save methods (will create or update based on new-record-state)
-      #   - Auto-creation of table and column families on save if table does not exists.
-      #   - Destroy a record
-      #
-      # What needs to be done:
-      #   - Casting of attributes
-      #   - Serialization of array/hashes (?  Don't think thats wokring, although I think the wrapper stores things as YAML if its not a string)
-      
+Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some functionality which you can expect from an ORM. This includes:
+    - An initializer which takes attribute hash and assigns them to your object.
+    - write and read methods for the attributes
+    - Validations, as you expect from an ActiveRecord model.
+    - Callbacks, as you expect from an ActiveRecord model.
+    - Information about changes on attributes.
+    - Casting of attributes
+    - Serialization of array/hashes (?  Don't think thats wokring, although I think the wrapper stores things as YAML if its not a string)
 
-      # 
-      # Example of usage with validations and column family definition
-      # 
+Tables also have:
+    - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
+    - Easy access to hbase connection via Person.connection
+    - Easy access to hbase table via Person.table
+    - Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
+    - Save methods (will create or update based on new-record-state)
+    - Auto-creation of table and column families on save if table does not exists.
+    - Destroy a record
 
-      validates_presence_of :name, :email
-      validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
-      
+
+Here is an example of usage, both for Table and Column:
+
+    class Person < MassiveRecord::ORM::Table
       column_family :info do
         field :name
         field :email
@@ -160,9 +155,24 @@ Thrift API wrapper (See spec/ folder for more examples) :
         field :date_of_birth, :date
         field :newsletter, :boolean, :default => false
       end
+
+      validates_presence_of :name, :email
+      validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
     end
 
-## ORM - In progress
+    
+    
+    class Address < MassiveRecord::ORM::Column
+      field :street
+      field :number, :integer
+      field :nice_place, :boolean, :default => true
+    end
+
+
+
+
+
+## ORM - In progress - Documentation below is just a working draft. Please see section above for what currently works.
 
 
     class Person < MassiveRecord::ORM::Table

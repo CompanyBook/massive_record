@@ -104,15 +104,8 @@ describe "persistence" do
     end
     
     it "should include the 'pts' field in the database which has 'points' as an alias" do
-      @person.points = 20
-      
-      attributes = @person.attributes.keys
-      attributes.delete("id")
-      attributes.delete("points")
-      attributes.push("pts")
-      
-      @person.points_changed?.should be_true
-      @person.send(:attributes_to_row_values_hash, @person.attributes.keys)[:info].keys.should include(*attributes)
+      @person.send(:attributes_to_row_values_hash)["info"].keys.should include("pts")
+      @person.send(:attributes_to_row_values_hash)["info"].keys.should_not include("points")
     end
   end
 
@@ -248,7 +241,7 @@ describe "persistence" do
 
         it "should only include changed attributes" do
           row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
-          row.should_receive(:values=).with({:info => {"name" => @new_name}})
+          row.should_receive(:values=).with({"info" => {"name" => @new_name}})
           @person.should_receive(:row_for_record).and_return(row)
 
           @person.name = @new_name
@@ -282,8 +275,7 @@ describe "persistence" do
           # Clen up the inserted column family above
           # TODO  Might want to wrap this inside of the column families object?
           Person.instance_eval do
-            attributes_schema.delete("new")
-            column_families.delete_if { |family| family.name == :new }
+            column_families.delete_if { |family| family.name == "new" }
           end
         end
       end

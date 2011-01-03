@@ -42,7 +42,7 @@ module MockMassiveRecordConnection
         # Simply returning all known column families across all tables to make the need
         # for creating new one on create disappear.
         def table.fetch_column_families
-          MassiveRecord::ORM::Table.descendants.collect(&:column_families).flatten
+          MassiveRecord::ORM::Table.descendants.collect(&:column_families).compact.collect(&:to_a).flatten
         end
         
         table
