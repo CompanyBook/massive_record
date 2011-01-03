@@ -37,7 +37,7 @@ describe "column classes" do
     end
 
     %w(
-      create! create new_record? persisted? destroyed? reload save save!
+      create! create reload save save!
       update_attribute update_attributes update_attributes! touch destroy
       delete increment! atomic_increment! decrement!
     ).each do |method|
