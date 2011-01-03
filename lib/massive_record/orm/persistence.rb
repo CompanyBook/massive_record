@@ -162,7 +162,7 @@ module MassiveRecord
       #
       def calculate_missing_family_names
         existing_family_names = self.class.table.fetch_column_families.collect(&:name) rescue []
-        expected_family_names = column_families.collect(&:name)
+        expected_family_names = column_families ? column_families.collect(&:name) : []
 
         expected_family_names.collect(&:to_s) - existing_family_names.collect(&:to_s)
       end
@@ -188,7 +188,7 @@ module MassiveRecord
 
         attributes_schema.each do |attr_name, orm_field|
           next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
-          values[orm_field.column_family][orm_field.column.to_s] = send(attr_name)
+          values[orm_field.column_family.name][orm_field.column] = send(attr_name)
         end
         
         values

@@ -2,21 +2,19 @@ require 'active_model'
 require 'active_support/core_ext/class/attribute_accessors'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/subclasses'
+require 'active_support/core_ext/module'
 require 'active_support/core_ext/string'
 require 'active_support/memoizable'
 
+require 'massive_record/orm/schema'
 require 'massive_record/orm/errors'
 require 'massive_record/orm/config'
 require 'massive_record/orm/finders'
-require 'massive_record/orm/field'
-require 'massive_record/orm/fields'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
-require 'massive_record/orm/attribute_methods/schema'
 require 'massive_record/orm/validations'
-require 'massive_record/orm/column_family'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/persistence'
 
@@ -144,7 +142,7 @@ module MassiveRecord
       include Finders
       include ActiveModel::Translation
       include AttributeMethods
-      include AttributeMethods::Schema, AttributeMethods::Write, AttributeMethods::Read
+      include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::Dirty
       include Validations
       include Callbacks

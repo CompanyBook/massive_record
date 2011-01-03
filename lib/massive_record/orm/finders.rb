@@ -81,16 +81,9 @@ module MassiveRecord
 
         def transpose_hbase_columns_to_record_attributes(row)
           attributes = {:id => row.id}
-          # Parse the row results to auto populate the instance attributes (see autoload option on column_family)
-          unless autoloaded_column_family_names.blank?
-            autoloaded_column_family_names.each do |name|
-              column_family = column_families.select{|c| c.name == name}.first
-              column_family.populate_fields_from_row_columns(row.columns)
-              self.attributes_schema = self.attributes_schema.merge(column_family.fields)
-            end
-            # Clear the array to avoid doing it every time
-            autoloaded_column_family_names.clear
-          end
+          
+          autoload_column_families_and_fields_with(row.columns.keys)
+
           # Parse the schema to populate the instance attributes
           attributes_schema.each do |key, field|
             cell = row.columns[field.unique_name]
