@@ -114,6 +114,16 @@ describe MassiveRecord::ORM::Base do
       @person.inspect.should include("Person")
     end
 
+    it "should start with the record's id if it has any" do
+      @person.id = 3
+      @person.inspect.should include "#<Person id: 3,"
+    end
+
+    it "should start with the record's id if it has any" do
+      @person.id = nil
+      @person.inspect.should include "#<Person id: nil,"
+    end
+
     it "should contain a nice list of it's attributes" do
       i = @person.inspect
       i.should include(%q{name: "Bob"})

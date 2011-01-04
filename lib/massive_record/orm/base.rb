@@ -96,11 +96,11 @@ module MassiveRecord
 
 
       def inspect
-        attributes_as_string = attributes_schema.keys.collect do |attr_name|
+        attributes_as_string = self.class.known_attribute_names.collect do |attr_name|
           "#{attr_name}: #{attribute_for_inspect(attr_name)}"
         end.join(', ')
 
-        "#<#{self.class}: #{attributes_as_string}>"
+        "#<#{self.class} id: #{id.inspect}, #{attributes_as_string}>"
       end
 
 
