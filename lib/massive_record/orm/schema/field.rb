@@ -63,7 +63,7 @@ module MassiveRecord
         
         def unique_name
           raise "Can't generate a unique name as I don't have a column family!" if column_family.nil?
-          [column_family.name, name].join(":")
+          [column_family.name, column].join(":")
         end
 
         def column_family

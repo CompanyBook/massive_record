@@ -190,7 +190,7 @@ module MassiveRecord
           next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
           values[orm_field.column_family.name][orm_field.column] = send(attr_name)
         end
-        
+
         values
       end
     end
