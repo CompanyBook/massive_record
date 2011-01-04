@@ -9,8 +9,11 @@ module MassiveRecord
         # Has some convenience behaviour like find :first, :last, :all.
         #
         def find(*args)
+          options = args.extract_options!.to_options
           raise ArgumentError.new("At least one argument required!") if args.empty?
           raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.") if args.first.nil?
+          raise ArgumentError.new("Sorry, conditions are not supported!") if options.has_key? :conditions
+          args << options
 
           type = args.shift if args.first.is_a? Symbol
           find_many = type == :all

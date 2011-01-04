@@ -28,6 +28,18 @@ describe "finders" do
       lambda { Person.find(nil) }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
 
+    it "should raise an error if conditions are given to first" do
+      lambda { Person.first(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+    end
+
+    it "should raise an error if conditions are given to all" do
+      lambda { Person.all(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+    end
+
+    it "should raise an error if conditions are given to find" do
+      lambda { Person.find(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+    end
+
     it "should ask the table to look up by it's id" do
       @mocked_table.should_receive(:find).with("ID1", anything).and_return(@row)
       Person.find("ID1")
