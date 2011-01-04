@@ -143,6 +143,7 @@ describe MassiveRecord::ORM::Schema::Field do
     before do
       @family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :info
       @field = MassiveRecord::ORM::Schema::Field.new :name => "field_name"
+      @field_with_column = MassiveRecord::ORM::Schema::Field.new :name => "field_name", :column => "fn"
     end
 
     it "should raise an error if it has no contained_in" do
@@ -152,6 +153,11 @@ describe MassiveRecord::ORM::Schema::Field do
     it "should return correct unique name" do
       @family << @field
       @field.unique_name.should == "info:field_name"
+    end
+    
+    it "should return a correct unique name when using column" do
+      @family << @field_with_column
+      @field_with_column.unique_name.should == "info:fn"
     end
   end
 
