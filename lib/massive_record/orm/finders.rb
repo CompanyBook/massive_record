@@ -18,6 +18,8 @@ module MassiveRecord
           type = args.shift if args.first.is_a? Symbol
           find_many = type == :all
           expected_result_size = nil
+
+          return (find_many ? [] : nil) unless table.exists?
           
           result_from_table = if type
                                 table.send(type, *args) # first() / all()

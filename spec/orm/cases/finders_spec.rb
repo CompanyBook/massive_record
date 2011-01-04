@@ -21,7 +21,21 @@ describe "finders" do
 
     it "should have at least one argument" do
       lambda { Person.find }.should raise_error ArgumentError
-      
+    end
+
+    it "should simply return nil on first if table does not exists" do
+      Person.table.should_receive(:exists?).and_return false
+      Person.first.should be_nil
+    end
+
+    it "should simply return nil on find if table does not exists" do
+      Person.table.should_receive(:exists?).and_return false
+      Person.find(1).should be_nil
+    end
+
+    it "should simply return empty array if table does not exists" do
+      Person.table.should_receive(:exists?).and_return false
+      Person.all.should == []
     end
 
     it "should raise RecordNotFound if id is nil" do
