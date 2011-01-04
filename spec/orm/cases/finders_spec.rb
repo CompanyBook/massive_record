@@ -21,11 +21,37 @@ describe "finders" do
 
     it "should have at least one argument" do
       lambda { Person.find }.should raise_error ArgumentError
-      
+    end
+
+    it "should simply return nil on first if table does not exists" do
+      Person.table.should_receive(:exists?).and_return false
+      Person.first.should be_nil
+    end
+
+    it "should simply return nil on find if table does not exists" do
+      Person.table.should_receive(:exists?).and_return false
+      Person.find(1).should be_nil
+    end
+
+    it "should simply return empty array if table does not exists" do
+      Person.table.should_receive(:exists?).and_return false
+      Person.all.should == []
     end
 
     it "should raise RecordNotFound if id is nil" do
       lambda { Person.find(nil) }.should raise_error MassiveRecord::ORM::RecordNotFound
+    end
+
+    it "should raise an error if conditions are given to first" do
+      lambda { Person.first(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+    end
+
+    it "should raise an error if conditions are given to all" do
+      lambda { Person.all(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+    end
+
+    it "should raise an error if conditions are given to find" do
+      lambda { Person.find(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
     end
 
     it "should ask the table to look up by it's id" do
