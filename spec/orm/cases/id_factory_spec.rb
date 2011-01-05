@@ -52,6 +52,7 @@ describe "id factory" do
 
       after do
         MassiveRecord::ORM::IdFactory.destroy_all
+        MassiveRecord::ORM::IdFactory.instance_variable_set(:@instance, nil)
       end
 
       it "should increment start a new sequence on 1" do
