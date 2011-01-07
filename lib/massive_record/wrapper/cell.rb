@@ -42,7 +42,7 @@ module MassiveRecord
       end
     
       def is_yaml?
-        @value =~ /^--- \n/ || @value =~ /^--- {}/
+        @value =~ /^--- \n/ || @value =~ /^--- {}/ || @value =~ /^--- \[\]/
       end
     end
   end
