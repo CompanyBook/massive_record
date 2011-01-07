@@ -6,7 +6,8 @@ module MassiveRecord
 
         TYPES = [:string, :integer, :boolean, :array, :hash, :date, :time]
 
-        attr_accessor :name, :column, :type, :default, :fields
+        attr_writer :default
+        attr_accessor :name, :column, :type, :fields
 
 
         validates_presence_of :name
@@ -58,6 +59,10 @@ module MassiveRecord
 
         def column
           @column || name
+        end
+
+        def default
+          @default.duplicable? ? @default.dup : @default
         end
 
         

@@ -180,4 +180,10 @@ describe MassiveRecord::ORM::Schema::Field do
       @field.column.should == "new"
     end
   end
+
+  it "should duplicate the default value" do
+    default_array = []
+    field = MassiveRecord::ORM::Schema::Field.new :name => "array", :type => :array, :default => default_array
+    field.default.object_id.should_not == default_array.object_id
+  end
 end
