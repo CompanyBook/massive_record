@@ -97,7 +97,6 @@ module MassiveRecord
           ensure_type_integer_for(table_name)
         else
           create_field_for(table_name)
-          ensure_that_we_have_table_and_column_families!
         end
       end
 

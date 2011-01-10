@@ -4,9 +4,10 @@ module MassiveRecord
       class Field
         include ActiveModel::Validations
 
-        TYPES = [:string, :integer, :boolean, :array, :hash, :date, :time]
+        TYPES = [:string, :integer, :float, :boolean, :array, :hash, :date, :time]
 
-        attr_accessor :name, :column, :type, :default, :fields
+        attr_writer :default
+        attr_accessor :name, :column, :type, :fields
 
 
         validates_presence_of :name
@@ -60,6 +61,10 @@ module MassiveRecord
           @column || name
         end
 
+        def default
+          @default.duplicable? ? @default.dup : @default
+        end
+
         
         def unique_name
           raise "Can't generate a unique name as I don't have a column family!" if column_family.nil?
@@ -94,6 +99,8 @@ module MassiveRecord
             value.to_s.empty? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
           when :integer
             value.to_s.empty? ? nil : value.to_i
+          when :float
+            value.to_s.empty? ? nil : value.to_f
           when :date
             value.empty? ? nil : Date.parse(value)
           when :time

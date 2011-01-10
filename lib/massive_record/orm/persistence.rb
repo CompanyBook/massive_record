@@ -87,6 +87,7 @@ module MassiveRecord
       # is atomic, and as of writing this the Thrift adapter / wrapper does
       # not do this anatomic.
       def atomic_increment!(attr_name, by = 1)
+        ensure_that_we_have_table_and_column_families!
         attr_name = attr_name.to_s
 
         row = row_for_record

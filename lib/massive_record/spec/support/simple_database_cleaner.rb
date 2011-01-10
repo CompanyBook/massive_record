@@ -15,9 +15,7 @@ module MassiveRecord
 
       included do
         before(:all) { add_prefix_to_tables }
-
-        after(:each) { delete_all_table_contents }
-        after(:all) { delete_all_tables }
+        after(:each) { delete_all_tables }
       end
 
 
@@ -31,10 +29,6 @@ module MassiveRecord
       def add_prefix_to_tables
         prefix = ActiveSupport::SecureRandom.hex(3)
         each_orm_class { |klass| klass.table_name_prefix = ["test", prefix, klass.table_name_prefix].reject(&:blank?).join("_") + "_" }
-      end
-
-      def delete_all_table_contents
-        each_orm_class_where_table_exists { |klass| klass.connection.client.deleteAllRow(klass.table_name, "*") }
       end
 
       def delete_all_tables
