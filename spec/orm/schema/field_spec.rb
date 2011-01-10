@@ -94,7 +94,7 @@ describe MassiveRecord::ORM::Schema::Field do
   end
 
   describe "#decode" do
-    it "should return vale if value is of correct class" do
+    it "should return a value if value is of correct class" do
       today = Date.today
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :date)
       @subject.decode(today) == today
@@ -122,6 +122,13 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(nil).should be_nil
     end
 
+    it "should decode an float value" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :code, :type => :float)
+      @subject.decode("12.345").should == 12.345
+      @subject.decode("").should be_nil
+      @subject.decode(nil).should be_nil
+    end
+    
     it "should decode a date type" do
       today = Date.today
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :date)

@@ -3,22 +3,18 @@ module MassiveRecord
     class Cell
       attr_writer :value
       attr_accessor :created_at
-    
-
 
       class << self
         def serialize_value(v)
           serialize?(v) ? v.to_yaml : v.to_s
         end
 
-
         private
 
         def serialize?(v)
-          ![String, Fixnum].include?(v.class)
+          [Hash, Array].include?(v.class)
         end
       end
-
 
       def initialize(opts = {})
         @value = opts[:value]

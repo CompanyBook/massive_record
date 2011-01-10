@@ -4,7 +4,7 @@ module MassiveRecord
       class Field
         include ActiveModel::Validations
 
-        TYPES = [:string, :integer, :boolean, :array, :hash, :date, :time]
+        TYPES = [:string, :integer, :float, :boolean, :array, :hash, :date, :time]
 
         attr_writer :default
         attr_accessor :name, :column, :type, :fields
@@ -99,6 +99,8 @@ module MassiveRecord
             value.to_s.empty? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
           when :integer
             value.to_s.empty? ? nil : value.to_i
+          when :float
+            value.to_s.empty? ? nil : value.to_f
           when :date
             value.empty? ? nil : Date.parse(value)
           when :time
