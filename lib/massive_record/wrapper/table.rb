@@ -101,13 +101,17 @@ module MassiveRecord
     
       def find_in_batches(opts = {}, &block)
         raise "A block is required." unless block_given?
-      
+        
+        limit = opts[:limit]
+        
         opts[:limit]  = opts.delete(:batch_size) || 10
         opts[:limit] += 1
       
         prev_results = []
-      
+        results_found = 0
+        
         while (true) do
+          opts[:limit] = limit - results_found + 1 if !limit.nil? && limit <= results_found + opts[:limit]
           results = all(opts)
         
           if results != prev_results
@@ -116,6 +120,7 @@ module MassiveRecord
               break
             else
               opts[:start] = results.last.id
+              results_found += results.size
               yield results
             end
             prev_results = results
