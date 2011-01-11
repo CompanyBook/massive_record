@@ -38,7 +38,7 @@ module MockMassiveRecordConnection
           row.values = {}
           row
         end
-
+        
         # Simply returning all known column families across all tables to make the need
         # for creating new one on create disappear.
         def table.fetch_column_families

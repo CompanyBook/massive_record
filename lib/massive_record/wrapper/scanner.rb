@@ -21,9 +21,9 @@ module MassiveRecord
       def open
         begin
           if created_at.to_s.empty?
-            @opened_scanner ||= client.scannerOpen(table_name, start_key, formatted_column_family_names)
+            @opened_scanner ||= connection.scannerOpen(table_name, start_key, formatted_column_family_names)
           else
-            @opened_scanner ||= client.scannerOpenTs(table_name, start_key, formatted_column_family_names, created_at)
+            @opened_scanner ||= connection.scannerOpenTs(table_name, start_key, formatted_column_family_names, created_at)
           end
           true
         rescue => e
@@ -33,10 +33,8 @@ module MassiveRecord
     
       def fetch_trows(opts = {})
         opts[:limit] ||= 10
-      
-        #client.scannerGet(@start_key)
         open
-        client.scannerGetList(opened_scanner, opts[:limit])
+        connection.scannerGetList(opened_scanner, opts[:limit])
       end
     
       def fetch_rows(opts = {})

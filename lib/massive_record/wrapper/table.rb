@@ -69,7 +69,7 @@ module MassiveRecord
         first.column_names
       end
     
-      def scanner(opts = {})      
+      def scanner(opts = {})
         # list of column families to fetch from hbase
         cols = opts[:column_family_names] || column_family_names
         
