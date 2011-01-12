@@ -76,7 +76,7 @@ module MassiveRecord
           find(:all, *args)
         end
         
-        def find_in_batches(*args, &block)
+        def find_in_batches(*args)
           table.find_in_batches(*args) do |rows|
             records = rows.collect do |row|
               instantiate(transpose_hbase_columns_to_record_attributes(row))
@@ -85,7 +85,7 @@ module MassiveRecord
           end
         end
         
-        def find_each(*args, &block)
+        def find_each(*args)
           find_in_batches(*args) do |rows|
             rows.each do |row|
               yield row

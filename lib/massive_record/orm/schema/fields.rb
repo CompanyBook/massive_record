@@ -25,10 +25,7 @@ module MassiveRecord
 
 
         def to_hash
-          inject({}) do |hash, field|
-            hash[field.name] = field
-            hash
-          end
+          Hash[collect { |field| [field.name, field] }]
         end
 
         def attribute_names
