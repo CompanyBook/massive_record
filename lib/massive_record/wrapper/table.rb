@@ -70,7 +70,18 @@ module MassiveRecord
       end
     
       def scanner(opts = {})
-        Scanner.new(connection, name, column_family_names, format_options_for_scanner(opts))
+        scanner = Scanner.new(connection, name, column_family_names, format_options_for_scanner(opts))
+        
+        if block_given?
+          begin
+            scanner.open
+            yield scanner
+          ensure
+            scanner.close
+          end
+        else
+          scanner
+        end
       end
       
       def format_options_for_scanner(opts = {})
@@ -83,12 +94,8 @@ module MassiveRecord
       end
       
       def all(opts = {})
-        s = scanner(opts)
-        begin
-          s.open
+        scanner(opts) do |s|
           s.fetch_rows(opts)
-        ensure
-          s.close
         end
       end
       
@@ -106,10 +113,7 @@ module MassiveRecord
         results_limit = opts.delete(:limit)
         results_found = 0
         
-        s = scanner(opts)
-        
-        begin
-          s.open
+        scanner(opts) do |s|
           while (true) do
             s.limit = results_limit - results_found if !results_limit.nil? && results_limit <= results_found + s.limit
             rows = s.fetch_rows
@@ -120,8 +124,6 @@ module MassiveRecord
               yield rows
             end
           end
-        ensure
-          s.close
         end
       end
     
