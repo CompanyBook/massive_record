@@ -70,61 +70,56 @@ module MassiveRecord
       end
     
       def scanner(opts = {})
-        # list of column families to fetch from hbase
-        cols = opts[:column_family_names] || column_family_names
-        
-        Scanner.new(connection, self.name, cols, {
-          :start_key  => opts[:start_key].to_s,
-          :created_at => opts[:created_at].to_s
-        })
+        Scanner.new(connection, name, column_family_names, format_options_for_scanner(opts))
       end
-    
+      
+      def format_options_for_scanner(opts = {})
+        {
+          :start_key  => opts[:start], 
+          :created_at => opts[:created_at],
+          :columns    => opts[:select], # list of column families to fetch from hbase
+          :limit      => opts[:limit] || opts[:batch_size]
+        }
+      end
+      
+      def all(opts = {})
+        s = scanner(opts)
+        begin
+          s.open
+          s.fetch_rows(opts)
+        ensure
+          s.close
+        end
+      end
+      
       def first(opts = {})
         all(opts.merge(:limit => 1)).first
       end
-    
-      def all(opts = {})
-        scanner({:start_key => opts.delete(:start), :column_family_names => opts.delete(:select)}).fetch_rows(opts)
-      end
-    
-      def find!(*args)
-        results = find(*args)
-        raise "Row not found." unless results.is_a?(MassiveRecord::Wrapper::Row) || (results.is_a?(Array) && !results.empty?)
-        results
-      end
-    
+      
       def find(*args)
         arg  = args[0]
         opts = args[1] || {}
         arg.is_a?(Array) ? arg.collect{|id| first(opts.merge(:start => id))} : first(opts.merge(:start => arg))
       end
     
-      def find_in_batches(opts = {}, &block)
-        raise "A block is required." unless block_given?
-        
-        limit = opts[:limit]
-        
-        opts[:limit]  = opts.delete(:batch_size) || 10
-        opts[:limit] += 1
-      
-        prev_results = []
+      def find_in_batches(opts = {})        
+        results_limit = opts.delete(:limit)
         results_found = 0
-        
-        while (true) do
-          opts[:limit] = limit - results_found + 1 if !limit.nil? && limit <= results_found + opts[:limit]
-          results = all(opts)
-        
-          if results != prev_results
-            prev_results.empty? ? results.pop : results.shift
-            if results.empty?
+                
+        begin
+          s.open
+          while (true) do
+            s.limit = results_limit - results_found if !results_limit.nil? && results_limit <= results_found + s.limit
+            rows = s.fetch_rows
+            if rows.empty?
               break
             else
-              opts[:start] = results.last.id
-              results_found += results.size
-              yield results
+              results_found += rows.size
+              yield rows
             end
-            prev_results = results
           end
+        ensure
+          s.close
         end
       end
     
