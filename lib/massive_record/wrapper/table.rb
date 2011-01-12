@@ -105,7 +105,9 @@ module MassiveRecord
       def find_in_batches(opts = {})        
         results_limit = opts.delete(:limit)
         results_found = 0
-                
+        
+        s = scanner(opts)
+        
         begin
           s.open
           while (true) do
