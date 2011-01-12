@@ -51,7 +51,7 @@ module MassiveRecord
             end
           end
 
-          raise RecordNotFound if result_from_table.blank? && type.nil?
+          raise RecordNotFound.new("Could not find #{model_name} with id=#{what_to_find}") if result_from_table.blank? && type.nil?
           
           if find_many && expected_result_size && expected_result_size != result_from_table.length
             raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{result_from_table.length}")
