@@ -12,7 +12,7 @@ module MassiveRecord
         private
 
         def serialize?(v)
-          [Hash, Array].include?(v.class)
+          [Hash, Array, NilClass].include?(v.class)
         end
       end
 
