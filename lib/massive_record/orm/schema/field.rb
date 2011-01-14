@@ -102,7 +102,8 @@ module MassiveRecord
           when :float
             value.to_s.empty? ? nil : value.to_f
           when :date
-            value.empty? ? nil : Date.parse(value)
+            # TODO : find a nicer way to do that
+            value.empty? || value.to_s == "0" ? nil : Date.parse(value)
           when :time
             value.empty? ? nil : Time.parse(value)
           when :array
