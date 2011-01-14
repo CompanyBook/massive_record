@@ -31,7 +31,7 @@ describe "attribute methods" do
   it "should not contains the id in the attributes_without_id getter" do
     @model.attributes_without_id.should_not include("id")
   end
-
+  
   describe "#attributes=" do
     it "should simply return if incomming value is not a hash" do
       @model.attributes = "FOO BAR"
