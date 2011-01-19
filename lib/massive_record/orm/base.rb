@@ -38,7 +38,7 @@ module MassiveRecord
      
       class << self
         def table_name
-          table_name_prefix + (table_name_overriden.blank? ? self.to_s.demodulize.underscore.pluralize : table_name_overriden) + table_name_suffix
+          @table_name ||= table_name_prefix + (table_name_overriden.blank? ? self.to_s.demodulize.underscore.pluralize : table_name_overriden) + table_name_suffix
         end
 
         def table_name=(name)
