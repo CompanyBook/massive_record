@@ -2,7 +2,6 @@
 require 'spec_helper'
 
 describe "encoding" do
-
   before do
     transport = Thrift::BufferedTransport.new(Thrift::Socket.new(MR_CONFIG['host'], 9090))
     protocol  = Thrift::BinaryProtocol.new(transport)
