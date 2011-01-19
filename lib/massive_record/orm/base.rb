@@ -37,6 +37,11 @@ module MassiveRecord
         def table_name
           @table_name ||= table_name_prefix + self.to_s.demodulize.underscore.pluralize + table_name_suffix
         end
+
+        def reset_table_name_configuration!
+          @table_name = nil
+          self.table_name_prefix = self.table_name_suffix = ""
+        end
       end
 
       #
