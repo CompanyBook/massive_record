@@ -22,6 +22,25 @@ describe MassiveRecord::ORM::Base do
       TestClass.table_name_suffix = "_suffix"
       TestClass.table_name.should == "test_classes_suffix"
     end
+    
+    describe "set explicitly" do
+      it "should be able to set it" do
+        TestClass.table_name = "foo"
+        TestClass.table_name.should == "foo"
+      end
+
+      it "should have a table name with prefix" do
+        TestClass.table_name = "foo"
+        TestClass.table_name_prefix = "prefix_"
+        TestClass.table_name.should == "prefix_foo"
+      end
+      
+      it "should have a table name with suffix" do
+        TestClass.table_name = "foo"
+        TestClass.table_name_suffix = "_suffix"
+        TestClass.table_name.should == "foo_suffix"
+      end
+    end
   end
 
   it "should have a model name" do

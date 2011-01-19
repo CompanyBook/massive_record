@@ -27,6 +27,9 @@ module MassiveRecord
       # example:
       #
       #   MassiveRecord::ORM::Base.table_name_prefix = "_production"
+      class_attribute :table_name_overriden, :instance_writer => false
+      self.table_name_overriden = nil
+
       class_attribute :table_name_prefix, :instance_writer => false
       self.table_name_prefix = ""
       
@@ -35,11 +38,15 @@ module MassiveRecord
      
       class << self
         def table_name
-          @table_name ||= table_name_prefix + self.to_s.demodulize.underscore.pluralize + table_name_suffix
+          table_name_prefix + (table_name_overriden.blank? ? self.to_s.demodulize.underscore.pluralize : table_name_overriden) + table_name_suffix
+        end
+
+        def table_name=(name)
+          self.table_name_overriden = name
         end
 
         def reset_table_name_configuration!
-          @table_name = nil
+          @table_name = self.table_name_overriden = nil
           self.table_name_prefix = self.table_name_suffix = ""
         end
       end
