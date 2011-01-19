@@ -44,6 +44,7 @@ module MassiveRecord
         def table_name=(name)
           self.table_name_overriden = name
         end
+        alias :set_table_name :table_name=
 
         def reset_table_name_configuration!
           @table_name = self.table_name_overriden = nil

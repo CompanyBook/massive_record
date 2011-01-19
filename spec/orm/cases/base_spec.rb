@@ -40,6 +40,11 @@ describe MassiveRecord::ORM::Base do
         TestClass.table_name_suffix = "_suffix"
         TestClass.table_name.should == "foo_suffix"
       end
+
+      it "should be possible to call set_table_name" do
+        TestClass.set_table_name("foo")
+        TestClass.table_name.should == "foo"
+      end
     end
   end
 
