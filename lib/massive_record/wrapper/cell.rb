@@ -6,7 +6,7 @@ module MassiveRecord
 
       class << self
         def serialize_value(v)
-          serialize?(v) ? v.to_yaml : v.to_s
+          serialize?(v) ? v.to_yaml : v.to_s.force_encoding(Encoding::BINARY)
         end
 
         private
