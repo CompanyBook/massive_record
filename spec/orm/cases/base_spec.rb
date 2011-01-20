@@ -4,24 +4,52 @@ require 'orm/models/test_class'
 describe MassiveRecord::ORM::Base do
   include MockMassiveRecordConnection
 
-  describe "#object" do
-    it "should have a table name" do
-      TestClass.table_name == "test_classes"
+  describe "table name" do
+    before do
+      TestClass.reset_table_name_configuration!
     end
-    
-    it "should have a model name" do
-      TestClass.model_name == "TestClass"
+
+    it "should have a table name" do
+      TestClass.table_name.should == "test_classes"
     end
     
     it "should have a table name with prefix" do
-      MassiveRecord::ORM::Table.table_name_prefix = "production_"
-      TestClass.table_name == "production_test_classes"
+      TestClass.table_name_prefix = "prefix_"
+      TestClass.table_name.should == "prefix_test_classes"
     end
     
     it "should have a table name with suffix" do
-      MassiveRecord::ORM::Table.table_name_suffix = "_production"
-      TestClass.table_name == "test_classes_production"
+      TestClass.table_name_suffix = "_suffix"
+      TestClass.table_name.should == "test_classes_suffix"
     end
+    
+    describe "set explicitly" do
+      it "should be able to set it" do
+        TestClass.table_name = "foo"
+        TestClass.table_name.should == "foo"
+      end
+
+      it "should have a table name with prefix" do
+        TestClass.table_name = "foo"
+        TestClass.table_name_prefix = "prefix_"
+        TestClass.table_name.should == "prefix_foo"
+      end
+      
+      it "should have a table name with suffix" do
+        TestClass.table_name = "foo"
+        TestClass.table_name_suffix = "_suffix"
+        TestClass.table_name.should == "foo_suffix"
+      end
+
+      it "should be possible to call set_table_name" do
+        TestClass.set_table_name("foo")
+        TestClass.table_name.should == "foo"
+      end
+    end
+  end
+
+  it "should have a model name" do
+    TestClass.model_name.should == "TestClass"
   end
 
   describe "#initialize" do

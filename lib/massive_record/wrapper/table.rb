@@ -69,56 +69,60 @@ module MassiveRecord
         first.column_names
       end
     
-      def scanner(opts = {})      
-        # list of column families to fetch from hbase
-        cols = opts[:column_family_names] || column_family_names
+      def scanner(opts = {})
+        scanner = Scanner.new(connection, name, column_family_names, format_options_for_scanner(opts))
         
-        Scanner.new(connection, self.name, cols, {
-          :start_key  => opts[:start_key].to_s,
-          :created_at => opts[:created_at].to_s
-        })
+        if block_given?
+          begin
+            scanner.open
+            yield scanner
+          ensure
+            scanner.close
+          end
+        else
+          scanner
+        end
       end
-    
+      
+      def format_options_for_scanner(opts = {})
+        {
+          :start_key  => opts[:start], 
+          :created_at => opts[:created_at],
+          :columns    => opts[:select], # list of column families to fetch from hbase
+          :limit      => opts[:limit] || opts[:batch_size]
+        }
+      end
+      
+      def all(opts = {})
+        scanner(opts) do |s|
+          s.fetch_rows(opts)
+        end
+      end
+      
       def first(opts = {})
         all(opts.merge(:limit => 1)).first
       end
-    
-      def all(opts = {})
-        scanner({:start_key => opts.delete(:start), :column_family_names => opts.delete(:select)}).fetch_rows(opts)
-      end
-    
-      def find!(*args)
-        results = find(*args)
-        raise "Row not found." unless results.is_a?(MassiveRecord::Wrapper::Row) || (results.is_a?(Array) && !results.empty?)
-        results
-      end
-    
+      
       def find(*args)
         arg  = args[0]
         opts = args[1] || {}
         arg.is_a?(Array) ? arg.collect{|id| first(opts.merge(:start => id))} : first(opts.merge(:start => arg))
       end
     
-      def find_in_batches(opts = {}, &block)
-        raise "A block is required." unless block_given?
-      
-        opts[:limit]  = opts.delete(:batch_size) || 10
-        opts[:limit] += 1
-      
-        prev_results = []
-      
-        while (true) do
-          results = all(opts)
+      def find_in_batches(opts = {})        
+        results_limit = opts.delete(:limit)
+        results_found = 0
         
-          if results != prev_results
-            prev_results.empty? ? results.pop : results.shift
-            if results.empty?
+        scanner(opts) do |s|
+          while (true) do
+            s.limit = results_limit - results_found if !results_limit.nil? && results_limit <= results_found + s.limit
+            rows = s.fetch_rows
+            if rows.empty?
               break
             else
-              opts[:start] = results.last.id
-              yield results
+              results_found += rows.size
+              yield rows
             end
-            prev_results = results
           end
         end
       end

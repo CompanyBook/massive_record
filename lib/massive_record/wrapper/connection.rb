@@ -58,6 +58,11 @@ module MassiveRecord
           @client = nil
           open
           client.send(method, *args) if @client
+        rescue Thrift::TransportException
+          @transport = nil
+          @client = nil
+          open
+          client.send(method, *args) if @client
         end
       end
     

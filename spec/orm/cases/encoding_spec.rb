@@ -3,20 +3,47 @@ require 'spec_helper'
 require 'orm/models/person'
 
 describe "encoding" do
-  include SetUpHbaseConnectionBeforeAll
-  include SetTableNamesToTestTable
 
-  it "should be able to store UTF-8 encoded strings" do
-    pending "!!!!!!!!!!!! ---------------------------- >>>> Vincent: I think you have encountered something similar before? Want to take a look at this? :-)"
-    
-    # TODO  This needs to be fixed. I kinda "fixed" it by forcing the encoding to
-    #       ASCII-8BIT on the Wrapper::Cell's serialize_value and deserialize_value, but
-    #       I don't feel confident that it completely solves it, so I'll leave it for now.
-    #       Vincent has asked about it on a mailing list, so we'll wait on some answers.
+  describe "with ORM" do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
 
-    person = Person.create! :id => "new_id", :name => "Thorbjørn", :age => "22"
-    person_from_db = Person.find(person.id)
-    person_from_db.should == person
-    person_from_db.name.should == "Thorbjørn"
+    before do
+      @person = Person.create! :id => "new_id", :name => "Thorbjørn", :age => "22"
+      @person_from_db = Person.find(@person.id)
+    end
+
+    it "should be able to store UTF-8 encoded strings" do
+      @person_from_db.should == @person
+      @person_from_db.name.should == "Thorbjørn"
+    end
+
+    it "should return string as UTF-8 encoded strings" do
+      @person_from_db.name.encoding.should == Encoding::UTF_8
+    end
+  end
+
+  describe "without ORM" do
+    include CreatePersonBeforeEach
+
+    before do
+      @id = "ID-encoding-test"
+
+      @row = MassiveRecord::Wrapper::Row.new
+      @row.table = @table
+      @row.id = @id
+      @row.values = {:info => {:name => "Thorbjørn", :email => "john@base.com", :age => "20"}}
+      @row.save
+
+      @row_from_db = @table.find(@id) 
+    end
+
+    it "should be able to store UTF-8 encoded strings" do
+      @row_from_db.values["info:name"].should == "Thorbjørn"
+    end
+
+    it "should return string as UTF-8 encoded strings" do
+      @row_from_db.values["info:name"].encoding.should == Encoding::UTF_8
+    end
   end
 end

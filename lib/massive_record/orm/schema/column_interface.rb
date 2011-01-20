@@ -71,6 +71,20 @@ module MassiveRecord
           method = "#{new_field.name}="
           send(method, new_field.default) if respond_to? method
         end
+        
+        #
+        # TODO : Need to be cleaned up after we implement the has_many method
+        #
+        def attributes_to_row_values_hash(only_attr_names = [])
+          values = Hash.new
+
+          attributes_schema.each do |attr_name, orm_field|
+            next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
+            values[orm_field.column] = send(attr_name)
+          end
+
+          values
+        end
       end
     end
   end

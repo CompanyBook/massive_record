@@ -49,3 +49,28 @@ module CreatePersonBeforeEach
     end
   end
 end
+
+module CreatePeopleBeforeEach
+  extend ActiveSupport::Concern
+
+  included do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+    before do
+      @table = MassiveRecord::Wrapper::Table.new(@connection, Person.table_name)
+      @table.column_families.create(:info)
+      @table.save
+      
+      @table_size = 9
+      
+      @table_size.times.each do |id|
+        @row = MassiveRecord::Wrapper::Row.new
+        @row.id = id + 1
+        @row.values = {:info => {:name => "John Doe", :email => "john@doe.com", :age => "20"}}
+        @row.table = @table
+        @row.save
+      end
+    end
+  end
+end

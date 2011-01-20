@@ -51,7 +51,7 @@ module MassiveRecord
             end
           end
 
-          raise RecordNotFound if result_from_table.blank? && type.nil?
+          raise RecordNotFound.new("Could not find #{model_name} with id=#{what_to_find}") if result_from_table.blank? && type.nil?
           
           if find_many && expected_result_size && expected_result_size != result_from_table.length
             raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{result_from_table.length}")
@@ -74,6 +74,23 @@ module MassiveRecord
 
         def all(*args)
           find(:all, *args)
+        end
+        
+        def find_in_batches(*args)
+          table.find_in_batches(*args) do |rows|
+            records = rows.collect do |row|
+              instantiate(transpose_hbase_columns_to_record_attributes(row))
+            end    
+            yield records
+          end
+        end
+        
+        def find_each(*args)
+          find_in_batches(*args) do |rows|
+            rows.each do |row|
+              yield row
+            end
+          end
         end
 
 

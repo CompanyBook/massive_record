@@ -33,10 +33,9 @@ module MassiveRecord
           # Returns a hash with attribute name as keys, default values read from field as value.
           #
           def default_attributes_from_schema
-            attributes_schema.inject({}) do |hash, (attribute_name, field)|
-              hash[attribute_name] = field.default
-              hash
-            end
+            Hash[attributes_schema.collect { |attribute_name, field| 
+              [attribute_name, field.default]
+            }]
           end
         end
 

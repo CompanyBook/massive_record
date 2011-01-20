@@ -136,7 +136,7 @@ module MassiveRecord
         end
       end
     
-      def self.populate_from_t_row_result(result, connection, table_name, column_families = [])
+      def self.populate_from_trow_result(result, connection, table_name, column_families = [])
         row                 = self.new
         row.id              = result.row
         row.new_record      = false

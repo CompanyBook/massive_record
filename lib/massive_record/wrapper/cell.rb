@@ -6,13 +6,13 @@ module MassiveRecord
 
       class << self
         def serialize_value(v)
-          serialize?(v) ? v.to_yaml : v.to_s
+          serialize?(v) ? v.to_yaml : v.to_s.force_encoding(Encoding::BINARY)
         end
 
         private
 
         def serialize?(v)
-          [Hash, Array].include?(v.class)
+          [Hash, Array, NilClass].include?(v.class)
         end
       end
 
@@ -26,7 +26,7 @@ module MassiveRecord
       end
     
       def deserialize_value
-        is_yaml? ? YAML.load(@value) : @value
+        is_yaml? ? YAML.load(@value) : value
       end
     
       def serialize_value(v)

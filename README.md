@@ -1,44 +1,27 @@
 # Massive Record
 
-HBase API and ORM using the HBase Thrift API.
+Massive Record is an ORM for HBase. It currently uses
+Thrift to communicate with HBase and will in time support
+other forms for communicating with Hbase.
 
-The Thrift library used has been tested with hbase-0.89.20100924.
-  
-See introduction to HBase model architecture :  
+
+See introduction to HBase model architecture:  
 http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture  
-Understanding terminology of Table / Row / Column family / Column / Cell :  
+Understanding terminology of Table / Row / Column family / Column / Cell:  
 http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
 
 ## Installation
 
-### IRB
+  gem install massive_record
 
-Install the Ruby thrift library :
-
-    gem install thrift
-    
-Checkout the massive_record project and install it as a Gem :
-
-    git clone git://github.com/CompanyBook/massive_record.git
-    cd massive_record/
-    rake install massive_record.gemspec
-    
-Then in IRB :
-
-    require 'rubygems'
-    require 'massive_record'
-    
-    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
-    
 ### Ruby on Rails
     
-Add the following Gems in your Gemfile :
+Add the following Gems in your Gemfile:
     
-    gem 'thrift', '0.5.0'
-    gem 'massive_record', :git => 'git://github.com/CompanyBook/massive_record.git'
+    gem 'massive_record'
 
-Create an config/hbase.yml file with the following content :
+Create an config/hbase.yml file with the following content:
   
     defaults: &defaults
       host: somewhere.compute.amazonaws.com # No 'http', it's a Thrift connection
@@ -49,31 +32,66 @@ Create an config/hbase.yml file with the following content :
 
     test:
       <<: *defaults
-      <<: *development
 
     production:
       <<: *defaults
 
 
-## Thrift API
+## Usage
 
-Ruby Library using the HBase Thrift API.
-http://wiki.apache.org/hadoop/Hbase/ThriftApi
+There are two ways for using the Massive Record library. At the highest level we have ORM. This is Active Model compliant and makes
+it easy to use. The second way of doing things is working directly against the wrapper (soon to be called adapter).
 
-The generated Ruby files can be found under lib/massive_record/thrift/  
-The whole API (CRUD and more) is present in the Client object (Apache::Hadoop::Hbase::Thrift::Hbase::Client).  
-The client can be easily initialized using the MassiveRecord connection :
 
-    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
-    conn.open
+### ORM
     
-    client = conn.client
-    # Do whatever you want with the client object
+Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some functionality which you can expect from an ORM. This includes:
+    - An initializer which takes attribute hash and assigns them to your object.
+    - Write and read methods for the attributes
+    - Validations, as you expect from an ActiveRecord.
+    - Callbacks, as you expect from an ActiveRecord.
+    - Information about changes on attributes.
+    - Casting of attributes
+    - Serialization of array / hashes
+
+Tables also have:
+    - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
+    - Easy access to adapter's connection via Person.connection
+    - Easy access to adapter's hbase table via Person.table
+    - Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
+    - Save / update methods
+    - Auto-creation of table and column families on save if table does not exists.
+    - Destroy records
+
+
+Here is an example of usage, both for Table and Column:
+
+    class Person < MassiveRecord::ORM::Table
+      column_family :info do
+        field :name
+        field :email
+        field :phone_number
+        field :points, :integer, :default => 0
+        field :date_of_birth, :date
+        field :newsletter, :boolean, :default => false
+      end
+
+      validates_presence_of :name, :email
+      validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
+    end
+
     
+    
+    class Address < MassiveRecord::ORM::Column
+      field :street
+      field :number, :integer
+      field :nice_place, :boolean, :default => true
+    end
 
-## Ruby API
 
-Thrift API wrapper (See spec/ folder for more examples) :
+## Wrapper (adapter) API
+
+You can, if you'd like, work directly against the adapter.
   
     # Init a new connection with HBase
     conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
@@ -121,155 +139,80 @@ Thrift API wrapper (See spec/ folder for more examples) :
     
     # Remove the table
     table.destroy
-  
 
-## ORM - Basic ActiveModel / ActiveRecord behaviour
+
+
+## Planned work
+
+- Rename Wrapper to Adapter, and make it easy to switch from Thrift to another way of communicating with Hbase.
+- Automatically handling time stamps like created_at and updated_at.
+- Associations and embedded objects.
+- Implement other Adapters, for instance using jruby and the Java API.
+
+
+
+## Contribute
+
+If you want to contribute feel free to fork this project :-)
+Make a feature branch, write test, implement and make a pull request.
+
+### Getting started
+
+    git clone git://github.com/CompanyBook/massive_record.git (or the address to your fork)
+    cd massive_record
+    bundle install
+
+Next up you need to add a config.yml file inside of spec/ which contains something like:
+    host: url.to-a.thrift.server
+    port: 9090
+    table: massive_record_test_table
+
+You should now be able to run `rspec spec/`
+
+### Play with it in the console
+
+Checkout the massive_record project and install it as a Gem :
+
+    cd massive_record/
+    bundle console
+    ruby-1.9.2-p0 > Bundler.require
+     => [
+          <Bundler::Dependency type=:runtime name="massive_record" requirements=">= 0">,
+          <Bundler::Dependency type=:runtime name="thrift" requirements=">= 0.5.0">,
+          <Bundler::Dependency type=:runtime name="activesupport" requirements=">= 0">,
+          <Bundler::Dependency type=:runtime name="activemodel" requirements=">= 0">,
+          <Bundler::Dependency type=:runtime name="rspec" requirements=">= 2.1.0">
+        ]
+    ruby-1.9.2-p0 > MassiveRecord::VERSION
+     => "0.0.1" 
     
-Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some functionality which you can expect from an ORM. This includes:
-    - An initializer which takes attribute hash and assigns them to your object.
-    - write and read methods for the attributes
-    - Validations, as you expect from an ActiveRecord model.
-    - Callbacks, as you expect from an ActiveRecord model.
-    - Information about changes on attributes.
-    - Casting of attributes
-    - Serialization of array/hashes (?  Don't think thats wokring, although I think the wrapper stores things as YAML if its not a string)
+### Clean HBase database between each test
 
-Tables also have:
-    - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
-    - Easy access to hbase connection via Person.connection
-    - Easy access to hbase table via Person.table
-    - Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
-    - Save methods (will create or update based on new-record-state)
-    - Auto-creation of table and column families on save if table does not exists.
-    - Destroy a record
-
-
-Here is an example of usage, both for Table and Column:
-
-    class Person < MassiveRecord::ORM::Table
-      column_family :info do
-        field :name
-        field :email
-        field :phone_number
-        field :points, :integer, :default => 0
-        field :date_of_birth, :date
-        field :newsletter, :boolean, :default => false
-      end
-
-      validates_presence_of :name, :email
-      validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
-    end
+We have created a helper module MassiveRecord::Rspec::SimpleDatabaseCleaner which, when included into rspec tests, will clean
+the database for ORM records between each test case. You can also take a look into spec/support/mock_massive_record_connection.rb
+for some functionality which will mock a hbase connection making it easier (faster) to test code where no real database is needed.
 
     
+
+
+## More Information and Resources
+
+### Thrift API
+
+Ruby Library using the HBase Thrift API.
+http://wiki.apache.org/hadoop/Hbase/ThriftApi
+
+The generated Ruby files can be found under lib/massive_record/thrift/  
+The whole API (CRUD and more) is present in the Client object (Apache::Hadoop::Hbase::Thrift::Hbase::Client).  
+The client can be easily initialized using the MassiveRecord connection :
+
+    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
+    conn.open
     
-    class Address < MassiveRecord::ORM::Column
-      field :street
-      field :number, :integer
-      field :nice_place, :boolean, :default => true
-    end
-
-
-
-
-
-## ORM - In progress - Documentation below is just a working draft. Please see section above for what currently works.
-
-
-    class Person < MassiveRecord::ORM::Table
-      
-      validates_presence_of :first_name, :last_name, :email
-      validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
-      
-      select :light, :info
-      select :full, [:info, :addresses, :friends, :misc]
-      select :manage, [:addresses, :friends]
-      
-      column_family :info do
-        field :first_name
-        field :last_name
-        field :email
-        field :phone_number
-        field :points, :integer, :default => 0
-        field :date_of_birth, :date
-        field :newsletter, :boolean, :default => false
-        timestamps # created_at, updated_at are automatically managed on field update
-      end
-      
-      column_family :addresses do
-        # Address objects are created from an Array of Hashes : [{ :country => 'Norge', ... }]
-        has_many :post_addresses, :class_name => 'Address', :inverse_of => :person, :address_type => :post
-        has_many :street_addresses, :class_name => 'Address', :inverse_of => :person, :address_type => :street
-      end
-      
-      column_family :friends do
-        # Friend objects are created from an Array of IDs : [56, 7756, 342, 54]
-        has_many :friends, :class_name => 'Friend', :collection => 'Ids', :inverse_of => :friend 
-      end
-      
-      column_family :misc do
-        field :status, :integer, :column => :st
-        field :websites, :hash # { :facebook_page => "XYZ", :blog => "XYZ" }
-      end
+    client = conn.client
+    # Do whatever you want with the client object
     
-      def name
-        "#{self.first_name} #{self.last_name}"
-      end
-      
-      def active?
-        self.status == 1
-      end
-      
-    end
-  
-    class Address < MassiveRecord::ORM::Column
-      
-      validates_format_of :zip_code, :with => /\[0-9]{6})\Z/i
-      
-      field :address_type
-      field :address
-      field :city
-      field :county
-      field :zip_code
-      field :country, Country
-      
-      timestamps
-      
-      belongs_to :person
-    
-      def simple_format
-        "#{self.person.name} - #{address}, #{city}, #{country}"
-      end
-    
-    end
-  
-    class Friend < Person
-      
-      belongs_to :friend
-      
-      def is_cool?
-        self.first_name == "Bob"
-      end
-      
-    end
-    
-    # New record
-    p = Person.new
-    p.first_name = "John"
-    p.email = "hbase@companybook.no"
-    p.post_addresses.push << Address.new(address: "Philip Pedersensver 1", city: "Oslo", country: "Norway")
-    p.save
-  
-    # Find
-    p = Person.find("my_person_id")
-    p.first_name # => John
-    p.post_addresses.first # => Address#s5645645
-    p.post_addresses.first.simple_format # => "John - Philip Pedersensver 1, Oslo, Norway"
-    
-    # Delete
-    p.destroy
-
-
-## Q&A
+### Q&A
 
 How to add a new column family to an existing table?
     
@@ -279,4 +222,4 @@ How to add a new column family to an existing table?
     enable 'companies'
 
 
-Copyright (c) 2010 Companybook, released under the MIT license
+Copyright (c) 2011 Companybook, released under the MIT license

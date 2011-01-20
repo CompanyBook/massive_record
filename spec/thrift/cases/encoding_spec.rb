@@ -2,6 +2,9 @@
 require 'spec_helper'
 
 describe "encoding" do
+  before :all do
+    @table_name = "encoding_test" + ActiveSupport::SecureRandom.hex(3)
+  end
 
   before do
     transport = Thrift::BufferedTransport.new(Thrift::Socket.new(MR_CONFIG['host'], 9090))
@@ -10,7 +13,6 @@ describe "encoding" do
     
     transport.open()
     
-    @table_name = "encoding_test"
     @column_family = "info:"
   end
   

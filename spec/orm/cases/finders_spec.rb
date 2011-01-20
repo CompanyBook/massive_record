@@ -168,6 +168,31 @@ describe "finders" do
       all.length.should == 2
     end
   end
+  
+  describe "#find_in_batches" do
+    include CreatePeopleBeforeEach
+        
+    it "should iterate through a collection of group of rows using a batch process" do
+      group_number = 0
+      batch_size = 3
+      Person.find_in_batches(:batch_size => batch_size) do |rows|
+        group_number += 1
+        rows.each do |row|
+          row.id.should_not be_nil
+        end
+      end        
+      group_number.should == @table_size / 3
+    end
+    
+    it "should iterate through a collection of rows using a batch process" do
+      rows_number = 0
+      Person.find_each(:batch_size => 3) do |row|
+        row.id.should_not be_nil
+        rows_number += 1
+      end
+      rows_number.should == @table_size
+    end
+  end
 
   describe "#exists?" do
     include CreatePersonBeforeEach
