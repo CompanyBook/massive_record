@@ -1,7 +1,7 @@
 require 'active_support/secure_random'
 
 #
-# So, this module does a couple of things:
+# This module does a couple of things:
 #   1.  Iterates over all tables and adds a prefix to
 #       them so that the classes will be uniq for
 #       the test run.
@@ -18,13 +18,7 @@ module MassiveRecord
         after(:each) { delete_all_tables }
       end
 
-
-
-
       private
-
-
-
 
       def add_prefix_to_tables
         prefix = ActiveSupport::SecureRandom.hex(3)
@@ -32,20 +26,12 @@ module MassiveRecord
       end
 
       def delete_all_tables
-        each_orm_class_where_table_exists { |klass| klass.table.destroy }
+        tables = MassiveRecord::ORM::Base.connection.tables
+        each_orm_class { |klass| klass.table.destroy and tables.delete(klass.table.name) if tables.include? klass.table.name }
       end
-
-
-
-
-
 
       def each_orm_class
         MassiveRecord::ORM::Table.descendants.each { |klass| yield klass }
-      end
-
-      def each_orm_class_where_table_exists
-        MassiveRecord::ORM::Table.descendants.select { |klass| klass.connection.tables.include? klass.table_name }.each { |klass| yield klass }
       end
     end
   end
