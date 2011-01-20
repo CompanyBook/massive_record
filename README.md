@@ -13,25 +13,8 @@ http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
 ## Installation
 
-### IRB
+  gem install massive_record
 
-Install the Ruby thrift library :
-
-    gem install massive_record
-    
-Checkout the massive_record project and install it as a Gem :
-
-    git clone git://github.com/CompanyBook/massive_record.git
-    cd massive_record/
-    rake install massive_record.gemspec
-    
-Then in IRB :
-
-    require 'rubygems'
-    require 'massive_record'
-    
-    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
-    
 ### Ruby on Rails
     
 Add the following Gems in your Gemfile:
@@ -159,6 +142,15 @@ You can, if you'd like, work directly against the adapter.
 
 
 
+## Planned work
+
+- Rename Wrapper to Adapter, and make it easy to switch from Thrift to another way of communicating with Hbase.
+- Automatically handling time stamps like created_at and updated_at.
+- Associations and embedded objects.
+- Implement other Adapters, for instance using jruby and the Java API.
+
+
+
 ## Contribute
 
 If you want to contribute feel free to fork this project :-)
@@ -171,12 +163,29 @@ Make a feature branch, write test, implement and make a pull request.
     bundle install
 
 Next up you need to add a config.yml file inside of spec/ which contains something like:
-    host: url.to-a.thrifr.server
+    host: url.to-a.thrift.server
     port: 9090
     table: massive_record_test_table
 
 You should now be able to run `rspec spec/`
 
+### Play with it in the console
+
+Checkout the massive_record project and install it as a Gem :
+
+    cd massive_record/
+    bundle console
+    ruby-1.9.2-p0 > Bundler.require
+     => [
+          <Bundler::Dependency type=:runtime name="massive_record" requirements=">= 0">,
+          <Bundler::Dependency type=:runtime name="thrift" requirements=">= 0.5.0">,
+          <Bundler::Dependency type=:runtime name="activesupport" requirements=">= 0">,
+          <Bundler::Dependency type=:runtime name="activemodel" requirements=">= 0">,
+          <Bundler::Dependency type=:runtime name="rspec" requirements=">= 2.1.0">
+        ]
+    ruby-1.9.2-p0 > MassiveRecord::VERSION
+     => "0.0.1" 
+    
 ### Clean HBase database between each test
 
 We have created a helper module MassiveRecord::Rspec::SimpleDatabaseCleaner which, when included into rspec tests, will clean
@@ -213,4 +222,4 @@ How to add a new column family to an existing table?
     enable 'companies'
 
 
-Copyright (c) 2010 Companybook, released under the MIT license
+Copyright (c) 2011 Companybook, released under the MIT license
