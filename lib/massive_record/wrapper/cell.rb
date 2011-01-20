@@ -26,7 +26,7 @@ module MassiveRecord
       end
     
       def deserialize_value
-        is_yaml? ? YAML.load(@value) : @value
+        is_yaml? ? YAML.load(@value) : value
       end
     
       def serialize_value(v)
