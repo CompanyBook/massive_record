@@ -27,6 +27,19 @@ module MassiveRecord
         raise "Can't be set manually." if attr_name.to_s == 'updated_at'  
         super
       end
+
+
+
+      private
+
+      def update(*)
+        super
+        # Not 100% accurat, as we might should re-read the saved row from
+        # the database to fetch exactly the correct updated at time, but
+        # it should do for now as it takes an extra query to check the time stamp.
+        @attributes['updated_at'] = Time.now
+      end
+
       def known_attribute_names_for_inspect
         (super rescue []) << 'updated_at'
       end

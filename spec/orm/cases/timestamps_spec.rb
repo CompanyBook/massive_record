@@ -31,5 +31,14 @@ describe "timestamps" do
     it "should include updated_at in inspect" do
       @person.inspect.should include(%q{updated_at:})
     end
+
+    it "should be updated after a save" do
+      sleep(1)
+
+      updated_at_was = @person.updated_at
+      @person.update_attribute :name, "Should Give Me New Updated At"
+
+      @person.updated_at.should_not == updated_at_was
+    end
   end
 end
