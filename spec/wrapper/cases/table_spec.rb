@@ -83,7 +83,7 @@ describe MassiveRecord::Wrapper::Table do
         @table.all(:limit => 1, :select => ["info"]).first.column_families.should == ["info"]
         @table.find("ID1", :select => ["info"]).column_families.should == ["info"]
       end
-      
+
       it "should update row values" do
         row = @table.first
         row.values["info:first_name"].should eql("John")
@@ -100,6 +100,46 @@ describe MassiveRecord::Wrapper::Table do
         row.update_columns({ :info => { :first_name => "Bob" } })
         row.save.should be_true
       end
+
+      it "should have a updated_at for a row" do
+        row = @table.first
+        row.updated_at.should be_a_kind_of Time
+      end
+
+      it "should have an updated_at for the row which is taken from the last updated attribute" do
+        sleep(1)
+        row = @table.first
+        row.update_columns({ :info =>  { :first_name => "New Bob" } })
+        row.save
+
+        sleep(1)
+
+        row = @table.first
+
+        row.columns["info:first_name"].created_at.should == row.updated_at
+      end
+
+      it "should have a new updated at for a row" do
+        row = @table.first
+        updated_at_was = row.updated_at
+
+        sleep(1)
+
+        row.update_columns({ :info =>  { :first_name => "Bob" } })
+        row.save
+
+        row = @table.first
+        
+        updated_at_was.should_not == row.updated_at
+      end
+
+      it "should return nil if no cells has been created" do
+        row = MassiveRecord::Wrapper::Row.new
+        row.updated_at.should be_nil
+      end
+
+      
+      
       
       it "should merge data" do
         row = @table.first
