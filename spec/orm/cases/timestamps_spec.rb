@@ -40,5 +40,16 @@ describe "timestamps" do
 
       @person.updated_at.should_not == updated_at_was
     end
+
+    it "should not be updated after a save which failed" do
+      sleep(1)
+
+      updated_at_was = @person.updated_at
+      @person.name = nil
+
+      @person.should_not be_valid
+
+      @person.updated_at.should == updated_at_was
+    end
   end
 end
