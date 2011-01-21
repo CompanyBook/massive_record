@@ -16,6 +16,7 @@ require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
+require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
 
 module MassiveRecord
@@ -159,6 +160,7 @@ module MassiveRecord
       include AttributeMethods::Dirty
       include Validations
       include Callbacks
+      include Timestamps
 
 
       alias [] read_attribute
