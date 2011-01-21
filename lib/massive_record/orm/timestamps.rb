@@ -27,6 +27,9 @@ module MassiveRecord
         raise "Can't be set manually." if attr_name.to_s == 'updated_at'  
         super
       end
+      def known_attribute_names_for_inspect
+        (super rescue []) << 'updated_at'
+      end
     end
   end
 end

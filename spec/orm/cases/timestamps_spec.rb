@@ -23,5 +23,13 @@ describe "timestamps" do
     it "should have updated at on a persisted record" do
       @person.updated_at.should be_a_kind_of Time
     end
+
+    it "should be included in the list of known_attribute_names_for_inspect" do
+      @person.send(:known_attribute_names_for_inspect).should include 'updated_at'
+    end
+
+    it "should include updated_at in inspect" do
+      @person.inspect.should include(%q{updated_at:})
+    end
   end
 end
