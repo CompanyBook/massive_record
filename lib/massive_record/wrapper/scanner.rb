@@ -38,7 +38,9 @@ module MassiveRecord
       end
       
       def populate_rows(results)
-        results.collect{|result| populate_row(result)}
+        results.collect do |result|
+          populate_row(result) unless result.row.match(/^#{start_key}/).nil?
+        end.select{|r| !r.nil?}
       end
       
       def populate_row(result)
