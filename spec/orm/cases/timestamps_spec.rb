@@ -105,5 +105,13 @@ describe "timestamps" do
     it "should not include created_at if object does not have it" do
       @person.send(:known_attribute_names_for_inspect).should_not include 'created_at'
     end
+
+    it "should raise error if created_at is not time" do
+      PersonWithTimestamps.attributes_schema['created_at'].type = :string
+
+      lambda { PersonWithTimestamps.create! }.should raise_error "created_at must be of type time"
+
+      PersonWithTimestamps.attributes_schema['created_at'].type = :time
+    end
   end
 end

@@ -6,6 +6,7 @@ module MassiveRecord
 
       included do
         before_create :if => :set_created_at_on_create? do
+          raise "created_at must be of type time" if attributes_schema['created_at'].type != :time
           @attributes['created_at'] = Time.now
         end
       end
