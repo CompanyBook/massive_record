@@ -14,20 +14,19 @@ module MassiveRecord
       extend ActiveSupport::Concern
 
       included do
-        before(:all) { add_prefix_to_tables }
+        before(:all) { add_suffix_to_tables }
         after(:each) { delete_all_tables }
       end
 
       private
 
-      def add_prefix_to_tables
-        prefix = ActiveSupport::SecureRandom.hex(3)
-        each_orm_class { |klass| klass.table_name_prefix = ["test", prefix, klass.table_name_prefix].reject(&:blank?).join("_") + "_" }
+      def add_suffix_to_tables
+        each_orm_class { |klass| klass.reset_table_name_configuration!; klass.table_name_suffix = '_test' }
       end
 
       def delete_all_tables
         tables = MassiveRecord::ORM::Base.connection.tables
-        each_orm_class { |klass| klass.table.destroy and tables.delete(klass.table.name) if tables.include? klass.table.name }
+        each_orm_class { |klass| klass.destroy_all and tables.delete(klass.table.name) if tables.include? klass.table.name }
       end
 
       def each_orm_class
