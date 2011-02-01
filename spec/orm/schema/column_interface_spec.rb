@@ -84,6 +84,18 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     defaults["age"].should == 1
   end
 
+  describe "timestamps" do
+    before do
+      class TestColumnInterface
+        timestamps
+      end
+    end
+
+    it "should have a created_at time field" do
+      TestColumnInterface.attributes_schema['created_at'].type.should == :time
+    end
+  end
+
 
   describe "dynamically adding a field" do
     it "should be possible to dynamically add a field" do
