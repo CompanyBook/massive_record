@@ -185,7 +185,7 @@ describe MassiveRecord::Wrapper::Table do
         
         @table.all.size.should == 5
       end
-            
+      
       it "should find rows" do
         ids_list = [["ID1"], ["ID1", "ID2", "ID3"]]
         ids_list.each do |ids|
@@ -194,26 +194,40 @@ describe MassiveRecord::Wrapper::Table do
           end
         end
       end
-      
+    
       it "should collect 5 IDs" do
         @table.all.collect(&:id).should eql(1.upto(5).collect{|i| "ID#{i}"})
       end
-      
+    
       it "should iterate through a collection of rows" do
         @table.all.each do |row|
           row.id.should_not be_nil
         end
       end
-      
+    
       it "should iterate through a collection of rows using a batch process" do
         group_number = 0
-        @table.find_in_batches(:batch_size => 2, :start => "ID", :select => ["info"]) do |group|
+        @table.find_in_batches(:batch_size => 2, :select => ["info"]) do |group|
           group_number += 1
           group.each do |row|
             row.id.should_not be_nil
           end
         end        
         group_number.should == 3
+      end
+    
+      it "should find 1 row using the :start option" do
+        @table.all(:start => "ID1").size.should == 1
+      end
+    
+      it "should find 5 rows using the :start option" do
+        @table.all(:start => "ID").size.should == 5
+      
+      end
+    
+      it "should find 4 rows using the :offset option" do
+        puts @table.all(:offset => "ID2").collect(&:id).inspect
+        @table.all(:offset => "ID2").size.should == 4
       end
       
       it "should exists in the database" do
