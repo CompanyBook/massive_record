@@ -21,12 +21,23 @@ module MassiveRecord
       private
 
       def add_suffix_to_tables
-        each_orm_class { |klass| klass.reset_table_name_configuration!; klass.table_name_suffix = '_test' }
+        each_orm_class do |klass|
+          table_name_overriden = klass.table_name_overriden
+          klass.reset_table_name_configuration!
+
+          klass.table_name = table_name_overriden
+          klass.table_name_suffix = '_test'
+        end
       end
 
       def delete_all_tables
         tables = MassiveRecord::ORM::Base.connection.tables
-        each_orm_class { |klass| klass.destroy_all and tables.delete(klass.table.name) if tables.include? klass.table.name }
+        each_orm_class do |klass|
+          if tables.include? klass.table.name
+            klass.table.all.each(&:destroy) # Don't want to use ORM, as it triggers callbacks etc..
+            tables.delete(klass.table.name)
+          end
+        end
       end
 
       def each_orm_class
