@@ -266,7 +266,6 @@ describe MassiveRecord::Wrapper::Table do
       end
     
       it "should find 4 rows using the :offset option" do
-        puts @table.all(:offset => "ID2").collect(&:id).inspect
         @table.all(:offset => "ID2").size.should == 4
       end
       

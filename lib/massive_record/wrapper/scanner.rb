@@ -46,8 +46,7 @@ module MassiveRecord
         results.collect do |result|
           if offset_key.empty?
             populate_row(result) unless result.row.match(/^#{start_key}/).nil?
-          else  
-              puts "$$$ #{offset_key.empty?.inspect}"
+          else
             populate_row(result)            
           end
         end.select{|r| !r.nil?}
