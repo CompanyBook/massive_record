@@ -43,5 +43,10 @@ module MassiveRecord
     # requiring a number to work on.
     class NotNumericalFieldError < MassiveRecordError
     end
+
+    # Raised if you try to assign a variable which can't be set manually,
+    # for instance time stamps
+    class CantBeManuallyAssigned < MassiveRecordError
+    end
   end
 end

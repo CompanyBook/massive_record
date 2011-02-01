@@ -85,6 +85,10 @@ module MassiveRecord
           self << Field.new_with_arguments_from_dsl(*args)
         end
 
+        # Internal DSL method
+        def timestamps
+          field :created_at, :time
+        end
 
         # Internal DSL method
         def autoload_fields

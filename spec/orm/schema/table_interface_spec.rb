@@ -87,6 +87,16 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestInterface.new.attributes_schema["name"].type.should == :string
   end
 
+  it "should make known_attribute_names readable for instances" do
+    class TestInterface
+      column_family :info do
+        field :name
+      end
+    end
+
+    TestInterface.new.known_attribute_names.should include('name')
+  end
+
   it "should not be shared amonb subclasses" do
     class TestInterface
       column_family :info do
@@ -96,6 +106,20 @@ describe MassiveRecord::ORM::Schema::TableInterface do
 
     TestInterface.column_families.should_not be_nil
     TestInterfaceSubClass.column_families.should be_nil
+  end
+
+  describe "timestamps" do
+    before do
+      class TestInterface
+        column_family :info do
+          timestamps
+        end
+      end
+    end
+
+    it "should have a created_at time field" do
+      TestInterface.attributes_schema['created_at'].type.should == :time
+    end
   end
 
 
