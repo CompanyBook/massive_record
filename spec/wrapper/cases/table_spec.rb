@@ -247,13 +247,13 @@ describe MassiveRecord::Wrapper::Table do
       
       it "should iterate through a collection of rows using a batch process" do
         group_number = 0
-        @table.find_in_batches(:batch_size => 2, :start => "ID2", :select => ["info"]) do |group|
+        @table.find_in_batches(:batch_size => 2, :start => "ID", :select => ["info"]) do |group|
           group_number += 1
           group.each do |row|
             row.id.should_not be_nil
           end
         end        
-        group_number.should == 2
+        group_number.should == 3
       end
       
       it "should exists in the database" do
