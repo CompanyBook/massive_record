@@ -3,10 +3,17 @@ module MassiveRecord
     module Timestamps
       extend ActiveSupport::Concern
 
+
+      included do
+        before_create :if => :set_created_at_on_create? do
+          @attributes['created_at'] = Time.now
+        end
+      end
+
+
+
       
       module ClassMethods
-        
-        
         private
 
         def transpose_hbase_columns_to_record_attributes(row)
@@ -24,7 +31,12 @@ module MassiveRecord
       end
 
       def write_attribute(attr_name, value)
-        raise "Can't be set manually." if attr_name.to_s == 'updated_at'  
+        attr_name = attr_name.to_s
+
+        if attr_name == 'updated_at' || (attr_name == 'created_at' && has_created_at?)
+          raise MassiveRecord::ORM::CantBeManuallyAssigned.new("#{attr_name} can't be manually assigned.")
+        end
+
         super
       end
 
@@ -40,8 +52,16 @@ module MassiveRecord
         updated
       end
 
+      def set_created_at_on_create?
+        has_created_at?
+      end
+
+      def has_created_at?
+        known_attribute_names.include? 'created_at'
+      end
+
       def known_attribute_names_for_inspect
-        (super rescue []) << 'updated_at'
+        out = (super rescue []) << 'updated_at'
       end
     end
   end
