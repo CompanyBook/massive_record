@@ -29,6 +29,11 @@ module MassiveRecord
             fields << Field.new_with_arguments_from_dsl(*args)
           end
 
+
+          def timestamps
+            add_field :created_at, :time
+          end
+
           #
           # If you need to add fields dynamically, use this method.
           # It wraps functionality needed to keep the class in a consistent state.

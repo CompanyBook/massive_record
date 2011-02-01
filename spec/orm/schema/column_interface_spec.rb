@@ -64,6 +64,15 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestColumnInterface.known_attribute_names.should include("name", "age")
   end
 
+  it "should make known_attribute_names readable for instances" do
+    class TestColumnInterface
+      field :name, :string
+    end
+
+    TestColumnInterface.new.known_attribute_names.should include('name')
+  end
+
+
   it "should give us default attributes from schema" do
     class TestColumnInterface
       field :name
@@ -73,6 +82,18 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     defaults = TestColumnInterface.default_attributes_from_schema
     defaults["name"].should be_nil
     defaults["age"].should == 1
+  end
+
+  describe "timestamps" do
+    before do
+      class TestColumnInterface
+        timestamps
+      end
+    end
+
+    it "should have a created_at time field" do
+      TestColumnInterface.attributes_schema['created_at'].type.should == :time
+    end
   end
 
 

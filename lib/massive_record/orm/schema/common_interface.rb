@@ -42,6 +42,10 @@ module MassiveRecord
         def attributes_schema
           self.class.attributes_schema
         end
+
+        def known_attribute_names
+          self.class.known_attribute_names
+        end
       end
     end
   end
