@@ -1,5 +1,6 @@
 # v0.2.0 (git develop)
 
+- If you add a created_at attribute it will be maintained by the ORM with the time the object was created.
 - An adapter (wrapper) row now has an updated_at attribute. ORM objects also responds to updated_at
 
 
