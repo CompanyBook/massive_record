@@ -16,6 +16,7 @@ require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
+require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
 
 module MassiveRecord
@@ -107,27 +108,14 @@ module MassiveRecord
       end
 
 
-
       def inspect
-        attributes_as_string = self.class.known_attribute_names.collect do |attr_name|
+        attributes_as_string = known_attribute_names_for_inspect.collect do |attr_name|
           "#{attr_name}: #{attribute_for_inspect(attr_name)}"
         end.join(', ')
 
         "#<#{self.class} id: #{id.inspect}, #{attributes_as_string}>"
       end
 
-
-      def attribute_for_inspect(attr_name)
-        value = read_attribute(attr_name)
-
-        if value.is_a?(String) && value.length > 50
-          "#{value[0..50]}...".inspect
-        elsif value.is_a?(Date) || value.is_a?(Time)
-          %("#{value.to_s}")
-        else
-          value.inspect
-        end
-      end
 
       def id
         if read_attribute(:id).blank? && respond_to?(:default_id, true)
@@ -142,6 +130,30 @@ module MassiveRecord
 
 
       private
+
+      #
+      # A place to hook in if you need to add attributes
+      # not known by the attribute schema in the inspect string.
+      # Remember to include a call to super in your module so you
+      # don't break the chain if you override it.
+      # See Timestamps for an example
+      #
+      def known_attribute_names_for_inspect
+        (self.class.known_attribute_names + (super rescue [])).uniq
+      end
+
+      def attribute_for_inspect(attr_name)
+        value = read_attribute(attr_name)
+
+        if value.is_a?(String) && value.length > 50
+          "#{value[0..50]}...".inspect
+        elsif value.is_a?(Date) || value.is_a?(Time)
+          %("#{value.to_s}")
+        else
+          value.inspect
+        end
+      end
+
 
       def next_id
         IdFactory.next_for(self.class).to_s
@@ -159,6 +171,7 @@ module MassiveRecord
       include AttributeMethods::Dirty
       include Validations
       include Callbacks
+      include Timestamps
 
 
       alias [] read_attribute
