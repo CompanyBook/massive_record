@@ -64,6 +64,15 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestColumnInterface.known_attribute_names.should include("name", "age")
   end
 
+  it "should make known_attribute_names readable for instances" do
+    class TestColumnInterface
+      field :name, :string
+    end
+
+    TestColumnInterface.new.known_attribute_names.should include('name')
+  end
+
+
   it "should give us default attributes from schema" do
     class TestColumnInterface
       field :name

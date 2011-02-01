@@ -87,6 +87,16 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestInterface.new.attributes_schema["name"].type.should == :string
   end
 
+  it "should make known_attribute_names readable for instances" do
+    class TestInterface
+      column_family :info do
+        field :name
+      end
+    end
+
+    TestInterface.new.known_attribute_names.should include('name')
+  end
+
   it "should not be shared amonb subclasses" do
     class TestInterface
       column_family :info do
