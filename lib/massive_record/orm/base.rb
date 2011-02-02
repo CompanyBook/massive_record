@@ -24,6 +24,9 @@ module MassiveRecord
     class Base
       include ActiveModel::Conversion
       
+      # Accepts a logger conforming to the interface of Log4r or the default Ruby 1.8+ Logger class,
+      cattr_accessor :logger, :instance_writer => false
+
       # Add a prefix or a suffix to the table name
       # example:
       #

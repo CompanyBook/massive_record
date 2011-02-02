@@ -173,4 +173,15 @@ describe MassiveRecord::ORM::Base do
       @test_object.foo.should == "new_value"
     end
   end
+
+
+  describe "logger" do
+    it "should respond to logger" do
+      MassiveRecord::ORM::Base.should respond_to :logger
+    end
+
+    it "should respond to logger=" do
+      MassiveRecord::ORM::Base.should respond_to :logger=
+    end
+  end
 end
