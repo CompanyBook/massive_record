@@ -51,7 +51,7 @@ describe "configuration" do
     describe "under Rails" do
       before do
         TestClass.connection_configuration = {}
-        module Rails; end
+        module ::Rails; end
         MassiveRecord::Wrapper::Base.stub!(:connection).and_return(@mock_connection)
       end
       

@@ -16,3 +16,7 @@ require 'massive_record/wrapper/base'
 
 # ORM
 require 'massive_record/orm/base'
+
+if defined?(::Rails) && ::Rails::VERSION::MAJOR == 3
+  require 'massive_record/rails/railtie'
+end
