@@ -48,5 +48,9 @@ module MassiveRecord
     # for instance time stamps
     class CantBeManuallyAssigned < MassiveRecordError
     end
+
+    # Raised if you try to save a record which is read only
+    class ReadOnlyRecord < MassiveRecordError
+    end
   end
 end

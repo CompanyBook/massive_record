@@ -476,4 +476,22 @@ describe "persistence" do
       end
     end
   end
+
+  describe "read only objects" do
+    include MockMassiveRecordConnection
+
+    it "should raise an error if new record is read only and you try to save it" do
+      person = Person.new :id => "id1", :name => "Thorbjorn", :age => 29
+      person.readonly!
+      lambda { person.save }.should raise_error MassiveRecord::ORM::ReadOnlyRecord
+    end
+
+    it "should raise an error if record is read only and you try to save it" do
+      person = Person.create :id => "id1", :name => "Thorbjorn", :age => 29
+      person.should be_persisted
+
+      person.readonly!
+      lambda { person.save }.should raise_error MassiveRecord::ORM::ReadOnlyRecord
+    end
+  end
 end

@@ -67,7 +67,7 @@ module MassiveRecord
         self.attributes_raw = attributes_from_field_definition.merge(attributes)
         self.attributes = attributes
         @new_record = true
-        @destroyed = false
+        @destroyed = @readonly = false
 
         _run_initialize_callbacks
       end
@@ -87,7 +87,7 @@ module MassiveRecord
       #   person.name # => 'Alice'
       def init_with(coder)
         @new_record = false
-        @destroyed = false
+        @destroyed = @readonly = false
 
         self.attributes_raw = coder['attributes']
 
@@ -130,6 +130,13 @@ module MassiveRecord
 
 
 
+      def readonly?
+        !!@readonly
+      end
+
+      def readonly!
+        @readonly = true
+      end
 
 
       private
