@@ -53,6 +53,7 @@ Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some f
     - Information about changes on attributes.
     - Casting of attributes
     - Serialization of array / hashes
+    - Timestamps like created_at and updated_at. Updated at will always be available, created_at must be defined. See example down:
 
 Tables also have:
     - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
@@ -74,6 +75,8 @@ Here is an example of usage, both for Table and Column:
         field :points, :integer, :default => 0
         field :date_of_birth, :date
         field :newsletter, :boolean, :default => false
+
+        timestamps # ..or field :created_at, :time
       end
 
       validates_presence_of :name, :email
@@ -145,7 +148,6 @@ You can, if you'd like, work directly against the adapter.
 ## Planned work
 
 - Rename Wrapper to Adapter, and make it easy to switch from Thrift to another way of communicating with Hbase.
-- Automatically handling time stamps like created_at and updated_at.
 - Associations and embedded objects.
 - Implement other Adapters, for instance using jruby and the Java API.
 

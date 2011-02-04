@@ -86,7 +86,8 @@ module MassiveRecord
       
       def format_options_for_scanner(opts = {})
         {
-          :start_key  => opts[:start], 
+          :start_key  => opts[:start],
+          :offset_key => opts[:offset],
           :created_at => opts[:created_at],
           :columns    => opts[:select], # list of column families to fetch from hbase
           :limit      => opts[:limit] || opts[:batch_size]

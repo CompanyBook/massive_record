@@ -111,6 +111,7 @@ module MassiveRecord
 
 
       def create_or_update
+        raise ReadOnlyRecord if readonly?
         !!(new_record? ? create : update)
       end
 

@@ -16,6 +16,7 @@ require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
+require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
 
 module MassiveRecord
@@ -23,6 +24,9 @@ module MassiveRecord
     class Base
       include ActiveModel::Conversion
       
+      # Accepts a logger conforming to the interface of Log4r or the default Ruby 1.8+ Logger class,
+      cattr_accessor :logger, :instance_writer => false
+
       # Add a prefix or a suffix to the table name
       # example:
       #
@@ -63,7 +67,7 @@ module MassiveRecord
         self.attributes_raw = attributes_from_field_definition.merge(attributes)
         self.attributes = attributes
         @new_record = true
-        @destroyed = false
+        @destroyed = @readonly = false
 
         _run_initialize_callbacks
       end
@@ -83,7 +87,7 @@ module MassiveRecord
       #   person.name # => 'Alice'
       def init_with(coder)
         @new_record = false
-        @destroyed = false
+        @destroyed = @readonly = false
 
         self.attributes_raw = coder['attributes']
 
@@ -107,15 +111,46 @@ module MassiveRecord
       end
 
 
-
       def inspect
-        attributes_as_string = self.class.known_attribute_names.collect do |attr_name|
+        attributes_as_string = known_attribute_names_for_inspect.collect do |attr_name|
           "#{attr_name}: #{attribute_for_inspect(attr_name)}"
         end.join(', ')
 
         "#<#{self.class} id: #{id.inspect}, #{attributes_as_string}>"
       end
 
+
+      def id
+        if read_attribute(:id).blank? && respond_to?(:default_id, true)
+          @attributes["id"] = default_id
+        end
+
+        read_attribute(:id)
+      end
+
+
+
+      def readonly?
+        !!@readonly
+      end
+
+      def readonly!
+        @readonly = true
+      end
+
+
+      private
+
+      #
+      # A place to hook in if you need to add attributes
+      # not known by the attribute schema in the inspect string.
+      # Remember to include a call to super in your module so you
+      # don't break the chain if you override it.
+      # See Timestamps for an example
+      #
+      def known_attribute_names_for_inspect
+        (self.class.known_attribute_names + (super rescue [])).uniq
+      end
 
       def attribute_for_inspect(attr_name)
         value = read_attribute(attr_name)
@@ -129,19 +164,6 @@ module MassiveRecord
         end
       end
 
-      def id
-        if read_attribute(:id).blank? && respond_to?(:default_id, true)
-          @attributes["id"] = default_id
-        end
-
-        read_attribute(:id)
-      end
-
-
-
-
-
-      private
 
       def next_id
         IdFactory.next_for(self.class).to_s
@@ -159,6 +181,7 @@ module MassiveRecord
       include AttributeMethods::Dirty
       include Validations
       include Callbacks
+      include Timestamps
 
 
       alias [] read_attribute

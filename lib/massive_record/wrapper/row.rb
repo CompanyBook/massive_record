@@ -41,7 +41,7 @@ module MassiveRecord
       def values
         @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.deserialize_value; h}
       end
-    
+
       def values=(data)
         @values = {}
         update_columns(data)
@@ -165,6 +165,9 @@ module MassiveRecord
         self
       end
     
+      def updated_at
+        columns.values.collect(&:created_at).max
+      end
     end  
   end
 end

@@ -13,7 +13,7 @@ module MassiveRecord
     class Base
       
       def self.config
-        config = YAML.load_file(Rails.root.join('config', 'hbase.yml'))[Rails.env]
+        config = YAML.load_file(::Rails.root.join('config', 'hbase.yml'))[::Rails.env]
         { :host => config['host'], :port => config['port'] }        
       end
 

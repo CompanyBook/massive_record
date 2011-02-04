@@ -83,7 +83,7 @@ describe MassiveRecord::Wrapper::Table do
         @table.all(:limit => 1, :select => ["info"]).first.column_families.should == ["info"]
         @table.find("ID1", :select => ["info"]).column_families.should == ["info"]
       end
-      
+
       it "should update row values" do
         row = @table.first
         row.values["info:first_name"].should eql("John")
@@ -100,6 +100,46 @@ describe MassiveRecord::Wrapper::Table do
         row.update_columns({ :info => { :first_name => "Bob" } })
         row.save.should be_true
       end
+
+      it "should have a updated_at for a row" do
+        row = @table.first
+        row.updated_at.should be_a_kind_of Time
+      end
+
+      it "should have an updated_at for the row which is taken from the last updated attribute" do
+        sleep(1)
+        row = @table.first
+        row.update_columns({ :info =>  { :first_name => "New Bob" } })
+        row.save
+
+        sleep(1)
+
+        row = @table.first
+
+        row.columns["info:first_name"].created_at.should == row.updated_at
+      end
+
+      it "should have a new updated at for a row" do
+        row = @table.first
+        updated_at_was = row.updated_at
+
+        sleep(1)
+
+        row.update_columns({ :info =>  { :first_name => "Bob" } })
+        row.save
+
+        row = @table.first
+        
+        updated_at_was.should_not == row.updated_at
+      end
+
+      it "should return nil if no cells has been created" do
+        row = MassiveRecord::Wrapper::Row.new
+        row.updated_at.should be_nil
+      end
+
+      
+      
       
       it "should merge data" do
         row = @table.first
@@ -185,7 +225,7 @@ describe MassiveRecord::Wrapper::Table do
         
         @table.all.size.should == 5
       end
-            
+      
       it "should find rows" do
         ids_list = [["ID1"], ["ID1", "ID2", "ID3"]]
         ids_list.each do |ids|
@@ -194,26 +234,39 @@ describe MassiveRecord::Wrapper::Table do
           end
         end
       end
-      
+    
       it "should collect 5 IDs" do
         @table.all.collect(&:id).should eql(1.upto(5).collect{|i| "ID#{i}"})
       end
-      
+    
       it "should iterate through a collection of rows" do
         @table.all.each do |row|
           row.id.should_not be_nil
         end
       end
-      
+    
       it "should iterate through a collection of rows using a batch process" do
         group_number = 0
-        @table.find_in_batches(:batch_size => 2, :start => "ID2", :select => ["info"]) do |group|
+        @table.find_in_batches(:batch_size => 2, :select => ["info"]) do |group|
           group_number += 1
           group.each do |row|
             row.id.should_not be_nil
           end
         end        
-        group_number.should == 2
+        group_number.should == 3
+      end
+    
+      it "should find 1 row using the :start option" do
+        @table.all(:start => "ID1").size.should == 1
+      end
+    
+      it "should find 5 rows using the :start option" do
+        @table.all(:start => "ID").size.should == 5
+      
+      end
+    
+      it "should find 4 rows using the :offset option" do
+        @table.all(:offset => "ID2").size.should == 4
       end
       
       it "should exists in the database" do

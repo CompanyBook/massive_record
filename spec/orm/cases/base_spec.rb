@@ -173,4 +173,27 @@ describe MassiveRecord::ORM::Base do
       @test_object.foo.should == "new_value"
     end
   end
+
+
+  describe "logger" do
+    it "should respond to logger" do
+      MassiveRecord::ORM::Base.should respond_to :logger
+    end
+
+    it "should respond to logger=" do
+      MassiveRecord::ORM::Base.should respond_to :logger=
+    end
+  end
+
+  describe "read only" do
+    it "should not be read only by default" do
+      TestClass.new.should_not be_readonly
+    end
+
+    it "should be read only if asked to" do
+      test = TestClass.new
+      test.readonly!
+      test.should be_readonly
+    end
+  end
 end

@@ -16,7 +16,7 @@ module MassiveRecord
           if @@connection.blank?
             @@connection = if !connection_configuration.empty?
                             MassiveRecord::Wrapper::Connection.new(connection_configuration)
-                          elsif defined? Rails
+                          elsif defined? ::Rails
                             MassiveRecord::Wrapper::Base.connection
                           else
                             raise ConnectionConfigurationMissing
