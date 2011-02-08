@@ -2,11 +2,15 @@ require 'spec_helper'
 require 'orm/models/person'
 
 describe MassiveRecord::ORM::Relations::Metadata do
-  subject { MassiveRecord::ORM::Relations::Metadata.new }
-
   %w(name foreign_key class_name).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
+  end
+
+
+  it "should return name as string" do
+    subject.name = :foo
+    subject.name.should == "foo"
   end
 
 
@@ -55,5 +59,18 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.should_receive(:calculate_foreign_key).once.and_return("foo")
       2.times { subject.foreign_key }
     end
+  end
+
+
+
+  it "should compare two meta datas based on name" do
+    other = MassiveRecord::ORM::Relations::Metadata.new
+    other.name = subject.name
+
+    other.should == subject
+  end
+
+  it "should have the same hash value for the same name" do
+    subject.hash == subject.name.hash
   end
 end

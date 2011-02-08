@@ -9,9 +9,11 @@ module MassiveRecord
       class Metadata
         extend ActiveSupport::Memoizable
         
-        attr_accessor :name
-        attr_writer :foreign_key, :class_name
+        attr_writer :foreign_key, :class_name, :name
 
+        def name
+          @name.to_s
+        end
 
         def foreign_key
           (@foreign_key || calculate_foreign_key).to_s
@@ -23,6 +25,17 @@ module MassiveRecord
         end
         memoize :class_name
 
+
+
+        
+        def ==(other)
+          other.instance_of?(self.class) && other.hash == hash
+        end
+        alias_method :eql?, :==
+
+        def hash
+          name.hash
+        end
 
 
         private
