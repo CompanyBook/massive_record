@@ -2,9 +2,19 @@ require 'spec_helper'
 require 'orm/models/person'
 
 describe MassiveRecord::ORM::Relations::Metadata do
+  subject { MassiveRecord::ORM::Relations::Metadata.new(nil) }
+
   %w(name foreign_key class_name).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
+  end
+
+
+  it "should be setting values by initializer" do
+    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle"
+    metadata.name.should == "car"
+    metadata.foreign_key.should == "my_car_id"
+    metadata.class_name.should == "Vehicle"
   end
 
 
@@ -64,9 +74,7 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
 
   it "should compare two meta datas based on name" do
-    other = MassiveRecord::ORM::Relations::Metadata.new
-    other.name = subject.name
-
+    other = MassiveRecord::ORM::Relations::Metadata.new(subject.name)
     other.should == subject
   end
 

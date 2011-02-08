@@ -11,6 +11,15 @@ module MassiveRecord
         
         attr_writer :foreign_key, :class_name, :name
 
+        
+        def initialize(name, options = {})
+          options.to_options!
+          self.name = name
+          self.foreign_key = options[:foreign_key]
+          self.class_name = options[:class_name]
+        end
+
+
         def name
           @name.to_s
         end
