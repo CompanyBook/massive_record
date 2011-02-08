@@ -1,4 +1,4 @@
-shared_examples_for MassiveRecord::ORM::Proxy do
+shared_examples_for MassiveRecord::ORM::Relations::Proxy do
   %w(owner target metadata).each do |method|
     it "should respond to #{method}" do
       should respond_to method
@@ -34,6 +34,7 @@ shared_examples_for MassiveRecord::ORM::Proxy do
     it "should reset the target" do
       subject.target = "foo"
       subject.reset
+      subject.stub(:find_target?).and_return(false)
       subject.target.should be_nil
     end
   end
@@ -76,6 +77,25 @@ shared_examples_for MassiveRecord::ORM::Proxy do
       it "should rause no method error if no one responds to it" do
         lambda { subject.dummy_method_which_does_not_exists }.should raise_error NoMethodError
       end
+    end
+  end
+
+
+  describe "#target" do
+    it "should return the target if it is present" do
+      subject.target = "foo"
+      subject.target.should == "foo"
+    end
+
+    it "should not try to load target if it has been loaded" do
+      subject.loaded!
+      should_not_receive :find_target
+      subject.target.should be_nil
+    end
+
+    it "should try to load the target if it has not been loaded" do
+      subject.should_receive(:find_target) { "foo" }
+      subject.target.should == "foo"
     end
   end
 end
