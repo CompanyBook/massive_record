@@ -7,6 +7,8 @@ module MassiveRecord
       # references_one :employee, :foreign_key => "person_id", :class_name => "Person"
       #
       class Metadata
+        extend ActiveSupport::Memoizable
+        
         attr_accessor :name
         attr_writer :foreign_key, :class_name
 
@@ -14,10 +16,12 @@ module MassiveRecord
         def foreign_key
           (@foreign_key || calculate_foreign_key).to_s
         end
+        memoize :foreign_key
 
         def class_name
           (@class_name || calculate_class_name).to_s
         end
+        memoize :class_name
 
 
 
