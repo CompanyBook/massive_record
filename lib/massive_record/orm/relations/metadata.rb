@@ -10,8 +10,9 @@ module MassiveRecord
         attr_accessor :name
         attr_writer :foreign_key, :class_name
 
+
         def foreign_key
-          @foreign_key
+          (@foreign_key || calculate_foreign_key).to_s
         end
 
         def class_name
@@ -25,6 +26,10 @@ module MassiveRecord
 
         def calculate_class_name
           name.to_s.classify
+        end
+
+        def calculate_foreign_key
+          class_name.downcase + "_id"
         end
       end
     end

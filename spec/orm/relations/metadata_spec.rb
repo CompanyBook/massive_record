@@ -36,8 +36,14 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.foreign_key.should == "person_id"
     end
 
+    it "should return foreign key as string" do
+      subject.foreign_key = :person_id
+      subject.foreign_key.should == "person_id"
+    end
+
     it "should try and calculate the foreign key from the class name" do
-      pending
+      subject.name = Person
+      subject.foreign_key.should == "person_id"
     end
   end
 end
