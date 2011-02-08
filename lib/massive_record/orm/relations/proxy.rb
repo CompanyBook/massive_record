@@ -8,14 +8,20 @@ module MassiveRecord
       class Proxy
         instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a|inspect|to_s|extend|)$|^__|^respond_to|^should|^instance_variable_/ }
 
-        attr_writer :target
+        attr_reader :target
         attr_accessor :owner, :metadata
 
-
-
-        def target
-          @target ||= find_target if find_target?
+        def target=(target)
+          @target = target
+          loaded!
         end
+        
+        def load_target
+          self.target = find_target if find_target?
+        rescue RecordNotFound
+          reset
+        end
+
 
 
 

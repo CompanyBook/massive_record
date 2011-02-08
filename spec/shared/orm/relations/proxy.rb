@@ -81,10 +81,15 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
   end
 
 
-  describe "#target" do
+  describe "target" do
     it "should return the target if it is present" do
       subject.target = "foo"
       subject.target.should == "foo"
+    end
+
+    it "should be consodered loaded if a target has been set" do
+      subject.target = "foo"
+      should be_loaded
     end
 
     it "should not try to load target if it has been loaded" do
@@ -95,7 +100,13 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
 
     it "should try to load the target if it has not been loaded" do
       subject.should_receive(:find_target) { "foo" }
+      subject.load_target
       subject.target.should == "foo"
+    end
+
+    it "should reset proxy if target's record was not found" do
+      subject.should_receive(:find_target).and_raise MassiveRecord::ORM::RecordNotFound
+      subject.load_target.should be_nil
     end
   end
 end
