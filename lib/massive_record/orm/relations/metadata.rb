@@ -6,6 +6,12 @@ module MassiveRecord
       # The master of metadata related to a relation. For instance;
       # references_one :employee, :foreign_key => "person_id", :class_name => "Person"
       #
+      # TODO
+      #   * We need to store which column_family to inject foreign_key in if that is needed.
+      #   * We need a way to supply custom finder method, so that proxy's find_target uses
+      #     some custom loading in cases we want to start scan from given key for instance.
+      #
+      #
       class Metadata
         extend ActiveSupport::Memoizable
         
