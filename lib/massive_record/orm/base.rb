@@ -9,6 +9,7 @@ require 'active_support/memoizable'
 require 'massive_record/orm/schema'
 require 'massive_record/orm/errors'
 require 'massive_record/orm/config'
+require 'massive_record/orm/relations'
 require 'massive_record/orm/finders'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
@@ -18,6 +19,7 @@ require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
+
 
 module MassiveRecord
   module ORM
