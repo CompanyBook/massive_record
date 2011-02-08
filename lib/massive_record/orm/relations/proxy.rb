@@ -6,10 +6,12 @@ module MassiveRecord
       # Parent class for all proxies sitting between records
       #
       class Proxy
-        instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a|inspect|to_s|extend|)$|^__|^respond_to|^should|^instance_variable_/ }
+        instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a|inspect|to_s|extend|equal\?)$|^__|^respond_to|^should|^instance_variable_/ }
 
         attr_reader :target
         attr_accessor :owner, :metadata
+
+
 
         def target=(target)
           @target = target
@@ -22,6 +24,14 @@ module MassiveRecord
           reset
         end
 
+        def reload
+          reset
+          load_target
+        end
+
+        def reset
+          @loaded = @target = nil
+        end
 
 
 
@@ -33,9 +43,7 @@ module MassiveRecord
           @loaded = true
         end
 
-        def reset
-          @loaded = @target = nil
-        end
+
 
 
         def respond_to?(*args)

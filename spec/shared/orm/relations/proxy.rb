@@ -39,6 +39,32 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
     end
   end
 
+  describe "#reload" do
+    before do
+      subject.stub!(:find_target)
+    end
+
+    it "should reset the proxy" do
+      subject.should_receive :reset
+      subject.reload
+    end
+
+    it "should call load_target" do
+      subject.should_receive :load_target
+      subject.reload
+    end
+
+    it "should return target if loaded successfully" do
+      subject.should_receive(:find_target) { "foo" }
+      subject.reload.should == "foo"
+    end
+
+    it "should return nil if loading of target failed" do
+      subject.should_receive(:find_target).and_raise MassiveRecord::ORM::RecordNotFound
+      subject.reload.should be_nil
+    end
+  end
+
 
   describe "forward method calls to target" do
     let(:target) { mock(Object, :target_method => "return value") }
