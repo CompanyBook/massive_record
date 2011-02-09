@@ -40,6 +40,14 @@ module MassiveRecord
           @loaded = @target = nil
         end
 
+        def replace(target)
+          if target.nil?
+            reset 
+          else
+            self.target = target
+          end
+        end
+
 
 
         def loaded?

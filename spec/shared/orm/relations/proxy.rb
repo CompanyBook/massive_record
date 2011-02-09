@@ -142,4 +142,24 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
       subject.load_target.should be_nil
     end
   end
+
+
+  describe "replace" do
+    let (:old_target) { Person.new }
+    let (:new_target) { Person.new }
+
+    before do
+      subject.target = old_target
+    end
+
+    it "should replace the old target with the new one" do
+      subject.replace(new_target)
+      subject.target.should == new_target
+    end
+
+    it "should reset the proxy if asked to replace with nil" do
+      subject.should_receive(:reset)
+      subject.replace(nil)
+    end
+  end
 end
