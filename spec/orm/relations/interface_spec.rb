@@ -50,6 +50,12 @@ describe MassiveRecord::ORM::Relations::Interface do
           subject.boss = boss
           subject.boss.should == boss
         end
+
+        it "should set the foreign_key in owner when target is set" do
+          pending
+          subject.boss = boss
+          subject.boss_id.should == boss.id
+        end
       end
     end
   end

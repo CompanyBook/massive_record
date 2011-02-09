@@ -50,7 +50,7 @@ module MassiveRecord
 
 
         def new_relation_proxy(owner)
-          Proxy.new(:owner => owner, :metadata => self)
+          proxy_class_name.constantize.new(:owner => owner, :metadata => self)
         end
 
         
@@ -73,6 +73,10 @@ module MassiveRecord
 
         def calculate_foreign_key
           name.downcase + "_id"
+        end
+
+        def proxy_class_name
+          "MassiveRecord::ORM::Relations::Proxy::"+relation_type.classify
         end
       end
     end

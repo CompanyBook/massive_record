@@ -101,7 +101,7 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
   describe "#new_relation_proxy" do
     let(:owner) { Person.new }
-    let(:proxy) { subject.new_relation_proxy(owner) }
+    let(:proxy) { subject.relation_type = "references_one" and subject.new_relation_proxy(owner) }
 
     it "should return a proxy where owner is assigned" do
       proxy.owner.should == owner
