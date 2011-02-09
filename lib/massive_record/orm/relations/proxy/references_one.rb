@@ -6,7 +6,7 @@ module MassiveRecord
 
           
           def target=(target)
-            owner.send(foreign_key_setter, target.id) if owner && target && persisting_foreign_key?
+            owner.send(foreign_key_setter, target.id) if target && persisting_foreign_key?
             super(target)
           end
 

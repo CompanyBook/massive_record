@@ -33,5 +33,11 @@ describe TestReferencesOneProxy do
       owner.boss = target
       owner.boss_id.should == target.id
     end
+
+    it "should not set the target's as the foreign key if we are not persisting the foreign key" do
+      metadata.should_receive(:persisting_foreign_key?).and_return(false)
+      owner.boss = target
+      owner.boss_id.should be_nil
+    end
   end
 end
