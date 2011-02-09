@@ -11,10 +11,11 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
 
   it "should be setting values by initializer" do
-    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle"
+    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_foreign_key_in => :info
     metadata.name.should == "car"
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
+    metadata.store_foreign_key_in.should == "info"
   end
 
 
