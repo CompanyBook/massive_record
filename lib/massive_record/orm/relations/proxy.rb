@@ -1,9 +1,13 @@
 module MassiveRecord
   module ORM
     module Relations
-      
       #
-      # Parent class for all proxies sitting between records
+      # Parent class for all proxies sitting between records.
+      # It's responsibility is to transparently load and forward
+      # method calls to it's target. Iy may also do some small maintenance
+      # work like setting foreign key in owner object etc. That kind of
+      # functionality is likely to be implemented in one of it's more
+      # specific sub class proxies.
       #
       class Proxy
         instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a|inspect|to_s|extend|equal\?)$|^__|^respond_to|^should|^instance_variable_/ }
@@ -22,11 +26,25 @@ module MassiveRecord
         end
 
 
+        #
+        # The target of a relation is the record
+        # the owner references. For instance,
+        # 
+        # class Person
+        #   references_one :car
+        # end
+        #
+        # The owner is a record of class person, the target will be the car.
+        #
         def target=(target)
           @target = target
           loaded! unless @target.nil?
         end
         
+        #
+        # Returns the target. Loads it, if it's not there.
+        # Returns nil if for some reason target could not be found.
+        #
         def load_target
           self.target = find_target if find_target?
           target
@@ -53,6 +71,9 @@ module MassiveRecord
 
 
 
+        #
+        # If the proxy is loaded it has a target
+        #
         def loaded?
           !!@loaded
         end
@@ -81,15 +102,22 @@ module MassiveRecord
         protected
 
         #
-        # Abstract method used to find target for the proxy.
+        # "Abstract" method used to find target for the proxy.
         #
         def find_target
         end
 
+        #
+        # When are we suppoed to find a target? Find a target is done
+        # through load_target.
+        #
         def find_target?
           !loaded? && can_find_target?
         end
 
+        #
+        # Override this to controll when a target may be found.
+        #
         def can_find_target?
           false
         end
