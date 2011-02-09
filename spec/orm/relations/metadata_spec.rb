@@ -70,6 +70,13 @@ describe MassiveRecord::ORM::Relations::Metadata do
     end
   end
 
+  describe "#foreign_key_setter" do
+    it "should return whatever the foreign_key is pluss =" do
+      subject.should_receive(:foreign_key).and_return("custom_key")
+      subject.foreign_key_setter.should == "custom_key="
+    end
+  end
+
 
 
   describe "#store_foreign_key_in" do

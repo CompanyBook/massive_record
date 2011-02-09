@@ -11,13 +11,14 @@ module MassiveRecord
         attr_reader :target
         attr_accessor :owner, :metadata
 
-        delegate :foreign_key, :store_foreign_key_in, :class_name, :name, :persisting_foreign_key?, :to => :metadata
+        delegate :foreign_key, :foreign_key_setter, :store_foreign_key_in,
+          :class_name, :name, :persisting_foreign_key?, :to => :metadata
 
         def initialize(options = {})
           options.to_options!
+          self.metadata = options[:metadata]
           self.owner = options[:owner]
           self.target = options[:target]
-          self.metadata = options[:metadata]
         end
 
 
@@ -86,7 +87,11 @@ module MassiveRecord
         end
 
         def find_target?
-          !loaded?
+          !loaded? && can_find_target?
+        end
+
+        def can_find_target?
+          false
         end
       end
     end

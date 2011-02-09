@@ -35,6 +35,10 @@ module MassiveRecord
           (@foreign_key || calculate_foreign_key).to_s
         end
 
+        def foreign_key_setter
+          foreign_key+'='
+        end
+
         def class_name
           (@class_name || calculate_class_name).to_s
         end

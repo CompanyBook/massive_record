@@ -1,4 +1,6 @@
-shared_examples_for MassiveRecord::ORM::Relations::Proxy do
+shared_examples_for "relation proxy" do
+  let(:target) { mock(Object).as_null_object }
+
   %w(owner target metadata).each do |method|
     it "should respond to #{method}" do
       should respond_to method
@@ -6,9 +8,9 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
   end
 
   it "should be setting values by initializer" do
-    proxy = MassiveRecord::ORM::Relations::Proxy.new(:owner => "owner", :target => "target", :metadata => "metadata")
+    proxy = MassiveRecord::ORM::Relations::Proxy.new(:owner => "owner", :target => target, :metadata => "metadata")
     proxy.owner.should == "owner"
-    proxy.target.should == "target"
+    proxy.target.should == target
     proxy.metadata.should == "metadata"
   end
 
@@ -39,7 +41,7 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
     end
 
     it "should reset the target" do
-      subject.target = "foo"
+      subject.target = target
       subject.reset
       subject.stub(:find_target?).and_return(false)
       subject.target.should be_nil
@@ -62,11 +64,13 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
     end
 
     it "should return target if loaded successfully" do
-      subject.should_receive(:find_target) { "foo" }
-      subject.reload.should == "foo"
+      subject.should_receive(:can_find_target?).and_return true
+      subject.should_receive(:find_target) { target }
+      subject.reload.should == target
     end
 
     it "should return nil if loading of target failed" do
+      subject.stub(:can_find_target?).and_return true
       subject.should_receive(:find_target).and_raise MassiveRecord::ORM::RecordNotFound
       subject.reload.should be_nil
     end
@@ -74,7 +78,7 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
 
 
   describe "forward method calls to target" do
-    let(:target) { mock(Object, :target_method => "return value") }
+    let(:target) { mock(Object, :target_method => "return value", :id => "dummy-id") }
 
     before do
       subject.target = target
@@ -103,8 +107,8 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
       end
 
       it "should call target's method if it responds to it" do
-        target.should_receive(:target_method).and_return("foo")
-        subject.target_method.should == "foo"
+        target.should_receive(:target_method).and_return(target)
+        subject.target_method.should == target
       end
 
       it "should rause no method error if no one responds to it" do
@@ -116,12 +120,12 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
 
   describe "target" do
     it "should return the target if it is present" do
-      subject.target = "foo"
-      subject.target.should == "foo"
+      subject.target = target
+      subject.target.should == target
     end
 
     it "should be consodered loaded if a target has been set" do
-      subject.target = "foo"
+      subject.target = target
       should be_loaded
     end
 
@@ -132,12 +136,14 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
     end
 
     it "should try to load the target if it has not been loaded" do
-      subject.should_receive(:find_target) { "foo" }
+      subject.stub(:can_find_target?).and_return true
+      subject.should_receive(:find_target) { target }
       subject.load_target
-      subject.target.should == "foo"
+      subject.target.should == target
     end
 
     it "should reset proxy if target's record was not found" do
+      subject.stub(:can_find_target?).and_return true
       subject.should_receive(:find_target).and_raise MassiveRecord::ORM::RecordNotFound
       subject.load_target.should be_nil
     end
