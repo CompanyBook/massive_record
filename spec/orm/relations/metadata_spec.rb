@@ -18,6 +18,8 @@ describe MassiveRecord::ORM::Relations::Metadata do
   end
 
 
+  its(:name) { should be_nil }
+
   it "should return name as string" do
     subject.name = :foo
     subject.name.should == "foo"
@@ -69,6 +71,22 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.should_receive(:calculate_foreign_key).once.and_return("foo")
       2.times { subject.foreign_key }
     end
+  end
+
+
+
+  describe "#store_foreign_key_in" do
+    its(:store_foreign_key_in) { should be_nil }
+
+    it "should be able to set column family to store foreign key in" do
+      subject.store_foreign_key_in = :info
+      subject.store_foreign_key_in.should == "info"
+    end
+  end
+
+  it "should know its persisting foreign key if foreign key stored in has been set" do
+    subject.store_foreign_key_in = :info
+    should be_persisting_foreign_key
   end
 
 

@@ -7,7 +7,6 @@ module MassiveRecord
       # references_one :employee, :foreign_key => "person_id", :class_name => "Person"
       #
       # TODO
-      #   * We need to store which column_family to inject foreign_key in if that is needed.
       #   * We need a way to supply custom finder method, so that proxy's find_target uses
       #     some custom loading in cases we want to start scan from given key for instance.
       #
@@ -15,7 +14,7 @@ module MassiveRecord
       class Metadata
         extend ActiveSupport::Memoizable
         
-        attr_writer :foreign_key, :class_name, :name
+        attr_writer :foreign_key, :store_foreign_key_in, :class_name, :name
 
         
         def initialize(name, options = {})
@@ -27,7 +26,7 @@ module MassiveRecord
 
 
         def name
-          @name.to_s
+          @name.to_s if @name
         end
 
         def foreign_key
@@ -39,6 +38,16 @@ module MassiveRecord
           (@class_name || calculate_class_name).to_s
         end
         memoize :class_name
+
+
+        def store_foreign_key_in
+          @store_foreign_key_in.to_s if @store_foreign_key_in
+        end
+
+        def persisting_foreign_key?
+          !!store_foreign_key_in
+        end
+
 
 
 
