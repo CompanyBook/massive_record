@@ -31,13 +31,7 @@ module MassiveRecord
             end
 
             if metadata.persisting_foreign_key?
-              redefine_method(metadata.foreign_key) do
-
-              end
-
-              redefine_method(metadata.foreign_key+'=') do |id|
-
-              end
+              add_field_to_column_family(metadata.store_foreign_key_in, metadata.foreign_key)
             end
           end
         end

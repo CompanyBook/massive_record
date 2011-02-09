@@ -128,7 +128,7 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
     it "should not try to load target if it has been loaded" do
       subject.loaded!
       should_not_receive :find_target
-      subject.target.should be_nil
+      subject.load_target.should be_nil
     end
 
     it "should try to load the target if it has not been loaded" do

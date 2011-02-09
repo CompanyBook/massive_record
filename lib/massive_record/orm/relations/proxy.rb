@@ -11,6 +11,7 @@ module MassiveRecord
         attr_reader :target
         attr_accessor :owner, :metadata
 
+        delegate :foreign_key, :store_foreign_key_in, :class_name, :name, :persisting_foreign_key?, :to => :metadata
 
         def initialize(options = {})
           options.to_options!
@@ -27,6 +28,7 @@ module MassiveRecord
         
         def load_target
           self.target = find_target if find_target?
+          target
         rescue RecordNotFound
           reset
         end
@@ -62,11 +64,11 @@ module MassiveRecord
 
 
         def respond_to?(*args)
-          super || (target && target.respond_to?(*args))
+          super || (load_target && target.respond_to?(*args))
         end
 
         def method_missing(method, *args, &block)
-          return target.send(method, *args, &block) if target && target.respond_to?(method)
+          return target.send(method, *args, &block) if load_target && target.respond_to?(method)
           super
         rescue NoMethodError => e
           raise e, e.message.sub(/ for #<.*$/, " via proxy for #{target}")
@@ -81,7 +83,6 @@ module MassiveRecord
         # Abstract method used to find target for the proxy.
         #
         def find_target
-          raise "Needs implementation!"
         end
 
         def find_target?

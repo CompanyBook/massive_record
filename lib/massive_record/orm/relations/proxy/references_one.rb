@@ -10,7 +10,7 @@ module MassiveRecord
           private
 
           def find_target
-
+            class_name.constantize.find(owner.send(foreign_key))
           end
         end
       end
