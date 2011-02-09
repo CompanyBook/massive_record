@@ -5,6 +5,13 @@ shared_examples_for MassiveRecord::ORM::Relations::Proxy do
     end
   end
 
+  it "should be setting values by initializer" do
+    proxy = MassiveRecord::ORM::Relations::Proxy.new(:owner => "owner", :target => "target", :metadata => "metadata")
+    proxy.owner.should == "owner"
+    proxy.target.should == "target"
+    proxy.metadata.should == "metadata"
+  end
+
   describe "#loaded" do
     it "should be true when loaded" do
       subject.instance_variable_set :@loaded, true

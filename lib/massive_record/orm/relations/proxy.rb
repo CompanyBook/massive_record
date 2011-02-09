@@ -12,10 +12,17 @@ module MassiveRecord
         attr_accessor :owner, :metadata
 
 
+        def initialize(options = {})
+          options.to_options!
+          self.owner = options[:owner]
+          self.target = options[:target]
+          self.metadata = options[:metadata]
+        end
+
 
         def target=(target)
           @target = target
-          loaded!
+          loaded! unless @target.nil?
         end
         
         def load_target
