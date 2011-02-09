@@ -42,11 +42,6 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.name = :employee
       subject.class_name.should == "Employee"
     end
-
-    it "should not need to calculate twice" do
-      subject.should_receive(:calculate_class_name).once.and_return("foo")
-      2.times { subject.class_name }
-    end
   end
 
 
@@ -63,14 +58,10 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.foreign_key.should == "person_id"
     end
 
-    it "should try and calculate the foreign key from the class name" do
-      subject.name = Person
+    it "should try and calculate the foreign key from the name" do
+      subject.class_name = "PersonWithSomething"
+      subject.name = :person
       subject.foreign_key.should == "person_id"
-    end
-
-    it "should not need to calculate twice" do
-      subject.should_receive(:calculate_foreign_key).once.and_return("foo")
-      2.times { subject.foreign_key }
     end
   end
 

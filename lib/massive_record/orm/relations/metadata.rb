@@ -12,10 +12,7 @@ module MassiveRecord
       #
       #
       class Metadata
-        extend ActiveSupport::Memoizable
-        
         attr_writer :foreign_key, :store_foreign_key_in, :class_name, :name
-
         
         def initialize(name, options = {})
           options.to_options!
@@ -33,12 +30,10 @@ module MassiveRecord
         def foreign_key
           (@foreign_key || calculate_foreign_key).to_s
         end
-        memoize :foreign_key
 
         def class_name
           (@class_name || calculate_class_name).to_s
         end
-        memoize :class_name
 
 
         def store_foreign_key_in
@@ -71,7 +66,7 @@ module MassiveRecord
         end
 
         def calculate_foreign_key
-          class_name.downcase + "_id"
+          name.downcase + "_id"
         end
       end
     end

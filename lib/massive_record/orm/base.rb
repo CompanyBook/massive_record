@@ -175,6 +175,7 @@ module MassiveRecord
 
     Base.class_eval do
       include Config
+      include Relations::Interface
       include Persistence
       include Finders
       include ActiveModel::Translation
