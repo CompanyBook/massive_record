@@ -19,10 +19,14 @@ describe MassiveRecord::ORM::Relations::Interface do
 
   describe "references one" do
     describe "relation's meta data" do
-      subject { Person }
+      subject { Person.relations.detect { |relation| relation.name == "boss" } }
 
       it "should have the reference one meta data stored in relations" do
-        subject.relations.detect { |relation| relation.name == "boss" }.should_not be_nil
+        Person.relations.detect { |relation| relation.name == "boss" }.should_not be_nil
+      end
+
+      it "should have type set to references_one" do
+        subject.relation_type.should == "references_one"
       end
     end
 

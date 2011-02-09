@@ -13,6 +13,7 @@ module MassiveRecord
         module ClassMethods
           def references_one(name, *args)
             metadata = Metadata.new(name, *args)
+            metadata.relation_type = 'references_one'
             self.relations << metadata
             create_references_one_accessors(metadata)
           end
