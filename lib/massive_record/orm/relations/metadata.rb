@@ -12,7 +12,7 @@ module MassiveRecord
       #
       #
       class Metadata
-        attr_writer :foreign_key, :store_foreign_key_in, :class_name, :name
+        attr_writer :foreign_key, :store_foreign_key_in, :class_name, :name, :relation_type
         
         def initialize(name, options = {})
           options.to_options!
@@ -25,6 +25,10 @@ module MassiveRecord
 
         def name
           @name.to_s if @name
+        end
+
+        def relation_type
+          @relation_type.to_s if @relation_type
         end
 
         def foreign_key

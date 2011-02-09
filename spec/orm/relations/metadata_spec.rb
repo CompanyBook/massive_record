@@ -4,7 +4,7 @@ require 'orm/models/person'
 describe MassiveRecord::ORM::Relations::Metadata do
   subject { MassiveRecord::ORM::Relations::Metadata.new(nil) }
 
-  %w(name foreign_key class_name).each do |attr|
+  %w(name foreign_key class_name relation_type).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
   end
@@ -16,6 +16,11 @@ describe MassiveRecord::ORM::Relations::Metadata do
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
     metadata.store_foreign_key_in.should == "info"
+  end
+
+  it "should not be possible to set relation type through initializer" do
+    metadata = subject.class.new :car, :relation_type => :foo
+    metadata.relation_type.should be_nil
   end
 
 
