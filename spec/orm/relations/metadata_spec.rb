@@ -103,7 +103,7 @@ describe MassiveRecord::ORM::Relations::Metadata do
     end
 
     it "should return a proxy where metadata is assigned" do
-      proxy.Metadata.should == subject
+      proxy.metadata.should == subject
     end
   end
 end

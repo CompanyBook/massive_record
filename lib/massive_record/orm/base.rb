@@ -70,6 +70,7 @@ module MassiveRecord
         self.attributes = attributes
         @new_record = true
         @destroyed = @readonly = false
+        @relation_proxy_cache = {}
 
         _run_initialize_callbacks
       end
@@ -90,6 +91,7 @@ module MassiveRecord
       def init_with(coder)
         @new_record = false
         @destroyed = @readonly = false
+        @relation_proxy_cache = {}
 
         self.attributes_raw = coder['attributes']
 

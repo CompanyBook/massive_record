@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'orm/models/person'
+require 'orm/models/person_with_timestamps'
 
 describe MassiveRecord::ORM::Relations::Interface do
   include SetUpHbaseConnectionBeforeAll 
@@ -28,11 +29,24 @@ describe MassiveRecord::ORM::Relations::Interface do
 
     describe "instance" do
       subject { Person.new }
+      let(:boss) { PersonWithTimestamps.new }
 
       it { should respond_to :boss }
       it { should respond_to :boss= }
       it { should respond_to :boss_id }
       it { should respond_to :boss_id= }
+
+
+      describe "record getter and setter" do
+        it "should return nil if foreign_key is nil" do
+          subject.boss.should be_nil 
+        end
+
+        it "should return the proxy's target if boss is set" do
+          subject.boss = boss
+          subject.boss.should == boss
+        end
+      end
     end
   end
 end
