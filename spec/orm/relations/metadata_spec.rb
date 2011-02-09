@@ -91,4 +91,19 @@ describe MassiveRecord::ORM::Relations::Metadata do
   it "should have the same hash value for the same name" do
     subject.hash == subject.name.hash
   end
+
+
+
+  describe "#new_relation_proxy" do
+    let(:owner) { Person.new }
+    let(:proxy) { subject.new_relation_proxy(owner) }
+
+    it "should return a proxy where owner is assigned" do
+      proxy.owner.should == owner
+    end
+
+    it "should return a proxy where metadata is assigned" do
+      proxy.Metadata.should == subject
+    end
+  end
 end

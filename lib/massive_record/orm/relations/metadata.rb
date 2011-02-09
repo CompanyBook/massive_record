@@ -45,7 +45,9 @@ module MassiveRecord
         end
 
 
-
+        def new_relation_proxy(owner)
+          Proxy.new(:owner => owner, :metadata => self)
+        end
 
         
         def ==(other)
