@@ -14,7 +14,7 @@ module MassiveRecord
           def references_one(name, *args)
             metadata = Metadata.new(name, *args)
             metadata.relation_type = 'references_one'
-            self.relations << metadata
+            raise RelationAlreadyDefined unless self.relations.add?(metadata)
             create_references_one_accessors(metadata)
           end
 

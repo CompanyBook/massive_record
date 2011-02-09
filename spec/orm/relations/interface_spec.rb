@@ -28,6 +28,10 @@ describe MassiveRecord::ORM::Relations::Interface do
       it "should have type set to references_one" do
         subject.relation_type.should == "references_one"
       end
+
+      it "should raise an error if the same relaton is called for twice" do
+        lambda { Person.references_one :boss }.should raise_error MassiveRecord::ORM::RelationAlreadyDefined
+      end
     end
 
 
