@@ -14,6 +14,9 @@ describe TestReferencesOneProxy do
   let(:target) { PersonWithTimestamps.new }
   let(:metadata) { subject.metadata }
 
+  it "should be possible to assign relation in new" do
+    lambda { Person.new(:boss => PersonWithTimestamps.new) }.should_not raise_error
+  end
 
   describe "#find_target" do
     it "should not try to find anything if foreign key is nil" do
