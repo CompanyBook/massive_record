@@ -1,4 +1,11 @@
 require 'yaml'
+
+require 'massive_record/adapters/thrift/column_family'
+require 'massive_record/adapters/thrift/connection'
+require 'massive_record/adapters/thrift/row'
+require 'massive_record/adapters/thrift/scanner'
+require 'massive_record/adapters/thrift/table'
+
 require 'massive_record/wrapper/connection'
 require 'massive_record/wrapper/tables_collection'
 require 'massive_record/wrapper/table'
