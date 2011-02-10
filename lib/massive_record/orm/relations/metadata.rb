@@ -13,6 +13,7 @@ module MassiveRecord
       #
       class Metadata
         attr_writer :foreign_key, :store_foreign_key_in, :class_name, :name, :relation_type
+        attr_accessor :find_with
         
         def initialize(name, options = {})
           options.to_options!
@@ -20,6 +21,7 @@ module MassiveRecord
           self.foreign_key = options[:foreign_key]
           self.store_foreign_key_in = options[:store_foreign_key_in]
           self.class_name = options[:class_name]
+          self.find_with = options[:find_with]
         end
 
 

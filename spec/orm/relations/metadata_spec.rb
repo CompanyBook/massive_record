@@ -4,7 +4,7 @@ require 'orm/models/person'
 describe MassiveRecord::ORM::Relations::Metadata do
   subject { MassiveRecord::ORM::Relations::Metadata.new(nil) }
 
-  %w(name foreign_key class_name relation_type).each do |attr|
+  %w(name foreign_key class_name relation_type find_with).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
   end
