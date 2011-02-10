@@ -8,7 +8,7 @@ module MassiveRecord
         class ReferencesOne < Proxy
 
           def target=(target)
-            owner.send(foreign_key_setter, target.id) if target && persisting_foreign_key?
+            owner.send(foreign_key_setter, target.id) if target && owner.respond_to?(foreign_key_setter)
             super(target)
           end
 
