@@ -8,8 +8,13 @@ module MassiveRecord
         class ReferencesOne < Proxy
 
           def target=(target)
-            owner.send(foreign_key_setter, target.id) if target && owner.respond_to?(foreign_key_setter)
+            set_foreign_key_in_owner(target.id) if target
             super(target)
+          end
+
+          def replace(target)
+            super
+            set_foreign_key_in_owner(nil) if target.nil?
           end
 
 
@@ -21,6 +26,10 @@ module MassiveRecord
 
           def can_find_target?
             use_find_with? || owner.send(foreign_key).present?
+          end
+
+          def set_foreign_key_in_owner(id)
+            owner.send(foreign_key_setter, id) if owner.respond_to?(foreign_key_setter)
           end
         end
       end

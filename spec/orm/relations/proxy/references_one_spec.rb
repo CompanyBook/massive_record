@@ -57,6 +57,12 @@ describe TestReferencesOneProxy do
       owner.boss_id.should == target.id
     end
 
+    it "should reset the targets foreign key if target is nil" do
+      owner.boss = target
+      owner.boss = nil
+      owner.boss_id.should be_nil
+    end
+
     it "should not set the target's ida as the foreign key if we are not persisting the foreign key" do
       owner.stub(:respond_to?).and_return(false)
       owner.boss = target
