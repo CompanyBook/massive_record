@@ -20,7 +20,7 @@ module MassiveRecord
           end
 
           def can_find_target?
-            owner.send(foreign_key).present?
+            use_find_with? || owner.send(foreign_key).present?
           end
         end
       end

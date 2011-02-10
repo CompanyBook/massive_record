@@ -63,7 +63,7 @@ Tables also have:
     - Save / update methods
     - Auto-creation of table and column families on save if table does not exists.
     - Destroy records
-    - Relations:
+    - Relations: references_one. See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
 
 
 Here is an example of usage, both for Table and Column:

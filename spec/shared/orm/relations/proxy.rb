@@ -1,6 +1,10 @@
 shared_examples_for "relation proxy" do
   let(:target) { mock(Object).as_null_object }
 
+  before do
+    subject.metadata = mock(MassiveRecord::ORM::Relations::Metadata).as_null_object if subject.metadata.nil?
+  end
+
   %w(owner target metadata).each do |method|
     it "should respond to #{method}" do
       should respond_to method
@@ -166,6 +170,23 @@ shared_examples_for "relation proxy" do
     it "should reset the proxy if asked to replace with nil" do
       subject.should_receive(:reset)
       subject.replace(nil)
+    end
+  end
+
+  describe "find_with" do
+    let(:metadata) { MassiveRecord::ORM::Relations::Metadata.new 'name', :find_with => Proc.new { |target| Person.find("testing-123") }}
+    let(:person) { Person.new }
+
+    before do
+      subject.metadata = metadata
+      subject.stub(:can_find_target?).and_return(true)
+    end
+
+    it "should use metadata's find with if exists" do
+      Person.should_receive(:find).with("testing-123").and_return(person)
+
+      should_not_receive :find_target
+      subject.load_target 
     end
   end
 end

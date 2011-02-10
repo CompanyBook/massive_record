@@ -6,10 +6,11 @@ describe TestReferencesOneProxy do
   include SetUpHbaseConnectionBeforeAll 
   include SetTableNamesToTestTable
 
+  subject { owner.send(:relation_proxy, 'boss') }
+
   it_should_behave_like "relation proxy"
 
   let(:owner) { Person.new }
-  subject { owner.send(:relation_proxy, 'boss') }
   let(:target) { PersonWithTimestamps.new }
   let(:metadata) { subject.metadata }
 
@@ -25,6 +26,25 @@ describe TestReferencesOneProxy do
       owner.boss_id = "id"
       PersonWithTimestamps.should_receive(:find).with("id").and_return(target)
       subject.load_target.should == target
+    end
+  end
+
+  describe "find with proc" do
+    let(:person) { Person.new }
+
+    before do
+      subject.metadata.find_with = Proc.new { |target| Person.find("testing-123") }
+      owner.boss_id = nil
+    end
+
+    it "should not call find_target" do
+      should_not_receive :find_target
+      subject.load_target
+    end
+
+    it "should load by given proc" do
+      Person.should_receive(:find).with("testing-123").and_return(person)
+      subject.load_target.should == person
     end
   end
 

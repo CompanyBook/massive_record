@@ -6,11 +6,6 @@ module MassiveRecord
       # The master of metadata related to a relation. For instance;
       # references_one :employee, :foreign_key => "person_id", :class_name => "Person"
       #
-      # TODO
-      #   * We need a way to supply custom finder method, so that proxy's find_target uses
-      #     some custom loading in cases we want to start scan from given key for instance.
-      #
-      #
       class Metadata
         attr_writer :foreign_key, :store_foreign_key_in, :class_name, :name, :relation_type
         attr_accessor :find_with

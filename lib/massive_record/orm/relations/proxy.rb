@@ -16,7 +16,7 @@ module MassiveRecord
         attr_accessor :owner, :metadata
 
         delegate :foreign_key, :foreign_key_setter, :store_foreign_key_in,
-          :class_name, :name, :persisting_foreign_key?, :to => :metadata
+          :class_name, :name, :persisting_foreign_key?, :find_with, :to => :metadata
 
         def initialize(options = {})
           options.to_options!
@@ -46,7 +46,7 @@ module MassiveRecord
         # Returns nil if for some reason target could not be found.
         #
         def load_target
-          self.target = find_target if find_target?
+          self.target = find_target_or_find_with if find_target?
           target
         rescue RecordNotFound
           reset
@@ -103,12 +103,14 @@ module MassiveRecord
 
         #
         # "Abstract" method used to find target for the proxy.
+        # Implement in subclasses. It is not called when the meta
+        # data contains a find_with proc; in that case it is used instead
         #
         def find_target
         end
 
         #
-        # When are we suppoed to find a target? Find a target is done
+        # When are we supposed to find a target? Find a target is done
         # through load_target.
         #
         def find_target?
@@ -120,6 +122,14 @@ module MassiveRecord
         #
         def can_find_target?
           false
+        end
+
+        def find_target_or_find_with
+          use_find_with? ? find_with.call(owner) : find_target
+        end
+
+        def use_find_with?
+          find_with.present? && find_with.respond_to?(:call)
         end
       end
     end
