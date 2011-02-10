@@ -19,7 +19,7 @@ module MassiveRecord
           find_many = type == :all
           expected_result_size = nil
 
-          return (find_many ? [] : nil) unless table.exists?
+          return (find_many ? [] : raise(RecordNotFound.new("Could not find #{model_name} with id=#{args.first}"))) unless table.exists?
           
           result_from_table = if type
                                 table.send(type, *args) # first() / all()
