@@ -6,7 +6,7 @@ module MassiveRecord
 
         included do
           class_attribute :relations, :instance_writer => false
-          self.relations = Set.new
+          self.relations = nil
         end
 
 
@@ -35,6 +35,8 @@ module MassiveRecord
           #                                     As a default TargetClass.find(foreign_key_method) is used.
           #
           def references_one(name, *args)
+            ensure_relations_exists
+
             metadata = Metadata.new(name, *args)
             metadata.relation_type = 'references_one'
             raise RelationAlreadyDefined unless self.relations.add?(metadata)
@@ -42,6 +44,10 @@ module MassiveRecord
           end
 
           private
+
+          def ensure_relations_exists
+            self.relations = Set.new if relations.nil?
+          end
 
 
           def create_references_one_accessors(metadata)

@@ -14,6 +14,10 @@ describe MassiveRecord::ORM::Relations::Interface do
         it { should respond_to relation }
       end
     end
+
+    it "should not share relations" do
+      Person.relations.should_not == PersonWithTimestamps.relations
+    end
   end
 
 
