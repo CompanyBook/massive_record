@@ -46,7 +46,7 @@ module MassiveRecord
 
           def create_references_one_accessors(metadata)
             redefine_method(metadata.name) do
-              relation_proxy(metadata.name).target
+              relation_proxy(metadata.name).load_target
             end
 
             redefine_method(metadata.name+'=') do |record|

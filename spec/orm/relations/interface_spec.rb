@@ -59,6 +59,18 @@ describe MassiveRecord::ORM::Relations::Interface do
           subject.boss = boss
           subject.boss_id.should == boss.id
         end
+
+        it "should load target object when read method is called" do
+          PersonWithTimestamps.should_receive(:find).and_return(boss)
+          subject.boss_id = boss.id
+          subject.boss.should == boss
+        end
+
+        it "should not load target twice" do
+          PersonWithTimestamps.should_receive(:find).once.and_return(boss)
+          subject.boss_id = boss.id
+          2.times { subject.boss }
+        end
       end
     end
   end
