@@ -68,6 +68,7 @@ module MassiveRecord
           if target.nil?
             reset 
           else
+            raise_if_type_mismatch(target)
             self.target = target
           end
         end
@@ -133,6 +134,13 @@ module MassiveRecord
 
         def use_find_with?
           find_with.present? && find_with.respond_to?(:call)
+        end
+
+        def raise_if_type_mismatch(record)
+          unless record.is_a? class_name.constantize
+            message = "#{class_name}(##{class_name.constantize.object_id}) expected, got #{record.class}(##{record.class.object_id})"
+            raise RelationTypeMismatch.new(message)
+          end
         end
       end
     end

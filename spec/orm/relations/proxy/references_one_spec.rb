@@ -6,13 +6,13 @@ describe TestReferencesOneProxy do
   include SetUpHbaseConnectionBeforeAll 
   include SetTableNamesToTestTable
 
-  subject { owner.send(:relation_proxy, 'boss') }
-
-  it_should_behave_like "relation proxy"
-
   let(:owner) { Person.new }
   let(:target) { PersonWithTimestamps.new }
   let(:metadata) { subject.metadata }
+
+  subject { owner.send(:relation_proxy, 'boss') }
+
+  it_should_behave_like "relation proxy"
 
   it "should be possible to assign relation in new" do
     lambda { Person.new(:boss => PersonWithTimestamps.new) }.should_not raise_error
@@ -72,6 +72,10 @@ describe TestReferencesOneProxy do
     it "should set the target's id as the foreign key even if we are not persisting it if the record responds to setter method" do
       owner.boss = target
       owner.boss_id.should == target.id
+    end
+
+    it "should raise an error if there is a type mismatch" do
+      lambda { owner.boss = Person.new }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
     end
   end
 end

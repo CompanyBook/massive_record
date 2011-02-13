@@ -155,8 +155,8 @@ shared_examples_for "relation proxy" do
 
 
   describe "replace" do
-    let (:old_target) { Person.new }
-    let (:new_target) { Person.new }
+    let (:old_target) { subject.class_name.constantize.new }
+    let (:new_target) { subject.class_name.constantize.new }
 
     before do
       subject.target = old_target
@@ -187,6 +187,24 @@ shared_examples_for "relation proxy" do
 
       should_not_receive :find_target
       subject.load_target 
+    end
+  end
+
+  describe "type checking of targets" do
+    let(:metadata) { MassiveRecord::ORM::Relations::Metadata.new 'person' }
+    let(:person) { Person.new }
+    let(:person_with_timestamps) { PersonWithTimestamps.new }
+
+    before do
+      subject.metadata = metadata
+    end
+
+    it "should not raise error if metadata's class corresponds to given target" do
+      lambda { subject.send :raise_if_type_mismatch, person }.should_not raise_error MassiveRecord::ORM::RelationTypeMismatch
+    end
+
+    it "should not raise error if metadata's class corresponds to given target" do
+      lambda { subject.send :raise_if_type_mismatch, person_with_timestamps }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
     end
   end
 end
