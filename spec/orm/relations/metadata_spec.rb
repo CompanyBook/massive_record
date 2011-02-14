@@ -125,4 +125,26 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.relation_type.should == "references_one_polymorphic"
     end
   end
+
+
+  describe "#polymorphic_type_column" do
+    before do
+      subject.polymorphic = true
+    end
+
+    it "should remove _id and add _type to foreign_key" do
+      subject.should_receive(:foreign_key).and_return("foo_id")
+      subject.polymorphic_type_column.should == "foo_type"
+    end
+
+    it "should simply add _type if foreign_key does not end on _id" do
+      subject.should_receive(:foreign_key).and_return("foo_id_b")
+      subject.polymorphic_type_column.should == "foo_id_b_type"
+    end
+
+    it "should return setter method" do
+      subject.should_receive(:polymorphic_type_column).and_return("yey")
+      subject.polymorphic_type_column_setter.should == "yey="
+    end
+  end
 end

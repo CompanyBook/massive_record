@@ -45,6 +45,15 @@ module MassiveRecord
           foreign_key+'='
         end
 
+        def polymorphic_type_column
+          type_column = foreign_key.gsub(/_id$/, '')
+          type_column + "_type"
+        end
+
+        def polymorphic_type_column_setter
+          polymorphic_type_column+'='
+        end
+
         def class_name
           (@class_name || calculate_class_name).to_s
         end
