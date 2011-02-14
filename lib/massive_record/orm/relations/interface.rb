@@ -41,6 +41,7 @@ module MassiveRecord
             metadata.relation_type = 'references_one'
             raise RelationAlreadyDefined unless self.relations.add?(metadata)
             create_references_one_accessors(metadata)
+            create_references_one_polymorphic_accessors(metadata) if metadata.polymorphic?
           end
 
           private
@@ -61,6 +62,12 @@ module MassiveRecord
 
             if metadata.persisting_foreign_key?
               add_field_to_column_family(metadata.store_in, metadata.foreign_key)
+            end
+          end
+
+          def create_references_one_polymorphic_accessors(metadata)
+            if metadata.persisting_foreign_key?
+              add_field_to_column_family(metadata.store_in, metadata.polymorphic_type_column)
             end
           end
         end
