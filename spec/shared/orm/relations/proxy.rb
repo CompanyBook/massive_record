@@ -207,4 +207,17 @@ shared_examples_for "relation proxy" do
       lambda { subject.send :raise_if_type_mismatch, person_with_timestamps }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
     end
   end
+
+  describe "target_class" do
+    let(:metadata) { MassiveRecord::ORM::Relations::Metadata.new 'person' }
+
+    before do
+      subject.metadata = metadata
+    end
+
+
+    it "should return correct class of the" do
+      subject.target_class.should == Person
+    end
+  end
 end

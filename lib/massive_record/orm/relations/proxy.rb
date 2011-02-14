@@ -40,6 +40,10 @@ module MassiveRecord
           @target = target
           loaded! unless @target.nil?
         end
+
+        def target_class
+          class_name.constantize
+        end
         
         #
         # Returns the target. Loads it, if it's not there.
@@ -134,8 +138,8 @@ module MassiveRecord
         end
 
         def raise_if_type_mismatch(record)
-          unless record.is_a? class_name.constantize
-            message = "#{class_name}(##{class_name.constantize.object_id}) expected, got #{record.class}(##{record.class.object_id})"
+          unless record.is_a? target_class
+            message = "#{class_name}(##{target_class.object_id}) expected, got #{record.class}(##{record.class.object_id})"
             raise RelationTypeMismatch.new(message)
           end
         end
