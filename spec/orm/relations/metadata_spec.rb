@@ -11,11 +11,11 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
 
   it "should be setting values by initializer" do
-    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_foreign_key_in => :info
+    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info
     metadata.name.should == "car"
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
-    metadata.store_foreign_key_in.should == "info"
+    metadata.store_in.should == "info"
   end
 
   it "should not be possible to set relation type through initializer" do
@@ -79,17 +79,17 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
 
 
-  describe "#store_foreign_key_in" do
-    its(:store_foreign_key_in) { should be_nil }
+  describe "#store_in" do
+    its(:store_in) { should be_nil }
 
     it "should be able to set column family to store foreign key in" do
-      subject.store_foreign_key_in = :info
-      subject.store_foreign_key_in.should == "info"
+      subject.store_in = :info
+      subject.store_in.should == "info"
     end
   end
 
   it "should know its persisting foreign key if foreign key stored in has been set" do
-    subject.store_foreign_key_in = :info
+    subject.store_in = :info
     should be_persisting_foreign_key
   end
 

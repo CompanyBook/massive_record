@@ -15,7 +15,7 @@ module MassiveRecord
         attr_reader :target
         attr_accessor :owner, :metadata
 
-        delegate :foreign_key, :foreign_key_setter, :store_foreign_key_in,
+        delegate :foreign_key, :foreign_key_setter, :store_in,
           :class_name, :name, :persisting_foreign_key?, :find_with, :to => :metadata
 
         def initialize(options = {})
