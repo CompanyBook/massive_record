@@ -14,7 +14,11 @@ module MassiveRecord
           options.to_options!
           self.name = name
           self.foreign_key = options[:foreign_key]
-          self.store_in = options[:store_in]
+          if options.has_key? :store_in
+            self.store_in = options[:store_in]
+          elsif options.has_key? :store_foreign_key_in
+            self.store_foreign_key_in = options[:store_foreign_key_in]
+          end
           self.class_name = options[:class_name]
           self.find_with = options[:find_with]
         end
@@ -43,6 +47,16 @@ module MassiveRecord
 
         def store_in
           @store_in.to_s if @store_in
+        end
+
+        def store_foreign_key_in
+          ActiveSupport::Deprecation.warn("store_foreign_key_in is deprecated. Use store_in instead!")
+          store_in
+        end
+
+        def store_foreign_key_in=(column_family)
+          ActiveSupport::Deprecation.warn("store_foreign_key_in is deprecated. Use store_in instead!")
+          self.store_in = column_family
         end
 
         def persisting_foreign_key?
