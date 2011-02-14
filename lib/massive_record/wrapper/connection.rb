@@ -34,8 +34,8 @@ module MassiveRecord
         @client
       end
       
-      def active?
-        @transport.open?
+      def open?
+        @transport.try("open?")
       end
       
       def tables
