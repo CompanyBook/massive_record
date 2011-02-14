@@ -4,18 +4,19 @@ require 'orm/models/person'
 describe MassiveRecord::ORM::Relations::Metadata do
   subject { MassiveRecord::ORM::Relations::Metadata.new(nil) }
 
-  %w(name foreign_key class_name relation_type find_with).each do |attr|
+  %w(name foreign_key class_name relation_type find_with polymorphic).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
   end
 
 
   it "should be setting values by initializer" do
-    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info
+    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info, :polymorphic => true
     metadata.name.should == "car"
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
     metadata.store_in.should == "info"
+    metadata.should be_polymorphic
   end
 
   it "should not be possible to set relation type through initializer" do
@@ -116,6 +117,12 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
     it "should return a proxy where metadata is assigned" do
       proxy.metadata.should == subject
+    end
+
+    it "should append _polymorphic to the proxy name if it is polymorphic" do
+      subject.polymorphic = true
+      subject.relation_type = "references_one"
+      subject.relation_type.should == "references_one_polymorphic"
     end
   end
 end

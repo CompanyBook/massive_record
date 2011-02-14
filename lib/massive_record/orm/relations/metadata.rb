@@ -7,7 +7,7 @@ module MassiveRecord
       # references_one :employee, :foreign_key => "person_id", :class_name => "Person"
       #
       class Metadata
-        attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type
+        attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic
         attr_accessor :find_with
         
         def initialize(name, options = {})
@@ -21,6 +21,7 @@ module MassiveRecord
           end
           self.class_name = options[:class_name]
           self.find_with = options[:find_with]
+          self.polymorphic = options[:polymorphic]
         end
 
 
@@ -29,7 +30,11 @@ module MassiveRecord
         end
 
         def relation_type
-          @relation_type.to_s if @relation_type
+          if @relation_type
+            relation_type = @relation_type.to_s
+            relation_type += "_polymorphic" if polymorphic?
+            relation_type
+          end
         end
 
         def foreign_key
@@ -61,6 +66,15 @@ module MassiveRecord
 
         def persisting_foreign_key?
           !!store_in
+        end
+
+
+        def polymorphic
+          !!@polymorphic
+        end
+
+        def polymorphic?
+          polymorphic
         end
 
 
