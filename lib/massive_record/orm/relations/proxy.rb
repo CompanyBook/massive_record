@@ -16,6 +16,7 @@ module MassiveRecord
         attr_accessor :owner, :metadata
 
         delegate :foreign_key, :foreign_key_setter, :store_in, :store_foreign_key_in,
+          :polymorphic_type_column, :polymorphic_type_column_setter,
           :class_name, :name, :persisting_foreign_key?, :find_with, :to => :metadata
 
         def initialize(options = {})

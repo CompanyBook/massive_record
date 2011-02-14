@@ -78,4 +78,23 @@ describe TestReferencesOneProxy do
       lambda { owner.boss = Person.new }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
     end
   end
+
+
+  describe "type checking of targets" do
+    let(:metadata) { MassiveRecord::ORM::Relations::Metadata.new 'person' }
+    let(:person) { Person.new }
+    let(:person_with_timestamps) { PersonWithTimestamps.new }
+
+    before do
+      subject.metadata = metadata
+    end
+
+    it "should not raise error if metadata's class corresponds to given target" do
+      lambda { subject.send :raise_if_type_mismatch, person }.should_not raise_error MassiveRecord::ORM::RelationTypeMismatch
+    end
+
+    it "should not raise error if metadata's class corresponds to given target" do
+      lambda { subject.send :raise_if_type_mismatch, person_with_timestamps }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
+    end
+  end
 end
