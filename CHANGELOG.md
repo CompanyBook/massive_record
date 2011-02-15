@@ -1,5 +1,7 @@
 # v0.2.0 (git develop)
 
+- Setting a non-parsable value on date/time field will no longer raise an error.
+- Scanner no longer fetches with a limit of 10 by default. It is set to 100000000.
 - References one relations support polymorphic relations.
 - Simple implementation of references_one relation. This is where you have a foreign key you will look up in a different table.
 

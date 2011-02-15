@@ -132,17 +132,29 @@ describe MassiveRecord::ORM::Schema::Field do
     it "should decode a date type" do
       today = Date.today
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :date)
-      @subject.decode(today.to_s) == today
+      @subject.decode(today.to_s).should == today
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+    end
+
+    it "should set date to nil if date could not be parsed" do
+      today = "foobar"
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :date)
+      @subject.decode(today).should be_nil
     end
     
     it "should decode a time type" do
       today = Time.now
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
-      @subject.decode(today.to_s) == today
+      @subject.decode(today.to_s).to_i.should == today.to_i
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+    end
+
+    it "should set time to nil if date could not be parsed" do
+      today = "foobar"
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+      @subject.decode(today).should be_nil
     end
   end
 
