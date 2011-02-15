@@ -5,10 +5,10 @@ module MassiveRecord
       attr_accessor :table
   
       def create(column_family, opts = {})
-        if column_family.is_a?(MassiveRecord::Wrapper::ColumnFamily)
+        if column_family.is_a?(ADAPTER::ColumnFamily)
           self.push(column_family)
         else
-          self.push(MassiveRecord::Wrapper::ColumnFamily.new(column_family, opts))
+          self.push(ADAPTER::ColumnFamily.new(column_family, opts))
         end
     
         true

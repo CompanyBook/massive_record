@@ -354,6 +354,12 @@ describe "persistence" do
         it "should return an array of all removed objects" do
           Person.destroy_all.should == [@person]
         end
+
+        it "should destroy all even if it is above 10 rows (obviously)" do
+          15.times { |i| Person.create! :id => "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
+          Person.destroy_all
+          Person.all.length.should == 0
+        end
       end
     end
   end
