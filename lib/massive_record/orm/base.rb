@@ -9,6 +9,7 @@ require 'active_support/memoizable'
 require 'massive_record/orm/schema'
 require 'massive_record/orm/errors'
 require 'massive_record/orm/config'
+require 'massive_record/orm/relations'
 require 'massive_record/orm/finders'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
@@ -18,6 +19,7 @@ require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
+
 
 module MassiveRecord
   module ORM
@@ -64,10 +66,12 @@ module MassiveRecord
       # for describing column families and fields are in place
       #
       def initialize(attributes = {})
-        self.attributes_raw = attributes_from_field_definition.merge(attributes)
-        self.attributes = attributes
         @new_record = true
         @destroyed = @readonly = false
+        @relation_proxy_cache = {}
+
+        self.attributes_raw = attributes_from_field_definition.merge(attributes)
+        self.attributes = attributes
 
         _run_initialize_callbacks
       end
@@ -88,6 +92,7 @@ module MassiveRecord
       def init_with(coder)
         @new_record = false
         @destroyed = @readonly = false
+        @relation_proxy_cache = {}
 
         self.attributes_raw = coder['attributes']
 
@@ -173,6 +178,7 @@ module MassiveRecord
 
     Base.class_eval do
       include Config
+      include Relations::Interface
       include Persistence
       include Finders
       include ActiveModel::Translation

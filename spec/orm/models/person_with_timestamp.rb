@@ -1,4 +1,4 @@
-class PersonWithTimestamps < MassiveRecord::ORM::Table
+class PersonWithTimestamp < MassiveRecord::ORM::Table
   column_family :info do
     field :name
     field :email

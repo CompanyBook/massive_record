@@ -52,5 +52,14 @@ module MassiveRecord
     # Raised if you try to save a record which is read only
     class ReadOnlyRecord < MassiveRecordError
     end
+
+
+    # Raised when a relation s already defined
+    class RelationAlreadyDefined < MassiveRecordError
+    end
+
+    # Raised if target in a relation proxy does not match what the proxy expects
+    class RelationTypeMismatch < MassiveRecordError
+    end
   end
 end
