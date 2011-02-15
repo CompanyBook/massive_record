@@ -16,7 +16,7 @@ module MassiveRecord
           @start_key = opts[:start_key].to_s
           @offset_key = opts[:offset_key].to_s
           @created_at = opts[:created_at].to_s
-          @limit = opts[:limit] || 10
+          @limit = opts[:limit] || 100000000
         end
       
         def key

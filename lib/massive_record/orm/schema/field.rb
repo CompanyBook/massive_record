@@ -102,10 +102,9 @@ module MassiveRecord
           when :float
             value.to_s.empty? ? nil : value.to_f
           when :date
-            # TODO : find a nicer way to do that
-            value.empty? || value.to_s == "0" ? nil : Date.parse(value)
+            value.empty? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
           when :time
-            value.empty? ? nil : Time.parse(value)
+            value.empty? ? nil : (Time.parse(value) rescue nil)
           when :array
             value
           when :hash
