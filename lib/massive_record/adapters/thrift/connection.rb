@@ -23,7 +23,7 @@ module MassiveRecord
             transport.open()
             true
           rescue
-            raise MassiveRecord::ConnectionException.new, "Unable to connect to HBase on #{@host}, port #{@port}"
+            raise MassiveRecord::Wrapper::Errors::ConnectionException.new, "Unable to connect to HBase on #{@host}, port #{@port}"
           end
         end
       

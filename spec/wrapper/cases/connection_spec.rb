@@ -25,7 +25,7 @@ describe "A connection" do
    
   it "should not be able to open a new connection with a wrong configuration and Raise an error" do
     @connection.port = 1234
-    lambda{@connection.open}.should raise_error(MassiveRecord::ConnectionException)
+    lambda{@connection.open}.should raise_error(MassiveRecord::Wrapper::Errors::ConnectionException)
   end
   
   it "should be open if opened" do

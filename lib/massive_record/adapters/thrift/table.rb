@@ -12,7 +12,7 @@ module MassiveRecord
         end
     
         def init_column_families      
-          @column_families = ColumnFamiliesCollection.new
+          @column_families = MassiveRecord::Wrapper::ColumnFamiliesCollection.new
           @column_families.table = self
         end
     

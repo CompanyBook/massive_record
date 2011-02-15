@@ -1,5 +1,3 @@
-require 'json'
-
 module MassiveRecord
   module Adapters
     module Thrift
@@ -27,7 +25,7 @@ module MassiveRecord
     
         def fetch_column_families(list)
           @column_families = table.column_families.collect do |column_name, description|
-            ColumnFamily.new(column_name.split(":").first, {
+             MassiveRecord::Wrapper::ColumnFamily.new(column_name.split(":").first, {
               :row          => self,
               :name         => description.name,
               :max_versions => description.maxVersions,
@@ -60,7 +58,7 @@ module MassiveRecord
           column = "#{column_family_name}:#{column_name}"
       
           if @columns[column].nil?
-            @columns[column] = Cell.new({ :value => Cell.serialize_value(value), :created_at => Time.now })
+            @columns[column] =  MassiveRecord::Wrapper::Cell.new({ :value =>  MassiveRecord::Wrapper::Cell.serialize_value(value), :created_at => Time.now })
           else
             @columns[column].serialize_value(value)
           end
@@ -145,7 +143,7 @@ module MassiveRecord
           row.column_families = column_families
 
           result.columns.each do |name, value|
-            row.columns[name] = Cell.new({
+            row.columns[name] =  MassiveRecord::Wrapper::Cell.new({
               :value      => value.value,
               :created_at => Time.at(value.timestamp / 1000, (value.timestamp % 1000) * 1000)
             })
