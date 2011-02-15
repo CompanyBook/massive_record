@@ -39,11 +39,8 @@ module MassiveRecord
           #                           As a default TargetClass.find(foreign_key_method) is used.
           #
           def references_one(name, *args)
-            ensure_relations_exists
+            metadata = set_up_relation('references_one', name, *args)
 
-            metadata = Metadata.new(name, *args)
-            metadata.relation_type = 'references_one'
-            raise RelationAlreadyDefined unless self.relations.add?(metadata)
             create_references_one_accessors(metadata)
             create_references_one_polymorphic_accessors(metadata) if metadata.polymorphic?
           end
@@ -82,10 +79,20 @@ module MassiveRecord
           #
           #
           def references_many(name, *args)
-            # TODO
+            metadata = set_up_relation('references_many', name, *args)
+            create_references_many_accessors(metadata)
           end
 
           private
+
+          def set_up_relation(type, name, *args)
+            ensure_relations_exists
+
+            Metadata.new(name, *args).tap do |metadata|
+              metadata.relation_type = type
+              raise RelationAlreadyDefined unless self.relations.add?(metadata)
+            end
+          end
 
           def ensure_relations_exists
             self.relations = Set.new if relations.nil?
@@ -110,6 +117,16 @@ module MassiveRecord
           def create_references_one_polymorphic_accessors(metadata)
             if metadata.persisting_foreign_key?
               add_field_to_column_family(metadata.store_in, metadata.polymorphic_type_column)
+            end
+          end
+
+          def create_references_many_accessors(metadata)
+            redefine_method(metadata.name) do
+              relation_proxy(metadata.name)
+            end
+
+            if metadata.persisting_foreign_key?
+              add_field_to_column_family(metadata.store_in, metadata.foreign_key)
             end
           end
         end
