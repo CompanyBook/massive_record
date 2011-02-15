@@ -167,6 +167,11 @@ describe "finders" do
       all.should include @person, @bob
       all.length.should == 2
     end
+
+    it "should find all persons, even if it is more than 10" do
+      15.times { |i| Person.create! :id => "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
+      Person.all.length.should > 10
+    end
   end
   
   describe "#find_in_batches" do
