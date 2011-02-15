@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe MassiveRecord::Wrapper::Table do
+describe "A table" do
   
-  describe "with a new connection" do
+  describe "with an open connection" do
 
     before do
       @connection = MassiveRecord::Wrapper::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])

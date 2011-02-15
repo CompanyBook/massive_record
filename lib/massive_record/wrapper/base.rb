@@ -1,10 +1,8 @@
 require 'yaml'
 require 'json'
 
-module MassiveRecord; end
-
-require 'massive_record/wrapper/errors'
 require 'massive_record/wrapper/adapter'
+require 'massive_record/wrapper/errors'
 require 'massive_record/wrapper/tables_collection'
 require 'massive_record/wrapper/column_families_collection'
 require 'massive_record/wrapper/cell'
