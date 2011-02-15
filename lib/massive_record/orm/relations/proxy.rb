@@ -135,7 +135,7 @@ module MassiveRecord
         end
 
         def use_find_with?
-          find_with.present? && find_with.respond_to?(:call)
+          !find_with.nil? && find_with.respond_to?(:call)
         end
 
         def raise_if_type_mismatch(record)

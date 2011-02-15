@@ -2,7 +2,7 @@ shared_examples_for "relation proxy" do
   let(:target) { mock(Object).as_null_object }
 
   before do
-    subject.metadata = mock(MassiveRecord::ORM::Relations::Metadata).as_null_object if subject.metadata.nil?
+    subject.metadata = mock(MassiveRecord::ORM::Relations::Metadata, :find_with => nil).as_null_object if subject.metadata.nil?
   end
 
   %w(owner target metadata).each do |method|
