@@ -102,6 +102,14 @@ module MassiveRecord
         end
 
 
+
+        def represents_a_collection?
+          relation_type == 'references_many'
+        end
+
+
+
+
         private
 
 
@@ -110,7 +118,9 @@ module MassiveRecord
         end
 
         def calculate_foreign_key
-          name.downcase + "_id"
+          fk = name.downcase + "_id"
+          fk += "s" if represents_a_collection?
+          fk
         end
 
         def proxy_class_name
