@@ -1,5 +1,8 @@
 # v0.2.0 (git develop)
+
+- References one relations support polymorphic relations.
 - Simple implementation of references_one relation. This is where you have a foreign key you will look up in a different table.
+
 
 # v0.1.2 (git master)
 

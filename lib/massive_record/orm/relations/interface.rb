@@ -25,14 +25,16 @@ module MassiveRecord
           # First argument is the name of the relation. class_name and foreign key is calculated from it, if none given.
           #
           # Options, all optional:
-          #   <tt>class_name</tt>   Class name is calculated from name, but can be overridden here.
-          #   <tt>foreign_key</tt>  Foreign key is calculated from name suffixed by _id as default.
-          #   <tt>store_in</tt>::   Send in the column family to store foreign key in. If none given,
-          #                         you should define the foreign key method in class if it can be
-          #                         calculated from another attributes in your class.
-          #   <tt>find_with</tt>    Assign it to a Proc and we will call it with the owner if you need complete
-          #                         control over how you retrieve your record.
-          #                         As a default TargetClass.find(foreign_key_method) is used.
+          #   <tt>class_name</tt>::   Class name is calculated from name, but can be overridden here.
+          #   <tt>polymorphic</tt>::  Set it to true for make the association polymorphic. Will use foreign_key,
+          #                           remove the "_id" (if it's there) and add _type for it's reading/writing of type.
+          #   <tt>foreign_key</tt>::  Foreign key is calculated from name suffixed by _id as default.
+          #   <tt>store_in</tt>::     Send in the column family to store foreign key in. If none given,
+          #                           you should define the foreign key method in class if it can be
+          #                           calculated from another attributes in your class.
+          #   <tt>find_with</tt>::    Assign it to a Proc and we will call it with the owner if you need complete
+          #                           control over how you retrieve your record.
+          #                           As a default TargetClass.find(foreign_key_method) is used.
           #
           def references_one(name, *args)
             ensure_relations_exists
