@@ -4,6 +4,10 @@ module MassiveRecord
       class Proxy
         class ReferencesMany < Proxy
 
+          def reset
+            super
+            @target = []
+          end
 
           private
 
