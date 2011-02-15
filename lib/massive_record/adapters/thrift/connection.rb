@@ -12,11 +12,11 @@ module MassiveRecord
         end
       
         def transport
-          @transport ||= Thrift::BufferedTransport.new(Thrift::Socket.new(@host, @port, @timeout))
+          @transport ||= ::Thrift::BufferedTransport.new(::Thrift::Socket.new(@host, @port, @timeout))
         end
       
         def open
-          protocol = Thrift::BinaryProtocol.new(transport)
+          protocol = ::Thrift::BinaryProtocol.new(transport)
           @client = Apache::Hadoop::Hbase::Thrift::Hbase::Client.new(protocol)
         
           begin
@@ -40,7 +40,7 @@ module MassiveRecord
         end
       
         def tables
-          collection = TablesCollection.new
+          collection = MassiveRecord::Wrapper::TablesCollection.new
           collection.connection = self
           getTableNames().each{|table_name| collection.push(table_name)}
           collection
@@ -59,7 +59,7 @@ module MassiveRecord
             @client = nil
             open
             client.send(method, *args) if @client
-          rescue Thrift::TransportException
+          rescue ::Thrift::TransportException
             @transport = nil
             @client = nil
             open

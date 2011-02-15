@@ -31,5 +31,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activemodel
+  activesupport
   massive_record!
   rspec (>= 2.1.0)
+  thrift (>= 0.5.0)

@@ -6,17 +6,19 @@ require 'massive_record/adapters/thrift/row'
 require 'massive_record/adapters/thrift/scanner'
 require 'massive_record/adapters/thrift/table'
 
-require 'massive_record/wrapper/connection'
+#require 'massive_record/wrapper/connection'
 require 'massive_record/wrapper/tables_collection'
-require 'massive_record/wrapper/table'
-require 'massive_record/wrapper/row'
+#require 'massive_record/wrapper/table'
+#require 'massive_record/wrapper/row'
 require 'massive_record/wrapper/column_families_collection'
-require 'massive_record/wrapper/column_family'
+#require 'massive_record/wrapper/column_family'
 require 'massive_record/wrapper/cell'
-require 'massive_record/wrapper/scanner'
+#require 'massive_record/wrapper/scanner'
 
 module MassiveRecord
   module Wrapper
+    include MassiveRecord::Adapters::Thrift
+    
     class Base
       
       def self.config
