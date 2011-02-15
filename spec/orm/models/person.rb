@@ -9,7 +9,7 @@ class Person < MassiveRecord::ORM::Table
     field :addresses, :hash, :default => {}
   end
 
-  references_one :boss, :class_name => "PersonWithTimestamps", :store_in => :info
+  references_one :boss, :class_name => "PersonWithTimestamp", :store_in => :info
 
   validates_presence_of :name, :age
   validates_numericality_of :age, :greater_than_or_equal_to => 0

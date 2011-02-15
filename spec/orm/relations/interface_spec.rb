@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'orm/models/person'
-require 'orm/models/person_with_timestamps'
+require 'orm/models/person_with_timestamp'
 
 describe MassiveRecord::ORM::Relations::Interface do
   include SetUpHbaseConnectionBeforeAll 
@@ -16,7 +16,7 @@ describe MassiveRecord::ORM::Relations::Interface do
     end
 
     it "should not share relations" do
-      Person.relations.should_not == PersonWithTimestamps.relations
+      Person.relations.should_not == PersonWithTimestamp.relations
     end
   end
 
@@ -41,7 +41,7 @@ describe MassiveRecord::ORM::Relations::Interface do
 
     describe "instance" do
       subject { Person.new }
-      let(:boss) { PersonWithTimestamps.new }
+      let(:boss) { PersonWithTimestamp.new }
 
       it { should respond_to :boss }
       it { should respond_to :boss= }
@@ -65,13 +65,13 @@ describe MassiveRecord::ORM::Relations::Interface do
         end
 
         it "should load target object when read method is called" do
-          PersonWithTimestamps.should_receive(:find).and_return(boss)
+          PersonWithTimestamp.should_receive(:find).and_return(boss)
           subject.boss_id = boss.id
           subject.boss.should == boss
         end
 
         it "should not load target twice" do
-          PersonWithTimestamps.should_receive(:find).once.and_return(boss)
+          PersonWithTimestamp.should_receive(:find).once.and_return(boss)
           subject.boss_id = boss.id
           2.times { subject.boss }
         end

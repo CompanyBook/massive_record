@@ -7,7 +7,7 @@ describe TestReferencesOneProxy do
   include SetTableNamesToTestTable
 
   let(:owner) { Person.new }
-  let(:target) { PersonWithTimestamps.new }
+  let(:target) { PersonWithTimestamp.new }
   let(:metadata) { subject.metadata }
 
   subject { owner.send(:relation_proxy, 'boss') }
@@ -15,19 +15,19 @@ describe TestReferencesOneProxy do
   it_should_behave_like "relation proxy"
 
   it "should be possible to assign relation in new" do
-    lambda { Person.new(:boss => PersonWithTimestamps.new) }.should_not raise_error
+    lambda { Person.new(:boss => PersonWithTimestamp.new) }.should_not raise_error
   end
 
   describe "#find_target" do
     it "should not try to find anything if foreign key is nil" do
       owner.boss_id = nil
-      PersonWithTimestamps.should_not_receive(:find)
+      PersonWithTimestamp.should_not_receive(:find)
       subject.load_target.should be_nil
     end
 
     it "should try to find the target if foreign key is set" do
       owner.boss_id = "id"
-      PersonWithTimestamps.should_receive(:find).with("id").and_return(target)
+      PersonWithTimestamp.should_receive(:find).with("id").and_return(target)
       subject.load_target.should == target
     end
   end
@@ -83,7 +83,7 @@ describe TestReferencesOneProxy do
   describe "type checking of targets" do
     let(:metadata) { MassiveRecord::ORM::Relations::Metadata.new 'person' }
     let(:person) { Person.new }
-    let(:person_with_timestamps) { PersonWithTimestamps.new }
+    let(:person_with_timestamp) { PersonWithTimestamp.new }
 
     before do
       subject.metadata = metadata
@@ -94,7 +94,7 @@ describe TestReferencesOneProxy do
     end
 
     it "should not raise error if metadata's class corresponds to given target" do
-      lambda { subject.send :raise_if_type_mismatch, person_with_timestamps }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
+      lambda { subject.send :raise_if_type_mismatch, person_with_timestamp }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
     end
   end
 end

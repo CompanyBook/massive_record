@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'orm/models/person'
-require 'orm/models/person_with_timestamps'
+require 'orm/models/person_with_timestamp'
 
 describe "timestamps" do
   include CreatePersonBeforeEach
@@ -56,11 +56,11 @@ describe "timestamps" do
 
   describe "#created_at" do
     before do
-      @person_with_timestamps = PersonWithTimestamps.create! :name => "John Doe", :email => "john@base.com", :age => "20"
+      @person_with_timestamp = PersonWithTimestamp.create! :name => "John Doe", :email => "john@base.com", :age => "20"
     end
 
     it "should have created at" do
-      @person_with_timestamps.should be_set_created_at_on_create
+      @person_with_timestamp.should be_set_created_at_on_create
     end
 
     it "should not have created at on create if model does not have created at" do
@@ -68,13 +68,13 @@ describe "timestamps" do
     end
 
     it "should have updated at equal to nil on new records" do
-      PersonWithTimestamps.new.created_at.should be_nil
+      PersonWithTimestamp.new.created_at.should be_nil
     end
 
     it "should not be possible to set updated at" do
-      lambda { @person_with_timestamps.created_at = Time.now }.should raise_error MassiveRecord::ORM::CantBeManuallyAssigned
-      lambda { @person_with_timestamps['created_at'] = Time.now }.should raise_error MassiveRecord::ORM::CantBeManuallyAssigned
-      lambda { @person_with_timestamps.write_attribute(:created_at, Time.now) }.should raise_error MassiveRecord::ORM::CantBeManuallyAssigned
+      lambda { @person_with_timestamp.created_at = Time.now }.should raise_error MassiveRecord::ORM::CantBeManuallyAssigned
+      lambda { @person_with_timestamp['created_at'] = Time.now }.should raise_error MassiveRecord::ORM::CantBeManuallyAssigned
+      lambda { @person_with_timestamp.write_attribute(:created_at, Time.now) }.should raise_error MassiveRecord::ORM::CantBeManuallyAssigned
     end
 
     it "should not raise cant-set-error if object has no timestamps" do
@@ -82,24 +82,24 @@ describe "timestamps" do
     end
 
     it "should have created_at on a persisted record" do
-      @person_with_timestamps.created_at.should be_a_kind_of Time
+      @person_with_timestamp.created_at.should be_a_kind_of Time
     end
 
     it "should not alter created at on update" do
-      created_at_was = @person_with_timestamps.created_at
+      created_at_was = @person_with_timestamp.created_at
 
       sleep(1)
 
-      @person_with_timestamps.update_attribute :name, @person_with_timestamps.name + "NEW"
-      @person_with_timestamps.created_at.should == created_at_was
+      @person_with_timestamp.update_attribute :name, @person_with_timestamp.name + "NEW"
+      @person_with_timestamp.created_at.should == created_at_was
     end
 
     it "should be included in the list of known_attribute_names_for_inspect" do
-      @person_with_timestamps.send(:known_attribute_names_for_inspect).should include 'created_at'
+      @person_with_timestamp.send(:known_attribute_names_for_inspect).should include 'created_at'
     end
 
     it "should include created_at in inspect" do
-      @person_with_timestamps.inspect.should include(%q{created_at:})
+      @person_with_timestamp.inspect.should include(%q{created_at:})
     end
 
     it "should not include created_at if object does not have it" do
@@ -107,11 +107,11 @@ describe "timestamps" do
     end
 
     it "should raise error if created_at is not time" do
-      PersonWithTimestamps.attributes_schema['created_at'].type = :string
+      PersonWithTimestamp.attributes_schema['created_at'].type = :string
 
-      lambda { PersonWithTimestamps.create! }.should raise_error "created_at must be of type time"
+      lambda { PersonWithTimestamp.create! }.should raise_error "created_at must be of type time"
 
-      PersonWithTimestamps.attributes_schema['created_at'].type = :time
+      PersonWithTimestamp.attributes_schema['created_at'].type = :time
     end
   end
 end
