@@ -48,6 +48,12 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.name = :employee
       subject.class_name.should == "Employee"
     end
+
+    it "should calculate correct class name if represents a collection" do
+      subject.relation_type = "references_many"
+      subject.name = "persons"
+      subject.class_name.should == "Person"
+    end
   end
 
 
