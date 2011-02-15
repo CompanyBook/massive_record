@@ -96,9 +96,13 @@ module MassiveRecord
         end
       
         def all(opts = {})
-          scanner(opts) do |s|
-            s.fetch_rows(opts)
+          all = []
+
+          find_in_batches(opts) do |rows|
+            all = all + rows
           end
+
+          all
         end
       
         def first(opts = {})
