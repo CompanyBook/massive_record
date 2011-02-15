@@ -13,14 +13,11 @@ module MassiveRecord
 
 
           def find_target
-            
+            target_class.find(owner.send(foreign_key))
           end
 
           def can_find_target?
-          end
-          
-          def raise_if_type_mismatch(record)
-            # ..might be removed. Right now defined just to not raise anything.
+            use_find_with? || owner.send(foreign_key).any? 
           end
         end
       end
