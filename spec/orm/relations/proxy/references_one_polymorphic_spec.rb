@@ -42,4 +42,48 @@ describe TestReferencesOnePolymorphicProxy do
       owner.attachable
     end
   end
+
+
+  describe "setting target object" do
+    it "should set the target's id as the foreign key in owner" do
+      owner.attachable = target
+      owner.attachable_id.should == target.id
+    end
+
+    it "should set the target's type in owner" do
+      owner.attachable_type = nil
+      owner.attachable = target
+      owner.attachable_type.should == target.class.to_s.underscore
+    end
+
+    it "should reset the targets foreign key if target is nil" do
+      owner.attachable = target
+      owner.attachable = nil
+      owner.attachable_id.should be_nil
+    end
+
+    it "should reset the target's type in owner if target is nil" do
+      owner.attachable = target
+      owner.attachable = nil
+      owner.attachable_type.should be_nil
+    end
+
+    it "should not set the target's id as the foreign key if we are not persisting the foreign key" do
+      owner.stub(:respond_to?).and_return(false)
+      owner.attachable = target
+      owner.attachable_id.should be_nil
+    end
+
+    it "should not set the target's type if owner is not responding to type setter" do
+      owner.attachable_type = nil
+      owner.stub(:respond_to?).and_return(false)
+      owner.attachable = target
+      owner.attachable_type.should be_nil
+    end
+
+    it "should set the target's id as the foreign key even if we are not persisting it if the record responds to setter method" do
+      owner.attachable = target
+      owner.attachable_id.should == target.id
+    end
+  end
 end

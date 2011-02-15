@@ -106,6 +106,8 @@ describe MassiveRecord::ORM::Relations::Interface do
       it { should respond_to :attachable= }
       it { should respond_to :attachable_id }
       it { should respond_to :attachable_id= }
+      it { should respond_to :attachable_type }
+      it { should respond_to :attachable_type= }
 
 
       describe "record getter and setter" do
@@ -123,9 +125,16 @@ describe MassiveRecord::ORM::Relations::Interface do
           subject.attachable_id.should == attachable.id
         end
 
-        [Person, PersonWithTimestamps].each do |polymorphic_class|
+        it "should set the type in owner when target is set" do
+          subject.attachable = attachable
+          subject.attachable_type.should == attachable.class.to_s.underscore
+        end
+
+
+
+        [Person, PersonWithTimestamp].each do |polymorphic_class|
           describe "polymorphic association to class #{polymorphic_class}" do
-            let (:attachable) { polymorphic_class.new }
+            let (:attachable) { polymorphic_class.new :id => "ID1" }
 
             before do
               subject.attachable_id = attachable.id
