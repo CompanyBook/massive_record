@@ -53,7 +53,8 @@ module MassiveRecord
 
           def create_references_one_accessors(metadata)
             redefine_method(metadata.name) do
-              relation_proxy(metadata.name).load_target
+              proxy = relation_proxy(metadata.name)
+              proxy.load_target ? proxy : nil
             end
 
             redefine_method(metadata.name+'=') do |record|

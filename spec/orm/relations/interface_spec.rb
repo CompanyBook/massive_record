@@ -42,6 +42,7 @@ describe MassiveRecord::ORM::Relations::Interface do
     describe "instance" do
       subject { Person.new }
       let(:boss) { PersonWithTimestamp.new }
+      let(:proxy) { subject.send(:relation_proxy, "boss") }
 
       it { should respond_to :boss }
       it { should respond_to :boss= }
@@ -57,6 +58,18 @@ describe MassiveRecord::ORM::Relations::Interface do
         it "should return the proxy's target if boss is set" do
           subject.boss = boss
           subject.boss.should == boss
+        end
+
+        it "should be able to reset the proxy" do
+          proxy.should_receive(:load_target).and_return(true)
+          proxy.should_receive(:reset) 
+          subject.boss.reset
+        end
+
+        it "should be able to reload the proxy" do
+          proxy.should_receive(:load_target).and_return(true)
+          proxy.should_receive(:reload)
+          subject.boss.reload
         end
 
         it "should set the foreign_key in owner when target is set" do
