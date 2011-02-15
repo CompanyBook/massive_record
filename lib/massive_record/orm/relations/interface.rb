@@ -12,7 +12,7 @@ module MassiveRecord
 
         module ClassMethods
           #
-          # Used to define a references once relation. Example of usage:
+          # Used to define a references one relation. Example of usage:
           # 
           # class Person < MassiveRecord::ORM::Table
           #   column_family :info do
@@ -24,7 +24,9 @@ module MassiveRecord
           #
           # First argument is the name of the relation. class_name and foreign key is calculated from it, if none given.
           #
+          #
           # Options, all optional:
+          #
           #   <tt>class_name</tt>::   Class name is calculated from name, but can be overridden here.
           #   <tt>polymorphic</tt>::  Set it to true for make the association polymorphic. Will use foreign_key,
           #                           remove the "_id" (if it's there) and add _type for it's reading/writing of type.
@@ -44,6 +46,43 @@ module MassiveRecord
             raise RelationAlreadyDefined unless self.relations.add?(metadata)
             create_references_one_accessors(metadata)
             create_references_one_polymorphic_accessors(metadata) if metadata.polymorphic?
+          end
+
+
+          #
+          # Used to define a reference many relation. Example of usage:
+          # 
+          # class Person < MassiveRecord::ORM::Table
+          #   column_family :info do
+          #     field :name
+          #   end
+          #   
+          #   references_many :cars, :store_in => :info
+          # end
+          #
+          # First argument is the name of the relation. class_name and attribute for foreign keys are calculated from it,
+          # if noen given. In the example above Person records will have attribute cars_ids which will be
+          # an array populated with foreign keys.
+          #
+          #
+          # Options, all optional:
+          #
+          #   <tt>class_name</tt>::   Class name is calculated from name, but can be overridden here.
+          #   <tt>foreign_key</tt>::  Foreign key is calculated from name suffixed by _ids as default.
+          #   <tt>store_in</tt>::     Send in the column family to store foreign key in. If none given,
+          #                           you should define the foreign key method in class if it can be
+          #                           calculated from another attributes in your class.
+          #   <tt>starts_with</tt>::  A method name which returns an ID to start from when fetching rows in
+          #                           Person's table. This is useful if you for instance has a person with id 1
+          #                           and in your table for cars have cars id like "<person_id>-<incremental number>"
+          #                           or something. Then you can say references_many :cars, :starts_with => :id.
+          #   <tt>find_with</tt>::    Assign it to a Proc and we will call it with the owner if you need complete
+          #                           control over how you retrieve your record.
+          #                           As a default TargetClass.find(foreign_keys_method) is used.
+          #
+          #
+          def references_many(name, *args)
+            # TODO
           end
 
           private
