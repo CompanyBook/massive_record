@@ -24,6 +24,8 @@ module MassiveRecord
           self.metadata = options[:metadata]
           self.owner = options[:owner]
           self.target = options[:target]
+
+          reset if target.nil?
         end
 
 

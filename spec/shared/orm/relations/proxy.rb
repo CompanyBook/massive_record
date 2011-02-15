@@ -48,7 +48,7 @@ shared_examples_for "relation proxy" do
       subject.target = target
       subject.reset
       subject.stub(:find_target?).and_return(false)
-      subject.target.should be_nil
+      subject.target.should be_blank
     end
   end
 
@@ -76,7 +76,7 @@ shared_examples_for "relation proxy" do
     it "should return nil if loading of target failed" do
       subject.stub(:can_find_target?).and_return true
       subject.should_receive(:find_target).and_raise MassiveRecord::ORM::RecordNotFound
-      subject.reload.should be_nil
+      subject.reload.should be_blank
     end
   end
 
@@ -136,7 +136,7 @@ shared_examples_for "relation proxy" do
     it "should not try to load target if it has been loaded" do
       subject.loaded!
       should_not_receive :find_target
-      subject.load_target.should be_nil
+      subject.load_target.should be_blank
     end
 
     it "should try to load the target if it has not been loaded" do
@@ -149,7 +149,7 @@ shared_examples_for "relation proxy" do
     it "should reset proxy if target's record was not found" do
       subject.stub(:can_find_target?).and_return true
       subject.should_receive(:find_target).and_raise MassiveRecord::ORM::RecordNotFound
-      subject.load_target.should be_nil
+      subject.load_target.should be_blank
     end
   end
 
