@@ -21,7 +21,7 @@ module MassiveRecord
           private
 
           def find_target
-            class_name.constantize.find(owner.send(foreign_key))
+            target_class.find(owner.send(foreign_key))
           end
 
           def can_find_target?
