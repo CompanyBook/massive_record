@@ -17,7 +17,7 @@ module MassiveRecord
       end
 
       def self.connection(opts = {})
-        conn = Connection.new(opts.empty? ? config : opts)
+        conn = ADAPTER::Connection.new(opts.empty? ? config : opts)
         conn.open
         conn
       end
