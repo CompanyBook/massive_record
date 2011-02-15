@@ -198,6 +198,10 @@ describe MassiveRecord::ORM::Relations::Interface do
       it { should respond_to :test_classes }
       it { should respond_to :test_classes_ids }
       it { should respond_to :test_classes_ids= }
+
+      it "should have an array as foreign_key attribute" do
+        subject.test_classes_ids.should be_instance_of Array
+      end
     end
   end
 end
