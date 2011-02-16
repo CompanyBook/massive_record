@@ -103,6 +103,12 @@ module MassiveRecord
         end
       
 
+        # Strange.. Without Rails, to_param goes through method_missing,
+        #           With Rails it seems like the proxy answered to to_param, which
+        #           kinda was not what I wanted.
+        def to_param # :nodoc:
+          target.try :to_param
+        end
         
 
         protected
