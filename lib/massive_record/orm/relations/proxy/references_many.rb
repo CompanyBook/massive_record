@@ -88,6 +88,8 @@ module MassiveRecord
                 record.send(method)
               end
             end
+
+            owner.save if owner.persisted?
           end
 
 

@@ -174,6 +174,18 @@ describe TestReferencesManyProxy do
           target.should_receive(delete_method)
           subject.send(delete_method, target)
         end
+
+        it "should not save the owner if it has not been persisted" do
+          owner.should_receive(:persisted?).and_return(false)
+          owner.should_not_receive(:save)
+          subject.send(delete_method, target)
+        end
+
+        it "should save the owner if it has been persisted" do
+          owner.save!
+          owner.should_receive(:save)
+          subject.send(delete_method, target)
+        end
       end
     end
 
