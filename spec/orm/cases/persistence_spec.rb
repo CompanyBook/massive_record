@@ -343,6 +343,11 @@ describe "persistence" do
         @person.should be_destroyed
         Person.all.length.should == 0
       end
+      
+      it "should be able to call destroy on new records" do
+        person = Person.new
+        person.destroy
+      end
 
       describe "#destroy_all" do
         it "should remove all when calling remove_all" do
