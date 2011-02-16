@@ -15,15 +15,22 @@ module MassiveRecord
           # Adding record(s) to the collection.
           #
           def <<(*records)
-            records.flatten.each do |record|
-              unless include? record
-                raise_if_type_mismatch(record)
-                add_foreign_key_in_owner(record.id)
-                target << record
-              end
-            end
+            save_records = owner.persisted?
 
-            self
+            if records.flatten.all? &:valid?
+              records.flatten.each do |record|
+                unless include? record
+                  raise_if_type_mismatch(record)
+                  add_foreign_key_in_owner(record.id)
+                  target << record
+                  record.save if save_records
+                end
+              end
+
+              owner.save if save_records
+
+              self
+            end
           end
           alias_method :push, :<<
           alias_method :concat, :<<

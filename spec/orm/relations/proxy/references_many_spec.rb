@@ -103,7 +103,38 @@ describe TestReferencesManyProxy do
         end
 
         it "should raise an error if there is a type mismatch" do
-          lambda { subject.send add_method, Person.new }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
+          lambda { subject.send add_method, Person.new(:name => "Foo", :age => 2) }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
+        end
+
+        it "should not save the pushed target if owner is not persisted" do
+          owner.should_receive(:persisted?).and_return false
+          target.should_not_receive(:save)
+          subject.send(add_method, target)
+        end
+
+        it "should not save the owner object if it has not been persisted before" do
+          owner.should_receive(:persisted?).and_return false
+          owner.should_not_receive(:save)
+          subject.send(add_method, target)
+        end
+
+        it "should save the pushed target if owner is persisted" do
+          owner.save!
+          target.should_receive(:save).and_return(true)
+          subject.send(add_method, target)
+        end
+
+        it "should not save anything if one record is invalid" do
+          owner.save!
+
+          target.should_receive(:valid?).and_return(true)
+          target_2.should_receive(:valid?).and_return(false)
+          
+          target.should_not_receive(:save)
+          target_2.should_not_receive(:save)
+          owner.should_not_receive(:save)
+
+          subject.send(add_method, [target, target_2]).should be_false
         end
       end
     end
