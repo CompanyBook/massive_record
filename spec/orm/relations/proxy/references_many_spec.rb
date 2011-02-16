@@ -47,7 +47,7 @@ describe TestReferencesManyProxy do
       end
 
       it "should not try to find target if start from method is blank" do
-        owner.should_receive(:friends_start_from_id).and_return(nil)
+        owner.should_receive(:friends_records_starts_from_id).and_return(nil)
         Person.should_not_receive(:all)
         subject.load_target.should be_empty
       end

@@ -9,7 +9,7 @@ module MassiveRecord
       class Metadata
         attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic
         attr_accessor :find_with
-        attr_reader :start_from
+        attr_reader :records_starts_from
         
         def initialize(name, options = {})
           options.to_options!
@@ -22,7 +22,7 @@ module MassiveRecord
           end
           self.class_name = options[:class_name]
           self.find_with = options[:find_with]
-          self.start_from = options[:start_from] if options[:start_from]
+          self.records_starts_from = options[:records_starts_from] if options[:records_starts_from]
           self.polymorphic = options[:polymorphic]
         end
 
@@ -79,7 +79,7 @@ module MassiveRecord
         end
 
         def persisting_foreign_key?
-          !!store_in && !start_from
+          !!store_in && !records_starts_from
         end
 
 
@@ -113,12 +113,12 @@ module MassiveRecord
         end
 
         
-        def start_from=(method)
-          @start_from = method
+        def records_starts_from=(method)
+          @records_starts_from = method
 
-          if @start_from
+          if @records_starts_from
             self.find_with = Proc.new do |owner|
-              start = owner.send(start_from) and target_class.all(:start => start)
+              start = owner.send(records_starts_from) and target_class.all(:start => start)
             end
           else
             self.find_with = nil
