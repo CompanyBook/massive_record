@@ -8,7 +8,7 @@ module MassiveRecord
       #
       class Metadata
         attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic
-        attr_accessor :find_with
+        attr_accessor :find_with, :start_from
         
         def initialize(name, options = {})
           options.to_options!
@@ -22,6 +22,7 @@ module MassiveRecord
           self.class_name = options[:class_name]
           self.find_with = options[:find_with]
           self.polymorphic = options[:polymorphic]
+          self.start_from = options[:start_from]
         end
 
 
@@ -74,7 +75,7 @@ module MassiveRecord
         end
 
         def persisting_foreign_key?
-          !!store_in
+          !!store_in && !start_from
         end
 
 

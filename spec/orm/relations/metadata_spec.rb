@@ -4,18 +4,19 @@ require 'orm/models/person'
 describe MassiveRecord::ORM::Relations::Metadata do
   subject { MassiveRecord::ORM::Relations::Metadata.new(nil) }
 
-  %w(name foreign_key class_name relation_type find_with polymorphic).each do |attr|
+  %w(name foreign_key class_name relation_type find_with polymorphic start_from).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
   end
 
 
   it "should be setting values by initializer" do
-    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info, :polymorphic => true
+    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info, :polymorphic => true, :start_from => :start_from
     metadata.name.should == "car"
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
     metadata.store_in.should == "info"
+    metadata.start_from.should == :start_from
     metadata.should be_polymorphic
   end
 
@@ -104,6 +105,12 @@ describe MassiveRecord::ORM::Relations::Metadata do
   it "should know its persisting foreign key if foreign key stored in has been set" do
     subject.store_in = :info
     should be_persisting_foreign_key
+  end
+
+  it "should not be storing the foreign key if start_from is defined" do
+    subject.store_in = :info
+    subject.start_from = :method_which_returns_a_starting_point
+    should_not be_persisting_foreign_key
   end
 
 

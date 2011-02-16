@@ -69,7 +69,7 @@ module MassiveRecord
           #   <tt>store_in</tt>::     Send in the column family to store foreign key in. If none given,
           #                           you should define the foreign key method in class if it can be
           #                           calculated from another attributes in your class.
-          #   <tt>starts_with</tt>::  A method name which returns an ID to start from when fetching rows in
+          #   <tt>start_from</tt>::   A method name which returns an ID to start from when fetching rows in
           #                           Person's table. This is useful if you for instance has a person with id 1
           #                           and in your table for cars have cars id like "<person_id>-<incremental number>"
           #                           or something. Then you can say references_many :cars, :starts_with => :id.
