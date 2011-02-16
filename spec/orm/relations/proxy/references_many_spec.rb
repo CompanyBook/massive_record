@@ -47,5 +47,10 @@ describe TestReferencesManyProxy do
       TestClass.should_receive(:find).with("testing-123").and_return([test_class])
       subject.load_target.should == [test_class]
     end
+
+    it "should always wrap the proc's result in an array" do
+      TestClass.should_receive(:find).with("testing-123").and_return(test_class)
+      subject.load_target.should == [test_class]
+    end
   end
 end

@@ -53,7 +53,7 @@ module MassiveRecord
         # Returns nil if for some reason target could not be found.
         #
         def load_target
-          self.target = find_target_or_find_with if find_target?
+          self.target = find_target_or_find_with_proc if find_target?
           target
         rescue RecordNotFound
           reset
@@ -109,12 +109,27 @@ module MassiveRecord
 
         protected
 
+        def find_target_or_find_with_proc
+          find_with_proc? ? find_target_with_proc : find_target
+        end
+
         #
         # "Abstract" method used to find target for the proxy.
         # Implement in subclasses. It is not called when the meta
-        # data contains a find_with proc; in that case it is used instead
+        # data contains a find_with proc; in that case find_target_with_proc
+        # is used instead
         #
         def find_target
+        end
+        
+        #
+        # Gives sub classes a place to hook into when we are
+        # gonna find target(s) by the proc. For instance, the
+        # references_many proxy ensures that the result of proc
+        # is put inside of an array.
+        #
+        def find_target_with_proc
+          find_with.call(owner)
         end
 
         #
@@ -129,14 +144,13 @@ module MassiveRecord
         # Override this to controll when a target may be found.
         #
         def can_find_target?
-          false
+          find_with_proc?
         end
 
-        def find_target_or_find_with
-          use_find_with? ? find_with.call(owner) : find_target
-        end
-
-        def use_find_with?
+        #
+        # 
+        #
+        def find_with_proc?
           !find_with.nil? && find_with.respond_to?(:call)
         end
 
