@@ -78,7 +78,7 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
     it "should return plural for if meta data is representing a many relation" do
       subject.relation_type = :references_many
-      subject.name = :person
+      subject.name = :persons
       subject.foreign_key.should == "person_ids"
     end
   end

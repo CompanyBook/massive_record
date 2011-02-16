@@ -19,13 +19,13 @@ describe TestReferencesManyProxy do
 
   describe "#find_target" do
     it "should not try to find target if foreign_keys is blank" do
-      owner.test_classes_ids.clear
+      owner.test_class_ids.clear
       TestClass.should_not_receive(:find)
       subject.load_target.should be_empty
     end
 
     it "should try to load target if foreign_keys has any keys" do
-      owner.test_classes_ids << target.id
+      owner.test_class_ids << target.id
       TestClass.should_receive(:find).with([target.id]).and_return([target])
       subject.load_target.should == [target]
     end
@@ -68,28 +68,28 @@ describe TestReferencesManyProxy do
         end
 
         it "should update array of foreign keys in owner" do
-          owner.test_classes_ids.should be_empty
+          owner.test_class_ids.should be_empty
           subject.send(add_method, target)
-          owner.test_classes_ids.should include(target.id)
+          owner.test_class_ids.should include(target.id)
         end
 
         it "should update array of foreign keys in owner" do
           owner.save!
           subject.send(add_method, target)
           owner.save! and owner.reload
-          owner.test_classes_ids.should include(target.id)
+          owner.test_class_ids.should include(target.id)
         end
 
         it "should not update array of foreign keys in owner if it does not respond to it" do
           owner.should_receive(:respond_to?).and_return(false)
           subject.send(add_method, target)
-          owner.test_classes_ids.should_not include(target.id)
+          owner.test_class_ids.should_not include(target.id)
         end
 
         it "should not do anything adding the same record twice" do
           2.times { subject.send(add_method, target) }
           subject.target.length.should == 1
-          owner.test_classes_ids.length.should == 1
+          owner.test_class_ids.length.should == 1
         end
 
         it "should be able to add two records at the same time" do
@@ -124,13 +124,13 @@ describe TestReferencesManyProxy do
 
         it "should remove the destroyed records id from owner foreign keys" do
           subject.send(delete_method, target)
-          owner.test_classes_ids.should_not include(target.id)
+          owner.test_class_ids.should_not include(target.id)
         end
 
         it "should not remove foreign keys in owner if it does not respond to it" do
           owner.should_receive(:respond_to?).and_return false
           subject.send(delete_method, target)
-          owner.test_classes_ids.should include(target.id)
+          owner.test_class_ids.should include(target.id)
         end
 
         it "should ask the record to #{delete_method} self" do
@@ -158,7 +158,7 @@ describe TestReferencesManyProxy do
 
       it "should remove all foreign keys in owner" do
         subject.destroy_all
-        owner.test_classes_ids.should be_empty
+        owner.test_class_ids.should be_empty
       end
 
       it "should call reset after all destroyed" do

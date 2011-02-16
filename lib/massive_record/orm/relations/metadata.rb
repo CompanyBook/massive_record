@@ -118,9 +118,11 @@ module MassiveRecord
         end
 
         def calculate_foreign_key
-          fk = name.downcase + "_id"
-          fk += "s" if represents_a_collection?
-          fk
+          if represents_a_collection?
+            name.downcase.singularize + "_ids"
+          else
+            name.downcase + "_id"
+          end
         end
 
         def proxy_class_name
