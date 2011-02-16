@@ -166,4 +166,32 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.polymorphic_type_column_setter.should == "yey="
     end
   end
+
+
+  describe "start_from" do
+    it "should not have any proc if start_from is nil" do
+      subject.find_with = "foo"
+      subject.start_from = nil
+      subject.find_with.should be_nil
+    end
+
+    it "should buld a proc with start_from set" do
+      subject.start_from = :friends_start_from_id
+      subject.find_with.should be_instance_of Proc
+    end
+
+    describe "proc" do
+      let(:owner) { Person.new :id => "person-1" }
+      let(:find_with_proc) { subject.start_from = :friends_start_from_id; subject.find_with }
+
+      before do
+        subject.class_name = "Person"
+      end
+
+      it "should call target class with all, start with owner's start from id response" do
+        Person.should_receive(:all).with(hash_including(:start => owner.friends_start_from_id))
+        find_with_proc.call(owner)
+      end
+    end
+  end
 end

@@ -8,7 +8,8 @@ module MassiveRecord
       #
       class Metadata
         attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic
-        attr_accessor :find_with, :start_from
+        attr_accessor :find_with
+        attr_reader :start_from
         
         def initialize(name, options = {})
           options.to_options!
@@ -21,8 +22,8 @@ module MassiveRecord
           end
           self.class_name = options[:class_name]
           self.find_with = options[:find_with]
+          self.start_from = options[:start_from] if options[:start_from]
           self.polymorphic = options[:polymorphic]
-          self.start_from = options[:start_from]
         end
 
 
@@ -59,6 +60,9 @@ module MassiveRecord
           (@class_name || calculate_class_name).to_s
         end
 
+        def target_class
+          class_name.constantize
+        end
 
         def store_in
           @store_in.to_s if @store_in
@@ -108,7 +112,18 @@ module MassiveRecord
           relation_type == 'references_many'
         end
 
+        
+        def start_from=(method)
+          @start_from = method
 
+          if @start_from
+            self.find_with = Proc.new do |owner|
+              start = owner.send(start_from) and target_class.all(:start => start)
+            end
+          else
+            self.find_with = nil
+          end
+        end
 
 
         private

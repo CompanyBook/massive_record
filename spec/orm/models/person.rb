@@ -16,4 +16,9 @@ class Person < MassiveRecord::ORM::Table
   validates_presence_of :name, :age
   validates_numericality_of :age, :greater_than_or_equal_to => 0
   validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i, :allow_blank => true
+
+
+  def friends_start_from_id
+    id+'-'
+  end
 end

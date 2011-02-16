@@ -99,11 +99,11 @@ module MassiveRecord
           end
 
           def find_target_with_proc
-            [super].flatten
+            [super].compact.flatten
           end
 
           def can_find_target?
-            super || owner.send(foreign_key).any? 
+            super || (owner.respond_to?(foreign_key) && owner.send(foreign_key).any?)
           end
 
 

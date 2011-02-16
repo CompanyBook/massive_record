@@ -174,7 +174,7 @@ shared_examples_for "relation proxy" do
   end
 
   describe "find_with" do
-    let(:metadata) { MassiveRecord::ORM::Relations::Metadata.new 'name', :find_with => Proc.new { |target| Person.find("testing-123") }}
+    let(:metadata) { MassiveRecord::ORM::Relations::Metadata.new 'person', :find_with => Proc.new { |target| Person.find("testing-123") }}
     let(:person) { Person.new }
 
     before do

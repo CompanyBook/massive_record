@@ -33,8 +33,8 @@ describe TestReferencesManyProxy do
     end
 
     describe "with start from" do
-      let(:target) { Person.new :id => owner.id+"-friend-1" }
-      let(:target_2) { Person.new :id => owner.id+"-friend-2" }
+      let(:target) { Person.create! :id => owner.id+"-friend-1" }
+      let(:target_2) { Person.create! :id => owner.id+"-friend-2" }
       let(:metadata) { subject.metadata }
 
       subject { owner.send(:relation_proxy, 'friends') }
@@ -43,6 +43,14 @@ describe TestReferencesManyProxy do
         owner.should_receive(:friends_start_from_id).and_return(nil)
         Person.should_not_receive(:all)
         subject.load_target.should be_empty
+      end
+
+      it "should find all friends when loading" do
+        pending
+        friends = subject.load_target
+        friends.length.should == 2
+        friend.should include(target)
+        friend.should include(target_2)
       end
     end
   end
@@ -71,6 +79,11 @@ describe TestReferencesManyProxy do
     it "should always wrap the proc's result in an array" do
       TestClass.should_receive(:find).with("testing-123").and_return(test_class)
       subject.load_target.should == [test_class]
+    end
+
+    it "should be empty if the proc return nil" do
+      TestClass.should_receive(:find).with("testing-123").and_return(nil)
+      subject.load_target.should be_empty
     end
   end
 
