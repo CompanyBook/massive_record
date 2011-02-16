@@ -105,4 +105,36 @@ describe TestReferencesManyProxy do
       end
     end
   end
+
+  describe "removing records from the collection" do
+    before do
+      target.save!
+      subject << target
+    end
+
+    [:destroy, :delete].each do |delete_method|
+      describe "with ##{delete_method}" do
+        it "should not be in proxy after being removed" do
+          subject.send(delete_method, target)
+          subject.target.should_not include target
+        end
+
+        it "should remove the destroyed records id from owner foreign keys" do
+          subject.send(delete_method, target)
+          owner.test_classes_ids.should_not include(target.id)
+        end
+
+        it "should not remove foreign keys in owner if it does not respond to it" do
+          owner.should_receive(:respond_to?).and_return false
+          subject.send(delete_method, target)
+          owner.test_classes_ids.should include(target.id)
+        end
+
+        it "should ask the record to #{delete_method} self" do
+          target.should_receive(delete_method)
+          subject.send(delete_method, target)
+        end
+      end
+    end
+  end
 end
