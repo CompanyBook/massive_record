@@ -149,7 +149,7 @@ module MassiveRecord
         end
 
         #
-        # 
+        # Are we supposed to find target with a proc?
         #
         def find_with_proc?
           !find_with.nil? && find_with.respond_to?(:call)

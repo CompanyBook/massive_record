@@ -18,16 +18,32 @@ describe TestReferencesManyProxy do
   
 
   describe "#find_target" do
-    it "should not try to find target if foreign_keys is blank" do
-      owner.test_class_ids.clear
-      TestClass.should_not_receive(:find)
-      subject.load_target.should be_empty
+    describe "with foreig keys stored in owner" do
+      it "should not try to find target if foreign_keys is blank" do
+        owner.test_class_ids.clear
+        TestClass.should_not_receive(:find)
+        subject.load_target.should be_empty
+      end
+
+      it "should try to load target if foreign_keys has any keys" do
+        owner.test_class_ids << target.id
+        TestClass.should_receive(:find).with([target.id]).and_return([target])
+        subject.load_target.should == [target]
+      end
     end
 
-    it "should try to load target if foreign_keys has any keys" do
-      owner.test_class_ids << target.id
-      TestClass.should_receive(:find).with([target.id]).and_return([target])
-      subject.load_target.should == [target]
+    describe "with start from" do
+      let(:target) { Person.new :id => owner.id+"-friend-1" }
+      let(:target_2) { Person.new :id => owner.id+"-friend-2" }
+      let(:metadata) { subject.metadata }
+
+      subject { owner.send(:relation_proxy, 'friends') }
+
+      it "should not try to find target if start from method is blank" do
+        owner.should_receive(:friends_start_from_id).and_return(nil)
+        Person.should_not_receive(:all)
+        subject.load_target.should be_empty
+      end
     end
   end
 

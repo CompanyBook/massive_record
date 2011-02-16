@@ -11,6 +11,7 @@ class Person < MassiveRecord::ORM::Table
 
   references_one :boss, :class_name => "PersonWithTimestamp", :store_in => :info
   references_many :test_classes, :store_in => :info
+  references_many :friends, :class_name => "Person", :start_from => :friends_start_from_id
 
   validates_presence_of :name, :age
   validates_numericality_of :age, :greater_than_or_equal_to => 0
