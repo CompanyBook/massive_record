@@ -33,11 +33,18 @@ describe TestReferencesManyProxy do
     end
 
     describe "with start from" do
-      let(:target) { Person.create! :id => owner.id+"-friend-1" }
-      let(:target_2) { Person.create! :id => owner.id+"-friend-2" }
+      let(:target) { Person.new :id => owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:target_2) { Person.new :id => owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:not_target) { Person.new :id => "foo"+"-friend-2", :name => "H", :age => 1 }
       let(:metadata) { subject.metadata }
 
       subject { owner.send(:relation_proxy, 'friends') }
+
+      before do
+        target.save!
+        target_2.save!
+        not_target.save!
+      end
 
       it "should not try to find target if start from method is blank" do
         owner.should_receive(:friends_start_from_id).and_return(nil)
@@ -46,11 +53,11 @@ describe TestReferencesManyProxy do
       end
 
       it "should find all friends when loading" do
-        pending
         friends = subject.load_target
         friends.length.should == 2
-        friend.should include(target)
-        friend.should include(target_2)
+        friends.should include(target)
+        friends.should include(target_2)
+        friends.should_not include(not_target)
       end
     end
   end
