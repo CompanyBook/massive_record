@@ -75,6 +75,10 @@ module MassiveRecord
           end
         end
 
+        def inspect
+          load_target.inspect
+        end
+
 
 
         #
