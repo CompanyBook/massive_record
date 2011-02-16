@@ -17,7 +17,8 @@ module MassiveRecord
 
         delegate :foreign_key, :foreign_key_setter, :store_in, :store_foreign_key_in,
           :polymorphic_type_column, :polymorphic_type_column_setter,
-          :class_name, :name, :persisting_foreign_key?, :find_with, :to => :metadata
+          :class_name, :name, :persisting_foreign_key?, :find_with,
+          :represents_a_collection?, :to => :metadata
 
         def initialize(options = {})
           options.to_options!

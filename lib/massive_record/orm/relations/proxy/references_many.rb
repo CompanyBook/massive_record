@@ -45,6 +45,15 @@ module MassiveRecord
           end
 
           #
+          # 
+          #
+          def destroy_all
+            destroy(load_target)
+            reset
+            loaded!
+          end
+
+          #
           # Checks if record is included in collection
           #
           # TODO  This needs a bit of work, depending on if proxy's target
@@ -54,6 +63,12 @@ module MassiveRecord
           def include?(record)
             target.include? record
           end
+
+
+          def empty?
+            target.empty?
+          end
+
 
           private
 

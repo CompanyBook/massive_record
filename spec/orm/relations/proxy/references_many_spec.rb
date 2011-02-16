@@ -36,7 +36,10 @@ describe TestReferencesManyProxy do
 
     before do
       subject.metadata.find_with = Proc.new { |target| TestClass.find("testing-123") }
-      owner.boss_id = nil
+    end
+
+    after do
+      subject.metadata.find_with = nil
     end
 
     it "should not call find_target" do
@@ -96,7 +99,7 @@ describe TestReferencesManyProxy do
         end
 
         it "should return proxy so calls can be chained" do
-          subject.send(add_method, target).should == subject
+          subject.send(add_method, target).object_id.should == subject.object_id
         end
 
         it "should raise an error if there is a type mismatch" do
@@ -134,6 +137,38 @@ describe TestReferencesManyProxy do
           target.should_receive(delete_method)
           subject.send(delete_method, target)
         end
+      end
+    end
+
+
+
+    describe "with destroy_all" do
+      before do
+        target.save!
+        target_2.save!
+
+        subject << target << target_2
+        owner.save!
+      end
+
+      it "should not include any records when destroying all" do
+        subject.destroy_all
+        subject.target.should be_empty
+      end
+
+      it "should remove all foreign keys in owner" do
+        subject.destroy_all
+        owner.test_classes_ids.should be_empty
+      end
+
+      it "should call reset after all destroyed" do
+        subject.should_receive(:reset)
+        subject.destroy_all
+      end
+
+      it "should be loaded after all being destroyed" do
+        subject.destroy_all
+        should be_loaded
       end
     end
   end

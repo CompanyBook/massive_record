@@ -40,6 +40,10 @@ describe TestReferencesOneProxy do
       owner.boss_id = nil
     end
 
+    after do
+      subject.metadata.find_with = nil
+    end
+
     it "should not call find_target" do
       should_not_receive :find_target
       subject.load_target
