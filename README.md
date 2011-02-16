@@ -81,9 +81,17 @@ Here is an example of usage, both for Table and Column:
       end
 
       references_one :boss, :class_name => "Person", :store_in => :info
+      references_one :attachment, :polymorphic => true
+      references_many :cars, :records_starts_from => :cars_start_id
 
       validates_presence_of :name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
+
+      # Returns the id the scanner should start from in the Car table
+      # to fetch cars related to this person
+      def cars_start_id
+        id+'-'
+      end
     end
 
     
