@@ -67,6 +67,12 @@ describe TestReferencesManyProxy do
           subject.target.should include target
         end
 
+        it "should not add invalid objects to collection" do
+          target.should_receive(:valid?).and_return false
+          subject.send(add_method, target).should be_false
+          subject.target.should_not include target
+        end
+
         it "should update array of foreign keys in owner" do
           owner.test_class_ids.should be_empty
           subject.send(add_method, target)
