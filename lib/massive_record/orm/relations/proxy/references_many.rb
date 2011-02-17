@@ -4,6 +4,17 @@ module MassiveRecord
       class Proxy
         class ReferencesMany < Proxy
 
+          #
+          # Loading targets will merge it with records found currently in proxy,
+          # to make sure we don't remove any pushed targets only cause we load the
+          # targets.
+          #
+          def load_target
+            target_before_load = target
+            target_after_load = super
+
+            self.target = (target_before_load + target_after_load).uniq
+          end
 
           def reset
             super
@@ -68,7 +79,7 @@ module MassiveRecord
           #       what we currently have in @target
           #
           def include?(record)
-            target.include? record
+            load_target.include? record
           end
 
           def length
