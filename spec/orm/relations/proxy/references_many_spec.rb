@@ -27,7 +27,7 @@ describe TestReferencesManyProxy do
 
       it "should try to load target if foreign_keys has any keys" do
         owner.test_class_ids << target.id
-        TestClass.should_receive(:find).with([target.id]).and_return([target])
+        TestClass.should_receive(:find).with([target.id], anything).and_return([target])
         subject.load_target.should == [target]
       end
 
