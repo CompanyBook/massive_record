@@ -26,7 +26,8 @@ module MassiveRecord
             if records.length == 1 and records.first.nil?
               reset
             else
-              self.target = records.flatten
+              delete_all
+              concat(records)
             end
           end
 
