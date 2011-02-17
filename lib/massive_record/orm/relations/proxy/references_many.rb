@@ -76,6 +76,10 @@ module MassiveRecord
             target.empty?
           end
 
+          def length
+            target.length
+          end
+
 
           private
 
