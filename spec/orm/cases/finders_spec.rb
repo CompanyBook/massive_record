@@ -188,6 +188,20 @@ describe "finders" do
       end        
       group_number.should == @table_size / 3
     end
+
+    it "should not do a thing if table does not exist" do
+      Person.table.should_receive(:exists?).and_return false
+
+      counter = 0
+
+      Person.find_in_batches(:batch_size => 3) do |rows|
+        rows.each do |row|
+          counter += 1
+        end
+      end
+
+      counter.should == 0
+    end
     
     it "should iterate through a collection of rows using a batch process" do
       rows_number = 0
