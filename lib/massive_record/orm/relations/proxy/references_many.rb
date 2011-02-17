@@ -21,6 +21,16 @@ module MassiveRecord
             @target = []
           end
 
+          def replace(*records)
+            records.flatten!
+
+            if records.length == 1 and records.first.nil?
+              reset
+            else
+              self.target = records.flatten
+            end
+          end
+
 
           #
           # Adding record(s) to the collection.

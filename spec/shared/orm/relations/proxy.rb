@@ -1,5 +1,6 @@
 shared_examples_for "relation proxy" do
   let(:target) { mock(Object).as_null_object }
+  let(:find_target_returns) { subject.represents_a_collection? ? [target] : target }
 
   before do
     subject.metadata = mock(MassiveRecord::ORM::Relations::Metadata, :find_with => nil).as_null_object if subject.metadata.nil?
@@ -69,8 +70,8 @@ shared_examples_for "relation proxy" do
 
     it "should return target if loaded successfully" do
       subject.should_receive(:can_find_target?).and_return true
-      subject.should_receive(:find_target) { target }
-      subject.reload.should == target
+      subject.should_receive(:find_target) { find_target_returns }
+      subject.reload.should == find_target_returns
     end
 
     it "should return nil if loading of target failed" do
@@ -81,45 +82,6 @@ shared_examples_for "relation proxy" do
   end
 
 
-  describe "forward method calls to target" do
-    let(:target) { mock(Object, :target_method => "return value", :id => "dummy-id") }
-
-    before do
-      subject.target = target
-    end
-    
-
-    describe "#respond_to?" do
-      it "should check proxy to see if it responds to something" do
-        should respond_to :target
-      end
-      
-      it "should respond to target_method" do
-        should respond_to :target_method
-      end
-
-      it "should not respond to a dummy method" do
-        should_not respond_to :dummy_method_which_does_not_exists 
-      end
-    end
-
-
-    describe "#method_missing" do
-      it "should call proxy's method if exists in proxy" do
-        subject.should_receive(:loaded?).once
-        subject.loaded?
-      end
-
-      it "should call target's method if it responds to it" do
-        target.should_receive(:target_method).and_return(target)
-        subject.target_method.should == target
-      end
-
-      it "should rause no method error if no one responds to it" do
-        lambda { subject.dummy_method_which_does_not_exists }.should raise_error NoMethodError
-      end
-    end
-  end
 
 
   describe "target" do
@@ -141,9 +103,9 @@ shared_examples_for "relation proxy" do
 
     it "should try to load the target if it has not been loaded" do
       subject.stub(:can_find_target?).and_return true
-      subject.should_receive(:find_target) { target }
+      subject.should_receive(:find_target) { find_target_returns }
       subject.load_target
-      subject.target.should == target
+      subject.target.should == find_target_returns
     end
 
     it "should reset proxy if target's record was not found" do
@@ -155,8 +117,8 @@ shared_examples_for "relation proxy" do
 
 
   describe "replace" do
-    let (:old_target) { subject.target_class.new }
-    let (:new_target) { subject.target_class.new }
+    let(:old_target) { subject.represents_a_collection? ? [subject.target_class.new] : subject.target_class.new }
+    let(:new_target) { subject.represents_a_collection? ? [subject.target_class.new] : subject.target_class.new }
 
     before do
       subject.target = old_target

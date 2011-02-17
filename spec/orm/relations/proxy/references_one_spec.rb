@@ -13,6 +13,7 @@ describe TestReferencesOneProxy do
   subject { owner.send(:relation_proxy, 'boss') }
 
   it_should_behave_like "relation proxy"
+  it_should_behave_like "singular proxy"
 
   it "should be possible to assign relation in new" do
     lambda { Person.new(:boss => PersonWithTimestamp.new) }.should_not raise_error
