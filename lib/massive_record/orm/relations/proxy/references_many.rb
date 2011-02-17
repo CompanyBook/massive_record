@@ -105,6 +105,8 @@ module MassiveRecord
           def length
             load_target.length
           end
+          alias_method :count, :length
+          alias_method :size, :length
 
           def empty?
             length == 0
