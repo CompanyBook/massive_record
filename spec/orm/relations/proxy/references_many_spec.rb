@@ -214,11 +214,6 @@ describe TestReferencesManyProxy do
           owner.test_class_ids.should include(target.id)
         end
 
-        it "should ask the record to #{delete_method} self" do
-          target.should_receive(delete_method)
-          subject.send(delete_method, target)
-        end
-
         it "should not save the owner if it has not been persisted" do
           owner.should_receive(:persisted?).and_return(false)
           owner.should_not_receive(:save)
@@ -230,6 +225,29 @@ describe TestReferencesManyProxy do
           owner.should_receive(:save)
           subject.send(delete_method, target)
         end
+      end
+    end
+
+    describe "with #destroy" do
+      before do
+        subject << target
+      end
+
+      it "should ask the record to destroy self" do
+        target.should_receive(:destroy)
+        subject.destroy target
+      end
+    end
+    
+    describe "with #delete" do
+      before do
+        subject << target
+      end
+
+      it "should not ask the record to destroy self" do
+        target.should_not_receive(:destroy)
+        target.should_not_receive(:delete)
+        subject.delete(target)
       end
     end
 

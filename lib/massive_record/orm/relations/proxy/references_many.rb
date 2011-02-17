@@ -110,7 +110,7 @@ module MassiveRecord
               if include? record
                 remove_foreign_key_in_owner(record.id)
                 target.delete(record)
-                record.send(method)
+                record.destroy if method.to_sym == :destroy
               end
             end
 
