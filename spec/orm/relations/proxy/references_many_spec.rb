@@ -30,6 +30,15 @@ describe TestReferencesManyProxy do
         TestClass.should_receive(:find).with([target.id]).and_return([target])
         subject.load_target.should == [target]
       end
+
+      it "should not die when loading foreign keys which does not exist in target table" do
+        owner.save!
+        owner.test_classes << target
+        owner.test_classes.reset
+        owner.test_class_ids << "does_not_exists"
+        owner.test_classes.reload
+        owner.test_classes.length.should == 1
+      end
     end
 
     describe "with start from" do
@@ -183,13 +192,12 @@ describe TestReferencesManyProxy do
   end
 
   describe "removing records from the collection" do
-    before do
-      target.save!
-      subject << target
-    end
-
     [:destroy, :delete].each do |delete_method|
       describe "with ##{delete_method}" do
+        before do
+          subject << target
+        end
+
         it "should not be in proxy after being removed" do
           subject.send(delete_method, target)
           subject.target.should_not include target
@@ -229,14 +237,11 @@ describe TestReferencesManyProxy do
 
     describe "with destroy_all" do
       before do
-        target.save!
-        target_2.save!
-
-        subject << target << target_2
         owner.save!
+        subject << target << target_2
       end
 
-      it "should not include any records when destroying all" do
+      it "should not include any records after destroying all" do
         subject.destroy_all
         subject.target.should be_empty
       end

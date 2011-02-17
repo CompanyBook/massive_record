@@ -95,7 +95,7 @@ module MassiveRecord
 
 
           def find_target
-            target_class.find(owner.send(foreign_key))
+            target_class.find(owner.send(foreign_key), :skip_expected_result_check => true)
           end
 
           def find_target_with_proc
