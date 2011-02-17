@@ -8,6 +8,12 @@ module MassiveRecord
           # to make sure we don't remove any pushed targets only cause we load the
           # targets.
           #
+          # TODO  Implement methods like:
+          #         * first
+          #         * find
+          #         * limit
+          #         * etc :-)
+          #
           def load_target
             target_before_load = target
             target_after_load = super
