@@ -132,7 +132,7 @@ describe TestReferencesManyProxy do
         end
 
         it "should not update array of foreign keys in owner if it does not respond to it" do
-          owner.should_receive(:respond_to?).and_return(false)
+          owner.should_receive(:respond_to?).twice.and_return(false)
           subject.send(add_method, target)
           owner.test_class_ids.should_not include(target.id)
         end
