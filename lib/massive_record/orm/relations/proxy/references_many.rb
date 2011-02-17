@@ -71,14 +71,14 @@ module MassiveRecord
             target.include? record
           end
 
+          def length
+            load_target.length
+          end
 
           def empty?
-            target.empty?
+            length == 0
           end
 
-          def length
-            target.length
-          end
 
 
           private

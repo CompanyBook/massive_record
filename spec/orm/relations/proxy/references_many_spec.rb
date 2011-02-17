@@ -262,4 +262,38 @@ describe TestReferencesManyProxy do
       end
     end
   end
+
+
+
+  describe "#length" do
+    [true, false].each do |should_persist_owner|
+      describe "with owner " + (should_persist_owner ? "persisted" : "not persisted") do
+        before do
+          owner.save! if should_persist_owner
+          subject << target
+        end
+
+        it "should return the correct length when loaded" do
+          subject.reload
+          subject.length.should == 1
+        end
+
+        it "should return the correct length when not loaded" do
+          subject.reset
+          subject.length.should == 1
+        end
+
+        it "should return the correct length when a record is added" do
+          subject << target_2
+          subject.length.should == 2
+        end
+
+        it "should return the correct length when a record is added to an unloaded proxy" do
+          subject.reset
+          subject << target_2
+          subject.length.should == 2
+        end
+      end
+    end
+  end
 end
