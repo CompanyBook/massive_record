@@ -278,6 +278,45 @@ describe TestReferencesManyProxy do
         subject.destroy_all
         should be_loaded
       end
+
+      it "should call destroy on each record" do
+        target.should_receive(:destroy)
+        target_2.should_receive(:destroy)
+        subject.destroy_all
+      end
+    end
+
+    describe "with delete_all" do
+      before do
+        owner.save!
+        subject << target << target_2
+      end
+
+      it "should not include any records after destroying all" do
+        subject.delete_all
+        subject.target.should be_empty
+      end
+
+      it "should remove all foreign keys in owner" do
+        subject.delete_all
+        owner.test_class_ids.should be_empty
+      end
+
+      it "should call reset after all destroyed" do
+        subject.should_receive(:reset)
+        subject.delete_all
+      end
+
+      it "should be loaded after all being destroyed" do
+        subject.delete_all
+        should be_loaded
+      end
+
+      it "should not call destroy on each record" do
+        target.should_not_receive(:destroy)
+        target_2.should_not_receive(:destroy)
+        subject.delete_all
+      end
     end
   end
 

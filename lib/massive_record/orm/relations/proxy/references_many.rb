@@ -3,7 +3,6 @@ module MassiveRecord
     module Relations
       class Proxy
         class ReferencesMany < Proxy
-
           #
           # Loading targets will merge it with records found currently in proxy,
           # to make sure we don't remove any pushed targets only cause we load the
@@ -73,10 +72,20 @@ module MassiveRecord
           end
 
           #
-          # 
+          # Destroys all records
           #
           def destroy_all
             destroy(load_target)
+            reset
+            loaded!
+          end
+
+          #
+          # Deletes all records from the relationship.
+          # Does not destroy the records
+          #
+          def delete_all
+            delete(load_target)
             reset
             loaded!
           end
