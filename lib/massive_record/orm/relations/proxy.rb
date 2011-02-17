@@ -10,7 +10,7 @@ module MassiveRecord
       # specific sub class proxies.
       #
       class Proxy
-        instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a|inspect|to_s|extend|equal\?)$|^__|^respond_to|^should|^instance_variable_/ }
+        instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a|to_s|extend|equal\?)$|^__|^respond_to|^should|^instance_variable_/ }
 
         attr_reader :target
         attr_accessor :owner, :metadata
@@ -74,6 +74,10 @@ module MassiveRecord
           end
         end
 
+        def inspect
+          load_target.inspect
+        end
+
 
 
         #
@@ -102,6 +106,12 @@ module MassiveRecord
         end
       
 
+        # Strange.. Without Rails, to_param goes through method_missing,
+        #           With Rails it seems like the proxy answered to to_param, which
+        #           kinda was not what I wanted.
+        def to_param # :nodoc:
+          target.try :to_param
+        end
         
 
         protected
