@@ -21,15 +21,15 @@ module MassiveRecord
           private
 
           def find_proxy_target
-            proxy_target_class.find(proxy_owner.send(foreign_key))
+            proxy_target_class.find(proxy_owner.send(metadata.foreign_key))
           end
 
           def can_find_proxy_target?
-            super || proxy_owner.send(foreign_key).present?
+            super || proxy_owner.send(metadata.foreign_key).present?
           end
 
           def set_foreign_key_in_proxy_owner(id)
-            proxy_owner.send(foreign_key_setter, id) if proxy_owner.respond_to?(foreign_key_setter)
+            proxy_owner.send(metadata.foreign_key_setter, id) if proxy_owner.respond_to?(metadata.foreign_key_setter)
           end
         end
       end

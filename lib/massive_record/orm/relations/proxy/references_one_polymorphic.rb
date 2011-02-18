@@ -9,7 +9,7 @@ module MassiveRecord
           end
 
           def proxy_target_class
-            proxy_owner.send(polymorphic_type_column).classify.constantize
+            proxy_owner.send(metadata.polymorphic_type_column).classify.constantize
           end
 
           def replace(proxy_target)
@@ -21,16 +21,16 @@ module MassiveRecord
           private
 
           def find_proxy_target
-            proxy_target_class.find(proxy_owner.send(foreign_key))
+            proxy_target_class.find(proxy_owner.send(metadata.foreign_key))
           end
 
           def can_find_proxy_target?
-            super || (proxy_owner.send(foreign_key).present? && proxy_owner.send(polymorphic_type_column).present?)
+            super || (proxy_owner.send(metadata.foreign_key).present? && proxy_owner.send(metadata.polymorphic_type_column).present?)
           end
 
           def set_foreign_key_and_type_in_proxy_owner(id, type)
-            proxy_owner.send(foreign_key_setter, id) if proxy_owner.respond_to?(foreign_key_setter)
-            proxy_owner.send(polymorphic_type_column_setter, type) if proxy_owner.respond_to?(polymorphic_type_column_setter)
+            proxy_owner.send(metadata.foreign_key_setter, id) if proxy_owner.respond_to?(metadata.foreign_key_setter)
+            proxy_owner.send(metadata.polymorphic_type_column_setter, type) if proxy_owner.respond_to?(metadata.polymorphic_type_column_setter)
           end
 
 

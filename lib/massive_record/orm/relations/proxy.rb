@@ -15,10 +15,7 @@ module MassiveRecord
         attr_reader :proxy_target
         attr_accessor :proxy_owner, :metadata
 
-        delegate :foreign_key, :foreign_key_setter, :store_in, :store_foreign_key_in,
-          :polymorphic_type_column, :polymorphic_type_column_setter,
-          :class_name, :proxy_target_class, :name, :persisting_foreign_key?, :find_with,
-          :represents_a_collection?, :to => :metadata
+        delegate :class_name, :proxy_target_class, :represents_a_collection?, :to => :metadata
 
         def initialize(options = {})
           options.to_options!
@@ -136,7 +133,7 @@ module MassiveRecord
         # is put inside of an array.
         #
         def find_proxy_target_with_proc(options = {})
-          find_with.call(proxy_owner, options)
+          metadata.find_with.call(proxy_owner, options)
         end
 
         #
@@ -158,7 +155,7 @@ module MassiveRecord
         # Are we supposed to find proxy_target with a proc?
         #
         def find_with_proc?
-          !find_with.nil? && find_with.respond_to?(:call)
+          !metadata.find_with.nil? && metadata.find_with.respond_to?(:call)
         end
 
         def raise_if_type_mismatch(record)

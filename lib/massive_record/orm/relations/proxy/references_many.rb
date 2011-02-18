@@ -149,14 +149,14 @@ module MassiveRecord
 
 
           def find_proxy_target
-            proxy_target_class.find(proxy_owner.send(foreign_key), :skip_expected_result_check => true)
+            proxy_target_class.find(proxy_owner.send(metadata.foreign_key), :skip_expected_result_check => true)
           end
 
           def find_first
             if can_find_proxy_target?
               if find_with_proc?
                 find_proxy_target_with_proc(:limit => 1).first
-              elsif first_id = proxy_owner.send(foreign_key).first
+              elsif first_id = proxy_owner.send(metadata.foreign_key).first
                 proxy_target_class.find(first_id)
               end
             end
@@ -167,7 +167,7 @@ module MassiveRecord
           end
 
           def can_find_proxy_target?
-            super || (proxy_owner.respond_to?(foreign_key) && proxy_owner.send(foreign_key).any?)
+            super || (proxy_owner.respond_to?(metadata.foreign_key) && proxy_owner.send(metadata.foreign_key).any?)
           end
 
 
@@ -175,21 +175,21 @@ module MassiveRecord
 
 
           def add_foreign_key_in_proxy_owner(id)
-            if proxy_owner.respond_to? foreign_key
-              proxy_owner.send(foreign_key) << id
+            if proxy_owner.respond_to? metadata.foreign_key
+              proxy_owner.send(metadata.foreign_key) << id
               notify_of_change_in_proxy_owner_foreign_key
             end
           end
 
           def remove_foreign_key_in_proxy_owner(id)
-            if proxy_owner.respond_to? foreign_key
-              proxy_owner.send(foreign_key).delete(id)
+            if proxy_owner.respond_to? metadata.foreign_key
+              proxy_owner.send(metadata.foreign_key).delete(id)
               notify_of_change_in_proxy_owner_foreign_key
             end
           end
 
           def notify_of_change_in_proxy_owner_foreign_key
-            method = foreign_key+"_will_change!"
+            method = metadata.foreign_key+"_will_change!"
             proxy_owner.send(method) if proxy_owner.respond_to? method
           end
         end
