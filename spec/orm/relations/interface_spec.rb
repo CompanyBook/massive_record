@@ -72,7 +72,7 @@ describe MassiveRecord::ORM::Relations::Interface do
           subject.boss.reload
         end
 
-        it "should set the foreign_key in owner when target is set" do
+        it "should set the foreign_key in proxy_owner when target is set" do
           subject.boss = boss
           subject.boss_id.should == boss.id
         end
@@ -133,12 +133,12 @@ describe MassiveRecord::ORM::Relations::Interface do
           subject.attachable.should == attachable
         end
 
-        it "should set the foreign_key in owner when target is set" do
+        it "should set the foreign_key in proxy_owner when target is set" do
           subject.attachable = attachable
           subject.attachable_id.should == attachable.id
         end
 
-        it "should set the type in owner when target is set" do
+        it "should set the type in proxy_owner when target is set" do
           subject.attachable = attachable
           subject.attachable_type.should == attachable.class.to_s.underscore
         end

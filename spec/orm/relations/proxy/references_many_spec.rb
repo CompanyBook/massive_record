@@ -6,48 +6,48 @@ describe TestReferencesManyProxy do
   include SetUpHbaseConnectionBeforeAll 
   include SetTableNamesToTestTable
 
-  let(:owner) { Person.new :id => "person-id-1", :name => "Test", :age => 29 }
+  let(:proxy_owner) { Person.new :id => "person-id-1", :name => "Test", :age => 29 }
   let(:target) { TestClass.new :id => "test-class-id-1" }
   let(:target_2) { TestClass.new :id => "test-class-id-2" }
   let(:metadata) { subject.metadata }
 
-  subject { owner.send(:relation_proxy, 'test_classes') }
+  subject { proxy_owner.send(:relation_proxy, 'test_classes') }
 
   it_should_behave_like "relation proxy"
 
   
 
   describe "#find_target" do
-    describe "with foreig keys stored in owner" do
+    describe "with foreig keys stored in proxy_owner" do
       it "should not try to find target if foreign_keys is blank" do
-        owner.test_class_ids.clear
+        proxy_owner.test_class_ids.clear
         TestClass.should_not_receive(:find)
         subject.load_target.should be_empty
       end
 
       it "should try to load target if foreign_keys has any keys" do
-        owner.test_class_ids << target.id
+        proxy_owner.test_class_ids << target.id
         TestClass.should_receive(:find).with([target.id], anything).and_return([target])
         subject.load_target.should == [target]
       end
 
       it "should not die when loading foreign keys which does not exist in target table" do
-        owner.save!
-        owner.test_classes << target
-        owner.test_classes.reset
-        owner.test_class_ids << "does_not_exists"
-        owner.test_classes.reload
-        owner.test_classes.length.should == 1
+        proxy_owner.save!
+        proxy_owner.test_classes << target
+        proxy_owner.test_classes.reset
+        proxy_owner.test_class_ids << "does_not_exists"
+        proxy_owner.test_classes.reload
+        proxy_owner.test_classes.length.should == 1
       end
     end
 
     describe "with start from" do
-      let(:target) { Person.new :id => owner.id+"-friend-1", :name => "T", :age => 2 }
-      let(:target_2) { Person.new :id => owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:target) { Person.new :id => proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:target_2) { Person.new :id => proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
       let(:not_target) { Person.new :id => "foo"+"-friend-2", :name => "H", :age => 1 }
       let(:metadata) { subject.metadata }
 
-      subject { owner.send(:relation_proxy, 'friends') }
+      subject { proxy_owner.send(:relation_proxy, 'friends') }
 
       before do
         target.save!
@@ -56,7 +56,7 @@ describe TestReferencesManyProxy do
       end
 
       it "should not try to find target if start from method is blank" do
-        owner.should_receive(:friends_records_starts_from_id).and_return(nil)
+        proxy_owner.should_receive(:friends_records_starts_from_id).and_return(nil)
         Person.should_not_receive(:all)
         subject.load_target.should be_empty
       end
@@ -118,29 +118,29 @@ describe TestReferencesManyProxy do
           subject.target.should_not include target
         end
 
-        it "should update array of foreign keys in owner" do
-          owner.test_class_ids.should be_empty
+        it "should update array of foreign keys in proxy_owner" do
+          proxy_owner.test_class_ids.should be_empty
           subject.send(add_method, target)
-          owner.test_class_ids.should include(target.id)
+          proxy_owner.test_class_ids.should include(target.id)
         end
 
-        it "should update array of foreign keys in owner" do
-          owner.save!
+        it "should update array of foreign keys in proxy_owner" do
+          proxy_owner.save!
           subject.send(add_method, target)
-          owner.save! and owner.reload
-          owner.test_class_ids.should include(target.id)
+          proxy_owner.save! and proxy_owner.reload
+          proxy_owner.test_class_ids.should include(target.id)
         end
 
-        it "should not update array of foreign keys in owner if it does not respond to it" do
-          owner.should_receive(:respond_to?).twice.and_return(false)
+        it "should not update array of foreign keys in proxy_owner if it does not respond to it" do
+          proxy_owner.should_receive(:respond_to?).twice.and_return(false)
           subject.send(add_method, target)
-          owner.test_class_ids.should_not include(target.id)
+          proxy_owner.test_class_ids.should_not include(target.id)
         end
 
         it "should not do anything adding the same record twice" do
           2.times { subject.send(add_method, target) }
           subject.target.length.should == 1
-          owner.test_class_ids.length.should == 1
+          proxy_owner.test_class_ids.length.should == 1
         end
 
         it "should be able to add two records at the same time" do
@@ -157,33 +157,33 @@ describe TestReferencesManyProxy do
           lambda { subject.send add_method, Person.new(:name => "Foo", :age => 2) }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
         end
 
-        it "should not save the pushed target if owner is not persisted" do
-          owner.should_receive(:persisted?).and_return false
+        it "should not save the pushed target if proxy_owner is not persisted" do
+          proxy_owner.should_receive(:persisted?).and_return false
           target.should_not_receive(:save)
           subject.send(add_method, target)
         end
 
-        it "should not save the owner object if it has not been persisted before" do
-          owner.should_receive(:persisted?).and_return false
-          owner.should_not_receive(:save)
+        it "should not save the proxy_owner object if it has not been persisted before" do
+          proxy_owner.should_receive(:persisted?).and_return false
+          proxy_owner.should_not_receive(:save)
           subject.send(add_method, target)
         end
 
-        it "should save the pushed target if owner is persisted" do
-          owner.save!
+        it "should save the pushed target if proxy_owner is persisted" do
+          proxy_owner.save!
           target.should_receive(:save).and_return(true)
           subject.send(add_method, target)
         end
 
         it "should not save anything if one record is invalid" do
-          owner.save!
+          proxy_owner.save!
 
           target.should_receive(:valid?).and_return(true)
           target_2.should_receive(:valid?).and_return(false)
           
           target.should_not_receive(:save)
           target_2.should_not_receive(:save)
-          owner.should_not_receive(:save)
+          proxy_owner.should_not_receive(:save)
 
           subject.send(add_method, [target, target_2]).should be_false
         end
@@ -203,26 +203,26 @@ describe TestReferencesManyProxy do
           subject.target.should_not include target
         end
 
-        it "should remove the destroyed records id from owner foreign keys" do
+        it "should remove the destroyed records id from proxy_owner foreign keys" do
           subject.send(delete_method, target)
-          owner.test_class_ids.should_not include(target.id)
+          proxy_owner.test_class_ids.should_not include(target.id)
         end
 
-        it "should not remove foreign keys in owner if it does not respond to it" do
-          owner.should_receive(:respond_to?).and_return false
+        it "should not remove foreign keys in proxy_owner if it does not respond to it" do
+          proxy_owner.should_receive(:respond_to?).and_return false
           subject.send(delete_method, target)
-          owner.test_class_ids.should include(target.id)
+          proxy_owner.test_class_ids.should include(target.id)
         end
 
-        it "should not save the owner if it has not been persisted" do
-          owner.should_receive(:persisted?).and_return(false)
-          owner.should_not_receive(:save)
+        it "should not save the proxy_owner if it has not been persisted" do
+          proxy_owner.should_receive(:persisted?).and_return(false)
+          proxy_owner.should_not_receive(:save)
           subject.send(delete_method, target)
         end
 
-        it "should save the owner if it has been persisted" do
-          owner.save!
-          owner.should_receive(:save)
+        it "should save the proxy_owner if it has been persisted" do
+          proxy_owner.save!
+          proxy_owner.should_receive(:save)
           subject.send(delete_method, target)
         end
       end
@@ -255,7 +255,7 @@ describe TestReferencesManyProxy do
 
     describe "with destroy_all" do
       before do
-        owner.save!
+        proxy_owner.save!
         subject << target << target_2
       end
 
@@ -264,9 +264,9 @@ describe TestReferencesManyProxy do
         subject.target.should be_empty
       end
 
-      it "should remove all foreign keys in owner" do
+      it "should remove all foreign keys in proxy_owner" do
         subject.destroy_all
-        owner.test_class_ids.should be_empty
+        proxy_owner.test_class_ids.should be_empty
       end
 
       it "should call reset after all destroyed" do
@@ -288,7 +288,7 @@ describe TestReferencesManyProxy do
 
     describe "with delete_all" do
       before do
-        owner.save!
+        proxy_owner.save!
         subject << target << target_2
       end
 
@@ -297,9 +297,9 @@ describe TestReferencesManyProxy do
         subject.target.should be_empty
       end
 
-      it "should remove all foreign keys in owner" do
+      it "should remove all foreign keys in proxy_owner" do
         subject.delete_all
-        owner.test_class_ids.should be_empty
+        proxy_owner.test_class_ids.should be_empty
       end
 
       it "should call reset after all destroyed" do
@@ -322,20 +322,20 @@ describe TestReferencesManyProxy do
 
   [:length, :size, :count].each do |method|
     describe "##{method}" do
-      [true, false].each do |should_persist_owner|
-        describe "with owner " + (should_persist_owner ? "persisted" : "not persisted") do
+      [true, false].each do |should_persist_proxy_owner|
+        describe "with proxy_owner " + (should_persist_proxy_owner ? "persisted" : "not persisted") do
           before do
-            owner.save! if should_persist_owner
+            proxy_owner.save! if should_persist_proxy_owner
             subject << target
           end
 
           it "should return the correct #{method} when loaded" do
-            subject.reload if should_persist_owner
+            subject.reload if should_persist_proxy_owner
             subject.send(method).should == 1
           end
 
           it "should return the correct #{method} when not loaded" do
-            subject.reset if should_persist_owner
+            subject.reset if should_persist_proxy_owner
             subject.send(method).should == 1
           end
 
@@ -345,7 +345,7 @@ describe TestReferencesManyProxy do
           end
 
           it "should return the correct #{method} when a record is added to an unloaded proxy" do
-            subject.reset if should_persist_owner
+            subject.reset if should_persist_proxy_owner
             subject << target_2
             subject.send(method).should == 2
           end
@@ -355,20 +355,20 @@ describe TestReferencesManyProxy do
   end
 
   describe "#include" do
-    [true, false].each do |should_persist_owner|
-      describe "with owner " + (should_persist_owner ? "persisted" : "not persisted") do
+    [true, false].each do |should_persist_proxy_owner|
+      describe "with proxy_owner " + (should_persist_proxy_owner ? "persisted" : "not persisted") do
         before do
-          owner.save! if should_persist_owner
+          proxy_owner.save! if should_persist_proxy_owner
           subject << target
         end
 
         it "should return that it includes it's target when loaded" do
-          subject.reload if should_persist_owner
+          subject.reload if should_persist_proxy_owner
           should include target
         end
 
         it "should return that it includes it's target when not loaded" do
-          subject.reset if should_persist_owner
+          subject.reset if should_persist_proxy_owner
           should include target
         end
 
@@ -378,7 +378,7 @@ describe TestReferencesManyProxy do
         end
 
         it "should return that it includes it's target when a record is added to an unloaded proxy" do
-          subject.reset if should_persist_owner
+          subject.reset if should_persist_proxy_owner
           subject << target_2
           should include target, target_2
         end
@@ -391,7 +391,7 @@ describe TestReferencesManyProxy do
   describe "#first" do
     describe "stored foreign keys" do
       before do
-        owner.save!
+        proxy_owner.save!
         subject << target << target_2
         subject.reset
       end
@@ -417,14 +417,14 @@ describe TestReferencesManyProxy do
     end
 
     describe "with records_starts_from (proc)" do
-      let(:target) { Person.new :id => owner.id+"-friend-1", :name => "T", :age => 2 }
-      let(:target_2) { Person.new :id => owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:target) { Person.new :id => proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:target_2) { Person.new :id => proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
       let(:metadata) { subject.metadata }
 
-      subject { owner.send(:relation_proxy, 'friends') }
+      subject { proxy_owner.send(:relation_proxy, 'friends') }
 
       before do
-        owner.save!
+        proxy_owner.save!
         subject << target << target_2
         subject.reset
       end

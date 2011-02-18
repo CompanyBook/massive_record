@@ -4,33 +4,33 @@ module MassiveRecord
       class Proxy
         class ReferencesOnePolymorphic < Proxy
           def target=(target)
-            set_foreign_key_and_type_in_owner(target.id, target.class.to_s.underscore) if target
+            set_foreign_key_and_type_in_proxy_owner(target.id, target.class.to_s.underscore) if target
             super(target)
           end
 
           def target_class
-            owner.send(polymorphic_type_column).classify.constantize
+            proxy_owner.send(polymorphic_type_column).classify.constantize
           end
 
           def replace(target)
             super
-            set_foreign_key_and_type_in_owner(nil, nil) if target.nil?
+            set_foreign_key_and_type_in_proxy_owner(nil, nil) if target.nil?
           end
 
 
           private
 
           def find_target
-            target_class.find(owner.send(foreign_key))
+            target_class.find(proxy_owner.send(foreign_key))
           end
 
           def can_find_target?
-            super || (owner.send(foreign_key).present? && owner.send(polymorphic_type_column).present?)
+            super || (proxy_owner.send(foreign_key).present? && proxy_owner.send(polymorphic_type_column).present?)
           end
 
-          def set_foreign_key_and_type_in_owner(id, type)
-            owner.send(foreign_key_setter, id) if owner.respond_to?(foreign_key_setter)
-            owner.send(polymorphic_type_column_setter, type) if owner.respond_to?(polymorphic_type_column_setter)
+          def set_foreign_key_and_type_in_proxy_owner(id, type)
+            proxy_owner.send(foreign_key_setter, id) if proxy_owner.respond_to?(foreign_key_setter)
+            proxy_owner.send(polymorphic_type_column_setter, type) if proxy_owner.respond_to?(polymorphic_type_column_setter)
           end
 
 

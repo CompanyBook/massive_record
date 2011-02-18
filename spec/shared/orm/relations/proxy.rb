@@ -6,15 +6,15 @@ shared_examples_for "relation proxy" do
     subject.metadata = mock(MassiveRecord::ORM::Relations::Metadata, :find_with => nil).as_null_object if subject.metadata.nil?
   end
 
-  %w(owner target metadata).each do |method|
+  %w(proxy_owner target metadata).each do |method|
     it "should respond to #{method}" do
       should respond_to method
     end
   end
 
   it "should be setting values by initializer" do
-    proxy = MassiveRecord::ORM::Relations::Proxy.new(:owner => "owner", :target => target, :metadata => "metadata")
-    proxy.owner.should == "owner"
+    proxy = MassiveRecord::ORM::Relations::Proxy.new(:proxy_owner => "proxy_owner", :target => target, :metadata => "metadata")
+    proxy.proxy_owner.should == "proxy_owner"
     proxy.target.should == target
     proxy.metadata.should == "metadata"
   end

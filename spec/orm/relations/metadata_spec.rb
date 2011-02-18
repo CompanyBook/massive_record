@@ -127,11 +127,11 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
 
   describe "#new_relation_proxy" do
-    let(:owner) { Person.new }
-    let(:proxy) { subject.relation_type = "references_one" and subject.new_relation_proxy(owner) }
+    let(:proxy_owner) { Person.new }
+    let(:proxy) { subject.relation_type = "references_one" and subject.new_relation_proxy(proxy_owner) }
 
-    it "should return a proxy where owner is assigned" do
-      proxy.owner.should == owner
+    it "should return a proxy where proxy_owner is assigned" do
+      proxy.proxy_owner.should == proxy_owner
     end
 
     it "should return a proxy where metadata is assigned" do
@@ -181,21 +181,21 @@ describe MassiveRecord::ORM::Relations::Metadata do
     end
 
     describe "proc" do
-      let(:owner) { Person.new :id => "person-1" }
+      let(:proxy_owner) { Person.new :id => "person-1" }
       let(:find_with_proc) { subject.records_starts_from = :friends_records_starts_from_id; subject.find_with }
 
       before do
         subject.class_name = "Person"
       end
 
-      it "should call target class with all, start with owner's start from id response" do
-        Person.should_receive(:all).with(hash_including(:start => owner.friends_records_starts_from_id))
-        find_with_proc.call(owner)
+      it "should call target class with all, start with proxy_owner's start from id response" do
+        Person.should_receive(:all).with(hash_including(:start => proxy_owner.friends_records_starts_from_id))
+        find_with_proc.call(proxy_owner)
       end
 
       it "should be possible to send in options to the proc" do
-        Person.should_receive(:all).with(hash_including(:limit => 10, :start => owner.friends_records_starts_from_id))
-        find_with_proc.call(owner, {:limit => 10})
+        Person.should_receive(:all).with(hash_including(:limit => 10, :start => proxy_owner.friends_records_starts_from_id))
+        find_with_proc.call(proxy_owner, {:limit => 10})
       end
     end
   end

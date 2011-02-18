@@ -92,8 +92,8 @@ module MassiveRecord
         end
 
 
-        def new_relation_proxy(owner)
-          proxy_class_name.constantize.new(:owner => owner, :metadata => self)
+        def new_relation_proxy(proxy_owner)
+          proxy_class_name.constantize.new(:proxy_owner => proxy_owner, :metadata => self)
         end
 
         
@@ -117,8 +117,8 @@ module MassiveRecord
           @records_starts_from = method
 
           if @records_starts_from
-            self.find_with = Proc.new do |owner, options = {}|
-              start = owner.send(records_starts_from) and target_class.all(options.merge({:start => start}))
+            self.find_with = Proc.new do |proxy_owner, options = {}|
+              start = proxy_owner.send(records_starts_from) and target_class.all(options.merge({:start => start}))
             end
           else
             self.find_with = nil

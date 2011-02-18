@@ -5,7 +5,7 @@ module MassiveRecord
       # Parent class for all proxies sitting between records.
       # It's responsibility is to transparently load and forward
       # method calls to it's target. Iy may also do some small maintenance
-      # work like setting foreign key in owner object etc. That kind of
+      # work like setting foreign key in proxy_owner object etc. That kind of
       # functionality is likely to be implemented in one of it's more
       # specific sub class proxies.
       #
@@ -13,7 +13,7 @@ module MassiveRecord
         instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a|to_s|extend|equal\?)$|^__|^respond_to|^should|^instance_variable_/ }
 
         attr_reader :target
-        attr_accessor :owner, :metadata
+        attr_accessor :proxy_owner, :metadata
 
         delegate :foreign_key, :foreign_key_setter, :store_in, :store_foreign_key_in,
           :polymorphic_type_column, :polymorphic_type_column_setter,
@@ -23,7 +23,7 @@ module MassiveRecord
         def initialize(options = {})
           options.to_options!
           self.metadata = options[:metadata]
-          self.owner = options[:owner]
+          self.proxy_owner = options[:proxy_owner]
           self.target = options[:target]
 
           reset if target.nil?
@@ -32,13 +32,13 @@ module MassiveRecord
 
         #
         # The target of a relation is the record
-        # the owner references. For instance,
+        # the proxy_owner references. For instance,
         # 
         # class Person
         #   references_one :car
         # end
         #
-        # The owner is a record of class person, the target will be the car.
+        # The proxy_owner is a record of class person, the target will be the car.
         #
         def target=(target)
           @target = target
@@ -136,7 +136,7 @@ module MassiveRecord
         # is put inside of an array.
         #
         def find_target_with_proc(options = {})
-          find_with.call(owner, options)
+          find_with.call(proxy_owner, options)
         end
 
         #

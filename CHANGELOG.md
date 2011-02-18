@@ -2,7 +2,7 @@
 
 - references_many.first() will only find first object from DB if proxy has not been loaded, or else return first element in loaded target.
 - Wrapper::Thrift has been moved into Adapter::Thrift. Adding more adapters should be not that hard now.
-- References many is now possible. We have to strategies: Store an array of foreign keys in the owner,
+- References many is now possible. We have to strategies: Store an array of foreign keys in the proxy_owner,
   or supply a ids-starts-with and open up a scanner and read from that point.
 - Setting a non-parsable value on date/time field will no longer raise an error.
 - Scanner no longer fetches with a limit of 10 by default. It is set to 100000000.

@@ -34,7 +34,7 @@ module MassiveRecord
           #   <tt>store_in</tt>::     Send in the column family to store foreign key in. If none given,
           #                           you should define the foreign key method in class if it can be
           #                           calculated from another attributes in your class.
-          #   <tt>find_with</tt>::    Assign it to a Proc and we will call it with the owner if you need complete
+          #   <tt>find_with</tt>::    Assign it to a Proc and we will call it with the proxy_owner if you need complete
           #                           control over how you retrieve your record.
           #                           As a default TargetClass.find(foreign_key_method) is used.
           #
@@ -73,7 +73,7 @@ module MassiveRecord
           #                                    Person's table. This is useful if you for instance has a person with id 1
           #                                    and in your table for cars have cars id like "<person_id>-<incremental number>"
           #                                    or something. Then you can say references_many :cars, :starts_with => :id.
-          #   <tt>find_with</tt>::             Assign it to a Proc and we will call it with the owner if you need complete
+          #   <tt>find_with</tt>::             Assign it to a Proc and we will call it with the proxy_owner if you need complete
           #                                    control over how you retrieve your record.
           #                                    As a default TargetClass.find(foreign_keys_method) is used.
           #
