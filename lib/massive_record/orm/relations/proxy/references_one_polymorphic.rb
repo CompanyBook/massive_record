@@ -3,28 +3,28 @@ module MassiveRecord
     module Relations
       class Proxy
         class ReferencesOnePolymorphic < Proxy
-          def target=(target)
-            set_foreign_key_and_type_in_proxy_owner(target.id, target.class.to_s.underscore) if target
-            super(target)
+          def proxy_target=(proxy_target)
+            set_foreign_key_and_type_in_proxy_owner(proxy_target.id, proxy_target.class.to_s.underscore) if proxy_target
+            super(proxy_target)
           end
 
-          def target_class
+          def proxy_target_class
             proxy_owner.send(polymorphic_type_column).classify.constantize
           end
 
-          def replace(target)
+          def replace(proxy_target)
             super
-            set_foreign_key_and_type_in_proxy_owner(nil, nil) if target.nil?
+            set_foreign_key_and_type_in_proxy_owner(nil, nil) if proxy_target.nil?
           end
 
 
           private
 
-          def find_target
-            target_class.find(proxy_owner.send(foreign_key))
+          def find_proxy_target
+            proxy_target_class.find(proxy_owner.send(foreign_key))
           end
 
-          def can_find_target?
+          def can_find_proxy_target?
             super || (proxy_owner.send(foreign_key).present? && proxy_owner.send(polymorphic_type_column).present?)
           end
 

@@ -188,7 +188,7 @@ describe MassiveRecord::ORM::Relations::Metadata do
         subject.class_name = "Person"
       end
 
-      it "should call target class with all, start with proxy_owner's start from id response" do
+      it "should call proxy_target class with all, start with proxy_owner's start from id response" do
         Person.should_receive(:all).with(hash_including(:start => proxy_owner.friends_records_starts_from_id))
         find_with_proc.call(proxy_owner)
       end

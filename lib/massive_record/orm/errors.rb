@@ -58,7 +58,7 @@ module MassiveRecord
     class RelationAlreadyDefined < MassiveRecordError
     end
 
-    # Raised if target in a relation proxy does not match what the proxy expects
+    # Raised if proxy_target in a relation proxy does not match what the proxy expects
     class RelationTypeMismatch < MassiveRecordError
     end
   end

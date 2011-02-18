@@ -4,9 +4,9 @@ module MassiveRecord
       class Proxy
         class ReferencesMany < Proxy
           #
-          # Loading targets will merge it with records found currently in proxy,
-          # to make sure we don't remove any pushed targets only cause we load the
-          # targets.
+          # Loading proxy_targets will merge it with records found currently in proxy,
+          # to make sure we don't remove any pushed proxy_targets only cause we load the
+          # proxy_targets.
           #
           # TODO  - Implement methods like:
           #         * find
@@ -17,16 +17,16 @@ module MassiveRecord
           #
           #       - A counter cache is also nice.
           #
-          def load_target
-            target_before_load = target
-            target_after_load = super
+          def load_proxy_target
+            proxy_target_before_load = proxy_target
+            proxy_target_after_load = super
 
-            self.target = (target_before_load + target_after_load).uniq
+            self.proxy_target = (proxy_target_before_load + proxy_target_after_load).uniq
           end
 
           def reset
             super
-            @target = []
+            @proxy_target = []
           end
 
           def replace(*records)
@@ -52,7 +52,7 @@ module MassiveRecord
                 unless include? record
                   raise_if_type_mismatch(record)
                   add_foreign_key_in_proxy_owner(record.id)
-                  target << record
+                  proxy_target << record
                   record.save if save_records
                 end
               end
@@ -85,7 +85,7 @@ module MassiveRecord
           # Destroys all records
           #
           def destroy_all
-            destroy(load_target)
+            destroy(load_proxy_target)
             reset
             loaded!
           end
@@ -95,7 +95,7 @@ module MassiveRecord
           # Does not destroy the records
           #
           def delete_all
-            delete(load_target)
+            delete(load_proxy_target)
             reset
             loaded!
           end
@@ -103,16 +103,16 @@ module MassiveRecord
           #
           # Checks if record is included in collection
           #
-          # TODO  This needs a bit of work, depending on if proxy's target
+          # TODO  This needs a bit of work, depending on if proxy's proxy_target
           #       has been loaded or not. For now, we are just checking
-          #       what we currently have in @target
+          #       what we currently have in @proxy_target
           #
           def include?(record)
-            load_target.include? record
+            load_proxy_target.include? record
           end
 
           def length
-            load_target.length
+            load_proxy_target.length
           end
           alias_method :count, :length
           alias_method :size, :length
@@ -123,7 +123,7 @@ module MassiveRecord
 
           def first
             if loaded?
-              target.first
+              proxy_target.first
             else
               find_first
             end
@@ -138,7 +138,7 @@ module MassiveRecord
             records.flatten.each do |record|
               if include? record
                 remove_foreign_key_in_proxy_owner(record.id)
-                target.delete(record)
+                proxy_target.delete(record)
                 record.destroy if method.to_sym == :destroy
               end
             end
@@ -148,25 +148,25 @@ module MassiveRecord
 
 
 
-          def find_target
-            target_class.find(proxy_owner.send(foreign_key), :skip_expected_result_check => true)
+          def find_proxy_target
+            proxy_target_class.find(proxy_owner.send(foreign_key), :skip_expected_result_check => true)
           end
 
           def find_first
-            if can_find_target?
+            if can_find_proxy_target?
               if find_with_proc?
-                find_target_with_proc(:limit => 1).first
+                find_proxy_target_with_proc(:limit => 1).first
               elsif first_id = proxy_owner.send(foreign_key).first
-                target_class.find(first_id)
+                proxy_target_class.find(first_id)
               end
             end
           end
 
-          def find_target_with_proc(options = {})
+          def find_proxy_target_with_proc(options = {})
             [super].compact.flatten
           end
 
-          def can_find_target?
+          def can_find_proxy_target?
             super || (proxy_owner.respond_to?(foreign_key) && proxy_owner.send(foreign_key).any?)
           end
 

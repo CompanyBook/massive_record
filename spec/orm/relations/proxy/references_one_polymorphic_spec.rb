@@ -7,7 +7,7 @@ describe TestReferencesOnePolymorphicProxy do
   include SetTableNamesToTestTable
 
   let(:proxy_owner) { TestClass.new }
-  let(:target) { Person.new }
+  let(:proxy_target) { Person.new }
   let(:metadata) { subject.metadata }
 
   subject { proxy_owner.send(:relation_proxy, 'attachable') }
@@ -20,8 +20,8 @@ describe TestReferencesOnePolymorphicProxy do
   it_should_behave_like "singular proxy"
 
 
-  describe "#find_target" do
-    it "should be able to find target if foreign_key and type is present in proxy_owner" do
+  describe "#find_proxy_target" do
+    it "should be able to find proxy_target if foreign_key and type is present in proxy_owner" do
       person = Person.new
       proxy_owner.attachable_id = "ID1"
       proxy_owner.attachable_type = "person"
@@ -29,14 +29,14 @@ describe TestReferencesOnePolymorphicProxy do
       proxy_owner.attachable.should == person
     end
 
-    it "should not be able to find target if foreign_key is nil" do
+    it "should not be able to find proxy_target if foreign_key is nil" do
       proxy_owner.attachable_id = nil
       proxy_owner.attachable_type = "person"
       Person.should_not_receive(:find)
       proxy_owner.attachable
     end
 
-    it "should not be able to find target if type is nil" do
+    it "should not be able to find proxy_target if type is nil" do
       proxy_owner.attachable_id = "ID1"
       proxy_owner.attachable_type = nil
       Person.should_not_receive(:find)
@@ -45,46 +45,46 @@ describe TestReferencesOnePolymorphicProxy do
   end
 
 
-  describe "setting target object" do
-    it "should set the target's id as the foreign key in proxy_owner" do
-      proxy_owner.attachable = target
-      proxy_owner.attachable_id.should == target.id
+  describe "setting proxy_target object" do
+    it "should set the proxy_target's id as the foreign key in proxy_owner" do
+      proxy_owner.attachable = proxy_target
+      proxy_owner.attachable_id.should == proxy_target.id
     end
 
-    it "should set the target's type in proxy_owner" do
+    it "should set the proxy_target's type in proxy_owner" do
       proxy_owner.attachable_type = nil
-      proxy_owner.attachable = target
-      proxy_owner.attachable_type.should == target.class.to_s.underscore
+      proxy_owner.attachable = proxy_target
+      proxy_owner.attachable_type.should == proxy_target.class.to_s.underscore
     end
 
-    it "should reset the targets foreign key if target is nil" do
-      proxy_owner.attachable = target
+    it "should reset the proxy_targets foreign key if proxy_target is nil" do
+      proxy_owner.attachable = proxy_target
       proxy_owner.attachable = nil
       proxy_owner.attachable_id.should be_nil
     end
 
-    it "should reset the target's type in proxy_owner if target is nil" do
-      proxy_owner.attachable = target
+    it "should reset the proxy_target's type in proxy_owner if proxy_target is nil" do
+      proxy_owner.attachable = proxy_target
       proxy_owner.attachable = nil
       proxy_owner.attachable_type.should be_nil
     end
 
-    it "should not set the target's id as the foreign key if we are not persisting the foreign key" do
+    it "should not set the proxy_target's id as the foreign key if we are not persisting the foreign key" do
       proxy_owner.stub(:respond_to?).and_return(false)
-      proxy_owner.attachable = target
+      proxy_owner.attachable = proxy_target
       proxy_owner.attachable_id.should be_nil
     end
 
-    it "should not set the target's type if proxy_owner is not responding to type setter" do
+    it "should not set the proxy_target's type if proxy_owner is not responding to type setter" do
       proxy_owner.attachable_type = nil
       proxy_owner.stub(:respond_to?).and_return(false)
-      proxy_owner.attachable = target
+      proxy_owner.attachable = proxy_target
       proxy_owner.attachable_type.should be_nil
     end
 
-    it "should set the target's id as the foreign key even if we are not persisting it if the record responds to setter method" do
-      proxy_owner.attachable = target
-      proxy_owner.attachable_id.should == target.id
+    it "should set the proxy_target's id as the foreign key even if we are not persisting it if the record responds to setter method" do
+      proxy_owner.attachable = proxy_target
+      proxy_owner.attachable_id.should == proxy_target.id
     end
   end
 end

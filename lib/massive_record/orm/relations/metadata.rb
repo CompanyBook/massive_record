@@ -60,7 +60,7 @@ module MassiveRecord
           (@class_name || calculate_class_name).to_s
         end
 
-        def target_class
+        def proxy_target_class
           class_name.constantize
         end
 
@@ -118,7 +118,7 @@ module MassiveRecord
 
           if @records_starts_from
             self.find_with = Proc.new do |proxy_owner, options = {}|
-              start = proxy_owner.send(records_starts_from) and target_class.all(options.merge({:start => start}))
+              start = proxy_owner.send(records_starts_from) and proxy_target_class.all(options.merge({:start => start}))
             end
           else
             self.find_with = nil

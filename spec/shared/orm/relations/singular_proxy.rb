@@ -1,26 +1,26 @@
 shared_examples_for "singular proxy" do
-  let(:target) { mock(Object).as_null_object }
-  let(:find_target_returns) { subject.represents_a_collection? ? [target] : target }
+  let(:proxy_target) { mock(Object).as_null_object }
+  let(:find_proxy_target_returns) { subject.represents_a_collection? ? [proxy_target] : proxy_target }
 
   before do
     subject.metadata = mock(MassiveRecord::ORM::Relations::Metadata, :find_with => nil).as_null_object if subject.metadata.nil?
   end
 
-  describe "forward method calls to target" do
-    let(:target) { mock(Object, :target_method => "return value", :id => "dummy-id") }
+  describe "forward method calls to proxy_target" do
+    let(:proxy_target) { mock(Object, :proxy_target_method => "return value", :id => "dummy-id") }
 
     before do
-      subject.target = target
+      subject.proxy_target = proxy_target
     end
     
 
     describe "#respond_to?" do
       it "should check proxy to see if it responds to something" do
-        should respond_to :target
+        should respond_to :proxy_target
       end
       
-      it "should respond to target_method" do
-        should respond_to :target_method
+      it "should respond to proxy_target_method" do
+        should respond_to :proxy_target_method
       end
 
       it "should not respond to a dummy method" do
@@ -35,9 +35,9 @@ shared_examples_for "singular proxy" do
         subject.loaded?
       end
 
-      it "should call target's method if it responds to it" do
-        target.should_receive(:target_method).and_return(target)
-        subject.target_method.should == target
+      it "should call proxy_target's method if it responds to it" do
+        proxy_target.should_receive(:proxy_target_method).and_return(proxy_target)
+        subject.proxy_target_method.should == proxy_target
       end
 
       it "should rause no method error if no one responds to it" do

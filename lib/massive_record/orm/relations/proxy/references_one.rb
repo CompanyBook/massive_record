@@ -7,24 +7,24 @@ module MassiveRecord
         #
         class ReferencesOne < Proxy
 
-          def target=(target)
-            set_foreign_key_in_proxy_owner(target.id) if target
-            super(target)
+          def proxy_target=(proxy_target)
+            set_foreign_key_in_proxy_owner(proxy_target.id) if proxy_target
+            super(proxy_target)
           end
 
-          def replace(target)
+          def replace(proxy_target)
             super
-            set_foreign_key_in_proxy_owner(nil) if target.nil?
+            set_foreign_key_in_proxy_owner(nil) if proxy_target.nil?
           end
 
 
           private
 
-          def find_target
-            target_class.find(proxy_owner.send(foreign_key))
+          def find_proxy_target
+            proxy_target_class.find(proxy_owner.send(foreign_key))
           end
 
-          def can_find_target?
+          def can_find_proxy_target?
             super || proxy_owner.send(foreign_key).present?
           end
 
