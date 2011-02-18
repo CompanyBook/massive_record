@@ -192,6 +192,11 @@ describe MassiveRecord::ORM::Relations::Metadata do
         Person.should_receive(:all).with(hash_including(:start => owner.friends_records_starts_from_id))
         find_with_proc.call(owner)
       end
+
+      it "should be possible to send in options to the proc" do
+        Person.should_receive(:all).with(hash_including(:limit => 10, :start => owner.friends_records_starts_from_id))
+        find_with_proc.call(owner, {:limit => 10})
+      end
     end
   end
 end

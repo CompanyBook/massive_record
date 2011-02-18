@@ -146,6 +146,7 @@ module MassiveRecord
           end
 
           def find_target_with_proc
+          def find_target_with_proc(options = {})
             [super].compact.flatten
           end
 
