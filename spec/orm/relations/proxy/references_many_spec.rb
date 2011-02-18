@@ -385,4 +385,68 @@ describe TestReferencesManyProxy do
       end
     end
   end
+
+
+
+  describe "#first" do
+    describe "stored foreign keys" do
+      before do
+        owner.save!
+        subject << target << target_2
+        subject.reset
+      end
+
+      it "should return nil if no relations are found" do
+        subject.destroy_all
+        subject.first.should be_nil
+      end
+
+      it "should return the first target" do
+        subject.first.should == target
+      end
+
+      it "should not be loaded" do
+        subject.first
+        subject.should_not be_loaded
+      end
+
+      it "should just find the first foreign key" do
+        TestClass.should_receive(:find).with(target.id).and_return(target)
+        subject.first
+      end
+    end
+
+    describe "with records_starts_from (proc)" do
+      let(:target) { Person.new :id => owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:target_2) { Person.new :id => owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:metadata) { subject.metadata }
+
+      subject { owner.send(:relation_proxy, 'friends') }
+
+      before do
+        owner.save!
+        subject << target << target_2
+        subject.reset
+      end
+
+      it "should return nil if no relations are found" do
+        subject.destroy_all
+        subject.first.should be_nil
+      end
+
+      it "should return the first target" do
+        subject.first.should == target
+      end
+
+      it "should not be loaded" do
+        subject.first
+        subject.should_not be_loaded
+      end
+
+      it "should find the first with a limit" do
+        Person.should_receive(:all).with(hash_including(:limit => 1))
+        subject.first
+      end
+    end
+  end
 end

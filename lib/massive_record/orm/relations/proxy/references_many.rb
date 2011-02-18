@@ -9,7 +9,6 @@ module MassiveRecord
           # targets.
           #
           # TODO  - Implement methods like:
-          #         * first
           #         * find
           #         * limit
           #         * find_in_batches
@@ -122,6 +121,14 @@ module MassiveRecord
             length == 0
           end
 
+          def first
+            if loaded?
+              target.first
+            else
+              find_first
+            end
+          end
+
 
 
           private
@@ -145,7 +152,16 @@ module MassiveRecord
             target_class.find(owner.send(foreign_key), :skip_expected_result_check => true)
           end
 
-          def find_target_with_proc
+          def find_first
+            if can_find_target?
+              if find_with_proc?
+                find_target_with_proc(:limit => 1).first
+              elsif first_id = owner.send(foreign_key).first
+                target_class.find(first_id)
+              end
+            end
+          end
+
           def find_target_with_proc(options = {})
             [super].compact.flatten
           end
