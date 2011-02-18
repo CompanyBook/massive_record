@@ -13,6 +13,9 @@ module MassiveRecord
           raise ArgumentError.new("At least one argument required!") if args.empty?
           raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.") if args.first.nil?
           raise ArgumentError.new("Sorry, conditions are not supported!") if options.has_key? :conditions
+
+          skip_expected_result_check = options.delete(:skip_expected_result_check)
+
           args << options
 
           type = args.shift if args.first.is_a? Symbol
@@ -43,7 +46,7 @@ module MassiveRecord
           # we have no expectations on the returned rows' ids)
           unless type || result_from_table.blank?
             if find_many
-              result_from_table.select! { |result| what_to_find.include? result.id }
+              result_from_table.select! { |result| what_to_find.include? result.try(:id) }
             else 
               if result_from_table.id != what_to_find
                 result_from_table = nil
@@ -53,7 +56,7 @@ module MassiveRecord
 
           raise RecordNotFound.new("Could not find #{model_name} with id=#{what_to_find}") if result_from_table.blank? && type.nil?
           
-          if find_many && expected_result_size && expected_result_size != result_from_table.length
+          if find_many && !skip_expected_result_check && expected_result_size && expected_result_size != result_from_table.length
             raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{result_from_table.length}")
           end
           

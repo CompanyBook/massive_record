@@ -9,6 +9,7 @@ module MassiveRecord
       class Metadata
         attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic
         attr_accessor :find_with
+        attr_reader :records_starts_from
         
         def initialize(name, options = {})
           options.to_options!
@@ -21,6 +22,7 @@ module MassiveRecord
           end
           self.class_name = options[:class_name]
           self.find_with = options[:find_with]
+          self.records_starts_from = options[:records_starts_from] if options[:records_starts_from]
           self.polymorphic = options[:polymorphic]
         end
 
@@ -58,6 +60,9 @@ module MassiveRecord
           (@class_name || calculate_class_name).to_s
         end
 
+        def target_class
+          class_name.constantize
+        end
 
         def store_in
           @store_in.to_s if @store_in
@@ -74,7 +79,7 @@ module MassiveRecord
         end
 
         def persisting_foreign_key?
-          !!store_in
+          !!store_in && !records_starts_from
         end
 
 
@@ -102,6 +107,25 @@ module MassiveRecord
         end
 
 
+
+        def represents_a_collection?
+          relation_type == 'references_many'
+        end
+
+        
+        def records_starts_from=(method)
+          @records_starts_from = method
+
+          if @records_starts_from
+            self.find_with = Proc.new do |owner|
+              start = owner.send(records_starts_from) and target_class.all(:start => start)
+            end
+          else
+            self.find_with = nil
+          end
+        end
+
+
         private
 
 
@@ -110,7 +134,11 @@ module MassiveRecord
         end
 
         def calculate_foreign_key
-          name.downcase + "_id"
+          if represents_a_collection?
+            name.downcase.singularize + "_ids"
+          else
+            name.downcase + "_id"
+          end
         end
 
         def proxy_class_name

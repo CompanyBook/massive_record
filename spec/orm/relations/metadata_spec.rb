@@ -4,18 +4,19 @@ require 'orm/models/person'
 describe MassiveRecord::ORM::Relations::Metadata do
   subject { MassiveRecord::ORM::Relations::Metadata.new(nil) }
 
-  %w(name foreign_key class_name relation_type find_with polymorphic).each do |attr|
+  %w(name foreign_key class_name relation_type find_with polymorphic records_starts_from).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
   end
 
 
   it "should be setting values by initializer" do
-    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info, :polymorphic => true
+    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info, :polymorphic => true, :records_starts_from => :records_starts_from
     metadata.name.should == "car"
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
     metadata.store_in.should == "info"
+    metadata.records_starts_from.should == :records_starts_from
     metadata.should be_polymorphic
   end
 
@@ -48,6 +49,12 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.name = :employee
       subject.class_name.should == "Employee"
     end
+
+    it "should calculate correct class name if represents a collection" do
+      subject.relation_type = "references_many"
+      subject.name = "persons"
+      subject.class_name.should == "Person"
+    end
   end
 
 
@@ -68,6 +75,12 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.class_name = "PersonWithSomething"
       subject.name = :person
       subject.foreign_key.should == "person_id"
+    end
+
+    it "should return plural for if meta data is representing a many relation" do
+      subject.relation_type = :references_many
+      subject.name = :persons
+      subject.foreign_key.should == "person_ids"
     end
   end
 
@@ -92,6 +105,12 @@ describe MassiveRecord::ORM::Relations::Metadata do
   it "should know its persisting foreign key if foreign key stored in has been set" do
     subject.store_in = :info
     should be_persisting_foreign_key
+  end
+
+  it "should not be storing the foreign key if records_starts_from is defined" do
+    subject.store_in = :info
+    subject.records_starts_from = :method_which_returns_a_starting_point
+    should_not be_persisting_foreign_key
   end
 
 
@@ -145,6 +164,34 @@ describe MassiveRecord::ORM::Relations::Metadata do
     it "should return setter method" do
       subject.should_receive(:polymorphic_type_column).and_return("yey")
       subject.polymorphic_type_column_setter.should == "yey="
+    end
+  end
+
+
+  describe "records_starts_from" do
+    it "should not have any proc if records_starts_from is nil" do
+      subject.find_with = "foo"
+      subject.records_starts_from = nil
+      subject.find_with.should be_nil
+    end
+
+    it "should buld a proc with records_starts_from set" do
+      subject.records_starts_from = :friends_records_starts_from_id
+      subject.find_with.should be_instance_of Proc
+    end
+
+    describe "proc" do
+      let(:owner) { Person.new :id => "person-1" }
+      let(:find_with_proc) { subject.records_starts_from = :friends_records_starts_from_id; subject.find_with }
+
+      before do
+        subject.class_name = "Person"
+      end
+
+      it "should call target class with all, start with owner's start from id response" do
+        Person.should_receive(:all).with(hash_including(:start => owner.friends_records_starts_from_id))
+        find_with_proc.call(owner)
+      end
     end
   end
 end

@@ -25,7 +25,7 @@ module MassiveRecord
           end
 
           def can_find_target?
-            use_find_with? || (owner.send(foreign_key).present? && owner.send(polymorphic_type_column).present?)
+            super || (owner.send(foreign_key).present? && owner.send(polymorphic_type_column).present?)
           end
 
           def set_foreign_key_and_type_in_owner(id, type)

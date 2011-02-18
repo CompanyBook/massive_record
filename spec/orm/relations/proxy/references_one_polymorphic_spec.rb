@@ -17,6 +17,7 @@ describe TestReferencesOnePolymorphicProxy do
   end
 
   it_should_behave_like "relation proxy"
+  it_should_behave_like "singular proxy"
 
 
   describe "#find_target" do

@@ -17,13 +17,16 @@ module MassiveRecord
 
         delegate :foreign_key, :foreign_key_setter, :store_in, :store_foreign_key_in,
           :polymorphic_type_column, :polymorphic_type_column_setter,
-          :class_name, :name, :persisting_foreign_key?, :find_with, :to => :metadata
+          :class_name, :target_class, :name, :persisting_foreign_key?, :find_with,
+          :represents_a_collection?, :to => :metadata
 
         def initialize(options = {})
           options.to_options!
           self.metadata = options[:metadata]
           self.owner = options[:owner]
           self.target = options[:target]
+
+          reset if target.nil?
         end
 
 
@@ -41,17 +44,13 @@ module MassiveRecord
           @target = target
           loaded! unless @target.nil?
         end
-
-        def target_class
-          class_name.constantize
-        end
         
         #
         # Returns the target. Loads it, if it's not there.
         # Returns nil if for some reason target could not be found.
         #
         def load_target
-          self.target = find_target_or_find_with if find_target?
+          self.target = find_target_or_find_with_proc if find_target?
           target
         rescue RecordNotFound
           reset
@@ -117,12 +116,27 @@ module MassiveRecord
 
         protected
 
+        def find_target_or_find_with_proc
+          find_with_proc? ? find_target_with_proc : find_target
+        end
+
         #
         # "Abstract" method used to find target for the proxy.
         # Implement in subclasses. It is not called when the meta
-        # data contains a find_with proc; in that case it is used instead
+        # data contains a find_with proc; in that case find_target_with_proc
+        # is used instead
         #
         def find_target
+        end
+        
+        #
+        # Gives sub classes a place to hook into when we are
+        # gonna find target(s) by the proc. For instance, the
+        # references_many proxy ensures that the result of proc
+        # is put inside of an array.
+        #
+        def find_target_with_proc
+          find_with.call(owner)
         end
 
         #
@@ -137,15 +151,14 @@ module MassiveRecord
         # Override this to controll when a target may be found.
         #
         def can_find_target?
-          false
+          find_with_proc?
         end
 
-        def find_target_or_find_with
-          use_find_with? ? find_with.call(owner) : find_target
-        end
-
-        def use_find_with?
-          find_with.present? && find_with.respond_to?(:call)
+        #
+        # Are we supposed to find target with a proc?
+        #
+        def find_with_proc?
+          !find_with.nil? && find_with.respond_to?(:call)
         end
 
         def raise_if_type_mismatch(record)

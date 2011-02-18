@@ -1,5 +1,7 @@
 # v0.2.0 (git develop)
 
+- References many is now possible. We have to strategies: Store an array of foreign keys in the owner,
+  or supply a ids-starts-with and open up a scanner and read from that point.
 - Setting a non-parsable value on date/time field will no longer raise an error.
 - Scanner no longer fetches with a limit of 10 by default. It is set to 100000000.
 - References one relations support polymorphic relations.

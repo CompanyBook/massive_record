@@ -168,4 +168,40 @@ describe MassiveRecord::ORM::Relations::Interface do
       end
     end
   end
+
+
+
+
+  describe "references many" do
+    describe "relation's meta data" do
+      subject { Person.relations.detect { |relation| relation.name == "test_classes" } }
+
+      it "should have the reference one meta data stored in relations" do
+        Person.relations.detect { |relation| relation.name == "test_classes" }.should_not be_nil
+      end
+
+      it "should have type set to references_many" do
+        subject.relation_type.should == "references_many"
+      end
+
+      it "should raise an error if the same relaton is called for twice" do
+        lambda { Person.references_one :test_classes }.should raise_error MassiveRecord::ORM::RelationAlreadyDefined
+      end
+    end
+
+
+    describe "instance" do
+      subject { Person.new }
+      let(:test_class) { TestClass.new }
+      let(:proxy) { subject.send(:relation_proxy, "test_classes") }
+
+      it { should respond_to :test_classes }
+      it { should respond_to :test_class_ids }
+      it { should respond_to :test_class_ids= }
+
+      it "should have an array as foreign_key attribute" do
+        subject.test_class_ids.should be_instance_of Array
+      end
+    end
+  end
 end
