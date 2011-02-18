@@ -117,8 +117,8 @@ module MassiveRecord
           @records_starts_from = method
 
           if @records_starts_from
-            self.find_with = Proc.new do |owner|
-              start = owner.send(records_starts_from) and target_class.all(:start => start)
+            self.find_with = Proc.new do |owner, options = {}|
+              start = owner.send(records_starts_from) and target_class.all(options.merge({:start => start}))
             end
           else
             self.find_with = nil
