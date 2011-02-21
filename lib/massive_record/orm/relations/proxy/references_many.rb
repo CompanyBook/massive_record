@@ -9,7 +9,6 @@ module MassiveRecord
           # proxy_targets.
           #
           # TODO  - Implement methods like:
-          #         * find
           #         * limit
           #         * find_in_batches
           #         * find_each
@@ -130,6 +129,19 @@ module MassiveRecord
           end
 
 
+          def find(id)
+            if loaded?
+              record = proxy_target.find { |record| record.id == id }
+            elsif foreign_key_in_proxy_owner_exists?(id)
+              record = proxy_target_class.find(id)
+            end
+
+            raise RecordNotFound.new("Could not find #{proxy_target_class.model_name} with id=#{id}") if record.nil?
+
+            record
+          end
+
+
 
           private
 
@@ -186,6 +198,10 @@ module MassiveRecord
               proxy_owner.send(metadata.foreign_key).delete(id)
               notify_of_change_in_proxy_owner_foreign_key
             end
+          end
+
+          def foreign_key_in_proxy_owner_exists?(id)
+            proxy_owner.send(metadata.foreign_key).include? id
           end
 
           def notify_of_change_in_proxy_owner_foreign_key
