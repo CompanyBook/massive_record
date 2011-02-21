@@ -488,6 +488,7 @@ describe TestReferencesManyProxy do
     describe "with records_starts_from (proc)" do
       let(:proxy_target) { Person.new :id => proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
       let(:proxy_target_2) { Person.new :id => proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:not_among_targets) { Person.new :id => "NOT-friend-1", :name => "H", :age => 9 }
       let(:metadata) { subject.metadata }
 
       subject { proxy_owner.send(:relation_proxy, 'friends') }
@@ -496,6 +497,30 @@ describe TestReferencesManyProxy do
         proxy_owner.save!
         subject << proxy_target << proxy_target_2
         subject.reset
+
+        not_among_targets.save!
+      end
+
+
+      it "should find the object from database if id exists among foreig keys" do
+        subject.find(proxy_target.id).should == proxy_target
+      end
+
+      it "should raise error if record is not among records in association" do
+        lambda { subject.find(not_among_targets.id) }.should raise_error MassiveRecord::ORM::RecordNotFound
+      end
+
+
+
+      it "should not hit database if proxy has been loaded" do
+        subject.load_proxy_target
+        Person.should_not_receive(:find)
+        subject.find(proxy_target.id).should == proxy_target
+      end
+
+      it "should raise error if proxy is loaded, but record is not found in association" do
+        subject.load_proxy_target
+        lambda { subject.find(not_among_targets.id) }.should raise_error MassiveRecord::ORM::RecordNotFound
       end
     end
   end

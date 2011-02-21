@@ -132,6 +132,10 @@ module MassiveRecord
           def find(id)
             if loaded?
               record = proxy_target.find { |record| record.id == id }
+            elsif find_with_proc?
+              if id.starts_with? proxy_owner.send(metadata.records_starts_from)
+                record = proxy_target_class.find(id)
+              end
             elsif foreign_key_in_proxy_owner_exists?(id)
               record = proxy_target_class.find(id)
             end
