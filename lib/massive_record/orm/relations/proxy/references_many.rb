@@ -9,7 +9,6 @@ module MassiveRecord
           # proxy_targets.
           #
           # TODO  - Implement methods like:
-          #         * limit
           #         * find_in_batches
           #         * find_each
           #         * etc :-)

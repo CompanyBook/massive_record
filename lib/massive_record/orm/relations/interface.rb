@@ -78,6 +78,15 @@ module MassiveRecord
           #                                    As a default TargetClass.find(foreign_keys_method) is used.
           #
           #
+          # Example usage:
+          #
+          # person = Person.first
+          # person.cars               # loads and returns all cars.
+          # person.cars.first         # Returns first car, either by loading just one object, or return first object in loaded proxy.
+          # person.cars.find("an_id") # Tries to load car with id 1 if that id is among person's cars. Either by a query and look among loaded records
+          # person.cars.limit(3)      # Returns the 3 first cars, either by slice the loaded array of cars, or do a limited DB query.
+          #
+          #
           def references_many(name, *args)
             metadata = set_up_relation('references_many', name, *args)
             create_references_many_accessors(metadata)
