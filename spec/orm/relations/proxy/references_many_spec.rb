@@ -524,4 +524,64 @@ describe TestReferencesManyProxy do
       end
     end
   end
+
+
+
+  describe "#limit" do
+    let(:not_among_targets) { proxy_target_3 }
+
+    describe "stored foreign keys" do
+      before do
+        proxy_owner.save!
+        subject << proxy_target << proxy_target_2
+        subject.reset
+
+        not_among_targets.save!
+      end
+
+      it "should return empty array if no targets are found" do
+        subject.destroy_all
+        subject.limit(1).should be_empty
+      end
+
+
+      it "should do db query with a limited set of ids" do
+        subject.limit(1).should == [proxy_target]
+      end
+
+      it "should not be loaded after a limit query" do
+        subject.limit(1).should == [proxy_target]
+        subject.should_not be_loaded
+      end
+
+      it "should not hit the database if the proxy is loaded" do
+        subject.load_proxy_target
+        TestClass.should_not_receive(:find)
+        subject.limit(1)
+      end
+
+      it "should return correct result set if proxy is loaded" do
+        subject.load_proxy_target
+        subject.limit(1).should == [proxy_target]
+      end
+    end
+
+
+    describe "with records_starts_from (proc)" do
+      let(:proxy_target) { Person.new :id => proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:proxy_target_2) { Person.new :id => proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:not_among_targets) { Person.new :id => "NOT-friend-1", :name => "H", :age => 9 }
+      let(:metadata) { subject.metadata }
+
+      subject { proxy_owner.send(:relation_proxy, 'friends') }
+
+      before do
+        proxy_owner.save!
+        subject << proxy_target << proxy_target_2
+        subject.reset
+
+        not_among_targets.save!
+      end
+    end
+  end
 end

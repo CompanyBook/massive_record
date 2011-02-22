@@ -146,6 +146,16 @@ module MassiveRecord
           end
 
 
+          def limit(limit)
+            if loaded?
+              proxy_target.slice(0, limit)
+            else
+              ids = proxy_owner.send(metadata.foreign_key).slice(0, limit)
+              find_proxy_target(ids)
+            end
+          end
+
+
 
           private
 
@@ -164,8 +174,9 @@ module MassiveRecord
 
 
 
-          def find_proxy_target
-            proxy_target_class.find(proxy_owner.send(metadata.foreign_key), :skip_expected_result_check => true)
+          def find_proxy_target(ids = nil)
+            ids = proxy_owner.send(metadata.foreign_key) if ids.nil?
+            proxy_target_class.find(ids, :skip_expected_result_check => true)
           end
 
           def find_first
