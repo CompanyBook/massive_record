@@ -108,6 +108,13 @@ module MassiveRecord
             load_proxy_target.include? record
           end
 
+          #
+          # Returns the length of targes
+          #
+          # TODO  This can be smarter as well. For instance; if we have not
+          #       loaded targets, and we have foreign keys in the owner we
+          #       can simply do a owner's foreign keys and ask for it's length.
+          #
           def length
             load_proxy_target.length
           end
