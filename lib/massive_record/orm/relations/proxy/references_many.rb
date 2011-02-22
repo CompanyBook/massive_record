@@ -145,6 +145,13 @@ module MassiveRecord
             record
           end
 
+          #
+          # Returns a limited result set of target records.
+          #
+          # TODO  If we know all our foreign keys (basically we also know our length)
+          #       we can then mark our self as loaded if limit is equal to or greater
+          #       than foreign keys length.
+          #
           def limit(limit)
             if loaded?
               proxy_target.slice(0, limit)
