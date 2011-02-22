@@ -72,8 +72,7 @@ module MassiveRecord
           end
 
           #
-          # Destroy record(s) from the collection
-          # Each record will be asked to delete itself as well
+          # Deletes record(s) from the collection
           #
           def delete(*records)
             delete_or_destroy *records, :delete
