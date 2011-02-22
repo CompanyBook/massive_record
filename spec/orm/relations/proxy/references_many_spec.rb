@@ -582,6 +582,32 @@ describe TestReferencesManyProxy do
 
         not_among_targets.save!
       end
+
+      it "should return empty array if no targets are found" do
+        subject.destroy_all
+        subject.limit(1).should be_empty
+      end
+
+
+      it "should do db query with a limited set of ids" do
+        subject.limit(1).should == [proxy_target]
+      end
+
+      it "should not be loaded after a limit query" do
+        subject.limit(1).should == [proxy_target]
+        subject.should_not be_loaded
+      end
+
+      it "should not hit the database if the proxy is loaded" do
+        subject.load_proxy_target
+        Person.should_not_receive(:find)
+        subject.limit(1)
+      end
+
+      it "should return correct result set if proxy is loaded" do
+        subject.load_proxy_target
+        subject.limit(1).should == [proxy_target]
+      end
     end
   end
 end

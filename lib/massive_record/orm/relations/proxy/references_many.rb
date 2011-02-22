@@ -149,6 +149,8 @@ module MassiveRecord
           def limit(limit)
             if loaded?
               proxy_target.slice(0, limit)
+            elsif find_with_proc?
+              find_proxy_target_with_proc(:limit => limit)
             else
               ids = proxy_owner.send(metadata.foreign_key).slice(0, limit)
               find_proxy_target(ids)
