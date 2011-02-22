@@ -1,6 +1,6 @@
 # v0.2.0 (git develop)
 
-- references_many.first() will only find first object from DB if proxy has not been loaded, or else return first element in loaded proxy_target.
+- references_many has first() and limit() which uses the target array if loaded, or load only what it needs from the database.
 - Wrapper::Thrift has been moved into Adapter::Thrift. Adding more adapters should be not that hard now.
 - References many is now possible. We have to strategies: Store an array of foreign keys in the proxy_owner,
   or supply a ids-starts-with and open up a scanner and read from that point.
