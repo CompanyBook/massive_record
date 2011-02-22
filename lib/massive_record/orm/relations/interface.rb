@@ -92,6 +92,36 @@ module MassiveRecord
             create_references_many_accessors(metadata)
           end
 
+
+
+          #
+          # Used to defined a relationship to other models where the other models are embedded inside of owner record.
+          #
+          # class Person < MassiveRecord::ORM::Table
+          #   embeds_many :addresses
+          # end
+          #
+          #
+          # The embeds many association should have one column family per association. embeds_many :addresses
+          # will by default be stored in the addresses column family. The way records are stored inside of a
+          # column family will be:
+          #
+          # | key         |   attributes                                        |
+          # ---------------------------------------------------------------------
+          # | "addr-id1"  | { :street => "Askerveien", :number => "12", etc... }
+          #
+          #
+          #
+          # Options, all optional:
+          #
+          #   <tt>class_name</tt>::            Class name is calculated from name, but can be overridden here.
+          #   <tt>store_in</tt>::              Send in the column family to store foreign key in. If none given,
+          #
+          def embeds_many(name, *args)
+            metadata = set_up_relation('embeds_many', name, *args)
+            create_embeds_many_accessors(metadata)
+          end
+
           private
 
           def set_up_relation(type, name, *args)
@@ -136,6 +166,13 @@ module MassiveRecord
 
             if metadata.persisting_foreign_key?
               add_field_to_column_family(metadata.store_in, metadata.foreign_key, :type => :array, :default => [])
+            end
+          end
+
+
+          def create_embeds_many_accessors(metadata)
+            redefine_method(metadata.name) do
+              relation_proxy(metadata.name)
             end
           end
         end

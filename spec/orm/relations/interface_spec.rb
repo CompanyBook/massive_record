@@ -204,4 +204,38 @@ describe MassiveRecord::ORM::Relations::Interface do
       end
     end
   end
+
+
+  describe "embeds many" do
+    describe "relation's meta data" do
+      subject { Person.relations.detect { |relation| relation.name == "addresses" } }
+
+      it "should have the reference one meta data stored in relations" do
+        Person.relations.detect { |relation| relation.name == "test_classes" }.should_not be_nil
+      end
+
+      it "should have type set to references_many" do
+        subject.relation_type.should == "embeds_many"
+      end
+
+      it "should raise an error if the same relaton is called for twice" do
+        lambda { Person.references_one :test_classes }.should raise_error MassiveRecord::ORM::RelationAlreadyDefined
+      end
+    end
+
+    describe "instance" do
+      subject { Person.new }
+      let(:test_class) { Address.new }
+      let(:proxy) { subject.send(:relation_proxy, "addresses") }
+
+      it { should respond_to :addresses }
+
+      it "should be empty when no addresses has been added" do
+        subject.addresses.should be_empty
+      end
+
+
+      # TODO ..test more of the addresses's (proxy) interface here :-)
+    end
+  end
 end
