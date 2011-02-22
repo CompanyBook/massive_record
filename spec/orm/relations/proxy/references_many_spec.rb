@@ -412,7 +412,7 @@ describe TestReferencesManyProxy do
       end
 
       it "should just find the first foreign key" do
-        TestClass.should_receive(:find).with(proxy_target.id).and_return(proxy_target)
+        TestClass.should_receive(:find).with(proxy_target.id, anything).and_return(proxy_target)
         subject.first
       end
     end

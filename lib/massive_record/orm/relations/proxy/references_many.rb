@@ -147,7 +147,8 @@ module MassiveRecord
               find_proxy_target_with_proc(:limit => limit)
             else
               ids = proxy_owner.send(metadata.foreign_key).slice(0, limit)
-              find_proxy_target(ids)
+              ids = ids.first if ids.length == 1
+              [find_proxy_target(ids)].flatten
             end
           end
 
