@@ -73,6 +73,10 @@ describe MassiveRecord::ORM::Base do
     it "should return nil as id by default" do
       TestClass.new.id.should be_nil
     end
+
+    it "should be possible to create an object with nil as argument" do
+      lambda { TestClass.new(nil) }.should_not raise_error
+    end
   end
 
   describe "equality" do

@@ -70,6 +70,8 @@ module MassiveRecord
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
 
+        attributes = {} if attributes.nil?
+
         self.attributes_raw = attributes_from_field_definition.merge(attributes)
         self.attributes = attributes
 
