@@ -76,8 +76,9 @@ describe "persistence" do
       @person.reload.should == @person
     end
 
-    it "should raise error on new record" do
-      lambda { Person.new.reload }.should raise_error MassiveRecord::ORM::RecordNotFound
+    it "should not do anything on reload when record is not persisted" do
+      Person.should_not_receive :find
+      Person.new.reload
     end
   end
 

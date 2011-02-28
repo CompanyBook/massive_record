@@ -30,7 +30,7 @@ module MassiveRecord
 
 
       def reload
-        self.attributes_raw = self.class.find(id).attributes
+        self.attributes_raw = self.class.find(id).attributes if persisted?
         self
       end
       
