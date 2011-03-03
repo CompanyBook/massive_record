@@ -96,13 +96,13 @@ module MassiveRecord
         end
       
         def all(opts = {})
-          all = []
-
-          find_in_batches(opts) do |rows|
-            all = all + rows
+          rows = []
+          
+          find_in_batches(opts) do |batch|
+            rows |= batch
           end
-
-          all
+          
+          rows
         end
       
         def first(opts = {})
@@ -123,10 +123,11 @@ module MassiveRecord
         def find_in_batches(opts = {})        
           results_limit = opts.delete(:limit)
           results_found = 0
-        
+          
           scanner(opts) do |s|
             while (true) do
               s.limit = results_limit - results_found if !results_limit.nil? && results_limit <= results_found + s.limit
+              
               rows = s.fetch_rows
               if rows.empty?
                 break
