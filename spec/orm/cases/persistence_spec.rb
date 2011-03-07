@@ -182,6 +182,9 @@ describe "persistence" do
               column_family :bar do
                 field :foo
               end
+
+              column_family :empty_family do
+              end
             end
 
             @new_instance = @new_class.new :id => "id_of_foo", :foo => "bar"
@@ -203,7 +206,7 @@ describe "persistence" do
 
           it "should create correct column families" do
             @new_instance.save
-            @new_class.table.fetch_column_families.collect(&:name).should == ["bar"]
+            @new_class.table.fetch_column_families.collect(&:name).should include "bar", "empty_family"
           end
 
           it "should store the new instance" do
