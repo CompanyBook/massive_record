@@ -78,6 +78,10 @@ describe "A table" do
         @table.column_names.size.should == 7
       end
       
+      it "should only load one column" do
+        @table.get("ID1", :info, :first_name).should == "John"
+      end
+      
       it "should only load one column family" do
         @table.first(:select => ["info"]).column_families.should == ["info"]
         @table.all(:limit => 1, :select => ["info"]).first.column_families.should == ["info"]

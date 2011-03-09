@@ -108,7 +108,15 @@ module MassiveRecord
         def first(opts = {})
           all(opts.merge(:limit => 1)).first
         end
-      
+        
+        #
+        # Fast way of fetching the value of the cell
+        # table.get("my_id", :info, :name) # => "Bob"
+        #
+        def get(id, column_family_name, column_name)
+          MassiveRecord::Wrapper::Cell.new(:value => connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.value).deserialize_value
+        end
+        
         def find(*args)
           arg  = args[0]
           opts = args[1] || {}
