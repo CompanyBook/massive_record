@@ -230,6 +230,24 @@ describe MassiveRecord::ORM::Finders::Scope do
         person = Person.select(:info).first
         person.should_not be_readonly
       end
+
+      it "should be possible to iterate over a collection with each" do
+        result = []
+
+        Person.limit(5).each do |person|
+          result << person.name
+        end
+
+        result.should == ["Person1", "Person2"]
+      end
+
+      it "should be possible to collect" do
+        Person.select(:info).collect(&:name).should == ["Person1", "Person2"]
+      end
+
+      it "should be possible to checkc if it includes something" do
+        Person.limit(1).include?(person_2).should be_false
+      end
     end
   end
 end
