@@ -37,27 +37,27 @@ describe MassiveRecord::ORM::Finders::Scope do
 
         it "should add incomming value to list" do
           subject.select(:info)
-          subject.select_values.should include :info
+          subject.select_values.should include 'info'
         end
 
         it "should be adding values if called twice" do
           subject.select(:info).select(:base)
-          subject.select_values.should include :info, :base
+          subject.select_values.should include 'info', 'base'
         end
 
         it "should add multiple arguments" do
           subject.select(:info, :base)
-          subject.select_values.should include :info, :base
+          subject.select_values.should include 'info', 'base'
         end
 
         it "should add multiple values given as array" do
           subject.select([:info, :base])
-          subject.select_values.should include :info, :base
+          subject.select_values.should include 'info', 'base'
         end
 
         it "should not add same value twice" do
-          subject.select(:info).select(:info)
-          subject.select_values.should == [:info]
+          subject.select(:info).select('info')
+          subject.select_values.should == ['info']
         end
       end
     end
@@ -90,7 +90,7 @@ describe MassiveRecord::ORM::Finders::Scope do
     end
 
     it "should include selection when asked for it" do
-      subject.select(:info).find_options.should include :select => [:info]
+      subject.select(:info).send(:find_options).should include :select => ['info']
     end
   end
 

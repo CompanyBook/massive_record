@@ -47,7 +47,7 @@ module MassiveRecord
         #
 
         def select(*select)
-          self.select_values = (self.select_values + select.flatten).compact.uniq
+          self.select_values |= select.flatten.compact.collect(&:to_s)
           self
         end
 
