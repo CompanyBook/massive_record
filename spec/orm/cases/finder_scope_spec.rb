@@ -78,4 +78,17 @@ describe MassiveRecord::ORM::Finders::Scope do
   end
 
 
+  describe "#to_find_options" do
+    it "should return an empty hash when no limitations are set" do
+      subject.to_find_options.should == {}
+    end
+
+    it "should include a limit if asked to be limited" do
+      subject.limit(5).to_find_options.should include :limit => 5
+    end
+
+    it "should include selection when asked for it" do
+      subject.select(:info).to_find_options.should include :select => [:info]
+    end
+  end
 end

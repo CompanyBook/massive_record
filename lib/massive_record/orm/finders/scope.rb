@@ -47,6 +47,16 @@ module MassiveRecord
 
 
 
+
+        def to_find_options
+          options = {}
+          options[:limit] = limit_value if limit_value
+          options[:select] = select_values if select_values.any?
+
+          options
+        end
+
+
         private
 
         def reset_single_values_methods
