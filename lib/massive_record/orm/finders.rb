@@ -5,7 +5,7 @@ module MassiveRecord
 
       included do
         class << self
-          delegate :select, :limit, :to => :finder_scope
+          delegate :first, :all, :select, :limit, :to => :finder_scope
         end
       end
 
@@ -73,16 +73,8 @@ module MassiveRecord
           find_many ? records : records.first
         end
 
-        def first(*args)
-          find(:first, *args)
-        end
-
         def last(*args)
           raise "Sorry, not implemented!"
-        end
-
-        def all(*args)
-          find(:all, *args)
         end
 
         def finder_scope
