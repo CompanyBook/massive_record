@@ -65,21 +65,6 @@ module MassiveRecord
 
 
 
-        def find_options
-          options = {}
-
-          SINGLE_VALUE_METHODS.each do |m|
-            value = send("#{m}_value") and options[m.to_sym] = value
-          end
-
-          MULTI_VALUE_METHODS.each do |m|
-            values = send("#{m}_values") and values.any? and options[m.to_sym] = values
-          end
-
-          options
-        end
-
-
         def ==(other)
           case other
           when Scope
@@ -89,6 +74,12 @@ module MassiveRecord
           else
             raise "Don't know how to compare #{self.class} with #{other.class}"
           end
+        end
+
+
+        def first
+          return @records.first if loaded?
+          limit(1).to_a.first
         end
 
         def to_a
@@ -105,6 +96,22 @@ module MassiveRecord
           @loaded = true
           @records
         end
+
+        def find_options
+          options = {}
+
+          SINGLE_VALUE_METHODS.each do |m|
+            value = send("#{m}_value") and options[m.to_sym] = value
+          end
+
+          MULTI_VALUE_METHODS.each do |m|
+            values = send("#{m}_values") and values.any? and options[m.to_sym] = values
+          end
+
+          options
+        end
+
+
 
 
         def reset_single_values_options

@@ -82,11 +82,11 @@ describe MassiveRecord::ORM::Finders::Scope do
 
   describe "#find_options" do
     it "should return an empty hash when no limitations are set" do
-      subject.find_options.should == {}
+      subject.send(:find_options).should == {}
     end
 
     it "should include a limit if asked to be limited" do
-      subject.limit(5).find_options.should include :limit => 5
+      subject.limit(5).send(:find_options).should include :limit => 5
     end
 
     it "should include selection when asked for it" do
@@ -133,6 +133,18 @@ describe MassiveRecord::ORM::Finders::Scope do
 
         subject.send(method)
       end
+    end
+  end
+
+
+  describe "#first" do
+    it "should return first record if loaded" do
+      records = mock(Array)
+      records.should_receive(:first).and_return(:first_record)
+      subject.instance_variable_set(:@records, records)
+      subject.loaded = true
+
+      subject.first.should == :first_record
     end
   end
 
