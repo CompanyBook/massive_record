@@ -24,6 +24,9 @@ module MassiveRecord
         alias :loaded? :loaded
 
 
+        delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to => :to_a
+        
+
         def initialize
           reset
           reset_single_values_options
@@ -72,6 +75,11 @@ module MassiveRecord
           end
 
           options
+        end
+
+        
+        def to_a
+          return @records if loaded?
         end
 
 

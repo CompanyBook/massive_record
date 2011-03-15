@@ -110,6 +110,29 @@ describe MassiveRecord::ORM::Finders::Scope do
       should_not be_loaded
     end
   end
+
+  describe "#to_a" do
+    it "should return @records if loaded" do
+      records = [:foo]
+      subject.instance_variable_set(:@records, records)
+      subject.loaded = true
+
+      subject.to_a.should == records
+    end
+
+
+    [:to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?].each do |method|
+      it "should delegate #{method} to to_a" do
+        records = mock(Array)
+        records.should_receive(method)
+
+        subject.instance_variable_set(:@records, records)
+        subject.loaded = true
+
+        subject.send(method)
+      end
+    end
+  end
 end
 
 
@@ -127,6 +150,11 @@ describe "real world test" do
         Person.should_not_receive(:find)
         Person.send(method, 5)
       end
+    end
+
+    it "should find just one record when asked for it" do
+      pending
+      Person.limit(1).length.should == 1
     end
   end
 end
