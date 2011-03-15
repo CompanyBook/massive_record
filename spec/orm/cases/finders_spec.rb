@@ -129,6 +129,23 @@ describe "finders" do
     end
   end
 
+  describe "first" do
+    it "should respond to first" do
+      TestClass.should respond_to :first
+    end
+
+    it "should call find with :first" do
+      TestClass.should_receive(:find).with(:all, {:limit => 1}).and_return([])
+      TestClass.first
+    end
+
+    it "should delegate first's call to find with it's args as second argument" do
+      options = {:foo => :bar}
+      TestClass.should_receive(:find).with(anything, hash_including(options)).and_return([])
+      TestClass.first options
+    end
+  end
+
 
 
 
