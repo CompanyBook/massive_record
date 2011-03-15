@@ -125,7 +125,7 @@ describe MassiveRecord::ORM::Finders::Scope do
 
     [:to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?].each do |method|
       it "should delegate #{method} to to_a" do
-        records = mock(Array)
+        records = []
         records.should_receive(method)
 
         subject.instance_variable_set(:@records, records)
@@ -134,12 +134,18 @@ describe MassiveRecord::ORM::Finders::Scope do
         subject.send(method)
       end
     end
+
+    it "should always return an array, even though results are single object" do
+      record = mock(Object)
+      subject.should_receive(:load_records).and_return(record)
+      subject.to_a.should be_instance_of Array
+    end
   end
 
 
   describe "#first" do
     it "should return first record if loaded" do
-      records = mock(Array)
+      records = []
       records.should_receive(:first).and_return(:first_record)
       subject.instance_variable_set(:@records, records)
       subject.loaded = true

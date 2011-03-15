@@ -87,7 +87,9 @@ module MassiveRecord
 
         def to_a
           return @records if loaded?
-          load_records
+          @records = load_records
+          @records = [@records] unless @records.is_a? Array
+          @records
         end
 
         def all(options = {})
