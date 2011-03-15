@@ -21,11 +21,30 @@ module MassiveRecord
         attr_accessor *MULTI_VALUE_METHODS.collect { |m| m + "_values" }
         attr_accessor *SINGLE_VALUE_METHODS.collect { |m| m + "_value" }
 
+
+
         def initialize
           reset_single_values_methods
           reset_multi_values_methods
         end
         
+
+
+
+        def select(*select)
+          self.select_values = (self.select_values + select.flatten).compact.uniq
+          self
+        end
+
+
+
+
+        def limit(limit)
+          self.limit_value = limit
+          self
+        end
+
+
 
 
         private
