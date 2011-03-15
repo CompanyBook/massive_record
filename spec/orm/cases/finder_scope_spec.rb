@@ -146,6 +146,34 @@ describe MassiveRecord::ORM::Finders::Scope do
 
       subject.first.should == :first_record
     end
+
+    it "should include finder options" do
+      extra_options = {:foo => :bar}
+
+      klass = mock(Object)
+      klass.should_receive(:find).with(anything, hash_including(extra_options)).and_return([])
+      subject.should_receive(:klass).and_return(klass)
+
+      subject.first(extra_options)
+    end
+  end
+
+  describe "#all" do
+    it "should simply call to_a" do
+      subject.should_receive(:to_a).and_return []
+      subject.all
+    end
+
+
+    it "should include finder options" do
+      extra_options = {:foo => :bar}
+
+      klass = mock(Object)
+      klass.should_receive(:find).with(anything, extra_options)
+      subject.should_receive(:klass).and_return(klass)
+
+      subject.all(extra_options)
+    end
   end
 
 

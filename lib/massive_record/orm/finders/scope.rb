@@ -29,6 +29,7 @@ module MassiveRecord
 
         def initialize(klass)
           @klass = klass
+          @extra_finder_options = {}
 
           reset
           reset_single_values_options
@@ -77,14 +78,21 @@ module MassiveRecord
         end
 
 
-        def first
+        def first(options = {})
           return @records.first if loaded?
+
+          apply_extra_finder_options(options)
           limit(1).to_a.first
         end
 
         def to_a
           return @records if loaded?
           load_records
+        end
+
+        def all(options = {})
+          apply_extra_finder_options(options)
+          to_a
         end
 
 
@@ -108,9 +116,14 @@ module MassiveRecord
             values = send("#{m}_values") and values.any? and options[m.to_sym] = values
           end
 
-          options
+          options.merge(@extra_finder_options)
         end
 
+
+
+        def apply_extra_finder_options(options)
+          @extra_finder_options.merge! options
+        end
 
 
 
