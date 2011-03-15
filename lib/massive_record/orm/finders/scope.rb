@@ -78,6 +78,16 @@ module MassiveRecord
         end
 
         
+        def ==(other)
+          case other
+          when Scope
+            object_id == other.object_id
+          when Array
+            to_a == other
+          else
+            raise "Don't know how to compare #{self.class} with #{other.class}"
+          end
+        end
         def to_a
           return @records if loaded?
         end

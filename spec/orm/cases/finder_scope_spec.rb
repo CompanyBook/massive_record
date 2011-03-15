@@ -136,6 +136,14 @@ describe MassiveRecord::ORM::Finders::Scope do
 end
 
 
+  describe "#==" do
+    it "should be counted equal if it's records are the same as asked what being compared to" do
+      subject.instance_variable_set(:@records, [:foo])
+      subject.loaded = true
+
+      subject.==([:foo]).should == true
+    end
+  end
 
 describe "real world test" do
   include SetUpHbaseConnectionBeforeAll
