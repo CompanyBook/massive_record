@@ -211,6 +211,14 @@ describe MassiveRecord::ORM::Finders::Scope do
       it "should find just one record when asked for it" do
         Person.limit(1).should == [person_1]
       end
+
+      it "should find only selected column families when asked for it" do
+        records = Person.select(:info).limit(1)
+        person_from_db = records.first
+
+        person_from_db.points.should be_nil
+        person_from_db.status.should be_nil
+      end
     end
   end
 end
