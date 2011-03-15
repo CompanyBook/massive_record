@@ -24,12 +24,17 @@ module MassiveRecord
 
 
         def initialize
-          reset_single_values_methods
-          reset_multi_values_methods
+          reset_single_values_options
+          reset_multi_values_options
         end
         
 
 
+
+
+        #
+        # Multi value options
+        #
 
         def select(*select)
           self.select_values = (self.select_values + select.flatten).compact.uniq
@@ -37,7 +42,9 @@ module MassiveRecord
         end
 
 
-
+        #
+        # Single value options
+        #
 
         def limit(limit)
           self.limit_value = limit
@@ -50,8 +57,14 @@ module MassiveRecord
 
         def to_find_options
           options = {}
-          options[:limit] = limit_value if limit_value
-          options[:select] = select_values if select_values.any?
+
+          SINGLE_VALUE_METHODS.each do |m|
+            value = send("#{m}_value") and options[m.to_sym] = value
+          end
+
+          MULTI_VALUE_METHODS.each do |m|
+            values = send("#{m}_values") and values.any? and options[m.to_sym] = values
+          end
 
           options
         end
@@ -59,11 +72,11 @@ module MassiveRecord
 
         private
 
-        def reset_single_values_methods
+        def reset_single_values_options
           SINGLE_VALUE_METHODS.each { |m| instance_variable_set("@#{m}_value", nil) } 
         end
 
-        def reset_multi_values_methods
+        def reset_multi_values_options
           MULTI_VALUE_METHODS.each { |m| instance_variable_set("@#{m}_values", []) } 
         end
       end
