@@ -219,6 +219,11 @@ describe MassiveRecord::ORM::Finders::Scope do
         person_from_db.points.should be_nil
         person_from_db.status.should be_nil
       end
+
+      it "should not return read only objects when select is used" do
+        person = Person.select(:info).first
+        person.should_not be_readonly
+      end
     end
   end
 end
