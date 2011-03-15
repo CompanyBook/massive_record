@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'orm/models/person'
 
 describe MassiveRecord::ORM::Finders::Scope do
+  let(:subject) { MassiveRecord::ORM::Finders::Scope.new(nil) }
+
   MassiveRecord::ORM::Finders::Scope::MULTI_VALUE_METHODS.each do |multi_values|
     it "should have #{multi_values} as an empty array as default" do
       subject.send(multi_values+"_values").should == []
@@ -78,17 +80,17 @@ describe MassiveRecord::ORM::Finders::Scope do
   end
 
 
-  describe "#to_find_options" do
+  describe "#find_options" do
     it "should return an empty hash when no limitations are set" do
-      subject.to_find_options.should == {}
+      subject.find_options.should == {}
     end
 
     it "should include a limit if asked to be limited" do
-      subject.limit(5).to_find_options.should include :limit => 5
+      subject.limit(5).find_options.should include :limit => 5
     end
 
     it "should include selection when asked for it" do
-      subject.select(:info).to_find_options.should include :select => [:info]
+      subject.select(:info).find_options.should include :select => [:info]
     end
   end
 
@@ -133,7 +135,6 @@ describe MassiveRecord::ORM::Finders::Scope do
       end
     end
   end
-end
 
 
   describe "#==" do
@@ -145,24 +146,31 @@ end
     end
   end
 
-describe "real world test" do
-  include SetUpHbaseConnectionBeforeAll
-  include SetTableNamesToTestTable
 
-  describe "with a person" do
-    let(:person_1) { Person.create! :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
-    let(:person_2) { Person.create! :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
 
-    (MassiveRecord::ORM::Finders::Scope::MULTI_VALUE_METHODS + MassiveRecord::ORM::Finders::Scope::SINGLE_VALUE_METHODS).each do |method|
-      it "should not load from database when Person.#{method}() is called" do
-        Person.should_not_receive(:find)
-        Person.send(method, 5)
+  describe "real world test" do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+    describe "with a person" do
+      let(:person_1) { Person.create! :id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
+      let(:person_2) { Person.create! :id => "ID2", :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
+
+      before do
+        person_1.save!
+        person_2.save!
       end
-    end
 
-    it "should find just one record when asked for it" do
-      pending
-      Person.limit(1).length.should == 1
+      (MassiveRecord::ORM::Finders::Scope::MULTI_VALUE_METHODS + MassiveRecord::ORM::Finders::Scope::SINGLE_VALUE_METHODS).each do |method|
+        it "should not load from database when Person.#{method}() is called" do
+          Person.should_not_receive(:find)
+          Person.send(method, 5)
+        end
+      end
+
+      it "should find just one record when asked for it" do
+        Person.limit(1).should == [person_1]
+      end
     end
   end
 end

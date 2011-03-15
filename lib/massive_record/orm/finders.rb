@@ -86,7 +86,7 @@ module MassiveRecord
         end
 
         def finder_scope
-          Scope.new
+          Scope.new(self)
         end
 
         def find_in_batches(*args)

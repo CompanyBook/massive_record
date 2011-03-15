@@ -20,14 +20,16 @@ module MassiveRecord
         
         attr_accessor *MULTI_VALUE_METHODS.collect { |m| m + "_values" }
         attr_accessor *SINGLE_VALUE_METHODS.collect { |m| m + "_value" }
-        attr_accessor :loaded
+        attr_accessor :loaded, :klass
         alias :loaded? :loaded
 
 
         delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to => :to_a
         
 
-        def initialize
+        def initialize(klass)
+          @klass = klass
+
           reset
           reset_single_values_options
           reset_multi_values_options
@@ -63,7 +65,7 @@ module MassiveRecord
 
 
 
-        def to_find_options
+        def find_options
           options = {}
 
           SINGLE_VALUE_METHODS.each do |m|
@@ -77,7 +79,7 @@ module MassiveRecord
           options
         end
 
-        
+
         def ==(other)
           case other
           when Scope
@@ -88,12 +90,22 @@ module MassiveRecord
             raise "Don't know how to compare #{self.class} with #{other.class}"
           end
         end
+
         def to_a
           return @records if loaded?
+          load_records
         end
 
 
         private
+
+
+        def load_records
+          @records = klass.find(:all, find_options)
+          @loaded = true
+          @records
+        end
+
 
         def reset_single_values_options
           SINGLE_VALUE_METHODS.each { |m| instance_variable_set("@#{m}_value", nil) } 
