@@ -101,4 +101,32 @@ describe MassiveRecord::ORM::Finders::Scope do
        should be_loaded
     end
   end
+
+
+  describe "#reset" do
+    it "should reset loaded status" do
+      subject.loaded = true
+      subject.reset
+      should_not be_loaded
+    end
+  end
+end
+
+
+
+describe "real world test" do
+  include SetUpHbaseConnectionBeforeAll
+  include SetTableNamesToTestTable
+
+  describe "with a person" do
+    let(:person_1) { Person.create! :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
+    let(:person_2) { Person.create! :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
+
+    (MassiveRecord::ORM::Finders::Scope::MULTI_VALUE_METHODS + MassiveRecord::ORM::Finders::Scope::SINGLE_VALUE_METHODS).each do |method|
+      it "should not load from database when Person.#{method}() is called" do
+        Person.should_not_receive(:find)
+        Person.send(method, 5)
+      end
+    end
+  end
 end

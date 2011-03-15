@@ -3,6 +3,12 @@ module MassiveRecord
     module Finders
       extend ActiveSupport::Concern
 
+      included do
+        class << self
+          delegate :select, :limit, :to => :finder_scope
+        end
+      end
+
       module ClassMethods
         #
         # Interface for retrieving objects based on key.
@@ -78,7 +84,11 @@ module MassiveRecord
         def all(*args)
           find(:all, *args)
         end
-        
+
+        def finder_scope
+          Scope.new
+        end
+
         def find_in_batches(*args)
           return unless table.exists?
 
