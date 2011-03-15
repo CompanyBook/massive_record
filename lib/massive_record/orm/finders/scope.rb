@@ -20,15 +20,20 @@ module MassiveRecord
         
         attr_accessor *MULTI_VALUE_METHODS.collect { |m| m + "_values" }
         attr_accessor *SINGLE_VALUE_METHODS.collect { |m| m + "_value" }
-
+        attr_accessor :loaded
+        alias :loaded? :loaded
 
 
         def initialize
+          reset
           reset_single_values_options
           reset_multi_values_options
         end
         
-
+        
+        def reset
+          @loaded = false
+        end
 
 
 

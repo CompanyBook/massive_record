@@ -91,4 +91,14 @@ describe MassiveRecord::ORM::Finders::Scope do
       subject.select(:info).to_find_options.should include :select => [:info]
     end
   end
+
+
+  describe "loaded" do
+    it { should_not be_loaded }
+
+    it "should be loaded if set to true" do
+       subject.loaded = true
+       should be_loaded
+    end
+  end
 end
