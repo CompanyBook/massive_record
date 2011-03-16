@@ -131,7 +131,7 @@ module MassiveRecord
             if respond_to? scope_method
               send(scope_method, arguments)
             else
-              raise "Don't know what to do with option '#{scope_method}'."
+              @extra_finder_options[scope_method] = arguments              
             end
           end
         end

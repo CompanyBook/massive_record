@@ -154,7 +154,7 @@ describe MassiveRecord::ORM::Finders::Scope do
     end
 
     it "should include finder options" do
-      extra_options = {:select => ["foo"]}
+      extra_options = {:select => ["foo"], :conditions => 'should_be_passed_on_to_finder'}
 
       klass = mock(Object)
       klass.should_receive(:find).with(anything, hash_including(extra_options)).and_return([])
@@ -172,7 +172,7 @@ describe MassiveRecord::ORM::Finders::Scope do
 
 
     it "should include finder options" do
-      extra_options = {:select => ["foo"]}
+      extra_options = {:select => ["foo"], :conditions => 'should_be_passed_on_to_finder'}
 
       klass = mock(Object)
       klass.should_receive(:find).with(anything, extra_options)
@@ -264,7 +264,7 @@ describe MassiveRecord::ORM::Finders::Scope do
     end
 
     it "should raise unknown scope error if options is unkown" do
-      lambda { subject.send(:apply_finder_options, :unkown => false) }.should raise_error "Don't know what to do with option 'unkown'."
+      lambda { subject.send(:apply_finder_options, :unkown => false) }.should_not raise_error
     end
   end
 end
