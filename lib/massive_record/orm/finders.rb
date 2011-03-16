@@ -7,6 +7,8 @@ module MassiveRecord
         class << self
           delegate :first, :all, :select, :limit, :to => :finder_scope
         end
+
+        class_attribute :default_scoping, :instance_writer => false
       end
 
       module ClassMethods
@@ -77,10 +79,6 @@ module MassiveRecord
           raise "Sorry, not implemented!"
         end
 
-        def finder_scope
-          Scope.new(self)
-        end
-
         def find_in_batches(*args)
           return unless table.exists?
 
@@ -103,6 +101,26 @@ module MassiveRecord
 
         def exists?(id)
           !!find(id) rescue false
+        end
+
+
+        def finder_scope
+          default_scoping || unscoped
+        end
+
+        def default_scope(scope)
+          self.default_scoping =  case scope
+                                    when Scope, nil
+                                      scope
+                                    when Hash
+                                      Scope.new(self, :find_options => scope)
+                                    else
+                                      raise "Don't know how to set scope with #{scope.class}."
+                                    end
+        end
+
+        def unscoped
+          Scope.new(self)
         end
 
 

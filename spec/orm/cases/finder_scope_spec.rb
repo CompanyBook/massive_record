@@ -154,7 +154,7 @@ describe MassiveRecord::ORM::Finders::Scope do
     end
 
     it "should include finder options" do
-      extra_options = {:foo => :bar}
+      extra_options = {:select => ["foo"]}
 
       klass = mock(Object)
       klass.should_receive(:find).with(anything, hash_including(extra_options)).and_return([])
@@ -172,7 +172,7 @@ describe MassiveRecord::ORM::Finders::Scope do
 
 
     it "should include finder options" do
-      extra_options = {:foo => :bar}
+      extra_options = {:select => ["foo"]}
 
       klass = mock(Object)
       klass.should_receive(:find).with(anything, extra_options)
@@ -199,8 +199,8 @@ describe MassiveRecord::ORM::Finders::Scope do
     include SetTableNamesToTestTable
 
     describe "with a person" do
-      let(:person_1) { Person.create! :id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
-      let(:person_2) { Person.create! :id => "ID2", :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
+      let(:person_1) { Person.create :id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
+      let(:person_2) { Person.create :id => "ID2", :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
 
       before do
         person_1.save!
@@ -248,6 +248,23 @@ describe MassiveRecord::ORM::Finders::Scope do
       it "should be possible to checkc if it includes something" do
         Person.limit(1).include?(person_2).should be_false
       end
+    end
+  end
+
+
+  describe "#apply_finder_options" do
+    it "should apply limit correctly" do
+      subject.should_receive(:limit).with(30)
+      subject.send :apply_finder_options, :limit => 30
+    end
+
+    it "should apply select correctly" do
+      subject.should_receive(:select).with(:foo)
+      subject.send :apply_finder_options, :select => :foo
+    end
+
+    it "should raise unknown scope error if options is unkown" do
+      lambda { subject.send(:apply_finder_options, :unkown => false) }.should raise_error "Don't know what to do with option 'unkown'."
     end
   end
 end

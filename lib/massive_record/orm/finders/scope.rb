@@ -27,13 +27,15 @@ module MassiveRecord
         delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to => :to_a
         
 
-        def initialize(klass)
+        def initialize(klass, options = {})
           @klass = klass
           @extra_finder_options = {}
 
           reset
           reset_single_values_options
           reset_multi_values_options
+
+          apply_finder_options(options[:find_options]) if options.has_key? :find_options
         end
         
         
@@ -81,7 +83,7 @@ module MassiveRecord
         def first(options = {})
           return @records.first if loaded?
 
-          apply_extra_finder_options(options)
+          apply_finder_options(options)
           limit(1).to_a.first
         end
 
@@ -93,9 +95,10 @@ module MassiveRecord
         end
 
         def all(options = {})
-          apply_extra_finder_options(options)
+          apply_finder_options(options)
           to_a
         end
+
 
 
         private
@@ -123,9 +126,16 @@ module MassiveRecord
 
 
 
-        def apply_extra_finder_options(options)
-          @extra_finder_options.merge! options
+        def apply_finder_options(options)
+          options.each do |scope_method, arguments|
+            if respond_to? scope_method
+              send(scope_method, arguments)
+            else
+              raise "Don't know what to do with option '#{scope_method}'."
+            end
+          end
         end
+
 
 
 
