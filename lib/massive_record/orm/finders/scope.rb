@@ -80,12 +80,32 @@ module MassiveRecord
         end
 
 
+
+        def find(*args)
+          options = args.extract_options!.to_options
+          apply_finder_options(options)
+          args << options.merge(find_options)
+
+          klass.do_find(*args)
+        end
+
+        def all(options = {})
+          apply_finder_options(options)
+          to_a
+        end
+
         def first(options = {})
           return @records.first if loaded?
 
           apply_finder_options(options)
           limit(1).to_a.first
         end
+
+        def last(*args)
+          raise "Sorry, not implemented!"
+        end
+
+
 
         def to_a
           return @records if loaded?
@@ -94,10 +114,6 @@ module MassiveRecord
           @records
         end
 
-        def all(options = {})
-          apply_finder_options(options)
-          to_a
-        end
 
 
 
@@ -105,7 +121,7 @@ module MassiveRecord
 
 
         def load_records
-          @records = klass.find(:all, find_options)
+          @records = klass.do_find(:all, find_options)
           @loaded = true
           @records
         end

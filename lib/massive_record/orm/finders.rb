@@ -5,18 +5,14 @@ module MassiveRecord
 
       included do
         class << self
-          delegate :first, :all, :select, :limit, :to => :finder_scope
+          delegate :find, :first, :last, :all, :select, :limit, :to => :finder_scope
         end
 
         class_attribute :default_scoping, :instance_writer => false
       end
 
       module ClassMethods
-        #
-        # Interface for retrieving objects based on key.
-        # Has some convenience behaviour like find :first, :last, :all.
-        #
-        def find(*args)
+        def do_find(*args) # :nodoc:
           options = args.extract_options!.to_options
           raise ArgumentError.new("At least one argument required!") if args.empty?
           raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.") if args.first.nil?
@@ -73,10 +69,6 @@ module MassiveRecord
           end
 
           find_many ? records : records.first
-        end
-
-        def last(*args)
-          raise "Sorry, not implemented!"
         end
 
         def find_in_batches(*args)

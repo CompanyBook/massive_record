@@ -118,13 +118,13 @@ describe "finders" do
     end
 
     it "should call find with :all" do
-      TestClass.should_receive(:find).with(:all, anything)
+      TestClass.should_receive(:do_find).with(:all, anything)
       TestClass.all
     end
 
     it "should delegate all's call to find with it's args as second argument" do
       options = {:foo => :bar}
-      TestClass.should_receive(:find).with(anything, options)
+      TestClass.should_receive(:do_find).with(anything, options)
       TestClass.all options
     end
   end
@@ -135,13 +135,13 @@ describe "finders" do
     end
 
     it "should call find with :first" do
-      TestClass.should_receive(:find).with(:all, {:limit => 1}).and_return([])
+      TestClass.should_receive(:do_find).with(:all, {:limit => 1}).and_return([])
       TestClass.first
     end
 
     it "should delegate first's call to find with it's args as second argument" do
       options = {:foo => :bar}
-      TestClass.should_receive(:find).with(anything, hash_including(options)).and_return([])
+      TestClass.should_receive(:do_find).with(anything, hash_including(options)).and_return([])
       TestClass.first options
     end
   end

@@ -142,6 +142,24 @@ describe MassiveRecord::ORM::Finders::Scope do
     end
   end
 
+  describe "#find" do
+    it "should return nil if not found" do
+      klass = mock(Object)
+      klass.should_receive(:do_find).and_return(nil)
+      subject.should_receive(:klass).and_return(klass)
+
+      subject.find(1).should be_nil
+    end
+
+    it "should be possible to add scopes" do
+      klass = mock(Object)
+      klass.should_receive(:do_find).with(1, :select => ['foo']).and_return(nil)
+      subject.should_receive(:klass).and_return(klass)
+      subject.select(:foo).find(1)
+    end
+  end
+
+
 
   describe "#first" do
     it "should return first record if loaded" do
@@ -157,7 +175,7 @@ describe MassiveRecord::ORM::Finders::Scope do
       extra_options = {:select => ["foo"], :conditions => 'should_be_passed_on_to_finder'}
 
       klass = mock(Object)
-      klass.should_receive(:find).with(anything, hash_including(extra_options)).and_return([])
+      klass.should_receive(:do_find).with(anything, hash_including(extra_options)).and_return([])
       subject.should_receive(:klass).and_return(klass)
 
       subject.first(extra_options)
@@ -175,7 +193,7 @@ describe MassiveRecord::ORM::Finders::Scope do
       extra_options = {:select => ["foo"], :conditions => 'should_be_passed_on_to_finder'}
 
       klass = mock(Object)
-      klass.should_receive(:find).with(anything, extra_options)
+      klass.should_receive(:do_find).with(anything, extra_options)
       subject.should_receive(:klass).and_return(klass)
 
       subject.all(extra_options)

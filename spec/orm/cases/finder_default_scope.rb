@@ -24,8 +24,16 @@ describe "Default scope in" do
 
 
 
-    it "should only load column family info as a default" do
+    it "should be possible to find the a record and use the default scope" do
+      Person.find(subject.id).points.should be_nil
+    end
+
+    it "should only load column family info as a default with first" do
       Person.first.points.should be_nil # its in :base
+    end
+
+    it "should only load column family info as default with all" do
+      Person.all.first.points.should be_nil
     end
 
     it "should be possible to bypass default scope by unscoped" do
@@ -34,7 +42,7 @@ describe "Default scope in" do
 
     it "should be possible to set default_scope with a hash" do
       Person.class_eval do
-        default_scope :seleft => :base
+        default_scope :select => :base
       end
 
       person = Person.first
