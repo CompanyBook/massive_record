@@ -95,8 +95,6 @@ module MassiveRecord
         end
 
         def first(options = {})
-          return @records.first if loaded?
-
           apply_finder_options(options)
           limit(1).to_a.first
         end
