@@ -2,12 +2,14 @@ require 'spec_helper'
 
 describe "A table" do
   
+  before(:all) do
+    @connection = MassiveRecord::Wrapper::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
+    @connection.open
+  end
+  
   describe "with an open connection" do
 
     before do
-      @connection = MassiveRecord::Wrapper::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
-      @connection.open
-      
       @table = MassiveRecord::Wrapper::Table.new(@connection, MR_CONFIG['table'])
     end
   
@@ -65,15 +67,7 @@ describe "A table" do
         row.table = @table
         row.save
       end
-      
-      it "should contains one row" do
-        @table.all.size.should == 1
-      end
-      
-      it "should load the first row" do
-        @table.first.should be_a_kind_of(MassiveRecord::Wrapper::Row)
-      end
-        
+              
       it "should list 5 column names" do
         @table.column_names.size.should == 7
       end
@@ -141,9 +135,6 @@ describe "A table" do
         row = MassiveRecord::Wrapper::Row.new
         row.updated_at.should be_nil
       end
-
-      
-      
       
       it "should merge data" do
         row = @table.first
@@ -218,61 +209,6 @@ describe "A table" do
         @table.first.should be_nil
       end
       
-      it "should create 5 rows" do
-        1.upto(5).each do |i|
-          row = MassiveRecord::Wrapper::Row.new
-          row.id = "ID#{i}"
-          row.values = { :info => { :first_name => "John #{i}", :last_name => "Doe #{i}" } }
-          row.table = @table
-          row.save
-        end
-        
-        @table.all.size.should == 5
-      end
-      
-      it "should find rows" do
-        ids_list = [["ID1"], ["ID1", "ID2", "ID3"]]
-        ids_list.each do |ids|
-          @table.find(ids).each do |row|
-            ids.include?(row.id).should be_true
-          end
-        end
-      end
-    
-      it "should collect 5 IDs" do
-        @table.all.collect(&:id).should eql(1.upto(5).collect{|i| "ID#{i}"})
-      end
-    
-      it "should iterate through a collection of rows" do
-        @table.all.each do |row|
-          row.id.should_not be_nil
-        end
-      end
-    
-      it "should iterate through a collection of rows using a batch process" do
-        group_number = 0
-        @table.find_in_batches(:batch_size => 2, :select => ["info"]) do |group|
-          group_number += 1
-          group.each do |row|
-            row.id.should_not be_nil
-          end
-        end        
-        group_number.should == 3
-      end
-    
-      it "should find 1 row using the :start option" do
-        @table.all(:start => "ID1").size.should == 1
-      end
-    
-      it "should find 5 rows using the :start option" do
-        @table.all(:start => "ID").size.should == 5
-      
-      end
-    
-      it "should find 4 rows using the :offset option" do
-        @table.all(:offset => "ID2").size.should == 4
-      end
-      
       it "should exists in the database" do
         @table.exists?.should be_true
       end
@@ -280,9 +216,82 @@ describe "A table" do
       it "should destroy the test table" do
         @table.destroy.should be_true
       end
-  
     end
   
   end
   
+  describe "can be scanned" do
+    before do
+      @table = MassiveRecord::Wrapper::Table.new(@connection, MR_CONFIG['table'])
+      @table.column_families.create(:info)
+      @table.column_families.create(:misc)
+      
+      @table.save
+      
+      ["A", "B"].each do |prefix|
+        1.upto(5).each do |i|
+          row = MassiveRecord::Wrapper::Row.new
+          row.id = "#{prefix}#{i}"
+          row.values = { :info => { :first_name => "John #{i}", :last_name => "Doe #{i}" } }
+          row.table = @table
+          row.save
+        end
+      end
+    end
+    
+    after do
+      @table.destroy
+    end
+    
+    it "should contains 10 rows" do
+      @table.all.size.should == 10
+      @table.all.collect(&:id).size.should == 10
+    end
+    
+    it "should load the first row" do
+      @table.first.should be_a_kind_of(MassiveRecord::Wrapper::Row)
+    end
+    
+    it "should find rows from a list of IDs" do
+      ids_list = [["A1"], ["A1", "A2", "A3"]]
+      ids_list.each do |ids|
+        @table.find(ids).each do |row|
+          ids.include?(row.id).should be_true
+        end
+      end
+    end
+  
+    it "should iterate through a collection of rows" do
+      @table.all.each do |row|
+        row.id.should_not be_nil
+      end
+    end
+  
+    it "should iterate through a collection of rows using a batch process" do
+      group_number = 0
+      @table.find_in_batches(:batch_size => 2, :select => ["info"]) do |group|
+        group_number += 1
+        group.each do |row|
+          row.id.should_not be_nil
+        end
+      end        
+      group_number.should == 5
+    end
+  
+    it "should find 1 row using the :start option" do
+      @table.all(:start => "A1").size.should == 1
+    end
+  
+    it "should find 5 rows using the :start option" do
+      @table.all(:start => "A").size.should == 5
+    end
+  
+    it "should find 9 rows using the :offset option" do
+      @table.all(:offset => "A2").size.should == 9
+    end
+    
+    it "should find 4 rows using both :offset and :start options" do
+      @table.all(:offset => "A2", :start => "A").size.should == 4
+    end
+  end
 end
