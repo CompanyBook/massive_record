@@ -7,7 +7,7 @@ describe "finders" do
     include MockMassiveRecordConnection
 
     before do
-      @mocked_table = mock(MassiveRecord::Wrapper::Table).as_null_object
+      @mocked_table = mock(MassiveRecord::Wrapper::Table, :to_ary => []).as_null_object
       Person.stub(:table).and_return(@mocked_table)
       
       @row = MassiveRecord::Wrapper::Row.new
@@ -25,10 +25,10 @@ describe "finders" do
 
     it "should simply return nil on first if table does not exists" do
       Person.table.should_receive(:exists?).and_return false
-      lambda { Person.first }.should raise_error MassiveRecord::ORM::RecordNotFound
+      Person.first.should be_nil
     end
 
-    it "should simply return nil on find if table does not exists" do
+    it "should raise record not found error on find if table does not exists" do
       Person.table.should_receive(:exists?).and_return false
       lambda { Person.find(1) }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
@@ -98,7 +98,6 @@ describe "finders" do
     end
 
     it "should return nil on first if no results was found" do
-      @mocked_table.should_receive(:first).and_return(nil)
       Person.first.should be_nil
     end
 
@@ -113,20 +112,37 @@ describe "finders" do
     end
   end
 
-  %w(first all).each do |method|
-    it "should respond to #{method}" do
-      TestClass.should respond_to method
+  describe "all" do
+    it "should respond to all" do
+      TestClass.should respond_to :all
     end
 
-    it "should delegate #{method} to find with first argument as :#{method}" do
-      TestClass.should_receive(:find).with(method.to_sym)
-      TestClass.send(method)
+    it "should call find with :all" do
+      TestClass.should_receive(:find).with(:all, anything)
+      TestClass.all
     end
 
-    it "should delegate #{method}'s call to find with it's args as second argument" do
+    it "should delegate all's call to find with it's args as second argument" do
       options = {:foo => :bar}
       TestClass.should_receive(:find).with(anything, options)
-      TestClass.send(method, options)
+      TestClass.all options
+    end
+  end
+
+  describe "first" do
+    it "should respond to first" do
+      TestClass.should respond_to :first
+    end
+
+    it "should call find with :first" do
+      TestClass.should_receive(:find).with(:all, {:limit => 1}).and_return([])
+      TestClass.first
+    end
+
+    it "should delegate first's call to find with it's args as second argument" do
+      options = {:foo => :bar}
+      TestClass.should_receive(:find).with(anything, hash_including(options)).and_return([])
+      TestClass.first options
     end
   end
 

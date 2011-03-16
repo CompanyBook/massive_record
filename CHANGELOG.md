@@ -1,5 +1,10 @@
 # v0.2.0 (git develop)
 
+- A default_scope is possible to set on classes. For instance: Calling default_scope select(:only_this_column_family)
+  inside of a class will execute finder operations with this as default scope. If you need to fetch records of class
+  without your preset default scope you can use Model.unscoped.
+- We now have some ActiveRecord like chaining of method calls when we do find-operations. Like Person.select(:column_family).limit(2)
+  is the same as Person.all(:select => ['column_family', :limit => 2])
 - references_many has first() and limit() which uses the target array if loaded, or load only what it needs from the database.
 - Wrapper::Thrift has been moved into Adapter::Thrift. Adding more adapters should be not that hard now.
 - References many is now possible. We have to strategies: Store an array of foreign keys in the proxy_owner,

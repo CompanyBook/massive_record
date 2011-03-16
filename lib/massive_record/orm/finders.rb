@@ -3,6 +3,14 @@ module MassiveRecord
     module Finders
       extend ActiveSupport::Concern
 
+      included do
+        class << self
+          delegate :first, :all, :select, :limit, :to => :finder_scope
+        end
+
+        class_attribute :default_scoping, :instance_writer => false
+      end
+
       module ClassMethods
         #
         # Interface for retrieving objects based on key.
@@ -67,18 +75,10 @@ module MassiveRecord
           find_many ? records : records.first
         end
 
-        def first(*args)
-          find(:first, *args)
-        end
-
         def last(*args)
           raise "Sorry, not implemented!"
         end
 
-        def all(*args)
-          find(:all, *args)
-        end
-        
         def find_in_batches(*args)
           return unless table.exists?
 
@@ -101,6 +101,26 @@ module MassiveRecord
 
         def exists?(id)
           !!find(id) rescue false
+        end
+
+
+        def finder_scope
+          default_scoping || unscoped
+        end
+
+        def default_scope(scope)
+          self.default_scoping =  case scope
+                                    when Scope, nil
+                                      scope
+                                    when Hash
+                                      Scope.new(self, :find_options => scope)
+                                    else
+                                      raise "Don't know how to set scope with #{scope.class}."
+                                    end
+        end
+
+        def unscoped
+          Scope.new(self)
         end
 
 
