@@ -16,6 +16,7 @@ require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
+require 'massive_record/orm/single_table_inheritance'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
@@ -182,6 +183,7 @@ module MassiveRecord
     Base.class_eval do
       include Config
       include Relations::Interface
+      include SingleTableInheritance
       include Persistence
       include Finders
       include ActiveModel::Translation
