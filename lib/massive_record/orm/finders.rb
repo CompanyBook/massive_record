@@ -132,7 +132,13 @@ module MassiveRecord
         end
 
         def instantiate(record)
-          allocate.tap do |model|
+          if klass = record[inheritance_attribute]
+            klass = klass.constantize
+          else
+            klass = self
+          end
+
+          klass.allocate.tap do |model|
             model.init_with('attributes' => record)
           end
         end

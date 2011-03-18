@@ -66,6 +66,17 @@ module MassiveRecord
         def base_class
           class_of_descendant(self)
         end
+
+
+        def inheritance_attribute
+          @inheritance_attribute ||= "type"
+        end
+
+        def set_inheritance_attribute(value = nil, &block)
+          define_attr_method :inheritance_attribute, value, &block
+        end
+        alias :inheritance_attribute= :set_inheritance_attribute
+
         
         private
         
@@ -201,7 +212,6 @@ module MassiveRecord
     Base.class_eval do
       include Config
       include Relations::Interface
-      include SingleTableInheritance
       include Persistence
       include Finders
       include ActiveModel::Translation
@@ -211,6 +221,7 @@ module MassiveRecord
       include Validations
       include Callbacks
       include Timestamps
+      include SingleTableInheritance
 
 
       alias [] read_attribute
