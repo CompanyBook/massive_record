@@ -131,6 +131,8 @@ module MassiveRecord
 
         _run_find_callbacks
         _run_initialize_callbacks
+
+        self
       end
 
 
