@@ -10,8 +10,10 @@ module MassiveRecord
       end
 
       def ensure_proper_type
-        if respond_to?(self.class.inheritance_attribute) && self[self.class.inheritance_attribute].blank?
-          self[self.class.inheritance_attribute] = self.class.to_s
+        attr = self.class.inheritance_attribute
+
+        if respond_to?(attr) && self[attr].blank? && self.class.base_class != self.class
+          self[attr] = self.class.to_s
         end
       end
     end

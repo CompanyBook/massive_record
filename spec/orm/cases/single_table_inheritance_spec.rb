@@ -18,4 +18,9 @@ describe "Single table inheritance" do
       end
     end
   end
+
+  it "should not set type if record being saved is base class" do
+    person = Person.new :id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true
+    person.type.should be_nil
+  end
 end

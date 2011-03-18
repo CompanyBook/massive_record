@@ -132,7 +132,7 @@ module MassiveRecord
         end
 
         def instantiate(record)
-          if klass = record[inheritance_attribute]
+          if klass = record[inheritance_attribute] and klass.present?
             klass = klass.constantize
           else
             klass = self
