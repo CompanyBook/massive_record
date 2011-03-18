@@ -33,9 +33,9 @@ module MassiveRecord
 
     class ColumnFamiliesMissingError < MassiveRecordError
       attr_reader :missing_column_families
-      def initialize(missing_column_families)
+      def initialize(klass, missing_column_families)
         @missing_column_families = missing_column_families
-        super("hbase are missing some column families: #{@missing_column_families.join(' ')}. Please migrate the database.")
+        super("hbase are missing some column families for class '#{klass.to_s}', table '#{klass.table_name}': #{@missing_column_families.join(' ')}. Please migrate the database.")
       end
     end
 
