@@ -5,6 +5,7 @@ class Person < MassiveRecord::ORM::Table
     field :age, :integer
     field :date_of_birth, :date
     field :addresses, :hash, :default => {}
+    field :type
   end
 
   column_family :base do

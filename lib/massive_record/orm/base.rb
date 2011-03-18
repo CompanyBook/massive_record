@@ -16,6 +16,7 @@ require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
+require 'massive_record/orm/single_table_inheritance'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
@@ -45,7 +46,11 @@ module MassiveRecord
      
       class << self
         def table_name
-          @table_name ||= table_name_prefix + (table_name_overriden.blank? ? self.to_s.demodulize.underscore.pluralize : table_name_overriden) + table_name_suffix
+          @table_name ||= table_name_prefix + table_name_without_pre_and_suffix + table_name_suffix
+        end
+
+        def table_name_without_pre_and_suffix
+          (table_name_overriden.blank? ? base_class.to_s.demodulize.underscore.pluralize : table_name_overriden)
         end
 
         def table_name=(name)
@@ -56,6 +61,31 @@ module MassiveRecord
         def reset_table_name_configuration!
           @table_name = self.table_name_overriden = nil
           self.table_name_prefix = self.table_name_suffix = ""
+        end
+
+        def base_class
+          class_of_descendant(self)
+        end
+
+
+        def inheritance_attribute
+          @inheritance_attribute ||= "type"
+        end
+
+        def set_inheritance_attribute(value = nil, &block)
+          define_attr_method :inheritance_attribute, value, &block
+        end
+        alias :inheritance_attribute= :set_inheritance_attribute
+
+        
+        private
+        
+        def class_of_descendant(klass)
+          if klass.superclass.superclass == Base
+            klass
+          else
+            class_of_descendant(klass.superclass)
+          end
         end
       end
 
@@ -101,6 +131,8 @@ module MassiveRecord
 
         _run_find_callbacks
         _run_initialize_callbacks
+
+        self
       end
 
 
@@ -191,6 +223,7 @@ module MassiveRecord
       include Validations
       include Callbacks
       include Timestamps
+      include SingleTableInheritance
 
 
       alias [] read_attribute

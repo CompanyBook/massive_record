@@ -1,5 +1,7 @@
 require 'spec_helper'
 require 'orm/models/test_class'
+require 'orm/models/friend'
+require 'orm/models/best_friend'
 
 describe MassiveRecord::ORM::Base do
   include MockMassiveRecordConnection
@@ -7,6 +9,14 @@ describe MassiveRecord::ORM::Base do
   describe "table name" do
     before do
       TestClass.reset_table_name_configuration!
+      Friend.reset_table_name_configuration!
+      BestFriend.reset_table_name_configuration!
+    end
+
+    after do
+      TestClass.reset_table_name_configuration!
+      Friend.reset_table_name_configuration!
+      BestFriend.reset_table_name_configuration!
     end
 
     it "should have a table name" do
@@ -21,6 +31,14 @@ describe MassiveRecord::ORM::Base do
     it "should have a table name with suffix" do
       TestClass.table_name_suffix = "_suffix"
       TestClass.table_name.should == "test_classes_suffix"
+    end
+
+    it "first sub class should have the same table name as base class" do
+      Friend.table_name.should == Person.table_name
+    end
+
+    it "second sub class should have the same table name as base class" do
+      BestFriend.table_name.should == Person.table_name
     end
     
     describe "set explicitly" do
@@ -44,6 +62,11 @@ describe MassiveRecord::ORM::Base do
       it "should be possible to call set_table_name" do
         TestClass.set_table_name("foo")
         TestClass.table_name.should == "foo"
+      end
+
+      it "sub class should have have table name overridden" do
+        Friend.table_name = "foo"
+        Friend.table_name.should == "foo"
       end
     end
   end
@@ -198,6 +221,21 @@ describe MassiveRecord::ORM::Base do
       test = TestClass.new
       test.readonly!
       test.should be_readonly
+    end
+  end
+
+
+  describe "#base_class" do
+    it "should return correct base class for direct descendant of Base" do
+      Person.base_class.should == Person
+    end
+
+    it "should return Person when asking a descendant of Person" do
+      Friend.base_class.should == Person
+    end
+
+    it "should return Person when asking a descendant of Person multiple levels" do
+      BestFriend.base_class.should == Person
     end
   end
 end

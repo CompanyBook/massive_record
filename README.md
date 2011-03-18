@@ -85,6 +85,7 @@ Here is an example of usage, both for Table and Column:
         field :points, :integer, :default => 0
         field :date_of_birth, :date
         field :newsletter, :boolean, :default => false
+        field :type # Used for single table inheritance
 
         timestamps # ..or field :created_at, :time
       end
@@ -102,6 +103,11 @@ Here is an example of usage, both for Table and Column:
       def cars_start_id
         id+'-'
       end
+    end
+
+    class Friend < Person
+      # This one will be stored in Person's table with it's type set to Friend.
+      # Calling Person.all will return object back as a Friend.
     end
 
     

@@ -155,7 +155,7 @@ module MassiveRecord
           self.class.table.save
         end
 
-        raise ColumnFamiliesMissingError.new(calculate_missing_family_names) if !calculate_missing_family_names.empty?
+        raise ColumnFamiliesMissingError.new(self.class, calculate_missing_family_names) if !calculate_missing_family_names.empty?
       end
       
       #
