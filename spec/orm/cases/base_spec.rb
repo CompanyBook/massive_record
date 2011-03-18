@@ -13,6 +13,12 @@ describe MassiveRecord::ORM::Base do
       BestFriend.reset_table_name_configuration!
     end
 
+    after do
+      TestClass.reset_table_name_configuration!
+      Friend.reset_table_name_configuration!
+      BestFriend.reset_table_name_configuration!
+    end
+
     it "should have a table name" do
       TestClass.table_name.should == "test_classes"
     end
