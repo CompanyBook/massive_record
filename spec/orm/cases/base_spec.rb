@@ -238,4 +238,28 @@ describe MassiveRecord::ORM::Base do
       BestFriend.base_class.should == Person
     end
   end
+  
+  
+  describe "#clone" do
+    before do
+      @test_object = TestClass.create!(:id => "1", :foo => 'bar')
+      @clone_object = @test_object.clone
+    end
+    
+    it "should be the same object class" do
+      @test_object.class.should == @clone_object.class
+    end
+    
+    it "should have a different object_id" do
+      @test_object.object_id.should_not == @clone_object.object_id
+    end
+    
+    it "should have the same attributes" do
+      @test_object.foo.should == @clone_object.foo
+    end
+    
+    it "should have a nil id" do
+      @clone_object.id.should be_nil
+    end
+  end
 end

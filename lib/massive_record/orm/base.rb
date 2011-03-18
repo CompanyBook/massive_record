@@ -179,6 +179,13 @@ module MassiveRecord
       end
 
 
+      def clone
+        object = self.class.new
+        object.init_with('attributes' => attributes.select{|k| !['id', 'created_at', 'updated_at'].include?(k)})
+        object
+      end
+      
+
       private
 
       #
