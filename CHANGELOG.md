@@ -1,5 +1,6 @@
 # v0.2.0 (git develop)
 
+- Single table inheritance is supported. By default you can have an attribute called type to give you support for it in a table.
 - A default_scope is possible to set on classes. For instance: Calling default_scope select(:only_this_column_family)
   inside of a class will execute finder operations with this as default scope. If you need to fetch records of class
   without your preset default scope you can use Model.unscoped.
