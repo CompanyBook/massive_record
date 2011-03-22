@@ -77,6 +77,11 @@ module MassiveRecord
         end
         alias :inheritance_attribute= :set_inheritance_attribute
 
+
+        def ===(other)
+          other.is_a? self
+        end
+
         
         private
         

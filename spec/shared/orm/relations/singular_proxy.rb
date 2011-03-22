@@ -44,5 +44,25 @@ shared_examples_for "singular proxy" do
         lambda { subject.dummy_method_which_does_not_exists }.should raise_error NoMethodError
       end
     end
+
+    describe "comparison of class" do
+      let(:proxy_target) { Person.new }
+
+      it "should be answer correctly to which class it is" do
+        subject.should be_a(Person)
+      end
+
+      it "should be comparable correctly" do
+        (Person === subject).should be_true
+      end
+
+      it "should be compared correctly in a case when construction" do
+        case subject
+        when Person
+        else
+          fail
+        end
+      end
+    end
   end
 end
