@@ -68,8 +68,14 @@ describe TestReferencesOneProxy do
       proxy_owner.boss_id.should be_nil
     end
 
-    it "should not set the proxy_target's ida as the foreign key if we are not persisting the foreign key" do
+    it "should not set the proxy_target's id as the foreign key if we are not persisting the foreign key" do
       proxy_owner.stub(:respond_to?).and_return(false)
+      proxy_owner.boss = proxy_target
+      proxy_owner.boss_id.should be_nil
+    end
+
+    it "should not set the proxy_target's id as the foreign key if the owner has been destroyed" do
+      proxy_owner.should_receive(:destroyed?).and_return true
       proxy_owner.boss = proxy_target
       proxy_owner.boss_id.should be_nil
     end

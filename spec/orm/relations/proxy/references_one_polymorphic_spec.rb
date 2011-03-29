@@ -12,12 +12,14 @@ describe TestReferencesOnePolymorphicProxy do
 
   subject { proxy_owner.send(:relation_proxy, 'attachable') }
 
-  before do
-    proxy_owner.attachable_type = "person"
-  end
+  describe "normal proxy behaviour" do
+    before do
+      proxy_owner.attachable_type = "person"
+    end
 
-  it_should_behave_like "relation proxy"
-  it_should_behave_like "singular proxy"
+    it_should_behave_like "relation proxy"
+    it_should_behave_like "singular proxy"
+  end
 
 
   describe "#find_proxy_target" do
@@ -81,6 +83,20 @@ describe TestReferencesOnePolymorphicProxy do
       proxy_owner.attachable = proxy_target
       proxy_owner.attachable_type.should be_nil
     end
+
+    it "should not set the proxy_target's id as the foreign key if the owner has been destroyed" do
+      proxy_owner.should_receive(:destroyed?).and_return true
+      proxy_owner.attachable = proxy_target
+      proxy_owner.attachable_id.should be_nil
+    end
+
+    it "should not set the proxy_target's type as the foreign key if the owner has been destroyed" do
+      proxy_owner.should_receive(:destroyed?).and_return true
+      proxy_owner.attachable = proxy_target
+      proxy_owner.attachable_type.should be_nil
+    end
+
+
 
     it "should set the proxy_target's id as the foreign key even if we are not persisting it if the record responds to setter method" do
       proxy_owner.attachable = proxy_target

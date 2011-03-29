@@ -143,6 +143,12 @@ describe TestReferencesManyProxy do
           proxy_owner.test_class_ids.should_not include(proxy_target.id)
         end
 
+        it "should not update array of foreign keys in the proxy owner if it has been destroyed" do
+          proxy_owner.should_receive(:destroyed?).and_return true
+          subject.send(add_method, proxy_target)
+          proxy_owner.test_class_ids.should_not include(proxy_target.id)
+        end
+
         it "should not do anything adding the same record twice" do
           2.times { subject.send(add_method, proxy_target) }
           subject.proxy_target.length.should == 1

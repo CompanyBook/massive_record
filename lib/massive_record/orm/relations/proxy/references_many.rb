@@ -201,7 +201,7 @@ module MassiveRecord
 
 
           def add_foreign_key_in_proxy_owner(id)
-            if proxy_owner.respond_to? metadata.foreign_key
+            if update_foreign_key_fields_in_proxy_owner? && proxy_owner.respond_to?(metadata.foreign_key)
               proxy_owner.send(metadata.foreign_key) << id
               notify_of_change_in_proxy_owner_foreign_key
             end

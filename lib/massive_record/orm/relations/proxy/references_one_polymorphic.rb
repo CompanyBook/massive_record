@@ -29,8 +29,10 @@ module MassiveRecord
           end
 
           def set_foreign_key_and_type_in_proxy_owner(id, type)
-            proxy_owner.send(metadata.foreign_key_setter, id) if proxy_owner.respond_to?(metadata.foreign_key_setter)
-            proxy_owner.send(metadata.polymorphic_type_column_setter, type) if proxy_owner.respond_to?(metadata.polymorphic_type_column_setter)
+            if update_foreign_key_fields_in_proxy_owner?
+              proxy_owner.send(metadata.foreign_key_setter, id) if proxy_owner.respond_to?(metadata.foreign_key_setter)
+              proxy_owner.send(metadata.polymorphic_type_column_setter, type) if proxy_owner.respond_to?(metadata.polymorphic_type_column_setter)
+            end
           end
 
 

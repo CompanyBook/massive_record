@@ -151,6 +151,10 @@ module MassiveRecord
           find_with_proc?
         end
 
+        def update_foreign_key_fields_in_proxy_owner?
+          !proxy_owner.destroyed?
+        end
+
         #
         # Are we supposed to find proxy_target with a proc?
         #
