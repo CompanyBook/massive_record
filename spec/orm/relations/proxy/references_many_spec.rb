@@ -125,11 +125,16 @@ describe TestReferencesManyProxy do
           proxy_owner.test_class_ids.should include(proxy_target.id)
         end
 
-        it "should update array of foreign keys in proxy_owner" do
+        it "should auto-persist foreign keys if owner has been persisted" do
           proxy_owner.save!
           subject.send(add_method, proxy_target)
-          proxy_owner.save! and proxy_owner.reload
+          proxy_owner.reload
           proxy_owner.test_class_ids.should include(proxy_target.id)
+        end
+
+        it "should not persist proxy owner (and it's foreign keys) if owner is a new record" do
+          subject.send(add_method, proxy_target)
+          proxy_owner.should be_new_record
         end
 
         it "should not update array of foreign keys in proxy_owner if it does not respond to it" do
