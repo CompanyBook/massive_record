@@ -18,7 +18,8 @@
 
 
 # v0.1.2 (git master)
-
+- Fixed, or at least made better, the is_yaml? method in Wrapper::Cell.This functionality of serialize/de-serialize
+  should be moved up into the ORM asap, but for now a hot fix has been applied.
 
 
 
