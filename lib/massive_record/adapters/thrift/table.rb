@@ -114,7 +114,7 @@ module MassiveRecord
         # table.get("my_id", :info, :name) # => "Bob"
         #
         def get(id, column_family_name, column_name)
-          MassiveRecord::Wrapper::Cell.new(:value => connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.value).deserialize_value
+          MassiveRecord::Wrapper::Cell.new(:value => connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.value).value
         end
         
         def find(*args)

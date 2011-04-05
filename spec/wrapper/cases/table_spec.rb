@@ -55,12 +55,12 @@ describe "A table" do
         row.values = { 
           :info => { :first_name => "John", :last_name => "Doe", :email => "john@base.com" },
           :misc => { 
-            :like => ["Eating", "Sleeping", "Coding"], 
+            :like => ["Eating", "Sleeping", "Coding"].to_json, 
             :dislike => {
               "Washing" => "Boring 6/10",
               "Ironing" => "Boring 8/10"
-            },
-            :empty => {},
+            }.to_json,
+            :empty => {}.to_json,
             :value_to_increment => "1"
           }
         }
@@ -144,24 +144,11 @@ describe "A table" do
         )
       end
       
-      it "should merge array data" do
-        row = @table.first
-        row.merge_columns({ :misc => { :like => ["Playing"] } })
-        row.columns["misc:like"].deserialize_value.should =~ ["Eating", "Sleeping", "Coding", "Playing"]
-      end
-      
-      it "should merge hash data" do
-        row = @table.first
-        row.merge_columns({ :misc => { :dislike => { "Ironing" => "Boring 10/10", "Running" => "Boring 5/10" } } })
-        row.columns["misc:dislike"].deserialize_value["Ironing"].should eql("Boring 10/10") # Check updated value
-        row.columns["misc:dislike"].deserialize_value.keys.should =~ ["Washing", "Ironing", "Running"] # Check new value
-      end
-      
       it "should deserialize Array / Hash values from YAML automatically" do
         row = @table.first
-        row.values["misc:like"].class.should eql(Array)
-        row.values["misc:dislike"].class.should eql(Hash)
-        row.values["misc:empty"].class.should eql(Hash)
+        ActiveSupport::JSON.decode(row.values["misc:like"]).class.should eql(Array)
+        ActiveSupport::JSON.decode(row.values["misc:dislike"]).class.should eql(Hash)
+        ActiveSupport::JSON.decode(row.values["misc:empty"]).class.should eql(Hash)
       end
       
       it "should display the previous value (versioning) of the column 'info:first_name'" do
