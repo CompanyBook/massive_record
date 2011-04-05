@@ -191,7 +191,7 @@ module MassiveRecord
         attributes_schema.each do |attr_name, orm_field|
           next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
           value = send(attr_name)
-          value = coder.dump(value) if encode
+          value = orm_field.encode(value) if encode
 
           values[orm_field.column_family.name][orm_field.column] = value
         end
