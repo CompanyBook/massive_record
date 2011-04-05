@@ -156,6 +156,36 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
       @subject.decode(today).should be_nil
     end
+
+    it "should deserialize array" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :array)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      @subject.decode(nil).should == nil
+      @subject.decode("").should == nil
+      @subject.decode("[]").should == []
+      @subject.decode([1, 2].to_json).should == [1, 2]
+    end
+
+    it "should deserialize hash" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :hash)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      @subject.decode(nil).should == nil
+      @subject.decode("").should == nil
+      @subject.decode("{}").should == {}
+      @subject.decode({:foo => 'bar'}.to_json).should == {'foo' => 'bar'}
+    end
+
+    it "should raise an argument if expecting array but getting something else" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :array)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      lambda { @subject.decode("false") }.should raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
+
+    it "should raise an argument if expecting array but getting something else" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :hash)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      lambda { @subject.decode("[]") }.should raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
   end
 
   describe "#unique_name" do

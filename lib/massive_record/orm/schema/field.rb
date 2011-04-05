@@ -7,7 +7,7 @@ module MassiveRecord
         TYPES = [:string, :integer, :float, :boolean, :array, :hash, :date, :time]
 
         attr_writer :default
-        attr_accessor :name, :column, :type, :fields
+        attr_accessor :name, :column, :type, :fields, :coder
 
 
         validates_presence_of :name
@@ -103,12 +103,16 @@ module MassiveRecord
             value.empty? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
           when :time
             value.empty? ? nil : (Time.parse(value) rescue nil)
-          when :array
-            value
-          when :hash
-            value
+          when :array, :hash
+            if value.present?
+              begin
+                value = coder.load(value)
+              ensure
+                raise SerializationTypeMismatch unless loaded_value_is_of_valid_class?(value)
+              end
+            end
           else
-            value
+            raise "Didn't expect to get here?"
           end
         end
 
@@ -137,6 +141,7 @@ module MassiveRecord
         def value_is_already_decoded?(value)
           classes.include? value.class
         end
+        alias loaded_value_is_of_valid_class? value_is_already_decoded?
       end
     end
   end
