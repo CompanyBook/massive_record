@@ -28,8 +28,6 @@ describe "encoding" do
     
     m.value.encoding.should == Encoding::BINARY
     @client.mutateRow(@table_name, "ID1", [m]).should be_nil
-    
-    puts "Value : #{@client.get(@table_name, "ID1", "info:first_name").first.value.force_encoding(Encoding::UTF_8)}"
   end
   
   it "should save UTF8 caracteres" do
@@ -39,8 +37,6 @@ describe "encoding" do
     
     m.value.encoding.should == Encoding::BINARY
     @client.mutateRow(@table_name, "ID1", [m]).should be_nil
-    
-    puts "Value : #{@client.get(@table_name, "ID1", "info:first_name").first.value.force_encoding(Encoding::UTF_8)}"
   end
   
   it "should save JSON" do
@@ -50,9 +46,6 @@ describe "encoding" do
     
     m.value.encoding.should == Encoding::BINARY
     @client.mutateRow(@table_name, "ID1", [m]).should be_nil   
-    
-    puts "Value : #{@client.get(@table_name, "ID1", "info:first_name").first.value.force_encoding(Encoding::UTF_8)}"
-    puts " => #{JSON.parse(@client.get(@table_name, "ID1", "info:first_name").first.value.force_encoding(Encoding::UTF_8))}" 
   end
   
   it "should take care of several encodings" do
