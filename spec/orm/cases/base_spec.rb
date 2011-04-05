@@ -262,4 +262,11 @@ describe MassiveRecord::ORM::Base do
       @clone_object.id.should be_nil
     end
   end
+
+
+  describe "coder" do
+    it "should have a default coder" do
+      Person.coder.should == MassiveRecord::ORM::Coders::JSON
+    end
+  end
 end
