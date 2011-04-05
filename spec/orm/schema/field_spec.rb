@@ -211,6 +211,11 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.encode("fooo").should == "fooo"
     end
 
+    it "should encode string if value is nil" do
+      @subject.type = :string
+      @subject.encode(nil).should == "null"
+    end
+
     (MassiveRecord::ORM::Schema::Field::TYPES - [:string]).each do |type|
       it "should ask coder to dump value when type is #{type}" do
         @subject.type = type

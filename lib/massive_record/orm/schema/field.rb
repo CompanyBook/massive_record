@@ -119,7 +119,7 @@ module MassiveRecord
         end
 
         def encode(value)
-          if type == :string
+          if type == :string && !value.nil?
             value
           else
             coder.dump(value)
