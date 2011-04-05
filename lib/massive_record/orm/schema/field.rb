@@ -84,19 +84,17 @@ module MassiveRecord
 
 
         def decode(value)
-          return nil if value.nil?
-
-          if type == :boolean
-            return value if value === TrueClass || value === FalseClass
-          else
-            return value if value.class == type.to_s.classify.constantize
-          end
+          return value if value.nil? || value_is_already_decoded?(value)
           
           case type
           when :string
             value
           when :boolean
-            value.to_s.empty? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
+            if value === TrueClass || value === FalseClass
+              value
+            else
+              value.to_s.empty? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
+            end
           when :integer
             value.to_s.empty? ? nil : value.to_i
           when :float
@@ -120,6 +118,24 @@ module MassiveRecord
 
         def name=(name)
           @name = name.to_s
+        end
+
+        def classes
+          classes = case type
+                    when :boolean
+                      [TrueClass, FalseClass]
+                    else
+                      klass = type.to_s.classify
+                      if ::Object.const_defined?(klass)
+                        [klass.constantize]
+                      end
+                    end
+
+          classes || []
+        end
+
+        def value_is_already_decoded?(value)
+          classes.include? value.class
         end
       end
     end
