@@ -89,8 +89,6 @@ module MassiveRecord
           return value if value.nil? || value_is_already_decoded?(value)
           
           case type
-          when :string
-            value
           when :boolean
             if value === TrueClass || value === FalseClass
               value
@@ -105,7 +103,7 @@ module MassiveRecord
             value.empty? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
           when :time
             value.empty? ? nil : (Time.parse(value) rescue nil)
-          when :array, :hash
+          when :array, :hash, :string
             if value.present?
               begin
                 value = coder.load(value)
@@ -119,7 +117,7 @@ module MassiveRecord
         end
 
         def encode(value)
-          if type == :string && !value.nil?
+          if type == :string && !value.nil? && value != coder.dump(nil)
             value
           else
             coder.dump(value)
@@ -149,11 +147,15 @@ module MassiveRecord
         end
 
         def value_is_already_decoded?(value)
-          classes.include? value.class
+          if type == :string
+            value.is_a?(String) && !(value == coder.dump("null") || value == coder.dump(nil))
+          else
+            classes.include?(value.class)
+          end
         end
 
         def loaded_value_is_of_valid_class?(value)
-          value.nil? || value_is_already_decoded?(value)
+          value.nil? || value.is_a?(String) && coder.dump(nil) || value_is_already_decoded?(value)
         end
       end
     end

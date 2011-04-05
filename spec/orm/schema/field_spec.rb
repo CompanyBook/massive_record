@@ -120,6 +120,16 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(nil).should be_nil
     end
 
+    it "should decode string null correctly" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode(@subject.encode("null")).should == "null"
+    end
+
+    it "should decode string with value nil correctly" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode(@subject.encode(nil)).should == nil
+    end
+
     it "should decode an integer value" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
       @subject.decode("1").should == 1
@@ -205,10 +215,14 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.coder = MassiveRecord::ORM::Coders::JSON.new
     end
 
-    it "should not ask coder to dump value if it is a string" do
+    it "should encode normal strings" do
       @subject.type = :string
-      @subject.coder.should_not_receive(:dump)
       @subject.encode("fooo").should == "fooo"
+    end
+
+    it "should encode string if value is null" do
+      @subject.type = :string
+      @subject.encode("null").should == @subject.coder.dump("null")
     end
 
     it "should encode string if value is nil" do
