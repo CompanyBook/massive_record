@@ -29,8 +29,8 @@ module MassiveRecord
     class Base
       include ActiveModel::Conversion
       
-      cattr_accessor :coder, :instance_writer => false
-      self.coder = Coders::JSON
+      class_attribute :coder, :instance_writer => false
+      self.coder = Coders::JSON.new
 
       # Accepts a logger conforming to the interface of Log4r or the default Ruby 1.8+ Logger class,
       cattr_accessor :logger, :instance_writer => false

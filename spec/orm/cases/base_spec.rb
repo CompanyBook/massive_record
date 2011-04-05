@@ -266,7 +266,7 @@ describe MassiveRecord::ORM::Base do
 
   describe "coder" do
     it "should have a default coder" do
-      Person.coder.should == MassiveRecord::ORM::Coders::JSON
+      Person.coder.should be_instance_of MassiveRecord::ORM::Coders::JSON
     end
   end
 end
