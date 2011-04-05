@@ -116,6 +116,14 @@ module MassiveRecord
           end
         end
 
+        def encode(value)
+          if type == :string
+            value
+          else
+            coder.dump(value)
+          end
+        end
+
 
 
         private

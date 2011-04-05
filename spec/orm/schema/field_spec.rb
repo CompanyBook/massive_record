@@ -188,6 +188,27 @@ describe MassiveRecord::ORM::Schema::Field do
     end
   end
 
+  describe "#encode" do
+    before do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+    end
+
+    it "should not ask coder to dump value if it is a string" do
+      @subject.type = :string
+      @subject.coder.should_not_receive(:dump)
+      @subject.encode("fooo").should == "fooo"
+    end
+
+    (MassiveRecord::ORM::Schema::Field::TYPES - [:string]).each do |type|
+      it "should ask coder to dump value when type is #{type}" do
+        @subject.type = type
+      @subject.coder.should_receive(:dump)
+      @subject.encode("{}")
+      end
+    end
+  end
+
   describe "#unique_name" do
     before do
       @family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => :info
