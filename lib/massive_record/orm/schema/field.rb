@@ -40,6 +40,8 @@ module MassiveRecord
           self.column = options[:column]
           self.type = options[:type] || :string
           self.default = options[:default]
+
+          self.coder = options[:coder] || Base.coder
         end
 
 
