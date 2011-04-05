@@ -29,6 +29,11 @@ describe MassiveRecord::ORM::Schema::Field do
       field.type.should == :integer
     end
 
+    it "should take type as an option" do
+      field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info", :type => :integer)
+      field.type.should == :integer
+    end
+
     it "should take the rest as options" do
       field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info", "integer", :default => 0)
       field.default.should == 0

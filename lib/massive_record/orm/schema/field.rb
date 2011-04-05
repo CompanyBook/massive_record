@@ -25,7 +25,7 @@ module MassiveRecord
         def self.new_with_arguments_from_dsl(*args)
           field_options = args.extract_options!
           field_options[:name] = args[0]
-          field_options[:type] = args[1]
+          field_options[:type] ||= args[1]
 
           new(field_options)
         end
