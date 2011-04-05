@@ -151,7 +151,10 @@ module MassiveRecord
         def value_is_already_decoded?(value)
           classes.include? value.class
         end
-        alias loaded_value_is_of_valid_class? value_is_already_decoded?
+
+        def loaded_value_is_of_valid_class?(value)
+          value.nil? || value_is_already_decoded?(value)
+        end
       end
     end
   end
