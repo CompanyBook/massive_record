@@ -93,16 +93,16 @@ module MassiveRecord
             if value === TrueClass || value === FalseClass
               value
             else
-              value.to_s.empty? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
+              value.blank? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
             end
           when :integer
-            value.to_s.empty? ? nil : value.to_i
+            value.blank? ? nil : value.to_i
           when :float
-            value.to_s.empty? ? nil : value.to_f
+            value.blank? ? nil : value.to_f
           when :date
-            value.empty? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
+            value.blank? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
           when :time
-            value.empty? ? nil : (Time.parse(value) rescue nil)
+            value.blank? ? nil : (Time.parse(value) rescue nil)
           when :array, :hash, :string
             if value.present?
               begin
@@ -112,7 +112,7 @@ module MassiveRecord
               end
             end
           else
-            raise "Didn't expect to get here?"
+            raise "Unable to decode #{value}, class: #{value}"
           end
         end
 
@@ -136,6 +136,8 @@ module MassiveRecord
           classes = case type
                     when :boolean
                       [TrueClass, FalseClass]
+                    when :integer
+                      [Fixnum]
                     else
                       klass = type.to_s.classify
                       if ::Object.const_defined?(klass)

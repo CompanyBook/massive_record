@@ -133,6 +133,7 @@ describe MassiveRecord::ORM::Schema::Field do
     it "should decode an integer value" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
       @subject.decode("1").should == 1
+      @subject.decode(1).should == 1
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
     end
@@ -233,8 +234,8 @@ describe MassiveRecord::ORM::Schema::Field do
     (MassiveRecord::ORM::Schema::Field::TYPES - [:string]).each do |type|
       it "should ask coder to dump value when type is #{type}" do
         @subject.type = type
-      @subject.coder.should_receive(:dump)
-      @subject.encode("{}")
+        @subject.coder.should_receive(:dump)
+        @subject.encode("{}")
       end
     end
   end
