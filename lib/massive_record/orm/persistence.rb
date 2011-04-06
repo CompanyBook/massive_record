@@ -91,7 +91,7 @@ module MassiveRecord
         attr_name = attr_name.to_s
 
         row = row_for_record
-        row.values = attributes_to_row_values_hash([attr_name], true)
+        row.values = attributes_to_row_values_hash([attr_name])
         self[attr_name] = row.atomic_increment(attributes_schema[attr_name].unique_name, by).to_i
       end
 
@@ -139,7 +139,7 @@ module MassiveRecord
       #
       def store_record_to_database(attribute_names_to_update = [])
         row = row_for_record
-        row.values = attributes_to_row_values_hash(attribute_names_to_update, true)
+        row.values = attributes_to_row_values_hash(attribute_names_to_update)
         row.save
       end
 
@@ -185,15 +185,12 @@ module MassiveRecord
       #
       # Returns attributes on a form which Wrapper::Row expects
       #
-      def attributes_to_row_values_hash(only_attr_names = [], encode = false)
+      def attributes_to_row_values_hash(only_attr_names = [])
         values = Hash.new { |hash, key| hash[key] = Hash.new }
 
         attributes_schema.each do |attr_name, orm_field|
           next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
-          value = send(attr_name)
-          value = orm_field.encode(value) if encode
-
-          values[orm_field.column_family.name][orm_field.column] = value
+          values[orm_field.column_family.name][orm_field.column] = orm_field.encode(send(attr_name))
         end
 
         values
