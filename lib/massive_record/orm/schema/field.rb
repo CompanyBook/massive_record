@@ -42,6 +42,9 @@ module MassiveRecord
           self.default = options[:default]
 
           self.coder = options[:coder] || Base.coder
+
+          @@encoded_nil_value = coder.dump(nil)
+          @@encoded_null_string = coder.dump("null")
         end
 
 
@@ -90,20 +93,12 @@ module MassiveRecord
           
           case type
           when :boolean
-            if value === TrueClass || value === FalseClass
-              value
-            else
-              value.blank? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
-            end
-          when :integer
-            value.blank? ? nil : value.to_i
-          when :float
-            value.blank? ? nil : value.to_f
+            value.blank? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
           when :date
             value.blank? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
           when :time
             value.blank? ? nil : (Time.parse(value) rescue nil)
-          when :array, :hash, :string
+          when :string, :integer, :float, :array, :hash
             if value.present?
               begin
                 value = coder.load(value)
@@ -119,7 +114,7 @@ module MassiveRecord
         end
 
         def encode(value)
-          if type == :string && !value.nil? && value != coder.dump(nil)
+          if type == :string && !(value.nil? || value == @@encoded_nil_value)
             value
           else
             coder.dump(value)
@@ -152,14 +147,14 @@ module MassiveRecord
 
         def value_is_already_decoded?(value)
           if type == :string
-            value.is_a?(String) && !(value == coder.dump("null") || value == coder.dump(nil))
+            value.is_a?(String) && !(value == @@encoded_null_string || value == @@encoded_nil_value)
           else
             classes.include?(value.class)
           end
         end
 
         def loaded_value_is_of_valid_class?(value)
-          value.nil? || value.is_a?(String) && coder.dump(nil) || value_is_already_decoded?(value)
+          value.nil? || value.is_a?(String) && value == @@encoded_nil_value || value_is_already_decoded?(value)
         end
       end
     end

@@ -162,7 +162,7 @@ describe MassiveRecord::ORM::Schema::Field do
     it "should decode a time type" do
       today = Time.now
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
-      @subject.decode(today.to_s).to_i.should == today.to_i
+      @subject.decode(@subject.coder.dump(today)).to_i.should == today.to_i
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
     end
