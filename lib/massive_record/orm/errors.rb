@@ -61,5 +61,9 @@ module MassiveRecord
     # Raised if proxy_target in a relation proxy does not match what the proxy expects
     class RelationTypeMismatch < MassiveRecordError
     end
+
+    # Raised when an attribute is decoded from the database, but the type returned does not match what is expected
+    class SerializationTypeMismatch < MassiveRecordError
+    end
   end
 end

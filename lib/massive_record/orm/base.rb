@@ -7,6 +7,7 @@ require 'active_support/core_ext/string'
 require 'active_support/memoizable'
 
 require 'massive_record/orm/schema'
+require 'massive_record/orm/coders'
 require 'massive_record/orm/errors'
 require 'massive_record/orm/config'
 require 'massive_record/orm/relations'
@@ -28,6 +29,9 @@ module MassiveRecord
     class Base
       include ActiveModel::Conversion
       
+      class_attribute :coder, :instance_writer => false
+      self.coder = Coders::JSON.new
+
       # Accepts a logger conforming to the interface of Log4r or the default Ruby 1.8+ Logger class,
       cattr_accessor :logger, :instance_writer => false
 

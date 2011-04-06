@@ -1,44 +1,21 @@
 module MassiveRecord
   module Wrapper
     class Cell
-      attr_writer :value
+      attr_reader :value
       attr_accessor :created_at
 
-      class << self
-        def serialize_value(v)
-          serialize?(v) ? v.to_yaml : v.to_s.force_encoding(Encoding::BINARY)
-        end
-
-        private
-
-        def serialize?(v)
-          [Hash, Array, NilClass].include?(v.class)
-        end
-      end
-
       def initialize(opts = {})
-        @value = opts[:value]
-        @created_at = opts[:created_at]
+        self.value = opts[:value]
+        self.created_at = opts[:created_at]
       end
     
-      def value
-        @value.is_a?(String) ? @value.to_s.force_encoding(Encoding::UTF_8) : @value
+      def value=(v)
+        raise "#{v} was a #{v.class}, but it must be a String!" unless v.is_a? String
+        @value = v.dup.force_encoding(Encoding::UTF_8)
       end
-    
-      def deserialize_value
-        is_yaml? ? YAML.load(@value) : value
-      end
-    
-      def serialize_value(v)
-        @value = self.class.serialize_value(v)
-      end
-    
-      def serialized_value
-        self.class.serialize_value(@value)
-      end
-    
-      def is_yaml?
-        @value =~ /\A--- \n/ || @value =~ /\A--- {}/ || @value =~ /\A--- \[\]/
+
+      def value_to_thrift
+        value.force_encoding(Encoding::BINARY)
       end
     end
   end

@@ -29,6 +29,11 @@ describe MassiveRecord::ORM::Schema::Field do
       field.type.should == :integer
     end
 
+    it "should take type as an option" do
+      field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info", :type => :integer)
+      field.type.should == :integer
+    end
+
     it "should take the rest as options" do
       field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info", "integer", :default => 0)
       field.default.should == 0
@@ -115,9 +120,20 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(nil).should be_nil
     end
 
+    it "should decode string null correctly" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode(@subject.encode("null")).should == "null"
+    end
+
+    it "should decode string with value nil correctly" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode(@subject.encode(nil)).should == nil
+    end
+
     it "should decode an integer value" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
       @subject.decode("1").should == 1
+      @subject.decode(1).should == 1
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
     end
@@ -146,7 +162,7 @@ describe MassiveRecord::ORM::Schema::Field do
     it "should decode a time type" do
       today = Time.now
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
-      @subject.decode(today.to_s).to_i.should == today.to_i
+      @subject.decode(@subject.coder.dump(today)).to_i.should == today.to_i
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
     end
@@ -155,6 +171,72 @@ describe MassiveRecord::ORM::Schema::Field do
       today = "foobar"
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
       @subject.decode(today).should be_nil
+    end
+
+    it "should deserialize array" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :array)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      @subject.decode(nil).should == nil
+      @subject.decode("").should == nil
+      @subject.decode("[]").should == []
+      @subject.decode([1, 2].to_json).should == [1, 2]
+    end
+
+    it "should deserialize hash" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :hash)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      @subject.decode(nil).should == nil
+      @subject.decode("").should == nil
+      @subject.decode("{}").should == {}
+      @subject.decode({:foo => 'bar'}.to_json).should == {'foo' => 'bar'}
+    end
+
+    it "should raise an argument if expecting array but getting something else" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :array)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      lambda { @subject.decode("false") }.should raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
+
+    it "should raise an argument if expecting hash but getting something else" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :hash)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      lambda { @subject.decode("[]") }.should raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
+
+    it "should not raise an argument if expecting hash getting nil" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :hash)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      lambda { @subject.decode("null") }.should_not raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
+  end
+
+  describe "#encode" do
+    before do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+    end
+
+    it "should encode normal strings" do
+      @subject.type = :string
+      @subject.encode("fooo").should == "fooo"
+    end
+
+    it "should encode string if value is null" do
+      @subject.type = :string
+      @subject.encode("null").should == @subject.coder.dump("null")
+    end
+
+    it "should encode string if value is nil" do
+      @subject.type = :string
+      @subject.encode(nil).should == "null"
+    end
+
+    (MassiveRecord::ORM::Schema::Field::TYPES - [:string]).each do |type|
+      it "should ask coder to dump value when type is #{type}" do
+        @subject.type = type
+        @subject.coder.should_receive(:dump)
+        @subject.encode("{}")
+      end
     end
   end
 

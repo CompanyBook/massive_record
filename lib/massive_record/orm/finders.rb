@@ -126,7 +126,7 @@ module MassiveRecord
           # Parse the schema to populate the instance attributes
           attributes_schema.each do |key, field|
             cell = row.columns[field.unique_name]
-            attributes[field.name] = cell.nil? ? nil : cell.deserialize_value
+            attributes[field.name] = cell.nil? ? nil : field.decode(cell.value)
           end
           attributes
         end

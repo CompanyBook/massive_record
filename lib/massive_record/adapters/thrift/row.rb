@@ -38,7 +38,7 @@ module MassiveRecord
     
         # = Parse columns / cells and create a Hash from them
         def values
-          @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.deserialize_value; h}
+          @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.value; h}
         end
 
         def values=(data)
@@ -58,33 +58,9 @@ module MassiveRecord
           column = "#{column_family_name}:#{column_name}"
       
           if @columns[column].nil?
-            @columns[column] =  MassiveRecord::Wrapper::Cell.new({ :value =>  MassiveRecord::Wrapper::Cell.serialize_value(value), :created_at => Time.now })
+            @columns[column] =  MassiveRecord::Wrapper::Cell.new({:value =>  value, :created_at => Time.now})
           else
-            @columns[column].serialize_value(value)
-          end
-        end
-    
-        # = Merge column values with new data : it implies that column values is a JSON encoded string
-        def merge_columns(data)
-          data.each do |column_family_name, columns|
-            columns.each do |column_name, values|
-              if values.is_a?(Hash)
-                unless @columns["#{column_family_name}:#{column_name}"].nil?
-                  column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value.merge(values)
-                else
-                  column_value = values
-                end            
-              elsif values.is_a?(Array)
-                unless @columns["#{column_family_name}:#{column_name}"].nil?
-                  column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value | values
-                else
-                  column_value = values
-                end            
-              else
-                column_value = values
-              end
-              update_column(column_family_name, column_name, column_value)
-            end
+            @columns[column].value = value
           end
         end
     
@@ -95,7 +71,7 @@ module MassiveRecord
           @columns.each do |column_name, cell|
             m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
             m.column = column_name
-            m.value  = cell.serialized_value
+            m.value  = cell.value_to_thrift
         
             mutations.push(m)
           end

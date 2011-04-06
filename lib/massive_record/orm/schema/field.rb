@@ -7,7 +7,7 @@ module MassiveRecord
         TYPES = [:string, :integer, :float, :boolean, :array, :hash, :date, :time]
 
         attr_writer :default
-        attr_accessor :name, :column, :type, :fields
+        attr_accessor :name, :column, :type, :fields, :coder
 
 
         validates_presence_of :name
@@ -25,7 +25,7 @@ module MassiveRecord
         def self.new_with_arguments_from_dsl(*args)
           field_options = args.extract_options!
           field_options[:name] = args[0]
-          field_options[:type] = args[1]
+          field_options[:type] ||= args[1]
 
           new(field_options)
         end
@@ -40,6 +40,11 @@ module MassiveRecord
           self.column = options[:column]
           self.type = options[:type] || :string
           self.default = options[:default]
+
+          self.coder = options[:coder] || Base.coder
+
+          @@encoded_nil_value = coder.dump(nil)
+          @@encoded_null_string = coder.dump("null")
         end
 
 
@@ -84,33 +89,35 @@ module MassiveRecord
 
 
         def decode(value)
-          return nil if value.nil?
-
-          if type == :boolean
-            return value if value === TrueClass || value === FalseClass
-          else
-            return value if value.class == type.to_s.classify.constantize
-          end
+          return value if value.nil? || value_is_already_decoded?(value)
           
           case type
-          when :string
-            value
           when :boolean
-            value.to_s.empty? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
-          when :integer
-            value.to_s.empty? ? nil : value.to_i
-          when :float
-            value.to_s.empty? ? nil : value.to_f
+            value.blank? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
           when :date
-            value.empty? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
+            value.blank? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
           when :time
-            value.empty? ? nil : (Time.parse(value) rescue nil)
-          when :array
-            value
-          when :hash
+            value.blank? ? nil : (Time.parse(value) rescue nil)
+          when :string, :integer, :float, :array, :hash
+            if value.present?
+              begin
+                value = coder.load(value)
+              ensure
+                unless loaded_value_is_of_valid_class?(value)
+                  raise SerializationTypeMismatch.new("Expected #{value} (class: #{value.class}) to be any of: #{classes.join(', ')}.")
+                end
+              end
+            end
+          else
+            raise "Unable to decode #{value}, class: #{value}"
+          end
+        end
+
+        def encode(value)
+          if type == :string && !(value.nil? || value == @@encoded_nil_value)
             value
           else
-            value
+            coder.dump(value)
           end
         end
 
@@ -120,6 +127,34 @@ module MassiveRecord
 
         def name=(name)
           @name = name.to_s
+        end
+
+        def classes
+          classes = case type
+                    when :boolean
+                      [TrueClass, FalseClass]
+                    when :integer
+                      [Fixnum]
+                    else
+                      klass = type.to_s.classify
+                      if ::Object.const_defined?(klass)
+                        [klass.constantize]
+                      end
+                    end
+
+          classes || []
+        end
+
+        def value_is_already_decoded?(value)
+          if type == :string
+            value.is_a?(String) && !(value == @@encoded_null_string || value == @@encoded_nil_value)
+          else
+            classes.include?(value.class)
+          end
+        end
+
+        def loaded_value_is_of_valid_class?(value)
+          value.nil? || value.is_a?(String) && value == @@encoded_nil_value || value_is_already_decoded?(value)
         end
       end
     end

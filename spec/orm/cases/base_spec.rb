@@ -77,14 +77,14 @@ describe MassiveRecord::ORM::Base do
 
   describe "#initialize" do
     it "should take a set of attributes and make them readable" do
-      model = TestClass.new :foo => :bar
-      model.foo.should == :bar
+      model = TestClass.new :foo => 'bar'
+      model.foo.should == 'bar'
     end
 
     it "should initialize an object via init_with()" do
       model = TestClass.allocate
-      model.init_with 'attributes' => {:foo => :bar}
-      model.foo.should == :bar
+      model.init_with 'attributes' => {:foo => 'bar'}
+      model.foo.should == 'bar'
     end
 
     it "should stringify keys set on attributes" do
@@ -260,6 +260,13 @@ describe MassiveRecord::ORM::Base do
     
     it "should have a nil id" do
       @clone_object.id.should be_nil
+    end
+  end
+
+
+  describe "coder" do
+    it "should have a default coder" do
+      Person.coder.should be_instance_of MassiveRecord::ORM::Coders::JSON
     end
   end
 end
