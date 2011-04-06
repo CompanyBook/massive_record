@@ -108,7 +108,9 @@ module MassiveRecord
               begin
                 value = coder.load(value)
               ensure
-                raise SerializationTypeMismatch unless loaded_value_is_of_valid_class?(value)
+                unless loaded_value_is_of_valid_class?(value)
+                  raise SerializationTypeMismatch.new("Expected #{value} (class: #{value.class}) to be any of: #{classes.join(', ')}.")
+                end
               end
             end
           else
