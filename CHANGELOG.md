@@ -1,5 +1,9 @@
 # v0.2.0 (git develop)
 
+- ORM will now take care of serialize and de-serialize of attributes like arrays, hashes etc. It is doing so
+  based on the type of your fields. You can select either JSON or YAML serialization for your data. As a default it
+  will use JSON. You can also, by chaining multiple coders together add support for multiple serialization types
+  when reading data from the database.
 - Thrift-adapter will no longer auto-serialize objects likes hashes and arrays. Its vlaues must now be strings, and it
   will only take care of encoding/decoding it to and from what Thrift expects (binary encoding).
 - Compare Person === proxy_targeting_a_person will now be true. Makes case-when-constructions doable.
