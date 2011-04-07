@@ -80,7 +80,7 @@ module MassiveRecord
         #
         # TODO : Need to be cleaned up after we implement the has_many method
         #
-        def attributes_to_row_values_hash(only_attr_names = [], encode = false)
+        def attributes_to_row_values_hash(only_attr_names = [])
           values = Hash.new
 
           attributes_schema.each do |attr_name, orm_field|

@@ -120,6 +120,11 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(nil).should be_nil
     end
 
+    it "should cast symbols to strings" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode(:value).should == "value"
+    end
+
     it "should decode string null correctly" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
       @subject.decode(@subject.encode("null")).should == "null"

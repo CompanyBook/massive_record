@@ -91,26 +91,27 @@ module MassiveRecord
         def decode(value)
           return value if value.nil? || value_is_already_decoded?(value)
           
-          case type
-          when :boolean
-            value.blank? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
-          when :date
-            value.blank? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
-          when :time
-            value.blank? ? nil : (Time.parse(value) rescue nil)
-          when :string, :integer, :float, :array, :hash
-            if value.present?
-              begin
-                value = coder.load(value)
-              ensure
-                unless loaded_value_is_of_valid_class?(value)
-                  raise SerializationTypeMismatch.new("Expected #{value} (class: #{value.class}) to be any of: #{classes.join(', ')}.")
-                end
-              end
+          value = case type
+                  when :boolean
+                    value.blank? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
+                  when :date
+                    value.blank? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
+                  when :time
+                    value.blank? ? nil : (Time.parse(value) rescue nil)
+                  when :string
+                    if value.present?
+                      value = value.to_s if value.is_a? Symbol
+                      coder.load(value)
+                    end
+                  when :integer, :float, :array, :hash
+                    coder.load(value) if value.present?
+                  else
+                    raise "Unable to decode #{value}, class: #{value}"
+                  end
+          ensure
+            unless loaded_value_is_of_valid_class?(value)
+              raise SerializationTypeMismatch.new("Expected #{value} (class: #{value.class}) to be any of: #{classes.join(', ')}.")
             end
-          else
-            raise "Unable to decode #{value}, class: #{value}"
-          end
         end
 
         def encode(value)
