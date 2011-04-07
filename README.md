@@ -175,7 +175,8 @@ You can, if you'd like, work directly against the adapter.
 ## Planned work
 
 - Rename Wrapper to Adapter, and make it easy to switch from Thrift to another way of communicating with Hbase.
-- Associations and embedded objects.
+- Embedded objects.
+- Cache the decoded values of attributes, not use the value_is_already_decoded?. This will fix possible problem with YAML as coder backend.
 - Implement other Adapters, for instance using jruby and the Java API.
 
 
