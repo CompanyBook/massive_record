@@ -1,6 +1,7 @@
 # v0.2.0.beta2 (git develop)
 
 - We are now raising error if MassiveRecordClass.new(attributes) receives unknown attributes.
+- Added support for Record.new(:references_many => [record, record]) and a_record.references_many = [record, record]
 
 
 

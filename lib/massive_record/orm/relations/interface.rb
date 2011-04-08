@@ -134,6 +134,10 @@ module MassiveRecord
               relation_proxy(metadata.name)
             end
 
+            redefine_method(metadata.name+'=') do |records|
+              relation_proxy(metadata.name).replace(records)
+            end
+
             if metadata.persisting_foreign_key?
               add_field_to_column_family(metadata.store_in, metadata.foreign_key, :type => :array, :default => [])
             end
