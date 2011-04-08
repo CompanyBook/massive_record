@@ -21,7 +21,7 @@ module MassiveRecord
     end
 
     # Raised if an attribute is unkown
-    class UnkownAttributeError < MassiveRecordError
+    class UnknownAttributeError < MassiveRecordError
     end
 
     # Raised if id is missing when you try a save
