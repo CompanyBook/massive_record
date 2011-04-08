@@ -45,7 +45,7 @@ describe "attribute methods" do
     end
 
     it "should raise an error if we encounter an unkown attribute" do
-      lambda { @model.attributes = {:unkown => "foo"} }.should raise_error MassiveRecord::ORM::UnkownAttributeError
+      lambda { @model.attributes = {:unkown => "foo"} }.should raise_error MassiveRecord::ORM::UnknownAttributeError
     end
   end
 end

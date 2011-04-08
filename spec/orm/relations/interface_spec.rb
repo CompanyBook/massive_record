@@ -89,6 +89,12 @@ describe MassiveRecord::ORM::Relations::Interface do
           2.times { subject.boss }
         end
       end
+
+
+      it "should be assignable in initializer" do
+        person = Person.new :boss => boss
+        person.boss.should == boss
+      end
     end
   end
 
@@ -196,11 +202,22 @@ describe MassiveRecord::ORM::Relations::Interface do
       let(:proxy) { subject.send(:relation_proxy, "test_classes") }
 
       it { should respond_to :test_classes }
+      it { should respond_to :test_classes= }
       it { should respond_to :test_class_ids }
       it { should respond_to :test_class_ids= }
 
       it "should have an array as foreign_key attribute" do
         subject.test_class_ids.should be_instance_of Array
+      end
+
+      it "should be assignable" do
+        subject.test_classes = [test_class]
+        subject.test_classes.should == [test_class]
+      end
+
+      it "should be assignable in initializer" do
+        person = Person.new :test_classes => [test_class]
+        person.test_classes.should == [test_class]
       end
     end
   end

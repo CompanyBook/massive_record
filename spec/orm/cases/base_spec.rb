@@ -81,6 +81,10 @@ describe MassiveRecord::ORM::Base do
       model.foo.should == 'bar'
     end
 
+    it "should raise error if attribute is unknown" do
+      lambda { TestClass.new :unknown => 'attribute' }.should raise_error MassiveRecord::ORM::UnknownAttributeError
+    end
+
     it "should initialize an object via init_with()" do
       model = TestClass.allocate
       model.init_with 'attributes' => {:foo => 'bar'}

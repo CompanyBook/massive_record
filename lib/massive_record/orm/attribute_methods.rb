@@ -23,7 +23,7 @@ module MassiveRecord
           if respond_to? writer_method
             send(writer_method, value)
           else
-            raise UnkownAttributeError.new("Unkown attribute: #{attr}")
+            raise UnknownAttributeError.new("Unkown attribute: #{attr}")
           end
         end
       end

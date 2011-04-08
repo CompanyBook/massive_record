@@ -151,16 +151,6 @@ describe "A table" do
         ActiveSupport::JSON.decode(row.values["misc:empty"]).class.should eql(Hash)
       end
       
-      it "should display the previous value (versioning) of the column 'info:first_name'" do
-        pending "should we implement this, Vincent? :-)"
-      
-        row = @table.first
-        row.values["info:first_name"].should eql("Bob")
-        
-        prev_row = row.prev
-        prev_row.values["info:first_name"].should eql("John")
-      end
-      
       it "should be able to perform partial updates" do
         row = @table.first(:select => ["misc"])
         row.update_columns({ :misc => { :genre => "M" } })

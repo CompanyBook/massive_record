@@ -1,4 +1,8 @@
-# v0.2.0 (git develop)
+# v0.2.0.beta2 (git develop)
+
+- We are now raising error if MassiveRecordClass.new(attributes) receives unknown attributes.
+- Added support for Record.new(:references_many => [record, record]) and a_record.references_many = [record, record]
+
 
 
 # v0.2.0.beta (git master)
@@ -26,9 +30,11 @@
 - Simple implementation of references_one relation. This is where you have a foreign key you will look up in a different table.
 
 
+
 # v0.1.2
 - Fixed, or at least made better, the is_yaml? method in Wrapper::Cell.This functionality of serialize/de-serialize
   should be moved up into the ORM asap, but for now a hot fix has been applied.
+
 
 
 # v0.1.1
@@ -40,6 +46,7 @@
 - If you add a created_at attribute it will be maintained by the ORM with the time the object was created.
 - An adapter (wrapper) row now has an updated_at attribute. ORM objects also responds to updated_at
 - Bugfix: Database cleaner no longer tries to remove tables with same name twice.
+
 
 
 # v0.1.0
