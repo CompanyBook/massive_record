@@ -1,5 +1,7 @@
 require 'spec_helper'
 require 'orm/models/test_class'
+require 'orm/models/friend'
+require 'orm/models/best_friend'
 
 describe MassiveRecord::ORM::Base do
   include MockMassiveRecordConnection
@@ -7,6 +9,14 @@ describe MassiveRecord::ORM::Base do
   describe "table name" do
     before do
       TestClass.reset_table_name_configuration!
+      Friend.reset_table_name_configuration!
+      BestFriend.reset_table_name_configuration!
+    end
+
+    after do
+      TestClass.reset_table_name_configuration!
+      Friend.reset_table_name_configuration!
+      BestFriend.reset_table_name_configuration!
     end
 
     it "should have a table name" do
@@ -21,6 +31,14 @@ describe MassiveRecord::ORM::Base do
     it "should have a table name with suffix" do
       TestClass.table_name_suffix = "_suffix"
       TestClass.table_name.should == "test_classes_suffix"
+    end
+
+    it "first sub class should have the same table name as base class" do
+      Friend.table_name.should == Person.table_name
+    end
+
+    it "second sub class should have the same table name as base class" do
+      BestFriend.table_name.should == Person.table_name
     end
     
     describe "set explicitly" do
@@ -45,6 +63,11 @@ describe MassiveRecord::ORM::Base do
         TestClass.set_table_name("foo")
         TestClass.table_name.should == "foo"
       end
+
+      it "sub class should have have table name overridden" do
+        Friend.table_name = "foo"
+        Friend.table_name.should == "foo"
+      end
     end
   end
 
@@ -54,14 +77,14 @@ describe MassiveRecord::ORM::Base do
 
   describe "#initialize" do
     it "should take a set of attributes and make them readable" do
-      model = TestClass.new :foo => :bar
-      model.foo.should == :bar
+      model = TestClass.new :foo => 'bar'
+      model.foo.should == 'bar'
     end
 
     it "should initialize an object via init_with()" do
       model = TestClass.allocate
-      model.init_with 'attributes' => {:foo => :bar}
-      model.foo.should == :bar
+      model.init_with 'attributes' => {:foo => 'bar'}
+      model.foo.should == 'bar'
     end
 
     it "should stringify keys set on attributes" do
@@ -72,6 +95,10 @@ describe MassiveRecord::ORM::Base do
 
     it "should return nil as id by default" do
       TestClass.new.id.should be_nil
+    end
+
+    it "should be possible to create an object with nil as argument" do
+      lambda { TestClass.new(nil) }.should_not raise_error
     end
   end
 
@@ -194,6 +221,52 @@ describe MassiveRecord::ORM::Base do
       test = TestClass.new
       test.readonly!
       test.should be_readonly
+    end
+  end
+
+
+  describe "#base_class" do
+    it "should return correct base class for direct descendant of Base" do
+      Person.base_class.should == Person
+    end
+
+    it "should return Person when asking a descendant of Person" do
+      Friend.base_class.should == Person
+    end
+
+    it "should return Person when asking a descendant of Person multiple levels" do
+      BestFriend.base_class.should == Person
+    end
+  end
+  
+  
+  describe "#clone" do
+    before do
+      @test_object = TestClass.create!(:id => "1", :foo => 'bar')
+      @clone_object = @test_object.clone
+    end
+    
+    it "should be the same object class" do
+      @test_object.class.should == @clone_object.class
+    end
+    
+    it "should have a different object_id" do
+      @test_object.object_id.should_not == @clone_object.object_id
+    end
+    
+    it "should have the same attributes" do
+      @test_object.foo.should == @clone_object.foo
+    end
+    
+    it "should have a nil id" do
+      @clone_object.id.should be_nil
+    end
+  end
+
+
+  describe "coder" do
+    it "should have a default coder" do
+      Person.coder.should be_instance_of MassiveRecord::ORM::Coders::JSON
     end
   end
 end

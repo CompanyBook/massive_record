@@ -33,9 +33,9 @@ module MassiveRecord
 
     class ColumnFamiliesMissingError < MassiveRecordError
       attr_reader :missing_column_families
-      def initialize(missing_column_families)
+      def initialize(klass, missing_column_families)
         @missing_column_families = missing_column_families
-        super("hbase are missing some column families: #{@missing_column_families.join(' ')}. Please migrate the database.")
+        super("hbase are missing some column families for class '#{klass.to_s}', table '#{klass.table_name}': #{@missing_column_families.join(' ')}. Please migrate the database.")
       end
     end
 
@@ -51,6 +51,19 @@ module MassiveRecord
 
     # Raised if you try to save a record which is read only
     class ReadOnlyRecord < MassiveRecordError
+    end
+
+
+    # Raised when a relation s already defined
+    class RelationAlreadyDefined < MassiveRecordError
+    end
+
+    # Raised if proxy_target in a relation proxy does not match what the proxy expects
+    class RelationTypeMismatch < MassiveRecordError
+    end
+
+    # Raised when an attribute is decoded from the database, but the type returned does not match what is expected
+    class SerializationTypeMismatch < MassiveRecordError
     end
   end
 end

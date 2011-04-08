@@ -5,7 +5,7 @@ module MassiveRecord
       attr_accessor :connection
     
       def load(table_name)
-        Table.new(connection, table_name)
+        ADAPTER::Table.new(connection, table_name)
       end
     
     end

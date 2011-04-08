@@ -1,9 +1,13 @@
 require 'spec_helper'
 
-describe MassiveRecord::Wrapper::Connection do
+describe "A connection" do
   
   before do
     @connection = MassiveRecord::Wrapper::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
+  end
+  
+  after do
+    @connection.close if @connection.open?
   end
   
   it "should have a host and port attributes" do
@@ -15,25 +19,24 @@ describe MassiveRecord::Wrapper::Connection do
     end
   end 
   
-  it "should not be active" do
-    pending "should we implement this, Vincent? :-)"
-    @connection.active?.should be_false
+  it "should not be open" do
+    @connection.open?.should be_false
   end
    
   it "should not be able to open a new connection with a wrong configuration and Raise an error" do
     @connection.port = 1234
-    lambda{@connection.open}.should raise_error(MassiveRecord::ConnectionException)
+    lambda{@connection.open}.should raise_error(MassiveRecord::Wrapper::Errors::ConnectionException)
   end
   
-  it "should be able to open a new connection with a good configuration" do
+  it "should be open if opened" do
     @connection.open.should be_true
+    @connection.open?.should be_true
   end
   
-  it "should not be active if it is closed" do 
-    @connection.open
-    @connection.active?.should be_true
+  it "should not be open if closed" do 
+    @connection.open.should be_true
     @connection.close.should be_true
-    @connection.active?.should be_false
+    @connection.open?.should be_false
   end
   
   it "should have a collection of tables" do

@@ -30,7 +30,7 @@ module MassiveRecord
 
 
       def reload
-        self.attributes_raw = self.class.find(id).attributes
+        self.attributes_raw = self.class.find(id).attributes if persisted?
         self
       end
       
@@ -64,7 +64,7 @@ module MassiveRecord
       end
 
       def destroy
-        @destroyed = row_for_record.destroy and freeze
+        @destroyed = (persisted? ? row_for_record.destroy : true) and freeze
       end
       alias_method :delete, :destroy
 
@@ -155,7 +155,7 @@ module MassiveRecord
           self.class.table.save
         end
 
-        raise ColumnFamiliesMissingError.new(calculate_missing_family_names) if !calculate_missing_family_names.empty?
+        raise ColumnFamiliesMissingError.new(self.class, calculate_missing_family_names) if !calculate_missing_family_names.empty?
       end
       
       #
@@ -190,7 +190,7 @@ module MassiveRecord
 
         attributes_schema.each do |attr_name, orm_field|
           next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
-          values[orm_field.column_family.name][orm_field.column] = send(attr_name)
+          values[orm_field.column_family.name][orm_field.column] = orm_field.encode(send(attr_name))
         end
 
         values

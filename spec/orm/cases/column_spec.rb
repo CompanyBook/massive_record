@@ -28,7 +28,7 @@ describe "column classes" do
 
   # TODO  We might want to remove this when we have implemented
   #       associations correctly. Since Columns are contained within
-  #       tables, calling save should do something on it's owner object.
+  #       tables, calling save should do something on it's proxy_owner object.
   describe "not be possible to persist (at least for now...)" do
     %w(first last all exists? destroy_all).each do |method|
       it "should not respond to class method #{method}" do

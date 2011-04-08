@@ -3,23 +3,30 @@ module MassiveRecord
     module Finders
       extend ActiveSupport::Concern
 
+      included do
+        class << self
+          delegate :find, :first, :last, :all, :select, :limit, :to => :finder_scope
+        end
+
+        class_attribute :default_scoping, :instance_writer => false
+      end
+
       module ClassMethods
-        #
-        # Interface for retrieving objects based on key.
-        # Has some convenience behaviour like find :first, :last, :all.
-        #
-        def find(*args)
+        def do_find(*args) # :nodoc:
           options = args.extract_options!.to_options
           raise ArgumentError.new("At least one argument required!") if args.empty?
           raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.") if args.first.nil?
           raise ArgumentError.new("Sorry, conditions are not supported!") if options.has_key? :conditions
+
+          skip_expected_result_check = options.delete(:skip_expected_result_check)
+
           args << options
 
           type = args.shift if args.first.is_a? Symbol
           find_many = type == :all
           expected_result_size = nil
 
-          return (find_many ? [] : nil) unless table.exists?
+          return (find_many ? [] : raise(RecordNotFound.new("Could not find #{model_name} with id=#{args.first}"))) unless table.exists?
           
           result_from_table = if type
                                 table.send(type, *args) # first() / all()
@@ -43,7 +50,7 @@ module MassiveRecord
           # we have no expectations on the returned rows' ids)
           unless type || result_from_table.blank?
             if find_many
-              result_from_table.select! { |result| what_to_find.include? result.id }
+              result_from_table.select! { |result| what_to_find.include? result.try(:id) }
             else 
               if result_from_table.id != what_to_find
                 result_from_table = nil
@@ -53,7 +60,7 @@ module MassiveRecord
 
           raise RecordNotFound.new("Could not find #{model_name} with id=#{what_to_find}") if result_from_table.blank? && type.nil?
           
-          if find_many && expected_result_size && expected_result_size != result_from_table.length
+          if find_many && !skip_expected_result_check && expected_result_size && expected_result_size != result_from_table.length
             raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{result_from_table.length}")
           end
           
@@ -64,19 +71,9 @@ module MassiveRecord
           find_many ? records : records.first
         end
 
-        def first(*args)
-          find(:first, *args)
-        end
-
-        def last(*args)
-          raise "Sorry, not implemented!"
-        end
-
-        def all(*args)
-          find(:all, *args)
-        end
-        
         def find_in_batches(*args)
+          return unless table.exists?
+
           table.find_in_batches(*args) do |rows|
             records = rows.collect do |row|
               instantiate(transpose_hbase_columns_to_record_attributes(row))
@@ -99,6 +96,26 @@ module MassiveRecord
         end
 
 
+        def finder_scope
+          default_scoping || unscoped
+        end
+
+        def default_scope(scope)
+          self.default_scoping =  case scope
+                                    when Scope, nil
+                                      scope
+                                    when Hash
+                                      Scope.new(self, :find_options => scope)
+                                    else
+                                      raise "Don't know how to set scope with #{scope.class}."
+                                    end
+        end
+
+        def unscoped
+          Scope.new(self)
+        end
+
+
         private
 
         def transpose_hbase_columns_to_record_attributes(row)
@@ -109,15 +126,19 @@ module MassiveRecord
           # Parse the schema to populate the instance attributes
           attributes_schema.each do |key, field|
             cell = row.columns[field.unique_name]
-            attributes[field.name] = cell.nil? ? nil : cell.deserialize_value
+            attributes[field.name] = cell.nil? ? nil : field.decode(cell.value)
           end
           attributes
         end
 
         def instantiate(record)
-          allocate.tap do |model|
-            model.init_with('attributes' => record)
-          end
+          model = if klass = record[inheritance_attribute] and klass.present?
+                    klass.constantize.allocate
+                  else
+                    allocate
+                  end
+
+          model.init_with('attributes' => record)
         end
       end
     end

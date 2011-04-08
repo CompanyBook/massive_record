@@ -24,21 +24,42 @@ describe "encoding" do
   it "should save standard caracteres" do
     m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
     m.column = "info:first_name"
-    m.value  = "Vincent"
+    m.value  = "Vincent".force_encoding(Encoding::BINARY)
     
-    m.value.encoding.should == Encoding::UTF_8
-    @client.mutateRow(@table_name, "ID1", [m]).should be_nil    
+    m.value.encoding.should == Encoding::BINARY
+    @client.mutateRow(@table_name, "ID1", [m]).should be_nil
   end
   
   it "should save UTF8 caracteres" do
-    pending "UTF8 enconding need to be fixed!"
-    
     m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
     m.column = "info:first_name"
-    m.value  = "Thorbjørn"
+    m.value  = "Thorbjørn".force_encoding(Encoding::BINARY)
     
-    m.value.encoding.should == Encoding::UTF_8
+    m.value.encoding.should == Encoding::BINARY
     @client.mutateRow(@table_name, "ID1", [m]).should be_nil
+  end
+  
+  it "should save JSON" do
+    m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
+    m.column = "info:first_name"
+    m.value  = { :p1 => "Vincent", :p2 => "Thorbjørn"}.to_json.force_encoding(Encoding::BINARY)
+    
+    m.value.encoding.should == Encoding::BINARY
+    @client.mutateRow(@table_name, "ID1", [m]).should be_nil   
+  end
+  
+  it "should take care of several encodings" do
+    m1        = Apache::Hadoop::Hbase::Thrift::Mutation.new
+    m1.column = "info:first_name"
+    m1.value  = { :p1 => "Vincent", :p2 => "Thorbjørn"}.to_json.force_encoding(Encoding::BINARY)
+    
+    m2        = Apache::Hadoop::Hbase::Thrift::Mutation.new
+    m2.column = "info:company_name"
+    # "incompatible character encodings: ASCII-8BIT and UTF-8" is raised if we don't force encoding
+    # because m1 is binary and m2 is UTF-8
+    m2.value  = "Thorbjørn".force_encoding(Encoding::BINARY)
+    
+    @client.mutateRow(@table_name, "ID1", [m1, m2]).should be_nil
   end
   
   it "should destroy the table" do

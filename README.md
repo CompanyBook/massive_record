@@ -54,6 +54,8 @@ Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some f
     - Casting of attributes
     - Serialization of array / hashes
     - Timestamps like created_at and updated_at. Updated at will always be available, created_at must be defined. See example down:
+    - Finder scopes. Like: Person.select(:only_columns_from_this_family).limit(10).collect(&:name)
+    - Ability to set a default scope.
 
 Tables also have:
     - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
@@ -63,11 +65,19 @@ Tables also have:
     - Save / update methods
     - Auto-creation of table and column families on save if table does not exists.
     - Destroy records
+    - Relations: See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
 
 
 Here is an example of usage, both for Table and Column:
 
     class Person < MassiveRecord::ORM::Table
+      references_one :boss, :class_name => "Person", :store_in => :info
+      references_one :attachment, :polymorphic => true
+      references_many :friends, :store_in => :info
+      references_many :cars, :records_starts_from => :cars_start_id
+
+      default_scope select(:info)
+
       column_family :info do
         field :name
         field :email
@@ -75,12 +85,29 @@ Here is an example of usage, both for Table and Column:
         field :points, :integer, :default => 0
         field :date_of_birth, :date
         field :newsletter, :boolean, :default => false
+        field :type # Used for single table inheritance
 
         timestamps # ..or field :created_at, :time
       end
 
+      column_family :misc do
+        field :with_a_lot_of_uninteresting_data
+      end
+
+
       validates_presence_of :name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
+
+      # Returns the id the scanner should start from in the Car table
+      # to fetch cars related to this person
+      def cars_start_id
+        id+'-'
+      end
+    end
+
+    class Friend < Person
+      # This one will be stored in Person's table with it's type set to Friend.
+      # Calling Person.all will return object back as a Friend.
     end
 
     
@@ -148,7 +175,8 @@ You can, if you'd like, work directly against the adapter.
 ## Planned work
 
 - Rename Wrapper to Adapter, and make it easy to switch from Thrift to another way of communicating with Hbase.
-- Associations and embedded objects.
+- Embedded objects.
+- Cache the decoded values of attributes, not use the value_is_already_decoded?. This will fix possible problem with YAML as coder backend.
 - Implement other Adapters, for instance using jruby and the Java API.
 
 

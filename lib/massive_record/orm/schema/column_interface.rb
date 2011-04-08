@@ -85,7 +85,7 @@ module MassiveRecord
 
           attributes_schema.each do |attr_name, orm_field|
             next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
-            values[orm_field.column] = send(attr_name)
+            values[orm_field.column] = orm_field.encode(send(attr_name))
           end
 
           values

@@ -76,8 +76,9 @@ describe "persistence" do
       @person.reload.should == @person
     end
 
-    it "should raise error on new record" do
-      lambda { Person.new.reload }.should raise_error MassiveRecord::ORM::RecordNotFound
+    it "should not do anything on reload when record is not persisted" do
+      Person.should_not_receive :find
+      Person.new.reload
     end
   end
 
@@ -104,8 +105,8 @@ describe "persistence" do
     end
     
     it "should include the 'pts' field in the database which has 'points' as an alias" do
-      @person.send(:attributes_to_row_values_hash)["info"].keys.should include("pts")
-      @person.send(:attributes_to_row_values_hash)["info"].keys.should_not include("points")
+      @person.send(:attributes_to_row_values_hash)["base"].keys.should include("pts")
+      @person.send(:attributes_to_row_values_hash)["base"].keys.should_not include("points")
     end
   end
 
@@ -181,6 +182,9 @@ describe "persistence" do
               column_family :bar do
                 field :foo
               end
+
+              column_family :empty_family do
+              end
             end
 
             @new_instance = @new_class.new :id => "id_of_foo", :foo => "bar"
@@ -202,7 +206,7 @@ describe "persistence" do
 
           it "should create correct column families" do
             @new_instance.save
-            @new_class.table.fetch_column_families.collect(&:name).should == ["bar"]
+            @new_class.table.fetch_column_families.collect(&:name).should include "bar", "empty_family"
           end
 
           it "should store the new instance" do
@@ -343,6 +347,11 @@ describe "persistence" do
         @person.should be_destroyed
         Person.all.length.should == 0
       end
+      
+      it "should be able to call destroy on new records" do
+        person = Person.new
+        person.destroy
+      end
 
       describe "#destroy_all" do
         it "should remove all when calling remove_all" do
@@ -353,6 +362,12 @@ describe "persistence" do
 
         it "should return an array of all removed objects" do
           Person.destroy_all.should == [@person]
+        end
+
+        it "should destroy all even if it is above 10 rows (obviously)" do
+          15.times { |i| Person.create! :id => "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
+          Person.destroy_all
+          Person.all.length.should == 0
         end
       end
     end
