@@ -1,11 +1,15 @@
-# v0.2.0.beta2 (git develop)
+# v0.2.0.beta3 (git develop)
+
+
+
+# v0.2.0.beta2 (git master)
 
 - We are now raising error if MassiveRecordClass.new(attributes) receives unknown attributes.
 - Added support for Record.new(:references_many => [record, record]) and a_record.references_many = [record, record]
 
 
 
-# v0.2.0.beta (git master)
+# v0.2.0.beta
 
 - ORM will now take care of serialize and de-serialize of attributes like arrays, hashes etc. It is doing so
   based on the type of your fields. You can select either JSON or YAML serialization for your data. As a default it
