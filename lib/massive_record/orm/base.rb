@@ -112,8 +112,10 @@ module MassiveRecord
 
         attributes = {} if attributes.nil?
 
-        self.attributes_raw = attributes_from_field_definition.merge(attributes)
+        self.attributes_raw = attributes_from_field_definition
         self.attributes = attributes
+
+        clear_dirty_states!
 
         _run_initialize_callbacks
       end
