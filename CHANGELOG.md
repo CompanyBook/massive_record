@@ -1,5 +1,5 @@
 # v0.2.0.beta3 (git develop)
-
+- Rails will now handle MassiveRecord::ORM::RecordNotFound correctly in a production environment, rendering 404.
 
 
 # v0.2.0.beta2 (git master)
