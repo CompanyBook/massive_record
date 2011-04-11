@@ -119,6 +119,23 @@ Here is an example of usage, both for Table and Column:
     end
 
 
+### Related gems
+
+We have developed some gems which adds support for MassiveRecord. These are:
+
+#### ORM Adapter
+https://github.com/CompanyBook/orm_adapter
+Used by Devise. I guess we'll might release the code used to get Devise support in MR.
+
+#### Database Cleaner
+https://github.com/CompanyBook/database_cleaner
+User by for instance Cucumber and ourself with Rspec.
+
+#### Sunspot Rails
+https://github.com/CompanyBook/sunspot_massive_record
+Makes it easier to make things searchable with solr.
+
+
 ## Wrapper (adapter) API
 
 You can, if you'd like, work directly against the adapter.
