@@ -156,6 +156,9 @@ module MassiveRecord
       end
       alias_method :eql?, :==
 
+      def hash
+        id.hash
+      end
 
       def freeze
         @attributes.freeze

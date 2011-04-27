@@ -151,6 +151,24 @@ describe MassiveRecord::ORM::Base do
     end
   end
 
+  describe "intersection and union operation" do
+    it "should correctly find intersection two sets" do
+      ([Person.find(1)] & [Person.find(1), Person.find(2)]).should == [Person.find(1)]
+    end
+
+    it "should correctly find union of two sets" do
+      ([Person.find(1)] | [Person.find(1), Person.find(2)]).should == [Person.find(1), Person.find(2)]
+    end
+
+    it "should correctly find intersection between two sets with different classes" do
+      ([Person.find(1)] & [TestClass.find(1)]).should == []
+    end
+
+    it "should correctly find union between two sets with different classes" do
+      ([Person.find(1)] | [TestClass.find(1)]).should == [Person.find(1), TestClass.find(1)]
+    end
+  end
+
   describe "#to_param" do
     it "should return nil if new record" do
       TestClass.new.to_param.should be_nil
