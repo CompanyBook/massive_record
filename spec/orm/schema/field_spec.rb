@@ -296,4 +296,42 @@ describe MassiveRecord::ORM::Schema::Field do
     field = MassiveRecord::ORM::Schema::Field.new :name => "array", :type => :array, :default => default_array
     field.default.object_id.should_not == default_array.object_id
   end
+
+
+  describe "default values" do
+    context "when nil is allowed" do
+      MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.each do |type, default|
+        it "should should default to nil" do
+          subject.type = type
+          subject.default.should == nil
+        end
+
+        it "should default to set value" do
+          subject.type = type
+          subject.default = default
+          subject.default.should == default
+        end
+      end
+    end
+
+
+    context "when nil is not allowed" do
+      subject { MassiveRecord::ORM::Schema::Field.new(:name => :test, :allow_nil => false) }
+
+      it { should_not be_allow_nil }
+
+      MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.each do |type, default|
+        it "should default to #{default} when type is #{type}" do
+          subject.type = type
+          subject.default.should == default
+        end
+      end
+
+      it "should be possible to override the default nil-not-allowed-value" do
+        subject.type = :hash
+        subject.default = {:foo => :bar}
+        subject.default.should == {:foo => :bar}
+      end
+    end
+  end
 end
