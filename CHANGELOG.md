@@ -1,4 +1,6 @@
 # v0.2.0.beta3 (git develop)
+
+- You can now disallow nil values, and in that case we will ensure that given field has its default value.
 - Rails will now handle MassiveRecord::ORM::RecordNotFound correctly in a production environment, rendering 404.
 
 
