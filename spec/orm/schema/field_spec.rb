@@ -299,8 +299,16 @@ describe MassiveRecord::ORM::Schema::Field do
 
 
   describe "default values" do
+    it "should be able to set to a proc" do
+      subject.type = :string
+      subject.default = Proc.new { "foo" }
+      subject.default.should == "foo"
+    end
+
     context "when nil is allowed" do
       MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.each do |type, default|
+        default = default.respond_to?(:call) ? default.call : default
+
         it "should should default to nil" do
           subject.type = type
           subject.default.should == nil
@@ -320,11 +328,20 @@ describe MassiveRecord::ORM::Schema::Field do
 
       it { should_not be_allow_nil }
 
-      MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.each do |type, default|
+      MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.reject { |type| type == :time }.each do |type, default|
+        default = default.respond_to?(:call) ? default.call : default
+
         it "should default to #{default} when type is #{type}" do
           subject.type = type
           subject.default.should == default
         end
+      end
+
+      it "should default to Time.now when type is time" do
+        subject.type = :time
+        time = Time.now
+        Time.should_receive(:now).and_return(time)
+        subject.default.should == time
       end
 
       it "should be possible to override the default nil-not-allowed-value" do

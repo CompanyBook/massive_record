@@ -80,7 +80,11 @@ module MassiveRecord
 
         def default
           @default = TYPES_DEFAULTS_TO[type] if !allow_nil? && @default.nil?
-          @default.duplicable? ? @default.dup : @default
+          if @default.respond_to? :call
+            @default.call
+          else
+            @default.duplicable? ? @default.dup : @default
+          end
         end
 
         

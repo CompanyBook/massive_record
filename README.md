@@ -86,6 +86,7 @@ Here is an example of usage, both for Table and Column:
         field :date_of_birth, :date, :allow_nil => false # Defaults to today
         field :newsletter, :boolean, :default => false
         field :type # Used for single table inheritance
+        field :in_the_future, :time, :default => Proc.new { 2.hours.from_now }
 
         timestamps # ..or field :created_at, :time
       end
