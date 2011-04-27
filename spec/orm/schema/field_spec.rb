@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe MassiveRecord::ORM::Schema::Field do
   describe "initializer" do
-    %w(name column default).each do |attr_name|
+    %w(name column default allow_nil).each do |attr_name|
       it "should set #{attr_name}" do
         field = MassiveRecord::ORM::Schema::Field.new attr_name => "a_value"
         field.send(attr_name).should == "a_value"
@@ -15,6 +15,10 @@ describe MassiveRecord::ORM::Schema::Field do
 
     it "should default to type string" do
       MassiveRecord::ORM::Schema::Field.new(:name => "a_value").type.should == :string
+    end
+
+    it "should default allow nil to true" do
+      MassiveRecord::ORM::Schema::Field.new(:name => "a_value").allow_nil.should be_true
     end
   end
 
@@ -291,5 +295,60 @@ describe MassiveRecord::ORM::Schema::Field do
     default_array = []
     field = MassiveRecord::ORM::Schema::Field.new :name => "array", :type => :array, :default => default_array
     field.default.object_id.should_not == default_array.object_id
+  end
+
+
+  describe "default values" do
+    it "should be able to set to a proc" do
+      subject.type = :string
+      subject.default = Proc.new { "foo" }
+      subject.default.should == "foo"
+    end
+
+    context "when nil is allowed" do
+      MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.each do |type, default|
+        default = default.respond_to?(:call) ? default.call : default
+
+        it "should should default to nil" do
+          subject.type = type
+          subject.default.should == nil
+        end
+
+        it "should default to set value" do
+          subject.type = type
+          subject.default = default
+          subject.default.should == default
+        end
+      end
+    end
+
+
+    context "when nil is not allowed" do
+      subject { MassiveRecord::ORM::Schema::Field.new(:name => :test, :allow_nil => false) }
+
+      it { should_not be_allow_nil }
+
+      MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.reject { |type| type == :time }.each do |type, default|
+        default = default.respond_to?(:call) ? default.call : default
+
+        it "should default to #{default} when type is #{type}" do
+          subject.type = type
+          subject.default.should == default
+        end
+      end
+
+      it "should default to Time.now when type is time" do
+        subject.type = :time
+        time = Time.now
+        Time.should_receive(:now).and_return(time)
+        subject.default.should == time
+      end
+
+      it "should be possible to override the default nil-not-allowed-value" do
+        subject.type = :hash
+        subject.default = {:foo => :bar}
+        subject.default.should == {:foo => :bar}
+      end
+    end
   end
 end
