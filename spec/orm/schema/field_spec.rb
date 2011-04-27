@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe MassiveRecord::ORM::Schema::Field do
   describe "initializer" do
-    %w(name column default).each do |attr_name|
+    %w(name column default allow_nil).each do |attr_name|
       it "should set #{attr_name}" do
         field = MassiveRecord::ORM::Schema::Field.new attr_name => "a_value"
         field.send(attr_name).should == "a_value"
@@ -15,6 +15,10 @@ describe MassiveRecord::ORM::Schema::Field do
 
     it "should default to type string" do
       MassiveRecord::ORM::Schema::Field.new(:name => "a_value").type.should == :string
+    end
+
+    it "should default allow nil to true" do
+      MassiveRecord::ORM::Schema::Field.new(:name => "a_value").allow_nil.should be_true
     end
   end
 

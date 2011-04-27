@@ -7,7 +7,7 @@ module MassiveRecord
         TYPES = [:string, :integer, :float, :boolean, :array, :hash, :date, :time]
 
         attr_writer :default
-        attr_accessor :name, :column, :type, :fields, :coder
+        attr_accessor :name, :column, :type, :fields, :coder, :allow_nil
 
 
         validates_presence_of :name
@@ -40,6 +40,7 @@ module MassiveRecord
           self.column = options[:column]
           self.type = options[:type] || :string
           self.default = options[:default]
+          self.allow_nil = options.has_key?(:allow_nil) ? options[:allow_nil] : true
 
           self.coder = options[:coder] || Base.coder
 
