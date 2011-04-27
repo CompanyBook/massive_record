@@ -139,7 +139,7 @@ module MassiveRecord
             end
 
             if metadata.persisting_foreign_key?
-              add_field_to_column_family(metadata.store_in, metadata.foreign_key, :type => :array, :default => [])
+              add_field_to_column_family(metadata.store_in, metadata.foreign_key, :type => :array, :allow_nil => false)
             end
           end
         end

@@ -43,7 +43,7 @@ module CreatePersonBeforeEach
       
       @row = MassiveRecord::Wrapper::Row.new
       @row.id = "ID1"
-      @row.values = {:info => {:name => "John Doe", :email => "john@base.com", :age => "20"}}
+      @row.values = {:info => {:name => "John Doe", :email => "john@base.com", :age => "20", :test_class_ids => [].to_json}}
       @row.table = @table
       @row.save
     end
