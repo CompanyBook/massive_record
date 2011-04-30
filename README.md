@@ -13,6 +13,9 @@ http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
 ## Installation
 
+First of all: Please make sure you are using Ruby 1.9.2. For now, we are only ensuring
+that Massive Record works on that Ruby version, and we know it has some problems with 1.8.7.
+
   gem install massive_record
 
 ### Ruby on Rails
