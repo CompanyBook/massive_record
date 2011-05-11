@@ -12,7 +12,7 @@ module MassiveRecord
 
 
       def attributes
-        @attributes ||= {}
+        Hash[@attributes.collect { |attr_name, raw_value| [attr_name, read_attribute(attr_name)] }]
       end
       
       def attributes=(new_attributes)
@@ -55,6 +55,12 @@ module MassiveRecord
         attributes = {'id' => nil}
         attributes.merge! self.class.default_attributes_from_schema if self.class.respond_to? :default_attributes_from_schema
         attributes
+      end
+
+      def fill_attributes_with_default_values_where_nil_is_not_allowed
+        attributes_schema.reject { |attr_name, field| field.allow_nil? || self[attr_name].present? }.each do |attr_name, field|
+          self[attr_name] = field.default
+        end
       end
     end
   end

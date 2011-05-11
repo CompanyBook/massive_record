@@ -91,6 +91,28 @@ describe MassiveRecord::ORM::Base do
       model.foo.should == 'bar'
     end
 
+    it "should set attributes where nil is not allowed if it is not included in attributes list" do
+      model = TestClass.allocate
+      model.init_with 'attributes' => {:foo => 'bar'}
+      model.hash_not_allow_nil.should == {}
+    end
+
+    it "should set attributes where nil is not allowed if it is included, but the value is nil" do
+      model = TestClass.allocate
+      model.init_with 'attributes' => {:hash_not_allow_nil => nil, :foo => 'bar'}
+      model.hash_not_allow_nil.should == {}
+    end
+
+    it "should not set override attributes where nil is allowed" do
+      model = TestClass.allocate
+      model.init_with 'attributes' => {:foo => nil}
+      model.foo.should be_nil
+    end
+
+    it "should set attributes where nil is not allowed when calling new" do
+      TestClass.new.hash_not_allow_nil.should == {}
+    end
+
     it "should stringify keys set on attributes" do
       model = TestClass.allocate
       model.init_with 'attributes' => {:foo => :bar}
@@ -126,6 +148,24 @@ describe MassiveRecord::ORM::Base do
 
     it "should not be equal if class are different" do
       TestClass.find(1).should_not == Person.find(2)
+    end
+  end
+
+  describe "intersection and union operation" do
+    it "should correctly find intersection two sets" do
+      ([Person.find(1)] & [Person.find(1), Person.find(2)]).should == [Person.find(1)]
+    end
+
+    it "should correctly find union of two sets" do
+      ([Person.find(1)] | [Person.find(1), Person.find(2)]).should == [Person.find(1), Person.find(2)]
+    end
+
+    it "should correctly find intersection between two sets with different classes" do
+      ([Person.find(1)] & [TestClass.find(1)]).should == []
+    end
+
+    it "should correctly find union between two sets with different classes" do
+      ([Person.find(1)] | [TestClass.find(1)]).should == [Person.find(1), TestClass.find(1)]
     end
   end
 

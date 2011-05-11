@@ -1,5 +1,4 @@
 require 'yaml'
-require 'json'
 
 require 'massive_record/wrapper/adapter'
 require 'massive_record/wrapper/errors'

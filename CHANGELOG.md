@@ -1,11 +1,24 @@
-# v0.2.0.beta2 (git develop)
+# v0.2.1 (git develop)
+
+
+# v0.2.0 (git master)
+
+- Intersection and union operations on arrays containing MassiveRecord objects is now working as expected.
+- You can now disallow nil values, and in that case we will ensure that given field has its default value.
+- Rails will now handle MassiveRecord::ORM::RecordNotFound correctly in a production environment, rendering 404.
+- record.attributes no longer returns internal @attributes-hash directly. Instead it iterates over all attributes,
+  fetches their values through read_attribute and then returns a new hash with these attribute-name-values pairs.
+- Fixed problem with STI sub classes in Rails development environment: Attributes defined in a sub class
+  was not loaded correctly first time you loaded a record through its parent class.
+
+# v0.2.0.beta2
 
 - We are now raising error if MassiveRecordClass.new(attributes) receives unknown attributes.
 - Added support for Record.new(:references_many => [record, record]) and a_record.references_many = [record, record]
 
 
 
-# v0.2.0.beta (git master)
+# v0.2.0.beta
 
 - ORM will now take care of serialize and de-serialize of attributes like arrays, hashes etc. It is doing so
   based on the type of your fields. You can select either JSON or YAML serialization for your data. As a default it

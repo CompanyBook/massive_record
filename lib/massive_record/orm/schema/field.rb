@@ -4,10 +4,21 @@ module MassiveRecord
       class Field
         include ActiveModel::Validations
 
-        TYPES = [:string, :integer, :float, :boolean, :array, :hash, :date, :time]
+        TYPES_DEFAULTS_TO = {
+          :string => '',
+          :integer => 0,
+          :float => 0.0,
+          :boolean => false,
+          :array => [],
+          :hash => {},
+          :date => lambda { Date.today },
+          :time => lambda { Time.now }
+        }
+
+        TYPES = TYPES_DEFAULTS_TO.keys
 
         attr_writer :default
-        attr_accessor :name, :column, :type, :fields, :coder
+        attr_accessor :name, :column, :type, :fields, :coder, :allow_nil
 
 
         validates_presence_of :name
@@ -40,6 +51,7 @@ module MassiveRecord
           self.column = options[:column]
           self.type = options[:type] || :string
           self.default = options[:default]
+          self.allow_nil = options.has_key?(:allow_nil) ? options[:allow_nil] : true
 
           self.coder = options[:coder] || Base.coder
 
@@ -67,7 +79,12 @@ module MassiveRecord
         end
 
         def default
-          @default.duplicable? ? @default.dup : @default
+          @default = TYPES_DEFAULTS_TO[type] if !allow_nil? && @default.nil?
+          if @default.respond_to? :call
+            @default.call
+          else
+            @default.duplicable? ? @default.dup : @default
+          end
         end
 
         
@@ -85,6 +102,9 @@ module MassiveRecord
           @column = column
         end
 
+        def allow_nil?
+          !!allow_nil
+        end
 
 
 

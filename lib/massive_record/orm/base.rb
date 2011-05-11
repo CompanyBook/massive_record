@@ -128,6 +128,9 @@ module MassiveRecord
       # trust the coder's attributes and not load it with default values.
       #
       #   class Person < MassiveRecord::ORM::Table
+      #     column_family :base do
+      #       field :name
+      #     end
       #   end
       #
       #   person = Person.allocate
@@ -139,6 +142,7 @@ module MassiveRecord
         @relation_proxy_cache = {}
 
         self.attributes_raw = coder['attributes']
+        fill_attributes_with_default_values_where_nil_is_not_allowed
 
         _run_find_callbacks
         _run_initialize_callbacks
@@ -152,6 +156,9 @@ module MassiveRecord
       end
       alias_method :eql?, :==
 
+      def hash
+        id.hash
+      end
 
       def freeze
         @attributes.freeze

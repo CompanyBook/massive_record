@@ -13,6 +13,9 @@ http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
 ## Installation
 
+First of all: Please make sure you are using Ruby 1.9.2. For now, we are only ensuring
+that Massive Record works on that Ruby version, and we know it has some problems with 1.8.7.
+
   gem install massive_record
 
 ### Ruby on Rails
@@ -83,9 +86,10 @@ Here is an example of usage, both for Table and Column:
         field :email
         field :phone_number
         field :points, :integer, :default => 0
-        field :date_of_birth, :date
+        field :date_of_birth, :date, :allow_nil => false # Defaults to today
         field :newsletter, :boolean, :default => false
         field :type # Used for single table inheritance
+        field :in_the_future, :time, :default => Proc.new { 2.hours.from_now }
 
         timestamps # ..or field :created_at, :time
       end
@@ -117,6 +121,23 @@ Here is an example of usage, both for Table and Column:
       field :number, :integer
       field :nice_place, :boolean, :default => true
     end
+
+
+### Related gems
+
+We have developed some gems which adds support for MassiveRecord. These are:
+
+#### ORM Adapter
+https://github.com/CompanyBook/orm_adapter
+Used by Devise. I guess we'll might release the code used to get Devise support in MR.
+
+#### Database Cleaner
+https://github.com/CompanyBook/database_cleaner
+User by for instance Cucumber and ourself with Rspec.
+
+#### Sunspot Rails
+https://github.com/CompanyBook/sunspot_massive_record
+Makes it easier to make things searchable with solr.
 
 
 ## Wrapper (adapter) API
