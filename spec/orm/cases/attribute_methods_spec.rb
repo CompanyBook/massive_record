@@ -28,8 +28,19 @@ describe "attribute methods" do
     @model.read_attribute(:age).should == 15
   end
   
-  it "should contains the id in the attributes getter" do
-    @model.attributes.should include("id")
+  describe "#attributes" do
+    it "should contain the id" do
+      @model.attributes.should include("id")
+    end
+
+    it "should not return @attributes directly" do
+      @model.attributes.object_id.should_not == @model.instance_variable_get(:@attributes).object_id
+    end
+
+    it "should ask read_attribute for help" do
+      @model.should_receive(:read_attribute).any_number_of_times.and_return("stub")
+      @model.attributes['name'].should eq 'stub'
+    end
   end
 
   describe "#attributes=" do

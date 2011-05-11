@@ -12,7 +12,7 @@ module MassiveRecord
 
 
       def attributes
-        @attributes ||= {}
+        Hash[@attributes.collect { |attr_name, raw_value| [attr_name, read_attribute(attr_name)] }]
       end
       
       def attributes=(new_attributes)
