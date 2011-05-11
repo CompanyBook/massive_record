@@ -36,11 +36,12 @@ module MassiveRecord
         end
       end
 
-      def ensure_proper_type
-        attr = self.class.inheritance_attribute
 
-        if respond_to?(attr) && self[attr].blank? && self.class.base_class != self.class
-          self[attr] = self.class.to_s
+      def ensure_proper_type
+        inheritance_attribute = self.class.inheritance_attribute
+
+        if respond_to?(inheritance_attribute) && self[inheritance_attribute].blank? && self.class.base_class != self.class
+          self[inheritance_attribute] = self.class.to_s
         end
       end
     end
