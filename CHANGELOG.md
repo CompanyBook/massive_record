@@ -1,5 +1,6 @@
 # v0.2.1 (git develop)
-
+- Removed inclusion of ActiveModel::Translation in ORM::Base class, as including ActiveModel::Validations
+  extends ORM::Base with Translation as well (and it should never have been included; it should have been extended with..)
 
 # v0.2.0 (git master)
 

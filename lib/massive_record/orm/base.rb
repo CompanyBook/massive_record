@@ -241,7 +241,6 @@ module MassiveRecord
       include Relations::Interface
       include Persistence
       include Finders
-      include ActiveModel::Translation
       include AttributeMethods
       include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::Dirty
