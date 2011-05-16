@@ -2,10 +2,13 @@ require 'spec_helper'
 require "active_support/log_subscriber/test_helper"
 
 describe "log subscriber" do
+  include ActiveSupport::BufferedLogger::Severity
+
   include SetUpHbaseConnectionBeforeAll
   include SetTableNamesToTestTable
 
-  subject { ActiveSupport::LogSubscriber::TestHelper::MockLogger.new }
+  let(:level) { DEBUG }
+  subject { ActiveSupport::LogSubscriber::TestHelper::MockLogger.new(level) }
 
   before do
     @old_logger = MassiveRecord::ORM::Base.logger
@@ -40,6 +43,8 @@ describe "log subscriber" do
 
 
   context "info" do
+    let(:level) { INFO }
+
     it "should have nothing logged to begin with" do
       subject.logged(:debug).size.should be_zero
     end

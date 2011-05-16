@@ -103,7 +103,7 @@ module MassiveRecord
           what_to_find = []
           result_from_table = []
           
-          ActiveSupport::Notifications.instrument("query.massive_record") do
+          ActiveSupport::Notifications.instrument("query.massive_record", {:name => [model_name, 'load'].join(' ')}) do
             return (find_many ? [] : raise(RecordNotFound.new("Could not find #{model_name} with id=#{args.first}"))) unless table.exists?
             find_many, expected_result_size, what_to_find, result_from_table = query_hbase(type, args, find_many)
           end

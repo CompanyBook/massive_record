@@ -2,7 +2,9 @@ module MassiveRecord
   module ORM
     class LogSubscriber < ActiveSupport::LogSubscriber
       def query(event)
-        # TODO
+        return unless logger.debug?
+
+        debug '%s (%.1fms)' % [event.payload[:name], event.duration]
       end
 
       def logger
