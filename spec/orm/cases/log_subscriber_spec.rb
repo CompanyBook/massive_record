@@ -2,7 +2,8 @@ require 'spec_helper'
 require "active_support/log_subscriber/test_helper"
 
 describe "log subscriber" do
-  include MockMassiveRecordConnection
+  include SetUpHbaseConnectionBeforeAll
+  include SetTableNamesToTestTable
 
   subject { ActiveSupport::LogSubscriber::TestHelper::MockLogger.new }
 
@@ -14,6 +15,8 @@ describe "log subscriber" do
 
     MassiveRecord::ORM::Base.logger = subject
     ActiveSupport::Notifications.notifier = @notifi
+
+    MassiveRecord::ORM::LogSubscriber.attach_to :massive_record
   end
 
   after do
