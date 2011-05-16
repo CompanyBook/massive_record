@@ -12,6 +12,78 @@ module MassiveRecord
       end
 
       module ClassMethods
+        #
+        # Find records in batches. Makes it easier to work with
+        # big data sets where you don't want to load every record up front.
+        #
+        def find_in_batches(*args)
+          return unless table.exists?
+
+          table.find_in_batches(*args) do |rows|
+            records = rows.collect do |row|
+              instantiate(transpose_hbase_columns_to_record_attributes(row))
+            end    
+            yield records
+          end
+        end
+        
+        #
+        # Similar to all, except that this will use find_in_batches
+        # behind the scene.
+        #
+        def find_each(*args)
+          find_in_batches(*args) do |rows|
+            rows.each do |row|
+              yield row
+            end
+          end
+        end
+
+
+        #
+        # Returns true if a record do exist
+        #
+        def exists?(id)
+          !!find(id) rescue false
+        end
+
+
+
+        #
+        # Entry point for method delegation like find, first, all etc.
+        #
+        def finder_scope
+          default_scoping || unscoped
+        end
+
+
+        #
+        # Sets a default scope which will be used for calls like find, first, all etc.
+        # Makes it possible to for instance set default column families to load on all
+        # calls to the database.
+        #
+        def default_scope(scope)
+          self.default_scoping =  case scope
+                                    when Scope, nil
+                                      scope
+                                    when Hash
+                                      Scope.new(self, :find_options => scope)
+                                    else
+                                      raise "Don't know how to set scope with #{scope.class}."
+                                    end
+        end
+
+        #
+        # Returns an fresh scope object with no limitations set by
+        # for instance the default scope
+        #
+        def unscoped
+          Scope.new(self)
+        end
+
+
+
+
         def do_find(*args) # :nodoc:
           options = args.extract_options!.to_options
           raise ArgumentError.new("At least one argument required!") if args.empty?
@@ -71,54 +143,12 @@ module MassiveRecord
           find_many ? records : records.first
         end
 
-        def find_in_batches(*args)
-          return unless table.exists?
 
-          table.find_in_batches(*args) do |rows|
-            records = rows.collect do |row|
-              instantiate(transpose_hbase_columns_to_record_attributes(row))
-            end    
-            yield records
-          end
-        end
-        
-        def find_each(*args)
-          find_in_batches(*args) do |rows|
-            rows.each do |row|
-              yield row
-            end
-          end
-        end
-
-
-        def exists?(id)
-          !!find(id) rescue false
-        end
-
-
-        def finder_scope
-          default_scoping || unscoped
-        end
-
-        def default_scope(scope)
-          self.default_scoping =  case scope
-                                    when Scope, nil
-                                      scope
-                                    when Hash
-                                      Scope.new(self, :find_options => scope)
-                                    else
-                                      raise "Don't know how to set scope with #{scope.class}."
-                                    end
-        end
-
-        def unscoped
-          Scope.new(self)
-        end
 
 
         private
 
-        def transpose_hbase_columns_to_record_attributes(row)
+        def transpose_hbase_columns_to_record_attributes(row) #: nodoc:
           attributes = {:id => row.id}
           
           autoload_column_families_and_fields_with(row.columns.keys)
@@ -131,7 +161,7 @@ module MassiveRecord
           attributes
         end
 
-        def instantiate(record)
+        def instantiate(record) # :nodoc:
           model = if klass = record[inheritance_attribute] and klass.present?
                     klass.constantize.allocate
                   else
