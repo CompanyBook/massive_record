@@ -38,6 +38,13 @@ module MockMassiveRecordConnection
           row.values = {}
           row
         end
+
+        def table.all(*args)
+          row = MassiveRecord::Wrapper::Row.new
+          row.id = args[0]
+          row.values = {}
+          [row]
+        end
         
         # Simply returning all known column families across all tables to make the need
         # for creating new one on create disappear.
