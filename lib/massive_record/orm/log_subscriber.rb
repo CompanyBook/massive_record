@@ -7,6 +7,11 @@ module MassiveRecord
         payload = event.payload
         name = '%s (%.1fms)' % [payload[:name], event.duration]
         description = payload[:description]
+        options = payload[:options]
+
+        if options.present?
+          options = "options: #{options}"
+        end
 
         if odd?
           name = color(name, CYAN, true)
@@ -15,7 +20,7 @@ module MassiveRecord
           name = color(name, MAGENTA, true)
         end
 
-        debug "  " + [name, description].compact.join("  ")
+        debug "  " + [name, description, options].compact.join("  ")
       end
 
       def logger

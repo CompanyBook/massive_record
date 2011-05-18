@@ -49,7 +49,7 @@ describe "log subscriber" do
     it "should include class, time and description on first" do
       Person.first
       wait
-      subject.logged(:debug).first.should match /Person.+?load.+?([\d.]+).+?all/
+      subject.logged(:debug).first.should match /Person.+?load.+?([\d.]+).+?all.+?options.+?limit=>1/
     end
 
     it "should include id when finding one person" do

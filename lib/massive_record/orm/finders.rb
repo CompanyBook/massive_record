@@ -139,7 +139,9 @@ module MassiveRecord
         def query_hbase(type, args, find_many) # :nodoc:
           result_from_table = if type
                                 ActiveSupport::Notifications.instrument("query.massive_record", {
-                                  :name => [model_name, 'load'].join(' '), :description => type
+                                  :name => [model_name, 'load'].join(' '),
+                                  :description => type,
+                                  :options => args
                                 }) do
                                   table.send(type, *args) # first() / all()
                                 end
@@ -157,7 +159,9 @@ module MassiveRecord
 
                                 expected_result_size = what_to_find.length if what_to_find.is_a? Array
                                 ActiveSupport::Notifications.instrument("query.massive_record", {
-                                  :name => [model_name, 'load'].join(' '), :description => "find id(s): #{what_to_find}"
+                                  :name => [model_name, 'load'].join(' '),
+                                  :description => "find id(s): #{what_to_find}",
+                                  :options => options
                                 }) do
                                   table.find(what_to_find, options)
                                 end
