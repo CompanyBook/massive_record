@@ -140,16 +140,7 @@ module MassiveRecord
       def store_record_to_database(action, attribute_names_to_update = [])
         row = row_for_record
         row.values = attributes_to_row_values_hash(attribute_names_to_update)
-
-        description = action + " id: #{id},"
-        description += " attributes: #{attribute_names_to_update.join(', ')}" if attribute_names_to_update.any?
-
-        ActiveSupport::Notifications.instrument("query.massive_record", {
-          :name => [self.class.model_name, 'save'].join(' '),
-          :description => description
-        }) do
-          row.save
-        end
+        row.save
       end
 
 
