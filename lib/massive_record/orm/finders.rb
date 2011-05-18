@@ -84,6 +84,9 @@ module MassiveRecord
 
 
 
+        #
+        # This do_find method is not very nice it's logic should be re-factored at some point.
+        #
         def do_find(*args) # :nodoc:
           options = args.extract_options!.to_options
           raise ArgumentError.new("At least one argument required!") if args.empty?
@@ -97,26 +100,11 @@ module MassiveRecord
           type = args.shift if args.first.is_a? Symbol
           find_many = type == :all
           expected_result_size = nil
-
-          return (find_many ? [] : raise(RecordNotFound.new("Could not find #{model_name} with id=#{args.first}"))) unless table.exists?
+          what_to_find = []
+          result_from_table = []
           
-          result_from_table = if type
-                                table.send(type, *args) # first() / all()
-                              else
-                                options = args.extract_options!
-                                what_to_find = args.first
-                                expected_result_size = 1
-
-                                if args.first.kind_of?(Array)
-                                  find_many = true
-                                elsif args.length > 1
-                                  find_many = true
-                                  what_to_find = args
-                                end
-
-                                expected_result_size = what_to_find.length if what_to_find.is_a? Array
-                                table.find(what_to_find, options)
-                              end
+          return (find_many ? [] : raise(RecordNotFound.new("Could not find #{model_name} with id=#{args.first}"))) unless table.exists?
+          find_many, expected_result_size, what_to_find, result_from_table = query_hbase(type, args, find_many)
 
           # Filter out unexpected IDs (unless type is set (all/first), in that case
           # we have no expectations on the returned rows' ids)
@@ -147,6 +135,40 @@ module MassiveRecord
 
 
         private
+
+        def query_hbase(type, args, find_many) # :nodoc:
+          result_from_table = if type
+                                ActiveSupport::Notifications.instrument("query.massive_record", {
+                                  :name => [model_name, 'load'].join(' '),
+                                  :description => type,
+                                  :options => args
+                                }) do
+                                  table.send(type, *args) # first() / all()
+                                end
+                              else
+                                options = args.extract_options!
+                                what_to_find = args.first
+                                expected_result_size = 1
+
+                                if args.first.kind_of?(Array)
+                                  find_many = true
+                                elsif args.length > 1
+                                  find_many = true
+                                  what_to_find = args
+                                end
+
+                                expected_result_size = what_to_find.length if what_to_find.is_a? Array
+                                ActiveSupport::Notifications.instrument("query.massive_record", {
+                                  :name => [model_name, 'load'].join(' '),
+                                  :description => "find id(s): #{what_to_find}",
+                                  :options => options
+                                }) do
+                                  table.find(what_to_find, options)
+                                end
+                              end
+
+          [find_many, expected_result_size, what_to_find, result_from_table]
+        end
 
         def transpose_hbase_columns_to_record_attributes(row) #: nodoc:
           attributes = {:id => row.id}
