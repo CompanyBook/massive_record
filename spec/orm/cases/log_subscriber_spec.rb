@@ -57,6 +57,12 @@ describe "log subscriber" do
       wait
       subject.logged(:debug).first.should include "id(s): id_to_be_found"
     end
+
+    it "should not see the options hash if it's empty" do
+      Person.exists? "id_to_be_found"
+      wait
+      subject.logged(:debug).first.should_not include "{}"
+    end
   end
 
 

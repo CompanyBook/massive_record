@@ -9,8 +9,10 @@ module MassiveRecord
         description = payload[:description]
         options = payload[:options]
 
-        if options.present?
+        if options.present? && options.any?
           options = "options: #{options}"
+        else
+          options = nil
         end
 
         if odd?
