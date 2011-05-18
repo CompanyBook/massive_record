@@ -1,4 +1,8 @@
 # v0.2.1 (git develop)
+
+- In Rails, we are now included in the 200-ok-completed-log like: Completed 200 OK in 798ms (Views: 277.5ms | MassiveRecord: 9.2ms)
+- Subscribed to events from query instruments and printing out time spent in database per call.
+- Added ActiveSupport Notifications instruments around database query calls in the ORM level.
 - Removed inclusion of ActiveModel::Translation in ORM::Base class, as including ActiveModel::Validations
   extends ORM::Base with Translation as well (and it should never have been included; it should have been extended with..)
 
