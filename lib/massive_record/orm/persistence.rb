@@ -118,7 +118,7 @@ module MassiveRecord
       def create
         ensure_that_we_have_table_and_column_families!
 
-        if saved = store_record_to_database
+        if saved = store_record_to_database('create')
           @new_record = false
         end
         saved
@@ -127,7 +127,7 @@ module MassiveRecord
       def update(attribute_names_to_update = attributes.keys)
         ensure_that_we_have_table_and_column_families!
 
-        store_record_to_database(attribute_names_to_update)
+        store_record_to_database('update', attribute_names_to_update)
       end
 
 
@@ -137,10 +137,19 @@ module MassiveRecord
       # Takes care of the actual storing of the record to the database
       # Both update and create is using this
       #
-      def store_record_to_database(attribute_names_to_update = [])
+      def store_record_to_database(action, attribute_names_to_update = [])
         row = row_for_record
         row.values = attributes_to_row_values_hash(attribute_names_to_update)
-        row.save
+
+        description = action + " id: #{id},"
+        description += " attributes: #{attribute_names_to_update.join(', ')}" if attribute_names_to_update.any?
+
+        ActiveSupport::Notifications.instrument("query.massive_record", {
+          :name => [self.class.model_name, 'save'].join(' '),
+          :description => description
+        }) do
+          row.save
+        end
       end
 
 
