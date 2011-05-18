@@ -18,6 +18,10 @@ describe "A table" do
       it "should not exists is the database" do
         @connection.tables.should_not include(MR_CONFIG['table'])
       end
+
+      it "should not exists in the database" do
+        @table.exists?.should be_false
+      end
     
       it "should not have any column families" do
         @table.column_families.should be_empty
@@ -188,6 +192,14 @@ describe "A table" do
       
       it "should exists in the database" do
         @table.exists?.should be_true
+      end
+
+      it "should only check for existance once" do
+        connection = mock(Object)
+        connection.should_receive(:tables).and_return [MR_CONFIG['table']] 
+        @table.should_receive(:connection).and_return(connection)
+
+        2.times { @table.exists? }
       end
   
       it "should destroy the test table" do

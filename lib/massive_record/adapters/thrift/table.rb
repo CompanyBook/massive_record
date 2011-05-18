@@ -42,6 +42,7 @@ module MassiveRecord
     
         def destroy
           disable
+          @table_exists = false
           client.deleteTable(name).nil?
         end
     
@@ -148,7 +149,7 @@ module MassiveRecord
         end
     
         def exists?
-          connection.tables.include?(name)
+          @table_exists ||= connection.tables.include?(name)
         end
     
         def regions
