@@ -163,6 +163,7 @@ module MassiveRecord
         end
 
         def hbase_query_find(what_to_find, options)
+          table.find(what_to_find, options)
         end
 
         def transpose_hbase_columns_to_record_attributes(row) #: nodoc:

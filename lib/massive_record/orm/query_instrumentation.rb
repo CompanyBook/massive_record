@@ -22,6 +22,7 @@ module MassiveRecord
             :description => "find id(s): #{what_to_find}",
             :options => options
           }) do
+            super
           end
         end
       end
