@@ -3,8 +3,11 @@ module MassiveRecord
     class LogSubscriber < ActiveSupport::LogSubscriber
       def query(event)
         return unless logger.debug?
-        name = '%s (%.1fms)' % [event.payload[:name], event.duration]
-        debug "  #{name}"
+
+        payload = event.payload
+        name = '%s (%.1fms)' % [payload[:name], event.duration]
+
+        debug "  " + [name, payload[:description]].compact.join("  ")
       end
 
       def logger

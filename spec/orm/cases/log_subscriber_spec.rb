@@ -39,6 +39,24 @@ describe "log subscriber" do
       wait
       subject.logged(:debug).size.should eq 1
     end
+
+    it "should include a the class name of what is loading, time it took, a description about what has been done" do
+      Person.all
+      wait
+      subject.logged(:debug).first.should match /Person.+?load.+?([\d.]+).+?all/
+    end
+
+    it "should include class, time and description on first" do
+      Person.first
+      wait
+      subject.logged(:debug).first.should match /Person.+?load.+?([\d.]+).+?all/
+    end
+
+    it "should include id when finding one person" do
+      Person.exists? "id_to_be_found"
+      wait
+      subject.logged(:debug).first.should include "id(s): id_to_be_found"
+    end
   end
 
 

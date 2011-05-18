@@ -103,10 +103,8 @@ module MassiveRecord
           what_to_find = []
           result_from_table = []
           
-          ActiveSupport::Notifications.instrument("query.massive_record", {:name => [model_name, 'load'].join(' ')}) do
-            return (find_many ? [] : raise(RecordNotFound.new("Could not find #{model_name} with id=#{args.first}"))) unless table.exists?
-            find_many, expected_result_size, what_to_find, result_from_table = query_hbase(type, args, find_many)
-          end
+          return (find_many ? [] : raise(RecordNotFound.new("Could not find #{model_name} with id=#{args.first}"))) unless table.exists?
+          find_many, expected_result_size, what_to_find, result_from_table = query_hbase(type, args, find_many)
 
           # Filter out unexpected IDs (unless type is set (all/first), in that case
           # we have no expectations on the returned rows' ids)
@@ -140,7 +138,11 @@ module MassiveRecord
 
         def query_hbase(type, args, find_many) # :nodoc:
           result_from_table = if type
-                                table.send(type, *args) # first() / all()
+                                ActiveSupport::Notifications.instrument("query.massive_record", {
+                                  :name => [model_name, 'load'].join(' '), :description => type
+                                }) do
+                                  table.send(type, *args) # first() / all()
+                                end
                               else
                                 options = args.extract_options!
                                 what_to_find = args.first
@@ -154,7 +156,11 @@ module MassiveRecord
                                 end
 
                                 expected_result_size = what_to_find.length if what_to_find.is_a? Array
-                                table.find(what_to_find, options)
+                                ActiveSupport::Notifications.instrument("query.massive_record", {
+                                  :name => [model_name, 'load'].join(' '), :description => "find id(s): #{what_to_find}"
+                                }) do
+                                  table.find(what_to_find, options)
+                                end
                               end
 
           [find_many, expected_result_size, what_to_find, result_from_table]
