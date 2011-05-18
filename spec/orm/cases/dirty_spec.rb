@@ -22,6 +22,18 @@ describe "dirty" do
       @person.should be_changed
     end
 
+    it "should not consider age set as string to the same as integer a change" do
+      @person.age = "20"
+      @person.should_not be_age_changed
+    end
+
+    it "should not consider age set as string back to original value a change" do
+      @person.age = 30
+      @person.age = "20"
+      @person.should_not be_age_changed
+    end
+
+
     it "should know when a attribute is set to it's original value" do
       original_name = @person.name
       @person.name = "Bob"
