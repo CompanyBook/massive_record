@@ -135,16 +135,6 @@ module MassiveRecord
           end
         end
 
-        def find_old(*args)
-          arg  = args[0]
-          opts = args[1] || {}
-          if arg.is_a?(Array)
-            arg.collect{|id| first(opts.merge(:start => id))}
-          else
-            first(opts.merge(:start => arg))
-          end
-        end
-    
         def find_in_batches(opts = {})        
           results_limit = opts[:limit]
           results_found = 0
