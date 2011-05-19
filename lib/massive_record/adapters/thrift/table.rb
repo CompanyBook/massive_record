@@ -119,12 +119,28 @@ module MassiveRecord
         end
         
         def find(*args)
+          what_to_find = args.first
+          options = args.extract_options!.symbolize_keys
+
+          if what_to_find.is_a?(Array)
+            what_to_find.collect { |id| find(id, options) }
+          else
+            if column_families_to_find = options[:select]
+              column_families_to_find &= column_family_names
+            end
+
+            if t_row_result = connection.getRowWithColumns(name, what_to_find, column_families_to_find).first
+              Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
+            end
+          end
+        end
+
+        def find_old(*args)
           arg  = args[0]
           opts = args[1] || {}
           if arg.is_a?(Array)
             arg.collect{|id| first(opts.merge(:start => id))}
           else
-            # need to replace by connection.getRowWithColumns("companies_development", "NO0000000812676342", ["info:name", "info:org_num"]).first
             first(opts.merge(:start => arg))
           end
         end

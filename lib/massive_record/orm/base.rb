@@ -4,6 +4,7 @@ require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/subclasses'
 require 'active_support/core_ext/module'
 require 'active_support/core_ext/string'
+require 'active_support/core_ext/array'
 require 'active_support/memoizable'
 
 require 'massive_record/orm/schema'
