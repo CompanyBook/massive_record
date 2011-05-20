@@ -10,7 +10,7 @@ module MassiveRecord
         
         def read_attribute(attr_name)
           attr_name = attr_name.to_s
-          decode_attribute(attr_name)
+          decode_attribute(attr_name, @attributes[attr_name])
         end
 
         private
@@ -19,8 +19,7 @@ module MassiveRecord
           read_attribute(attr_name)
         end
 
-        def decode_attribute(attr_name, value = nil)
-          value ||= @attributes[attr_name]
+        def decode_attribute(attr_name, value)
           attributes_schema[attr_name].nil? ? value : attributes_schema[attr_name].decode(value)
         end
       end

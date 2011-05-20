@@ -22,6 +22,18 @@ describe "dirty" do
       @person.should be_changed
     end
 
+    it "should notice changes in boolean values from false to true" do
+      @person.status = !@person.status
+      @person.should be_status_changed
+    end
+
+    it "should notice changes in boolean values from true to false" do
+      @person.status = true
+      @person.save
+      @person.status = false
+      @person.should be_status_changed
+    end
+
     it "should not consider age set as string to the same as integer a change" do
       @person.age = "20"
       @person.should_not be_age_changed
