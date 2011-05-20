@@ -86,6 +86,10 @@ describe "A table" do
         @table.find("ID1", :select => ["info"]).column_families.should == ["info"]
       end
 
+      it "should return nil if id is not found" do
+        @table.find("not_exist_FOO").should be_nil
+      end
+
       it "should update row values" do
         row = @table.first
         row.values["info:first_name"].should eql("John")

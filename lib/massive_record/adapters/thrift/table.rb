@@ -118,6 +118,11 @@ module MassiveRecord
           MassiveRecord::Wrapper::Cell.new(:value => connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.value).value
         end
         
+        #
+        # Finds one or multiple ids
+        #
+        # Returns nil if id is not found
+        #
         def find(*args)
           what_to_find = args.first
           options = args.extract_options!.symbolize_keys
