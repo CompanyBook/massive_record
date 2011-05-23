@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency "thrift", ">= 0.5.0"
   s.add_dependency "activesupport"
   s.add_dependency "activemodel"
+  s.add_dependency "tzinfo"
 
   s.add_development_dependency "rspec", ">= 2.1.0"
 
