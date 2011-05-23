@@ -1,3 +1,7 @@
+unless ActiveModel::AttributeMethods.const_defined? 'COMPILABLE_REGEXP'
+  ActiveModel::AttributeMethods::COMPILABLE_REGEXP = /\A[a-zA-Z_]\w*[!?=]?\Z/
+end
+
 module MassiveRecord
   module ORM
     module AttributeMethods
