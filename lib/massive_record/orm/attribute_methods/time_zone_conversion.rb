@@ -29,6 +29,16 @@ module MassiveRecord
           class_attribute :skip_time_zone_conversion_for_attributes, :instance_writer => false
           self.skip_time_zone_conversion_for_attributes = []
         end
+
+
+
+        module ClassMethods
+          private
+
+          def time_zone_conversion_on_field?(field)
+            time_zone_aware_attributes && !skip_time_zone_conversion_for_attributes.include?(field.name) && field.type == :time
+          end
+        end
       end
     end
   end
