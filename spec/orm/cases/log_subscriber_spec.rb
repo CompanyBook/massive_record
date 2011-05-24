@@ -34,23 +34,38 @@ describe "log subscriber" do
       subject.logged(:debug).size.should be_zero
     end
 
+
     describe "loading records" do
       it "should have one lined log to debug when doing a all" do
         Person.all
         wait
-        subject.logged(:debug).size.should eq 1
+        subject.logged(:debug).size.should eq 2
       end
 
       it "should include a the class name of what is loading, time it took, a description about what has been done" do
         Person.all
         wait
-        subject.logged(:debug).first.should match /Person.+?load.+?([\d.]+).+?all/
+        subject.logged(:debug).last.should match /Person.+?load.+?([\d.]+).+?all/
+      end
+    end
+
+    describe "querying records" do
+      it "should have one lined log to debug when doing a all" do
+        Person.all
+        wait
+        subject.logged(:debug).size.should eq 2
+      end
+
+      it "should include a the class name of what is querying, time it took, a description about what has been done" do
+        Person.all
+        wait
+        subject.logged(:debug).first.should match /Person.+?query.+?([\d.]+).+?all/
       end
 
       it "should include class, time and description on first" do
         Person.first
         wait
-        subject.logged(:debug).first.should match /Person.+?load.+?([\d.]+).+?all.+?options.+?limit=>1/
+        subject.logged(:debug).first.should match /Person.+?query.+?([\d.]+).+?all.+?options.+?limit=>1/
       end
 
       it "should include id when finding one person" do
