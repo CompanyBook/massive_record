@@ -17,8 +17,6 @@ module MassiveRecord
         # big data sets where you don't want to load every record up front.
         #
         def find_in_batches(*args)
-          return unless table.exists?
-
           table.find_in_batches(*args) do |rows|
             records = rows.collect do |row|
               instantiate(transpose_hbase_columns_to_record_attributes(row))
@@ -103,7 +101,6 @@ module MassiveRecord
           what_to_find = []
           result_from_table = []
           
-          return (find_many ? [] : raise(RecordNotFound.new("Could not find #{model_name} with id=#{args.first}"))) unless table.exists?
           find_many, expected_result_size, what_to_find, result_from_table = query_hbase(type, args, find_many)
 
           # Filter out unexpected IDs (unless type is set (all/first), in that case

@@ -43,14 +43,4 @@ describe "A connection" do
     @connection.open
     @connection.tables.should be_a_kind_of(MassiveRecord::Wrapper::TablesCollection)
   end
-  
-  it "should reconnect on IOError" do
-    @connection.open
-    @connection.transport.open?.should be_true
-    @connection.getTableNames().should be_a_kind_of(Array)
-    
-    @connection.close
-    @connection.transport.open?.should be_false
-    @connection.getTableNames().should be_a_kind_of(Array)
-  end
 end
