@@ -38,7 +38,17 @@ module MassiveRecord
           # Redefine reader method if we are to do time zone configuration on field
           def define_method_attribute(attr_name)
             if time_zone_conversion_on_field?(attributes_schema[attr_name])
-              # TODO Do something special here
+              if attr_name =~ ActiveModel::AttributeMethods::COMPILABLE_REGEXP
+                generated_attribute_methods.module_eval <<-RUBY, __FILE__, __LINE__
+                  def #{attr_name}
+                    if utc_time_from_database = decode_attribute('#{attr_name}', @attributes['#{attr_name}'])
+                      utc_time_from_database.in_time_zone
+                    end
+                  end
+                RUBY
+              else
+                # TODO 
+              end
             else
               super
             end

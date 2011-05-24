@@ -61,6 +61,7 @@ describe "Time zone awareness" do
       field.type = :time
       TestClass.skip_time_zone_conversion_for_attributes = ['tested_at']
       TestClass.send(:time_zone_conversion_on_field?, field).should be_false
+      TestClass.skip_time_zone_conversion_for_attributes = []
     end
 
     it "should not do conversion when attribute is string field" do
@@ -83,10 +84,17 @@ describe "Time zone awareness" do
       end
     end
 
-    it "should return time as TimeWithZone" do
+    it "should return time as TimeWithZone when attribute accessed directly" do
       in_time_zone zone do
         subject.tested_at = time_as_string
         subject.tested_at.should be_instance_of ActiveSupport::TimeWithZone
+      end
+    end
+
+    it "should return time as TimeWithZone when attribute accessed through read_attribute" do
+      in_time_zone zone do
+        subject.tested_at = time_as_string
+        subject.read_attribute(:tested_at).should be_instance_of ActiveSupport::TimeWithZone
       end
     end
   end
