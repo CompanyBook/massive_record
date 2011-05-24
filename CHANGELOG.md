@@ -1,5 +1,7 @@
 # v0.2.1 (git develop)
 
+- No longer checking if table exist on a find. Instead we rescue error the few times a table does not exist,
+  and create it based on current schema. This gained a lot of speed on our production server.
 - Changed the way Thrift::Table executes find(). It is now doing the work ~3 times faster.
 - In Rails, we are now included in the 200-ok-completed-log like: Completed 200 OK in 798ms (Views: 277.5ms | MassiveRecord: 9.2ms)
 - Subscribed to events from query instruments and printing out time spent in database per call.
