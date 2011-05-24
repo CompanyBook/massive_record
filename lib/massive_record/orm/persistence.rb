@@ -149,14 +149,15 @@ module MassiveRecord
       # have what we need
       #
       def ensure_that_we_have_table_and_column_families!
-        if !self.class.connection.tables.include? self.class.table_name
-          missing_family_names = calculate_missing_family_names
-          self.class.table.create_column_families(missing_family_names) unless missing_family_names.empty?
-          self.class.table.save
-        end
-
+        hbase_create_table! unless self.class.connection.tables.include?(self.class.table_name)
         raise ColumnFamiliesMissingError.new(self.class, calculate_missing_family_names) if calculate_missing_family_names.any?
-      en
+      end
+
+      def hbase_create_table!
+        missing_family_names = calculate_missing_family_names
+        self.class.table.create_column_families(missing_family_names) unless missing_family_names.empty?
+        self.class.table.save
+      end
       
       #
       # Calculate which column families are missing in the database in
