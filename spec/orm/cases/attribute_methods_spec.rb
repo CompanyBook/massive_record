@@ -27,6 +27,11 @@ describe "attribute methods" do
   it "should return casted value when read" do
     @model.read_attribute(:age).should == 15
   end
+
+  it "should read from a method if it has been defined" do
+    @model.should_receive(:name).and_return("my name is")
+    @model.read_attribute(:name).should eq "my name is"
+  end
   
   describe "#attributes" do
     it "should contain the id" do

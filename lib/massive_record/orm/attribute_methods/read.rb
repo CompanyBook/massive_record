@@ -16,12 +16,12 @@ module MassiveRecord
             if attr_name =~ ActiveModel::AttributeMethods::COMPILABLE_REGEXP
               generated_attribute_methods.module_eval <<-RUBY, __FILE__, __LINE__
                 def #{attr_name}
-                  read_attribute('#{attr_name}')
+                  decode_attribute('#{attr_name}', @attributes['#{attr_name}'])
                 end
               RUBY
             else
               generated_attribute_methods.send(:define_method, attr_name) do
-                read_attribute(attr_name)
+                decode_attribute(attr_name, @attributes[attr_name])
               end
             end
           end
@@ -30,7 +30,12 @@ module MassiveRecord
 
         def read_attribute(attr_name)
           attr_name = attr_name.to_s
-          decode_attribute(attr_name, @attributes[attr_name])
+
+          if respond_to? attr_name
+            send(attr_name) if attributes_schema.has_key? attr_name
+          else
+            decode_attribute(attr_name, @attributes[attr_name])
+          end
         end
 
         private
