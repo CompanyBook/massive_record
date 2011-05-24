@@ -66,10 +66,6 @@ module MassiveRecord
           begin
             open if not @client
             client.send(method, *args) if @client
-          rescue IOError => error
-            @client = nil
-            open(:reconnecting => true, :reason => error.class)
-            client.send(method, *args) if @client
           rescue ::Thrift::TransportException => error
             @transport = nil
             @client = nil

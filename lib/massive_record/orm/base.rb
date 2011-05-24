@@ -14,6 +14,7 @@ require 'massive_record/orm/config'
 require 'massive_record/orm/relations'
 require 'massive_record/orm/finders'
 require 'massive_record/orm/finders/scope'
+require 'massive_record/orm/finders/rescue_missing_table_on_find'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/write'
 require 'massive_record/orm/attribute_methods/read'
@@ -243,6 +244,7 @@ module MassiveRecord
       include Relations::Interface
       include Persistence
       include Finders
+      extend  RescueMissingTableOnFind
       include AttributeMethods
       include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::Dirty
