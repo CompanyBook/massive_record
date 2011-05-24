@@ -172,7 +172,6 @@ describe "finders" do
     end
 
     it "should raise MassiveRecord::ORM::RecordNotFound error if table does not exist" do
-      pending "Will refactor persistance module a bit first.."
       Person.table.destroy
       expect { Person.find("id") }.to raise_error MassiveRecord::ORM::RecordNotFound
     end
@@ -223,7 +222,7 @@ describe "finders" do
     end
 
     it "should not do a thing if table does not exist" do
-      Person.table.should_receive(:exists?).and_return false
+      Person.table.destroy
 
       counter = 0
 

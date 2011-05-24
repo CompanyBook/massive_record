@@ -17,8 +17,6 @@ module MassiveRecord
         # big data sets where you don't want to load every record up front.
         #
         def find_in_batches(*args)
-          return unless table.exists?
-
           table.find_in_batches(*args) do |rows|
             records = rows.collect do |row|
               instantiate(transpose_hbase_columns_to_record_attributes(row))
