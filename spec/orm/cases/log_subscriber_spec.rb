@@ -47,24 +47,6 @@ describe "log subscriber" do
         wait
         subject.logged(:debug).last.should match /Person.+?load.+?([\d.]+).+?all/
       end
-
-      #it "should include class, time and description on first" do
-        #Person.first
-        #wait
-        #subject.logged(:debug).last.should match /Person.+?load.+?([\d.]+).+?all.+?options.+?limit=>1/
-      #end
-
-      #it "should include id when finding one person" do
-        #Person.exists? "id_to_be_found"
-        #wait
-        #subject.logged(:debug).last.should include "id(s): id_to_be_found"
-      #end
-
-      #it "should not see the options hash if it's empty" do
-        #Person.exists? "id_to_be_found"
-        #wait
-        #subject.logged(:debug).last.should_not include "{}"
-      #end
     end
 
     describe "querying records" do
