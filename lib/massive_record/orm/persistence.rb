@@ -13,6 +13,42 @@ module MassiveRecord
         def destroy_all
           all.each { |record| record.destroy }
         end
+        
+
+        #
+        # Iterates over tables and column families and ensure that we
+        # have what we need
+        #
+        def ensure_that_we_have_table_and_column_families! # :nodoc:
+          # 
+          # TODO: Can we skip checking if it exists at all, and instead, rescue it if it does not?
+          #
+          hbase_create_table! unless table.exists?
+          raise ColumnFamiliesMissingError.new(self, calculate_missing_family_names) if calculate_missing_family_names.any?
+        end
+
+
+        private
+
+        #
+        # Creates table for this ORM class
+        #
+        def hbase_create_table!
+          missing_family_names = calculate_missing_family_names
+          table.create_column_families(missing_family_names) unless missing_family_names.empty?
+          table.save
+        end
+
+        #
+        # Calculate which column families are missing in the database in
+        # context of what the schema instructs.
+        #
+        def calculate_missing_family_names
+          existing_family_names = table.fetch_column_families.collect(&:name) rescue []
+          expected_family_names = column_families ? column_families.collect(&:name) : []
+
+          expected_family_names.collect(&:to_s) - existing_family_names.collect(&:to_s)
+        end
       end
 
 
@@ -87,7 +123,7 @@ module MassiveRecord
       # is atomic, and as of writing this the Thrift adapter / wrapper does
       # not do this anatomic.
       def atomic_increment!(attr_name, by = 1)
-        ensure_that_we_have_table_and_column_families!
+        self.class.ensure_that_we_have_table_and_column_families!
         attr_name = attr_name.to_s
 
         row = row_for_record
@@ -116,7 +152,7 @@ module MassiveRecord
       end
 
       def create
-        ensure_that_we_have_table_and_column_families!
+        self.class.ensure_that_we_have_table_and_column_families!
 
         if saved = store_record_to_database('create')
           @new_record = false
@@ -125,7 +161,7 @@ module MassiveRecord
       end
 
       def update(attribute_names_to_update = attributes.keys)
-        ensure_that_we_have_table_and_column_families!
+        self.class.ensure_that_we_have_table_and_column_families!
 
         store_record_to_database('update', attribute_names_to_update)
       end
@@ -144,31 +180,6 @@ module MassiveRecord
       end
 
 
-      #
-      # Iterates over tables and column families and ensure that we
-      # have what we need
-      #
-      def ensure_that_we_have_table_and_column_families!
-        hbase_create_table! unless self.class.connection.tables.include?(self.class.table_name)
-        raise ColumnFamiliesMissingError.new(self.class, calculate_missing_family_names) if calculate_missing_family_names.any?
-      end
-
-      def hbase_create_table!
-        missing_family_names = calculate_missing_family_names
-        self.class.table.create_column_families(missing_family_names) unless missing_family_names.empty?
-        self.class.table.save
-      end
-      
-      #
-      # Calculate which column families are missing in the database in
-      # context of what the schema instructs.
-      #
-      def calculate_missing_family_names
-        existing_family_names = self.class.table.fetch_column_families.collect(&:name) rescue []
-        expected_family_names = column_families ? column_families.collect(&:name) : []
-
-        expected_family_names.collect(&:to_s) - existing_family_names.collect(&:to_s)
-      end
 
       #
       # Returns a Wrapper::Row class which we can manipulate this
