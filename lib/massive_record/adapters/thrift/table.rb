@@ -131,8 +131,7 @@ module MassiveRecord
             what_to_find.collect { |id| find(id, options) }
           else
             if column_families_to_find = options[:select]
-              #column_families_to_find &= column_family_names
-              column_families_to_find = column_families_to_find.collect{|c| c.to_s}
+              column_families_to_find = column_families_to_find.collect { |c| c.to_s }
             end
 
             if t_row_result = connection.getRowWithColumns(name, what_to_find, column_families_to_find).first
