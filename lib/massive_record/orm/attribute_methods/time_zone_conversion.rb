@@ -33,6 +33,27 @@ module MassiveRecord
 
 
         module ClassMethods
+          protected
+
+          # Redefine reader method if we are to do time zone configuration on field
+          def define_method_attribute(attr_name)
+            if time_zone_conversion_on_field?(attributes_schema[attr_name])
+              # TODO Do something special here
+            else
+              super
+            end
+          end
+
+          # Redefine writer method if we are to do time zone configuration on field
+          def define_method_attribute=(attr_name)
+            if time_zone_conversion_on_field?(attributes_schema[attr_name])
+              # TODO Do something special here
+            else
+              super
+            end
+          end
+
+
           private
 
           def time_zone_conversion_on_field?(field)

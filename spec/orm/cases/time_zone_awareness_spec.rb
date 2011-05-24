@@ -3,6 +3,22 @@ require 'orm/models/test_class'
 require 'orm/models/person'
 
 describe "Time zone awareness" do
+  def in_time_zone(tz)
+    old_zone = Time.zone
+    old_awareness = MassiveRecord::ORM::Base.time_zone_aware_attributes
+
+    Time.zone = zone ? ActiveSupport::TimeZone[zone] : nil
+    MassiveRecord::ORM::Base.time_zone_aware_attributes = !zone.nil?
+
+    yield
+
+    ensure
+      Time.zone = old_zone
+      MassiveRecord::ORM::Base.time_zone_aware_attributes = old_awareness
+  end
+
+
+
 
   before { MassiveRecord::ORM::Base.time_zone_aware_attributes = true }
 
@@ -50,6 +66,28 @@ describe "Time zone awareness" do
     it "should not do conversion when attribute is string field" do
       field.type = :string
       TestClass.send(:time_zone_conversion_on_field?, field).should be_false
+    end
+  end
+
+
+
+  describe "conversion on attribute" do
+    subject { TestClass.new }
+    let(:zone) { "Europe/Stockholm" }
+    let(:time_as_string) { "2010-10-10 10:10:10" }
+
+    it "should be nil when set to nil" do
+      in_time_zone zone do
+        subject.tested_at = nil
+        subject.tested_at.should be_nil
+      end
+    end
+
+    it "should return time as TimeWithZone" do
+      in_time_zone zone do
+        subject.tested_at = time_as_string
+        subject.tested_at.should be_instance_of ActiveSupport::TimeWithZone
+      end
     end
   end
 end
