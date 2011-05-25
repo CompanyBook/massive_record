@@ -37,14 +37,14 @@ module MassiveRecord
 
           # Redefine reader method if we are to do time zone configuration on field
           def define_method_attribute(attr_name)
-            internal_read_method = "_#{attr_name}"
-
             if time_zone_conversion_on_field?(attributes_schema[attr_name])
+              internal_read_method = "_#{attr_name}"
+
               if attr_name =~ ActiveModel::AttributeMethods::COMPILABLE_REGEXP
                 generated_attribute_methods.module_eval <<-RUBY, __FILE__, __LINE__
                   def #{internal_read_method}
-                    if utc_time_from_database = decode_attribute('#{attr_name}', @attributes['#{attr_name}'])
-                      utc_time_from_database.in_time_zone
+                    if time = decode_attribute('#{attr_name}', @attributes['#{attr_name}'])
+                      time.in_time_zone
                     end
                   end
 
@@ -52,8 +52,8 @@ module MassiveRecord
                 RUBY
               else
                 generated_attribute_methods.send(:define_method, internal_read_method) do
-                  if utc_time_from_database = decode_attribute(attr_name, @attributes[attr_name])
-                    utc_time_from_database.in_time_zone
+                  if time = decode_attribute(attr_name, @attributes[attr_name])
+                    time.in_time_zone
                   end
                 end
               end
@@ -64,11 +64,8 @@ module MassiveRecord
 
           # Redefine writer method if we are to do time zone configuration on field
           def define_method_attribute=(attr_name)
-            if time_zone_conversion_on_field?(attributes_schema[attr_name])
-              super
-            else
-              super
-            end
+            # Nothing special goes on here, at the moment
+            super
           end
 
 

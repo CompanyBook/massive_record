@@ -3,9 +3,17 @@ require 'orm/models/test_class'
 require 'orm/models/person'
 
 describe "Time zone awareness" do
-  def in_time_zone(tz)
+  #
+  # Helper method which enables and disables time zone awareness and sets the
+  # incomming time zone to the current one.
+  #
+  # Method will ensure that everything is put back into
+  # the state it was before the method was called.
+  #
+  def in_time_zone(zone)
     old_zone = Time.zone
     old_awareness = MassiveRecord::ORM::Base.time_zone_aware_attributes
+    TestClass.undefine_attribute_methods # If time zone awareness has changed we need to re-generate methods
 
     Time.zone = zone ? ActiveSupport::TimeZone[zone] : nil
     MassiveRecord::ORM::Base.time_zone_aware_attributes = !zone.nil?
@@ -15,15 +23,11 @@ describe "Time zone awareness" do
     ensure
       Time.zone = old_zone
       MassiveRecord::ORM::Base.time_zone_aware_attributes = old_awareness
+      TestClass.undefine_attribute_methods
   end
 
 
 
-
-  before do 
-    MassiveRecord::ORM::Base.time_zone_aware_attributes = true
-    TestClass.undefine_attribute_methods
-  end
 
   describe "configuration" do
     it "should have a default time zone configuration" do
@@ -31,7 +35,7 @@ describe "Time zone awareness" do
     end
 
     it "should have default time zone awareness" do
-      TestClass.time_zone_aware_attributes.should eq true
+      TestClass.time_zone_aware_attributes.should eq false
     end
 
     it "should by default skip no attributes when doing time zone conversions" do
@@ -50,8 +54,10 @@ describe "Time zone awareness" do
     let(:field) { MassiveRecord::ORM::Schema::Field.new :name => 'tested_at' }
 
     it "should do conversion when attribute is time" do
-      field.type = :time
-      TestClass.send(:time_zone_conversion_on_field?, field).should be_true
+      in_time_zone "utc" do
+        field.type = :time
+        TestClass.send(:time_zone_conversion_on_field?, field).should be_true
+      end
     end
 
     it "should not do conversion if time_zone_aware_attributes is false" do
@@ -76,28 +82,99 @@ describe "Time zone awareness" do
 
 
   describe "conversion on attribute" do
-    subject { TestClass.new }
-    let(:zone) { "Europe/Stockholm" }
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+    subject { TestClass.new :id => "test" }
+    let(:tz_europe) { "Europe/Stockholm" }
+    let(:tz_us) { "Pacific Time (US & Canada)" }
+
     let(:time_as_string) { "2010-10-10 10:10:10" }
 
     it "should be nil when set to nil" do
-      in_time_zone zone do
+      in_time_zone tz_europe do
         subject.tested_at = nil
         subject.tested_at.should be_nil
       end
     end
 
     it "should return time as TimeWithZone when attribute accessed directly" do
-      in_time_zone zone do
+      in_time_zone tz_europe do
         subject.tested_at = time_as_string
         subject.tested_at.should be_instance_of ActiveSupport::TimeWithZone
       end
     end
 
     it "should return time as TimeWithZone when attribute accessed through read_attribute" do
-      in_time_zone zone do
+      in_time_zone tz_europe do
         subject.tested_at = time_as_string
         subject.read_attribute(:tested_at).should be_instance_of ActiveSupport::TimeWithZone
+      end
+    end
+
+    it "should return time in local time" do
+      in_time_zone tz_europe do
+        subject.tested_at = time_as_string
+        subject.tested_at.time_zone.should eq ActiveSupport::TimeZone[tz_europe]
+
+        in_time_zone tz_us do
+          subject.tested_at.time_zone.should eq ActiveSupport::TimeZone[tz_us]
+        end
+      end
+    end
+
+    it "should return correct time in other time zones" do
+      utc_time = Time.utc(2010, 1, 1)
+      us_time = utc_time.in_time_zone(tz_us)
+
+      in_time_zone tz_europe do
+        subject.tested_at = us_time
+        subject.tested_at.should eq utc_time
+      end
+    end
+
+    it "should return correct times after save" do
+      utc_time = Time.now.utc
+      europe_time = utc_time.in_time_zone(tz_europe)
+      us_time = utc_time.in_time_zone(tz_us)
+
+      in_time_zone tz_europe do
+        subject.tested_at = europe_time
+        subject.save!
+      end
+
+      subject.reload
+
+      in_time_zone tz_us do
+        subject.tested_at.to_s.should eq us_time.to_s
+      end
+    end
+
+    it "should store time in DB format" do
+      utc_time = Time.now.utc
+      europe_time = utc_time.in_time_zone(tz_europe)
+
+      in_time_zone tz_europe do
+        subject.tested_at = europe_time
+        subject.save!
+      end
+
+      subject.reload
+      subject.tested_at.to_s.should eq utc_time.to_s
+
+      in_time_zone tz_europe do
+        subject.tested_at.to_s.should eq europe_time.to_s
+      end
+    end
+
+    it "should store time in DB format, raw check" do
+      in_time_zone tz_europe do
+        subject.tested_at = time_as_string
+        subject.save!
+
+        r = TestClass.table.find("test")
+        cell = r.columns["test_family:tested_at"]
+        cell.value.should eq MassiveRecord::ORM::Base.coder.dump(Time.zone.parse(time_as_string).utc)
       end
     end
   end
