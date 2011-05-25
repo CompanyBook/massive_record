@@ -253,6 +253,23 @@ describe MassiveRecord::ORM::Schema::Field do
         @subject.encode("{}")
       end
     end
+
+    context "time_zone_aware_attributes" do
+      before do
+        @old_time_zone_aware_attributes = MassiveRecord::ORM::Base.time_zone_aware_attributes
+        MassiveRecord::ORM::Base.time_zone_aware_attributes = true
+      end
+
+      after do
+        MassiveRecord::ORM::Base.time_zone_aware_attributes = @old_time_zone_aware_attributes
+      end
+
+      it "should encode times in UTC" do
+        europe_time = Time.now.in_time_zone('Europe/Stockholm')
+        @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+        @subject.encode(europe_time).should == subject.coder.dump(europe_time.utc)
+      end
+    end
   end
 
   describe "#unique_name" do
