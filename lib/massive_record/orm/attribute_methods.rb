@@ -10,7 +10,7 @@ module MassiveRecord
 
       module ClassMethods
         def define_attribute_methods
-          super(known_attribute_names)
+          super(known_attribute_names << "id")
         end
       end
 
