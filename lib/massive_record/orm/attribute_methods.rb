@@ -47,6 +47,13 @@ module MassiveRecord
         super
       end
 
+
+      protected
+
+      def attribute_method?(attr_name)
+        attr_name == 'id' || (defined?(@attributes) && @attributes.include?(attr_name))
+      end
+
       private
 
       def attributes_raw=(new_attributes)
