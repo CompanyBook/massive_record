@@ -176,6 +176,12 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(nil).should be_nil
     end
 
+    it "should decode time when value is ActiveSupport::TimeWithZone" do
+      today = Time.now.in_time_zone('Europe/Stockholm')
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+      @subject.decode(today).to_i.should == today.to_i
+    end
+
     it "should set time to nil if date could not be parsed" do
       today = "foobar"
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)

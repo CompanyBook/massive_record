@@ -169,6 +169,8 @@ module MassiveRecord
         def value_is_already_decoded?(value)
           if type == :string
             value.is_a?(String) && !(value == @@encoded_null_string || value == @@encoded_nil_value)
+          elsif value.acts_like?(type)
+            true
           else
             classes.include?(value.class)
           end
