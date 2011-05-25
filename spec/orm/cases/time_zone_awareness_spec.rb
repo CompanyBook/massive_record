@@ -20,7 +20,10 @@ describe "Time zone awareness" do
 
 
 
-  before { MassiveRecord::ORM::Base.time_zone_aware_attributes = true }
+  before do 
+    MassiveRecord::ORM::Base.time_zone_aware_attributes = true
+    TestClass.undefine_attribute_methods
+  end
 
   describe "configuration" do
     it "should have a default time zone configuration" do
