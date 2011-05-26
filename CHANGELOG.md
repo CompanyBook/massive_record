@@ -1,5 +1,8 @@
 # v0.2.1 (git develop)
 
+- Time can now be time zone aware. Times are being presented in the Time.zone, and persisted 
+  in UTC. You enable it with MassiveRecord::ORM::Base.time_zone_aware_attributes = true.
+  In a Rails application this will be set to true by default.
 - No longer checking if table exist on a find. Instead we rescue error the few times a table does not exist,
   and create it based on current schema. This gained a lot of speed on our production server.
 - Changed the way Thrift::Table executes find(). It is now doing the work ~3 times faster.
