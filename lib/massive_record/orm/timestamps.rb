@@ -28,7 +28,7 @@ module MassiveRecord
 
 
       def updated_at
-        self['updated_at']
+        self.class.time_zone_aware_attributes ? self['updated_at'].try(:in_time_zone) : self['updated_at']
       end
 
       def write_attribute(attr_name, value)

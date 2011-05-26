@@ -3,6 +3,7 @@ require 'orm/models/person'
 require 'orm/models/person_with_timestamp'
 
 describe "timestamps" do
+  include TimeZoneHelper
   include CreatePersonBeforeEach
 
   before do
@@ -51,6 +52,20 @@ describe "timestamps" do
       @person.should_not be_valid
 
       @person.updated_at.should == updated_at_was
+    end
+
+    context "with time zone awarenesswith zone enabled" do
+      it "should return time with zone" do
+        in_time_zone "Europe/Stockholm" do
+          @person.updated_at.should be_instance_of ActiveSupport::TimeWithZone
+        end
+      end
+
+      it "should be nil on new records" do
+        in_time_zone "Europe/Stockholm" do
+          Person.new.updated_at.should be_nil
+        end
+      end
     end
   end
 
