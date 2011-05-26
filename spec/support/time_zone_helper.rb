@@ -9,7 +9,8 @@ module TimeZoneHelper
   def in_time_zone(zone)
     old_zone = Time.zone
     old_awareness = MassiveRecord::ORM::Base.time_zone_aware_attributes
-    TestClass.undefine_attribute_methods # If time zone awareness has changed we need to re-generate methods
+    MassiveRecord::ORM::Base.subclasses.each { |klass| klass.undefine_attribute_methods } # If time zone awareness has changed we need to re-generate methods
+
 
     Time.zone = zone ? ActiveSupport::TimeZone[zone] : nil
     MassiveRecord::ORM::Base.time_zone_aware_attributes = !zone.nil?
@@ -19,6 +20,6 @@ module TimeZoneHelper
     ensure
       Time.zone = old_zone
       MassiveRecord::ORM::Base.time_zone_aware_attributes = old_awareness
-      TestClass.undefine_attribute_methods
+      MassiveRecord::ORM::Base.subclasses.each { |klass| klass.undefine_attribute_methods } # If time zone awareness has changed we need to re-generate methods
   end
 end
