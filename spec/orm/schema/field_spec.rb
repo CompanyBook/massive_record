@@ -176,6 +176,12 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(nil).should be_nil
     end
 
+    it "should decode time when value is ActiveSupport::TimeWithZone" do
+      today = Time.now.in_time_zone('Europe/Stockholm')
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+      @subject.decode(today).to_i.should == today.to_i
+    end
+
     it "should set time to nil if date could not be parsed" do
       today = "foobar"
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
@@ -245,6 +251,23 @@ describe MassiveRecord::ORM::Schema::Field do
         @subject.type = type
         @subject.coder.should_receive(:dump)
         @subject.encode("{}")
+      end
+    end
+
+    context "time_zone_aware_attributes" do
+      before do
+        @old_time_zone_aware_attributes = MassiveRecord::ORM::Base.time_zone_aware_attributes
+        MassiveRecord::ORM::Base.time_zone_aware_attributes = true
+      end
+
+      after do
+        MassiveRecord::ORM::Base.time_zone_aware_attributes = @old_time_zone_aware_attributes
+      end
+
+      it "should encode times in UTC" do
+        europe_time = Time.now.in_time_zone('Europe/Stockholm')
+        @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+        @subject.encode(europe_time).should == subject.coder.dump(europe_time.utc)
       end
     end
   end

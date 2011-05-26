@@ -1,3 +1,7 @@
+unless ActiveModel::AttributeMethods.const_defined? 'COMPILABLE_REGEXP'
+  ActiveModel::AttributeMethods::COMPILABLE_REGEXP = /\A[a-zA-Z_]\w*[!?=]?\Z/
+end
+
 module MassiveRecord
   module ORM
     module AttributeMethods
@@ -41,6 +45,13 @@ module MassiveRecord
       def respond_to?(*args)
         self.class.define_attribute_methods unless self.class.attribute_methods_generated?
         super
+      end
+
+
+      protected
+
+      def attribute_method?(attr_name)
+        attr_name == 'id' || (defined?(@attributes) && @attributes.include?(attr_name))
       end
 
       private

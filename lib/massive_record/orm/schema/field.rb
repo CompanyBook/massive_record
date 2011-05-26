@@ -138,6 +138,7 @@ module MassiveRecord
           if type == :string && !(value.nil? || value == @@encoded_nil_value)
             value
           else
+            value = value.try(:utc) if Base.time_zone_aware_attributes && field_affected_by_time_zone_awareness?
             coder.dump(value)
           end
         end
@@ -169,6 +170,8 @@ module MassiveRecord
         def value_is_already_decoded?(value)
           if type == :string
             value.is_a?(String) && !(value == @@encoded_null_string || value == @@encoded_nil_value)
+          elsif value.acts_like?(type)
+            true
           else
             classes.include?(value.class)
           end
@@ -176,6 +179,10 @@ module MassiveRecord
 
         def loaded_value_is_of_valid_class?(value)
           value.nil? || value.is_a?(String) && value == @@encoded_nil_value || value_is_already_decoded?(value)
+        end
+
+        def field_affected_by_time_zone_awareness?
+          type == :time
         end
       end
     end

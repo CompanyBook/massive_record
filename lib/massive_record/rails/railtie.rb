@@ -19,6 +19,13 @@ module MassiveRecord
           include MassiveRecord::Rails::ControllerRuntime
         end
       end
+
+      initializer "massive_record.time_zone_awareness" do
+        ActiveSupport.on_load(:massive_record) do
+          self.time_zone_aware_attributes = true
+          self.default_timezone = :utc
+        end
+      end
     end
   end
 end
