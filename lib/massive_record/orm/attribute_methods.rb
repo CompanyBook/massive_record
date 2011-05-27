@@ -27,7 +27,7 @@ module MassiveRecord
       def attributes=(new_attributes)
         return unless new_attributes.is_a?(Hash)
 
-        new_attributes.each do |attr, value|
+        sanitize_for_mass_assignment(new_attributes).each do |attr, value|
           writer_method = "#{attr}="
           if respond_to? writer_method
             send(writer_method, value)

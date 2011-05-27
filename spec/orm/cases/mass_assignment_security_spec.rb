@@ -49,7 +49,49 @@ describe "mass assignment security" do
 
   describe "access test on" do
     describe Person do
+      context "when only age is accessible" do
+        it "sets age with mass assignment" do
+          restore_mass_assignment_security_policy_after Person do
+            Person.class_eval do
+              attr_accessible :age
+            end
 
+            Person.new(:age => 33).age.should eq 33
+          end
+        end
+
+        it "does not set name with mass assignment" do
+          restore_mass_assignment_security_policy_after Person do
+            Person.class_eval do
+              attr_accessible :age
+            end
+
+            Person.new(:name => 'Thorbjorn').name.should be_nil
+          end
+        end
+      end
+
+      context "when only age is protected" do
+        it "does not set age with mass assignment" do
+          restore_mass_assignment_security_policy_after Person do
+            Person.class_eval do
+              attr_protected :age
+            end
+
+            Person.new(:age => 33).age.should be_nil
+          end
+        end
+
+        it "sets name with mass assignment" do
+          restore_mass_assignment_security_policy_after Person do
+            Person.class_eval do
+              attr_protected :age
+            end
+
+            Person.new(:name => 'Thorbjorn').name.should eq "Thorbjorn"
+          end
+        end
+      end
     end
   end
 end
