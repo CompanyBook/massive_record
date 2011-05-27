@@ -1,5 +1,9 @@
 # v0.2.1 (git develop)
 
+- We now have mass assignment of attributes, just like ActiveRecord. It ueses the same module,
+  so attr_accessible and attr_protected methods are available. By default the id and inheritable attribute
+  are protected. If you where doing Person.new(:id => 'ID') you might want to change this now as it will no
+  longer work.
 - Time can now be time zone aware. Times are being presented in the Time.zone, and persisted 
   in UTC. You enable it with MassiveRecord::ORM::Base.time_zone_aware_attributes = true.
   In a Rails application this will be set to true by default.
