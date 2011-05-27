@@ -11,6 +11,16 @@ module MassiveRecord
       module ClassMethods
         def define_attribute_methods
           super(known_attribute_names)
+          @attribute_methods_generated = true
+        end
+
+        def attribute_methods_generated?
+          @attribute_methods_generated ||= false
+        end
+
+        def undefine_attribute_methods(*args)
+          super
+          @attribute_methods_generated = false
         end
       end
 
