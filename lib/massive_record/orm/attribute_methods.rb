@@ -7,10 +7,15 @@ module MassiveRecord
     module AttributeMethods
       extend ActiveSupport::Concern
       include ActiveModel::AttributeMethods      
+      include ActiveModel::MassAssignmentSecurity
 
       module ClassMethods
         def define_attribute_methods
           super(known_attribute_names)
+        end
+
+        def attributes_protected_by_default
+          ['id', inheritance_attribute]
         end
       end
 
