@@ -1,5 +1,6 @@
 # v0.2.1 (git develop)
 
+- Polymorphic type attribute is no longer called underscore on. Should be backwards compatible when finding records.
 - Time can now be time zone aware. Times are being presented in the Time.zone, and persisted 
   in UTC. You enable it with MassiveRecord::ORM::Base.time_zone_aware_attributes = true.
   In a Rails application this will be set to true by default.

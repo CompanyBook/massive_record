@@ -4,7 +4,7 @@ module MassiveRecord
       class Proxy
         class ReferencesOnePolymorphic < Proxy
           def proxy_target=(proxy_target)
-            set_foreign_key_and_type_in_proxy_owner(proxy_target.id, proxy_target.class.to_s.underscore) if proxy_target
+            set_foreign_key_and_type_in_proxy_owner(proxy_target.id, proxy_target.class.to_s) if proxy_target
             super(proxy_target)
           end
 

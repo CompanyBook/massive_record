@@ -146,7 +146,7 @@ describe MassiveRecord::ORM::Relations::Interface do
 
         it "should set the type in proxy_owner when proxy_target is set" do
           subject.attachable = attachable
-          subject.attachable_type.should == attachable.class.to_s.underscore
+          subject.attachable_type.should == attachable.class.to_s
         end
 
 
