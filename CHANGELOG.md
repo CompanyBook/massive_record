@@ -4,6 +4,8 @@
   so attr_accessible and attr_protected methods are available. By default the id and inheritable attribute
   are protected. If you where doing Person.new(:id => 'ID') you might want to change this now as it will no
   longer work.
+- Ids can now be assigned on new/create/create! with: Person.new("id", attributes). Person.new(id: "id") will
+  is soon to be disallowed.
 - Time can now be time zone aware. Times are being presented in the Time.zone, and persisted 
   in UTC. You enable it with MassiveRecord::ORM::Base.time_zone_aware_attributes = true.
   In a Rails application this will be set to true by default.

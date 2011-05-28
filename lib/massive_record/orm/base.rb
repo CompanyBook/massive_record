@@ -108,15 +108,20 @@ module MassiveRecord
       # and assign to instance variables. How read- and write 
       # methods are defined might change over time when the DSL
       # for describing column families and fields are in place
+      # You can call initialize in multiple ways:
+      #   ORMClass.new(attr_one: value, attr_two: value)
+      #   ORMClass.new("the-id-of-the-new-record")
+      #   ORMClass.new("the-id-of-the-new-record", attr_one: value, attr_two: value)
       #
-      def initialize(attributes = {})
+      def initialize(*args)
+        attributes = args.extract_options!
+        id = args.first
+
         @new_record = true
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
 
-        attributes = {} if attributes.nil?
-
-        self.attributes_raw = attributes_from_field_definition
+        self.attributes_raw = attributes_from_field_definition.merge('id' => id)
         self.attributes = attributes
 
         clear_dirty_states!

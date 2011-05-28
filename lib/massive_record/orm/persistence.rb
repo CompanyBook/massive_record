@@ -4,8 +4,8 @@ module MassiveRecord
       extend ActiveSupport::Concern
 
       module ClassMethods
-        def create(attributes = {})
-          new(attributes).tap do |record|
+        def create(*args)
+          new(*args).tap do |record|
             record.save
           end
         end
