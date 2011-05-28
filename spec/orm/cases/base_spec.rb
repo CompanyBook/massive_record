@@ -313,4 +313,18 @@ describe MassiveRecord::ORM::Base do
       Person.coder.should be_instance_of MassiveRecord::ORM::Coders::JSON
     end
   end
+
+  describe "id as first argument to" do
+    [:new, :create, :create!].each do |creation_method|
+      describe creation_method do
+        it "sets first argument as records id" do
+          TestClass.send(creation_method, "idfirstarg").id.should == "idfirstarg"
+        end
+
+        it "sets first argument as record id, hash as it's attribute" do
+          TestClass.send(creation_method, "idfirstarg", foo: 'works').foo.should == 'works'
+        end
+      end
+    end
+  end
 end

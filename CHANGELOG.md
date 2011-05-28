@@ -1,5 +1,7 @@
 # v0.2.1 (git develop)
 
+- Ids can now be assigned on new/create/create! with: Person.new("id", attributes). Person.new(id: "id") will
+  is soon to be disallowed.
 - Time can now be time zone aware. Times are being presented in the Time.zone, and persisted 
   in UTC. You enable it with MassiveRecord::ORM::Base.time_zone_aware_attributes = true.
   In a Rails application this will be set to true by default.
