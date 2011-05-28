@@ -126,6 +126,7 @@ Here is an example of usage, both for Table and Column:
       field :nice_place, :boolean, :default => true
     end
 
+You can find a small example application here: https://github.com/thhermansen/massive_record_test_app
 
 ### Related gems
 
