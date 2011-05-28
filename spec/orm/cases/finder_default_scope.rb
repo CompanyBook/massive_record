@@ -7,7 +7,7 @@ describe "Default scope in" do
   include SetTableNamesToTestTable
 
   describe Person do
-    let(:subject) { Person.new :id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
+    let(:subject) { Person.new "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
 
     before do
       subject.save!

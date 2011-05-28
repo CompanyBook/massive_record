@@ -181,7 +181,7 @@ describe MassiveRecord::ORM::Relations::Metadata do
     end
 
     describe "proc" do
-      let(:proxy_owner) { Person.new :id => "person-1" }
+      let(:proxy_owner) { Person.new "person-1" }
       let(:find_with_proc) { subject.records_starts_from = :friends_records_starts_from_id; subject.find_with }
 
       before do

@@ -9,7 +9,7 @@ describe "encoding" do
     include SetTableNamesToTestTable
 
     before do
-      @person = Person.create! :id => "new_id", :name => "Thorbjørn", :age => "22"
+      @person = Person.create! "new_id", :name => "Thorbjørn", :age => "22"
       @person_from_db = Person.find(@person.id)
     end
 

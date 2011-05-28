@@ -217,8 +217,8 @@ describe MassiveRecord::ORM::Finders::Scope do
     include SetTableNamesToTestTable
 
     describe "with a person" do
-      let(:person_1) { Person.create :id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
-      let(:person_2) { Person.create :id => "ID2", :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
+      let(:person_1) { Person.create "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
+      let(:person_2) { Person.create "ID2", :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
 
       before do
         person_1.save!

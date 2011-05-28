@@ -3,7 +3,7 @@ require 'orm/models/person'
 
 describe "attribute methods" do
   before do
-    @model = Person.new :id => "5", :name => "John", :age => "15"
+    @model = Person.new "5", :name => "John", :age => "15"
   end
 
   it "should define reader method" do

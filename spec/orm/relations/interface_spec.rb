@@ -153,7 +153,7 @@ describe MassiveRecord::ORM::Relations::Interface do
 
         [Person, PersonWithTimestamp].each do |polymorphic_class|
           describe "polymorphic association to class #{polymorphic_class}" do
-            let (:attachable) { polymorphic_class.new :id => "ID1" }
+            let (:attachable) { polymorphic_class.new "ID1" }
 
             before do
               subject.attachable_id = attachable.id
