@@ -6,10 +6,10 @@ describe TestReferencesManyProxy do
   include SetUpHbaseConnectionBeforeAll 
   include SetTableNamesToTestTable
 
-  let(:proxy_owner) { Person.new :id => "person-id-1", :name => "Test", :age => 29 }
-  let(:proxy_target) { TestClass.new :id => "test-class-id-1" }
-  let(:proxy_target_2) { TestClass.new :id => "test-class-id-2" }
-  let(:proxy_target_3) { TestClass.new :id => "test-class-id-3" }
+  let(:proxy_owner) { Person.new "person-id-1", :name => "Test", :age => 29 }
+  let(:proxy_target) { TestClass.new "test-class-id-1" }
+  let(:proxy_target_2) { TestClass.new "test-class-id-2" }
+  let(:proxy_target_3) { TestClass.new "test-class-id-3" }
   let(:metadata) { subject.metadata }
 
   subject { proxy_owner.send(:relation_proxy, 'test_classes') }
@@ -43,9 +43,9 @@ describe TestReferencesManyProxy do
     end
 
     describe "with start from" do
-      let(:proxy_target) { Person.new :id => proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
-      let(:proxy_target_2) { Person.new :id => proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
-      let(:not_proxy_target) { Person.new :id => "foo"+"-friend-2", :name => "H", :age => 1 }
+      let(:proxy_target) { Person.new proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:proxy_target_2) { Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:not_proxy_target) { Person.new "foo"+"-friend-2", :name => "H", :age => 1 }
       let(:metadata) { subject.metadata }
 
       subject { proxy_owner.send(:relation_proxy, 'friends') }
@@ -429,8 +429,8 @@ describe TestReferencesManyProxy do
     end
 
     describe "with records_starts_from (proc)" do
-      let(:proxy_target) { Person.new :id => proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
-      let(:proxy_target_2) { Person.new :id => proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:proxy_target) { Person.new proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:proxy_target_2) { Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
       let(:metadata) { subject.metadata }
 
       subject { proxy_owner.send(:relation_proxy, 'friends') }
@@ -497,9 +497,9 @@ describe TestReferencesManyProxy do
 
 
     describe "with records_starts_from (proc)" do
-      let(:proxy_target) { Person.new :id => proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
-      let(:proxy_target_2) { Person.new :id => proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
-      let(:not_among_targets) { Person.new :id => "NOT-friend-1", :name => "H", :age => 9 }
+      let(:proxy_target) { Person.new proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:proxy_target_2) { Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:not_among_targets) { Person.new "NOT-friend-1", :name => "H", :age => 9 }
       let(:metadata) { subject.metadata }
 
       subject { proxy_owner.send(:relation_proxy, 'friends') }
@@ -579,9 +579,9 @@ describe TestReferencesManyProxy do
 
 
     describe "with records_starts_from (proc)" do
-      let(:proxy_target) { Person.new :id => proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
-      let(:proxy_target_2) { Person.new :id => proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
-      let(:not_among_targets) { Person.new :id => "NOT-friend-1", :name => "H", :age => 9 }
+      let(:proxy_target) { Person.new proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:proxy_target_2) { Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:not_among_targets) { Person.new "NOT-friend-1", :name => "H", :age => 9 }
       let(:metadata) { subject.metadata }
 
       subject { proxy_owner.send(:relation_proxy, 'friends') }

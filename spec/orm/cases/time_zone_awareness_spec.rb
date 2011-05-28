@@ -61,7 +61,7 @@ describe "Time zone awareness" do
     include SetUpHbaseConnectionBeforeAll
     include SetTableNamesToTestTable
 
-    subject { TestClass.new :id => "test" }
+    subject { TestClass.new "test" }
     let(:tz_europe) { "Europe/Stockholm" }
     let(:tz_us) { "Pacific Time (US & Canada)" }
 

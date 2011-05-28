@@ -15,27 +15,27 @@ describe "persistence" do
     end
 
     it "should be persisted if saved" do
-      model = TestClass.new :id => "id1"
+      model = TestClass.new "id1"
       model.save
       model.should be_persisted
     end
 
     it "should be destroyed when destroyed" do
-      model = TestClass.new :id => "id1"
+      model = TestClass.new "id1"
       model.save
       model.destroy
       model.should be_destroyed
     end
 
     it "should not be persisted if destroyed" do
-      model = TestClass.new :id => "id1"
+      model = TestClass.new "id1"
       model.save
       model.destroy
       model.should_not be_persisted
     end
 
     it "should be possible to create new objects" do
-      TestClass.create(:id => "id1").should be_persisted
+      TestClass.create("id1").should be_persisted
     end
 
     it "should raise an error if validation fails on save!" do
@@ -91,17 +91,17 @@ describe "persistence" do
     end
 
     it "should return a row with id set" do
-      Person.new({:id => "foo"}).send(:row_for_record).id.should == "foo"
+      Person.new("foo").send(:row_for_record).id.should == "foo"
     end
 
     it "should return a row with table set" do
-      Person.new({:id => "foo"}).send(:row_for_record).table.should == Person.table
+      Person.new("foo").send(:row_for_record).table.should == Person.table
     end
   end
   
   describe "#attributes_to_row_values_hash" do
     before do
-      @person = Person.new({ :id => "new_id", :name => "Vincent", :points => 15 })
+      @person = Person.new("new_id", :name => "Vincent", :points => 15)
     end
     
     it "should include the 'pts' field in the database which has 'points' as an alias" do
@@ -116,7 +116,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.create! :id => "new_id", :name => "Thorbjorn", :age => "22"
+        @person = Person.create! "new_id", :name => "Thorbjorn", :age => "22"
       end
 
       it "should update given attriubte when valid" do
@@ -134,7 +134,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.create! :id => "new_id", :name => "Thorbjorn", :age => "22"
+        @person = Person.create! "new_id", :name => "Thorbjorn", :age => "22"
       end
 
       it "should update given attriubtes when valid" do
@@ -162,7 +162,7 @@ describe "persistence" do
       end
 
       it "should delegate save to update if its a persisted record" do
-        person = Person.new :id => 14, :name => "Bob", :age => 33
+        person = Person.new '14', :name => "Bob", :age => 33
         person.should_receive(:new_record?).and_return(false)
         person.should_receive(:update)
         person.save
@@ -187,7 +187,7 @@ describe "persistence" do
               end
             end
 
-            @new_instance = @new_class.new :id => "id_of_foo", :foo => "bar"
+            @new_instance = @new_class.new "id_of_foo", :foo => "bar"
           end
 
           after do
@@ -220,7 +220,7 @@ describe "persistence" do
           include CreatePersonBeforeEach
 
           it "should store (create) new objects" do
-            person = Person.new :id => "new_id", :name => "Thorbjorn", :age => "22"
+            person = Person.new "new_id", :name => "Thorbjorn", :age => "22"
             person.save!
             person_from_db = Person.find(person.id)
             person_from_db.should == person
@@ -292,7 +292,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.new :id => "id1"
+        @person = Person.new "id1"
         @person.stub!(:new_record?).and_return(false)
         @row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
         @person.should_receive(:row_for_record).and_return(@row)
@@ -333,7 +333,7 @@ describe "persistence" do
       include SetTableNamesToTestTable
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should be removed by destroy" do
@@ -355,7 +355,7 @@ describe "persistence" do
 
       describe "#destroy_all" do
         it "should remove all when calling remove_all" do
-          Person.create! :id => "id2", :name => "Going to die :-(", :age => 99
+          Person.create! "id2", :name => "Going to die :-(", :age => 99
           Person.destroy_all
           Person.all.length.should == 0
         end
@@ -365,7 +365,7 @@ describe "persistence" do
         end
 
         it "should destroy all even if it is above 10 rows (obviously)" do
-          15.times { |i| Person.create! :id => "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
+          15.times { |i| Person.create! "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
           Person.destroy_all
           Person.all.length.should == 0
         end
@@ -380,7 +380,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should being able to increment age" do
@@ -414,7 +414,7 @@ describe "persistence" do
       include SetTableNamesToTestTable
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should delegate it's call to increment" do
@@ -442,7 +442,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should being able to decrement age" do
@@ -476,7 +476,7 @@ describe "persistence" do
       include SetTableNamesToTestTable
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should delegate it's call to decrement" do
@@ -496,13 +496,13 @@ describe "persistence" do
     include MockMassiveRecordConnection
 
     it "should raise an error if new record is read only and you try to save it" do
-      person = Person.new :id => "id1", :name => "Thorbjorn", :age => 29
+      person = Person.new "id1", :name => "Thorbjorn", :age => 29
       person.readonly!
       lambda { person.save }.should raise_error MassiveRecord::ORM::ReadOnlyRecord
     end
 
     it "should raise an error if record is read only and you try to save it" do
-      person = Person.create :id => "id1", :name => "Thorbjorn", :age => 29
+      person = Person.create "id1", :name => "Thorbjorn", :age => 29
       person.should be_persisted
 
       person.readonly!

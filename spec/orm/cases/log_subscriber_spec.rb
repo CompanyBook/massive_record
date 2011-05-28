@@ -83,7 +83,7 @@ describe "log subscriber" do
     
     describe "store records" do
       before do
-        @person = Person.create! :id => "first", :name => "Name", :age => 20
+        @person = Person.create! "first", :name => "Name", :age => 20
         wait
       end
 

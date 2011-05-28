@@ -7,6 +7,7 @@ module MassiveRecord
     module AttributeMethods
       extend ActiveSupport::Concern
       include ActiveModel::AttributeMethods      
+      include ActiveModel::MassAssignmentSecurity
 
       module ClassMethods
         def define_attribute_methods
@@ -22,6 +23,10 @@ module MassiveRecord
           super
           @attribute_methods_generated = false
         end
+
+        def attributes_protected_by_default
+          ['id', inheritance_attribute]
+        end
       end
 
 
@@ -32,7 +37,7 @@ module MassiveRecord
       def attributes=(new_attributes)
         return unless new_attributes.is_a?(Hash)
 
-        new_attributes.each do |attr, value|
+        sanitize_for_mass_assignment(new_attributes).each do |attr, value|
           writer_method = "#{attr}="
           if respond_to? writer_method
             send(writer_method, value)

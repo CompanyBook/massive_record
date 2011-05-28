@@ -193,7 +193,7 @@ describe "finders" do
     end
 
     it "should find all persons, even if it is more than 10" do
-      15.times { |i| Person.create! :id => "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
+      15.times { |i| Person.create! "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
       Person.all.length.should > 10
     end
 

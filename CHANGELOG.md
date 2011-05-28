@@ -1,5 +1,11 @@
 # v0.2.1 (git develop)
 
+- We now have mass assignment of attributes, just like ActiveRecord. It ueses the same module,
+  so attr_accessible and attr_protected methods are available. By default the id and inheritable attribute
+  are protected. If you where doing Person.new(:id => 'ID') you might want to change this now as it will no
+  longer work.
+- Ids can now be assigned on new/create/create! with: Person.new("id", attributes). Person.new(id: "id") will
+  is soon to be disallowed.
 - Polymorphic type attribute is no longer called underscore on. Should be backwards compatible when finding records.
 - Time can now be time zone aware. Times are being presented in the Time.zone, and persisted 
   in UTC. You enable it with MassiveRecord::ORM::Base.time_zone_aware_attributes = true.
