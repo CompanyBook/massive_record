@@ -101,6 +101,7 @@ Here is an example of usage, both for Table and Column:
         field :with_a_lot_of_uninteresting_data
       end
 
+      attr_accessible :name, :email, :phone_number, :date_of_birth
 
       validates_presence_of :name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
