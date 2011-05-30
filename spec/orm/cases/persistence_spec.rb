@@ -171,6 +171,7 @@ describe "persistence" do
 
     describe "database test" do
       include SetUpHbaseConnectionBeforeAll
+      include SetTableNamesToTestTable
       
       describe "create" do
         describe "when table does not exists" do
@@ -226,6 +227,31 @@ describe "persistence" do
             person_from_db.should == person
             person_from_db.name.should == "Thorbjorn"
           end
+        end
+
+        it "raises an error if id already exists" do
+          check_was = Person.check_record_uniqueness_on_create
+          Person.check_record_uniqueness_on_create = true
+
+          Person.create! "foo", :name => "Thorbjorn", :age => "22"
+          expect {
+            Person.create! "foo", :name => "Anders", :age => "22"
+          }.to raise_error MassiveRecord::ORM::RecordNotUnique
+
+          Person.find("foo").name.should eq "Thorbjorn"
+          
+          Person.check_record_uniqueness_on_create = check_was
+        end
+
+        it "raises no error if exist checking is turned off" do
+          check_was = Person.check_record_uniqueness_on_create
+          Person.check_record_uniqueness_on_create = false
+
+          Person.create! "foo", :name => "Thorbjorn", :age => "22"
+          Person.create! "foo", :name => "Anders", :age => "22" # This will result in an "update"
+          Person.find("foo").name.should eq "Anders"
+
+          Person.check_record_uniqueness_on_create = check_was
         end
       end
 

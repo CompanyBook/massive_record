@@ -154,6 +154,8 @@ module MassiveRecord
       def create
         self.class.ensure_that_we_have_table_and_column_families!
 
+        raise RecordNotUnique if check_record_uniqueness_on_create && self.class.exists?(id)
+
         if saved = store_record_to_database('create')
           @new_record = false
         end

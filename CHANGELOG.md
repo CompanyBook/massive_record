@@ -1,6 +1,8 @@
 # v0.2.1 (git develop)
 
-- We now have mass assignment of attributes, just like ActiveRecord. It ueses the same module,
+- We can now, by setting Base.check_record_uniqueness_on_create to true, do a quick and simple (and
+  kinda insecure) check if the record id exists on a new_record when doing a create call. Just a simple sanity check.
+- We now have mass assignment of attributes, just like ActiveRecord. It uses the same module,
   so attr_accessible and attr_protected methods are available. By default the id and inheritable attribute
   are protected. If you where doing Person.new(:id => 'ID') you might want to change this now as it will no
   longer work.

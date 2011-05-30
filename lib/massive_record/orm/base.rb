@@ -51,6 +51,15 @@ module MassiveRecord
       
       class_attribute :table_name_suffix, :instance_writer => false
       self.table_name_suffix = ""
+
+      #
+      # Will do a simple exists?(id) check before create as a simple (and
+      # kinda insecure) sanity check on if that ID exists or not. If it do
+      # exists a RecordNotUnique will be raised. This is done from the ORM
+      # layer, so obviously there is a speed cost on create.
+      #
+      class_attribute :check_record_uniqueness_on_create, :instance_writer => false
+      self.check_record_uniqueness_on_create = false
      
       class << self
         def table_name
