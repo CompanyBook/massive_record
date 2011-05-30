@@ -204,6 +204,11 @@ module MassiveRecord
         read_attribute(:id)
       end
 
+      def id=(id)
+        id = id.to_s unless id.blank?
+        write_attribute(:id, id)
+      end
+
 
 
       def readonly?

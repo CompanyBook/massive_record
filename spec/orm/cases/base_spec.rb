@@ -215,7 +215,7 @@ describe MassiveRecord::ORM::Base do
 
     it "should start with the record's id if it has any" do
       @person.id = 3
-      @person.inspect.should include "#<Person id: 3,"
+      @person.inspect.should include '#<Person id: "3",'
     end
 
     it "should start with the record's id if it has any" do

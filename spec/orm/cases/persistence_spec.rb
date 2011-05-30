@@ -535,4 +535,18 @@ describe "persistence" do
       lambda { person.save }.should raise_error MassiveRecord::ORM::ReadOnlyRecord
     end
   end
+
+  describe "id as int" do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+    it "saves id as string and reloads correctly" do
+      person = Person.new :name => "Thorbjorn", :age => 29
+      person.id = 1
+      person.save!
+
+      person.reload
+      person.id.should == "1"
+    end
+  end
 end
