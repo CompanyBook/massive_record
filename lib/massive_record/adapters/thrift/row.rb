@@ -80,35 +80,13 @@ module MassiveRecord
         end
 
 
-        #
-        # FIXME
-        # 
-        # The thrift wrapper is only working with strings as far as I can see,
-        # and the atomicIncrement call on strings kinda doesn't make sense on strings
-        #
-        # For now I'll implement this without atomicIncrement, to get the behaviour we want.
-        # Guess this in time will either be fixed or raised an not-supported-error. If the
-        # latter is the case I guess we'll need to shift over to a jruby adapter and use the
-        # java api instead of thrift.
-        #
+        
         def atomic_increment(column_name, by = 1)
-          # @table.client.atomicIncrement(@table.name, id.to_s, column_name, by) 
-          value_to_increment = @columns[column_name.to_s].value
-
-          raise "Value to increment (#{value_to_increment}) doesnt seem to be a number!" unless value_to_increment =~ /^\d+$/
-          raise "Argument by must be an integer" unless by.is_a? Fixnum
-
-          value_to_increment = value_to_increment.to_i
-          value_to_increment += by
-          value_to_increment = value_to_increment.to_s
-
-          mutation = Apache::Hadoop::Hbase::Thrift::Mutation.new
-          mutation.column = column_name
-          mutation.value = value_to_increment
-
-          if @table.client.mutateRow(@table.name, id.to_s, [mutation]).nil?
-            value_to_increment
-          end
+          @table.client.atomicIncrement(@table.name, id.to_s, column_name, by) 
+        end
+        
+        def read_atomic_integer_value(column_name)
+          atomic_increment(column_name, 0)
         end
     
         def self.populate_from_trow_result(result, connection, table_name, column_families = [])

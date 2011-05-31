@@ -127,7 +127,7 @@ module MassiveRecord
         attr_name = attr_name.to_s
 
         row = row_for_record
-        row.values = attributes_to_row_values_hash([attr_name])
+        row.values = attributes_to_row_values_hash([attr_name]) # FIXME This seems strange.. Should not load any current data from self, database does all work
         self[attr_name] = row.atomic_increment(attributes_schema[attr_name].unique_name, by).to_i
       end
 
