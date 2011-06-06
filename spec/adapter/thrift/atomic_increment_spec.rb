@@ -36,11 +36,20 @@ describe MassiveRecord::Wrapper::Row do
     it "increments to 1 when called on a new value" do
       subject.atomic_increment(atomic_inc_attr_name).should eq 1
     end
+
+    it "increments by 2 when asked to do so" do
+      subject.atomic_increment(atomic_inc_attr_name, 2).should eq 2
+    end
   end
 
   describe "#read_atomic_integer_value" do
     it "returns 0 if no atomic increment operation has been performed" do
       subject.read_atomic_integer_value(atomic_inc_attr_name).should eq 0
+    end
+
+    it "returns 1 after one incrementation of 1" do
+      subject.atomic_increment(atomic_inc_attr_name)
+      subject.read_atomic_integer_value(atomic_inc_attr_name).should eq 1
     end
   end
 end
