@@ -123,7 +123,9 @@ module MassiveRecord
                       value = value.to_s if value.is_a? Symbol
                       coder.load(value)
                     end
-                  when :integer, :float, :array, :hash
+                  when :integer
+                    coder.load(value) if value.present?
+                  when :float, :array, :hash
                     coder.load(value) if value.present?
                   else
                     raise "Unable to decode #{value}, class: #{value}"
@@ -183,6 +185,10 @@ module MassiveRecord
 
         def field_affected_by_time_zone_awareness?
           type == :time
+        end
+
+        def hex_string_to_integer(string)
+          string.reverse.unpack("q*").first
         end
       end
     end

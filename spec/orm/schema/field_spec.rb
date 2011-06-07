@@ -147,6 +147,15 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(nil).should be_nil
     end
 
+    it "decodes an integer value is represented as a binary string" do
+      pending
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
+      @subject.decode(nil).should be_nil
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x01").should eq 1
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x1C").should eq 28
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x1E").should eq 30
+    end
+
     it "should decode an float value" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :code, :type => :float)
       @subject.decode("12.345").should == 12.345
@@ -371,6 +380,19 @@ describe MassiveRecord::ORM::Schema::Field do
         subject.type = :hash
         subject.default = {:foo => :bar}
         subject.default.should == {:foo => :bar}
+      end
+    end
+  end
+
+
+
+  describe "#hex_string_to_integer" do
+    subject { MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer) }
+
+    ((-2..2).to_a + [4611686018427387903]).each do |integer|
+      it "decodes signed integer '#{integer}' correctly" do
+        int_representation_in_hbase = [integer].pack('q').reverse
+        subject.send(:hex_string_to_integer, int_representation_in_hbase).should eq integer
       end
     end
   end
