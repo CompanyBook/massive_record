@@ -148,7 +148,6 @@ describe MassiveRecord::ORM::Schema::Field do
     end
 
     it "decodes an integer value is represented as a binary string" do
-      pending
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
       @subject.decode(nil).should be_nil
       @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x01").should eq 1

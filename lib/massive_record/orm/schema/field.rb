@@ -124,7 +124,11 @@ module MassiveRecord
                       coder.load(value)
                     end
                   when :integer
-                    coder.load(value) if value.present?
+                    if value =~ /\A\d*\Z/
+                      coder.load(value) if value.present?
+                    else
+                      hex_string_to_integer(value)
+                    end
                   when :float, :array, :hash
                     coder.load(value) if value.present?
                   else
