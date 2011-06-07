@@ -60,6 +60,7 @@ describe "A table" do
           :info => { :first_name => "John", :last_name => "Doe", :email => "john@base.com" },
           :misc => {
             :integer => 1234567,
+            :null_test => "some-value",
             :like => ["Eating", "Sleeping", "Coding"].to_json, 
             :dislike => {
               "Washing" => "Boring 6/10",
@@ -73,7 +74,7 @@ describe "A table" do
       end
               
       it "should list all column names" do
-        @table.column_names.size.should == 7
+        @table.column_names.size.should == 8
       end
       
       it "should only load one column" do
@@ -153,7 +154,7 @@ describe "A table" do
         row = @table.first
         row.update_columns({ :misc => { :super_power => "Eating"} })
         row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should(
-          eql(["misc:integer", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
+          eql(["misc:null_test", "misc:integer", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
         )
       end
       
@@ -193,6 +194,18 @@ describe "A table" do
 
         result = row.atomic_increment("misc:integer")
         result.should == 1234568
+      end
+
+      it "should be settable to nil" do
+        row = @table.first
+
+        row.values["misc:null_test"].should_not be_nil
+
+        row.update_column(:misc, :null_test, nil)
+        row.save
+
+        row = @table.first
+        row.values["misc:null_test"].should be_nil
       end
       
       it "should delete a row" do

@@ -1,7 +1,7 @@
 module MassiveRecord
   module Wrapper
     class Cell
-      SUPPORTED_TYPES = [String, Fixnum, Bignum]
+      SUPPORTED_TYPES = [NilClass, String, Fixnum, Bignum]
 
       attr_reader :value
       attr_accessor :created_at
@@ -43,11 +43,10 @@ module MassiveRecord
           value.force_encoding(Encoding::BINARY)
         when Fixnum, Bignum
           self.class.integer_to_hex_string(value)
+        when NilClass
+          value
         end
       end
-
-      private
-
     end
   end
 end

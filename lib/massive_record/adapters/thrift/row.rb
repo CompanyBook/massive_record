@@ -69,11 +69,13 @@ module MassiveRecord
           mutations = []
       
           @columns.each do |column_name, cell|
-            m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
-            m.column = column_name
-            m.value  = cell.value_to_thrift
-        
-            mutations.push(m)
+            mutations << Apache::Hadoop::Hbase::Thrift::Mutation.new(:column => column_name).tap do |mutation|
+              if new_value = cell.value_to_thrift
+                mutation.value = new_value
+              else
+                mutation.isDelete = true
+              end
+            end
           end
 
           @table.client.mutateRow(@table.name, id.to_s.dup.force_encoding(Encoding::BINARY), mutations).nil?
