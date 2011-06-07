@@ -192,7 +192,7 @@ module MassiveRecord
         end
 
         def hex_string_to_integer(string)
-          string.reverse.unpack("q*").first
+          Wrapper::Cell.hex_string_to_integer(string)
         end
       end
     end

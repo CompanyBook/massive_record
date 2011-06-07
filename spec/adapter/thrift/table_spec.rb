@@ -58,7 +58,8 @@ describe "A table" do
         row.id = "ID1"
         row.values = { 
           :info => { :first_name => "John", :last_name => "Doe", :email => "john@base.com" },
-          :misc => { 
+          :misc => {
+            :integer => 1234567,
             :like => ["Eating", "Sleeping", "Coding"].to_json, 
             :dislike => {
               "Washing" => "Boring 6/10",
@@ -72,7 +73,7 @@ describe "A table" do
       end
               
       it "should list all column names" do
-        @table.column_names.size.should == 6
+        @table.column_names.size.should == 7
       end
       
       it "should only load one column" do
@@ -98,6 +99,11 @@ describe "A table" do
         
         row.update_column(:info, :email, "bob@base.com")
         row.values["info:email"].should eql("bob@base.com")
+      end
+
+      it "should persist integer values as binary" do
+        row = @table.first
+        row.values["misc:integer"].should eq [1234567].pack('q').reverse
       end
       
       it "should save row changes" do
@@ -147,7 +153,7 @@ describe "A table" do
         row = @table.first
         row.update_columns({ :misc => { :super_power => "Eating"} })
         row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should(
-          eql(["misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
+          eql(["misc:integer", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
         )
       end
       
@@ -168,18 +174,25 @@ describe "A table" do
         row.values["misc:genre"].should == "M"
       end
 
-      it "should be able to do atomic increment call on values" do
+      it "should be able to do atomic increment call on new cell" do
         row = @table.first
 
         result = row.atomic_increment("misc:value_to_increment")
         result.should == 1
       end
 
-      it "should be able to pass inn what to incremet by" do
+      it "should be able to pass in what to incremet the new cell by" do
         row = @table.first
         result = row.atomic_increment("misc:value_to_increment", 2)
 
         result.should == 3
+      end
+
+      it "should be able to do atomic increment on existing values" do
+        row = @table.first
+
+        result = row.atomic_increment("misc:integer")
+        result.should == 1234568
       end
       
       it "should delete a row" do
