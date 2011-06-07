@@ -254,7 +254,12 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.encode(nil).should == "null"
     end
 
-    (MassiveRecord::ORM::Schema::Field::TYPES - [:string]).each do |type|
+    it "should encode fixnum to fixnum" do
+      @subject.type = :integer
+      @subject.encode(1).should == 1
+    end
+
+    (MassiveRecord::ORM::Schema::Field::TYPES - [:integer, :string]).each do |type|
       it "should ask coder to dump value when type is #{type}" do
         @subject.type = type
         @subject.coder.should_receive(:dump)

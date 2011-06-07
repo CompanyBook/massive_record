@@ -145,7 +145,11 @@ module MassiveRecord
             value
           else
             value = value.try(:utc) if Base.time_zone_aware_attributes && field_affected_by_time_zone_awareness?
-            coder.dump(value)
+            if type == :integer
+              value
+            else
+              coder.dump(value).to_s
+            end
           end
         end
 
