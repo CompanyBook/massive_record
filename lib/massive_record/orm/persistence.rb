@@ -3,10 +3,6 @@ module MassiveRecord
     module Persistence
       extend ActiveSupport::Concern
 
-      included do
-        cattr_accessor :backward_compatibility_integers_might_be_persisted_as_strings, :instance_writer => false
-        self.backward_compatibility_integers_might_be_persisted_as_strings = false
-      end
 
       module ClassMethods
         def create(*args)

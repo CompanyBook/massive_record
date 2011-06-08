@@ -126,7 +126,7 @@ module MassiveRecord
                       coder.load(value)
                     end
                   when :integer
-                    if Base.backward_compatibility_integers_might_be_persisted_as_strings && value =~ /\A\d*\Z/
+                    if value =~ /\A\d*\Z/
                       coder.load(value) if value.present?
                     else
                       hex_string_to_integer(value)
