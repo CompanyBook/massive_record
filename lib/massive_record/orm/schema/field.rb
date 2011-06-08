@@ -13,9 +13,9 @@ module MassiveRecord
           :hash => {},
           :date => lambda { Date.today },
           :time => lambda { Time.now }
-        }
+        }.freeze
 
-        TYPES = TYPES_DEFAULTS_TO.keys
+        TYPES = TYPES_DEFAULTS_TO.keys.freeze
 
         attr_writer :default
         attr_accessor :name, :column, :type, :fields, :coder, :allow_nil
@@ -143,9 +143,7 @@ module MassiveRecord
         end
 
         def encode(value)
-          return value if value.nil? || [:string, :integer].include?(type)
-
-          if type == :string && !(value.nil? || value == @@encoded_nil_value)
+          if value.nil? || should_not_be_encoded?
             value
           else
             value = value.try(:utc) if Base.time_zone_aware_attributes && field_affected_by_time_zone_awareness?
@@ -201,6 +199,10 @@ module MassiveRecord
 
         def utf_8_encoded?
           type != :integer
+        end
+
+        def should_not_be_encoded?
+          [:string, :integer].include?(type)
         end
       end
     end
