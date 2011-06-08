@@ -454,11 +454,20 @@ describe "persistence" do
         @person.age.should == 30
       end
 
-      it "should be able to do atomic increments" do
-        @person.atomic_increment!(:age).should == 30
-        @person.age.should == 30
-        @person.reload
-        @person.age.should == 30
+
+      describe "atomic increments" do
+        it "should be able to do atomic increments on existing objects" do
+          @person.atomic_increment!(:age).should == 30
+          @person.age.should == 30
+          @person.reload
+          @person.age.should == 30
+        end
+
+        it "is a persisted record after incrementation" do
+          person = Person.new('id2')
+          person.atomic_increment!(:age).should eq 1
+          person.should be_persisted
+        end
       end
     end
   end

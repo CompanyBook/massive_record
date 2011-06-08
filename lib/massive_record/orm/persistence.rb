@@ -126,9 +126,9 @@ module MassiveRecord
         self.class.ensure_that_we_have_table_and_column_families!
         attr_name = attr_name.to_s
 
-        row = row_for_record
-        row.values = attributes_to_row_values_hash([attr_name]) # FIXME This seems strange.. Should not load any current data from self, database does all work
-        self[attr_name] = row.atomic_increment(attributes_schema[attr_name].unique_name, by).to_i
+        self[attr_name] = row_for_record.atomic_increment(attributes_schema[attr_name].unique_name, by)
+        @new_record = false
+        self[attr_name]
       end
 
       def decrement(attr_name, by = 1)
