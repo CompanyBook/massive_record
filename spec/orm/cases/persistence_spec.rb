@@ -483,7 +483,7 @@ describe "persistence" do
             row.update_column(
               atomic_field.column_family.name,
               atomic_field.name,
-              '1'
+              MassiveRecord::ORM::Base.coder.dump(1)
             )
             row.save
           end

@@ -238,7 +238,7 @@ module MassiveRecord
 
         raw_value = self.class.table.get(id, field.column_family.name, field.name)
 
-        update(attr_name) if raw_value =~ /\A\d*\Z/
+        store_record_to_database('update', [attr_name]) if raw_value =~ /\A\d*\Z/
       end
     end
   end

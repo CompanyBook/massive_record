@@ -77,7 +77,7 @@ describe "id factory" do
             row.update_column(
               MassiveRecord::ORM::IdFactory::COLUMN_FAMILY_FOR_TABLES,
               Person.table_name,
-              '1'
+              MassiveRecord::ORM::Base.coder.dump(1)
             )
             row.save
           end
