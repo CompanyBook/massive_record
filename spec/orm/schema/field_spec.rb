@@ -140,11 +140,16 @@ describe MassiveRecord::ORM::Schema::Field do
     end
 
     it "should decode an integer value" do
+      old_combatibility = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+      MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
       @subject.decode("1").should == 1
       @subject.decode(1).should == 1
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+
+      MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_combatibility
     end
 
     it "decodes an integer value is represented as a binary string" do

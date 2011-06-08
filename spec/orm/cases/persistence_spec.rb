@@ -468,6 +468,30 @@ describe "persistence" do
           person.atomic_increment!(:age).should eq 1
           person.should be_persisted
         end
+
+        it "increments correctly when value is '1'" do
+          old_ensure = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
+          person = Person.new('id2')
+          person.atomic_increment!(:age).should eq 1
+
+          atomic_field = Person.attributes_schema['age']
+
+          # Enter incompatible data, number as string.
+          Person.table.find("id2").tap do |row|
+            row.update_column(
+              atomic_field.column_family.name,
+              atomic_field.name,
+              '1'
+            )
+            row.save
+          end
+
+          person.atomic_increment!(:age).should eq 2
+
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_ensure
+        end
       end
     end
   end

@@ -64,6 +64,30 @@ describe "id factory" do
         3.times { subject.next_for(Person) }
         subject.next_for("cars").should == 1
       end
+
+
+      describe "old string representation of integers" do
+        it "increments correctly when value is '1'" do
+          old_ensure = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
+          subject.next_for(Person)
+
+          # Enter incompatible data, number as string.
+          MassiveRecord::ORM::IdFactory.table.first.tap do |row|
+            row.update_column(
+              MassiveRecord::ORM::IdFactory::COLUMN_FAMILY_FOR_TABLES,
+              Person.table_name,
+              '1'
+            )
+            row.save
+          end
+
+          subject.next_for(Person).should eq 2
+
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_ensure
+        end
+      end
     end
   end
 end
