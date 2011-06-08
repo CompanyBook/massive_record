@@ -582,4 +582,31 @@ describe "persistence" do
       person.id.should == "1"
     end
   end
+
+
+  describe "attributes with nil value" do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+
+    subject do
+      Person.create!("id", {
+        :name => "Thorbjorn",
+        :age => 22,
+        :points => 1,
+        :addresses => {'home' => 'Here'},
+        :status => true
+      })
+    end
+
+    %w(points addresses status).each do |attr|
+      it "removes the cell from hbase when #{attr} is set to nil" do
+        subject[attr] = nil
+        subject.save!
+
+        raw_values = Person.table.find(subject.id).values
+        raw_values[subject.attributes_schema[attr].unique_name].should be_nil
+      end
+    end
+  end
 end
