@@ -11,6 +11,7 @@ class Person < MassiveRecord::ORM::Table
   column_family :base do
     field :points, :integer, :default => 1, :column => :pts
     field :status, :boolean, :default => false
+    field :phone_numbers, :array, :allow_nil => false
   end
 
 

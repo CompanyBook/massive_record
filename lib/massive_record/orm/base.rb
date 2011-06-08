@@ -39,6 +39,19 @@ module MassiveRecord
       # Accepts a logger conforming to the interface of Log4r or the default Ruby 1.8+ Logger class,
       cattr_accessor :logger, :instance_writer => false
 
+
+      #
+      # Integers are now persisted as a hax representation in hbase, not as
+      # a string any more. This makes for instance atomic_increment!(:int_attr) work
+      # as expected.
+      #
+      # The problem is that if you have old data in your database, you need to handle
+      # this. Every new integer will still be written as hex though.
+      #
+      cattr_accessor :backward_compatibility_integers_might_be_persisted_as_strings, :instance_writer => false
+      self.backward_compatibility_integers_might_be_persisted_as_strings = false
+
+
       # Add a prefix or a suffix to the table name
       # example:
       #

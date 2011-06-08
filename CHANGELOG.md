@@ -1,5 +1,19 @@
 # v0.2.1 (git develop)
 
+- If you have a persisted record and you set one attribute to nil that attribute will be
+  deleted from HBase to represent the nil-value. The fact that the schema of that record
+  class knows of that attribute will be the reason for it to still respond and return nil.
+- Thrift adapter will no longer return UTF-8 encoded strings. The reason for this is that
+  binary representation of integers cannot be set with a UTF-8 encoding; it must be BINARY.
+  It is the client`s responsibility of the adapter to set correct encoding, and the ORM now
+  does this too.
+- If you do have a database where integers are stored as string, you should enable
+  ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings. It will, before for
+  instance atomic_increment! is called, ensure that the integers has been persisted as hex.
+- Based on the previous change we are now able to do real atomic incrementation of integer values.
+  HBase will do the incrementation and guarantee the integrity of that incrementation.
+- Fixnum and Bignum are stored as a 64 bit signed integer representation, not as strings. Fixnum and bignum
+  values are no longer encoded by the ORM; that responsibility has been moved down to the adapter.
 - We can now, by setting Base.check_record_uniqueness_on_create to true, do a quick and simple (and
   kinda insecure) check if the record id exists on a new_record when doing a create call. Just a simple sanity check.
 - We now have mass assignment of attributes, just like ActiveRecord. It uses the same module,

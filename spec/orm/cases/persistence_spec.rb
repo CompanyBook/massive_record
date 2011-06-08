@@ -454,11 +454,44 @@ describe "persistence" do
         @person.age.should == 30
       end
 
-      it "should be able to do atomic increments" do
-        @person.atomic_increment!(:age).should == 30
-        @person.age.should == 30
-        @person.reload
-        @person.age.should == 30
+
+      describe "atomic increments" do
+        it "should be able to do atomic increments on existing objects" do
+          @person.atomic_increment!(:age).should == 30
+          @person.age.should == 30
+          @person.reload
+          @person.age.should == 30
+        end
+
+        it "is a persisted record after incrementation" do
+          person = Person.new('id2')
+          person.atomic_increment!(:age).should eq 1
+          person.should be_persisted
+        end
+
+        it "increments correctly when value is '1'" do
+          old_ensure = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
+          person = Person.new('id2')
+          person.atomic_increment!(:age).should eq 1
+
+          atomic_field = Person.attributes_schema['age']
+
+          # Enter incompatible data, number as string.
+          Person.table.find("id2").tap do |row|
+            row.update_column(
+              atomic_field.column_family.name,
+              atomic_field.name,
+              '1'
+            )
+            row.save
+          end
+
+          person.atomic_increment!(:age).should eq 2
+
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_ensure
+        end
       end
     end
   end
@@ -547,6 +580,33 @@ describe "persistence" do
 
       person.reload
       person.id.should == "1"
+    end
+  end
+
+
+  describe "attributes with nil value" do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+
+    subject do
+      Person.create!("id", {
+        :name => "Thorbjorn",
+        :age => 22,
+        :points => 1,
+        :addresses => {'home' => 'Here'},
+        :status => true
+      })
+    end
+
+    %w(points addresses status).each do |attr|
+      it "removes the cell from hbase when #{attr} is set to nil" do
+        subject[attr] = nil
+        subject.save!
+
+        raw_values = Person.table.find(subject.id).values
+        raw_values[subject.attributes_schema[attr].unique_name].should be_nil
+      end
     end
   end
 end

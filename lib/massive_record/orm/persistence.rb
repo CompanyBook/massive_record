@@ -3,6 +3,7 @@ module MassiveRecord
     module Persistence
       extend ActiveSupport::Concern
 
+
       module ClassMethods
         def create(*args)
           new(*args).tap do |record|
@@ -126,9 +127,11 @@ module MassiveRecord
         self.class.ensure_that_we_have_table_and_column_families!
         attr_name = attr_name.to_s
 
-        row = row_for_record
-        row.values = attributes_to_row_values_hash([attr_name])
-        self[attr_name] = row.atomic_increment(attributes_schema[attr_name].unique_name, by).to_i
+        ensure_proper_binary_integer_representation(attr_name)
+
+        self[attr_name] = row_for_record.atomic_increment(attributes_schema[attr_name].unique_name, by)
+        @new_record = false
+        self[attr_name]
       end
 
       def decrement(attr_name, by = 1)
@@ -208,6 +211,34 @@ module MassiveRecord
         end
 
         values
+      end
+
+      #
+      # To cope with the problem which arises when you ask to
+      # do atomic incrementation of an attribute and that attribute
+      # has a string representation of a number, like "1", instead of
+      # the binary representation, like "\x00\x00\x00\x00\x00\x00\x00\x01".
+      #
+      # We then need to re-write that string representation into
+      # hex representation. Now, if you are on a completely new
+      # database and have never used MassiveRecord before we should not
+      # need to do this at all; numbers are now stored as hex, but for
+      # backward compatibility we are doing this.
+      #
+      # Now, there is a risk of doing this; if two calls are made to
+      # atomic_increment! on a record where it's value is a string
+      # representation this operation might be compromised. Therefor
+      # you need to enable this feature.
+      #
+      def ensure_proper_binary_integer_representation(attr_name)
+        return if !backward_compatibility_integers_might_be_persisted_as_strings || new_record?
+
+        field = attributes_schema[attr_name]  
+        raise "Not an integer field" unless field.try(:type) == :integer
+
+        raw_value = self.class.table.get(id, field.column_family.name, field.name)
+
+        update(attr_name) if raw_value =~ /\A\d*\Z/
       end
     end
   end
