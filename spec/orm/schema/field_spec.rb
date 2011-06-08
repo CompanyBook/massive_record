@@ -123,6 +123,7 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode("value").should == "value"
       @subject.decode("").should == ""
       @subject.decode(nil).should be_nil
+      @subject.decode("frozen".freeze).should eq "frozen"
     end
 
     it "should cast symbols to strings" do
