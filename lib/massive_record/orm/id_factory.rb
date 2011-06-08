@@ -38,7 +38,7 @@ module MassiveRecord
         if table_exists?
           begin
             if @instance
-              @instance.reload
+              @instance.reload # If, for some reason, the record has been removed. Will be rescued and set to nil
             else
               @instance = find(ID)
             end
