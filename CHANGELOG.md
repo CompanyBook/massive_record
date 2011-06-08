@@ -1,5 +1,8 @@
 # v0.2.1 (git develop)
 
+- If you have a persisted record and you set one attribute to nil that attribute will be
+  deleted from HBase to represent the nil-value. The fact that the schema of that record
+  class knows of that attribute will be the reason for it to still respond and return nil.
 - Thrift adapter will no longer return UTF-8 encoded strings. The reason for this is that
   binary representation of integers cannot be set with a UTF-8 encoding; it must be BINARY.
   It is the client`s responsibility of the adapter to set correct encoding, and the ORM now

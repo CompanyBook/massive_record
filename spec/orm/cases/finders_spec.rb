@@ -23,24 +23,6 @@ describe "finders" do
       lambda { Person.find }.should raise_error ArgumentError
     end
 
-    it "should simply return nil on first if table does not exists" do
-      pending
-      Person.table.should_receive(:exists?).and_return false
-      Person.first.should be_nil
-    end
-
-    it "should raise record not found error on find if table does not exists" do
-      pending
-      Person.table.should_receive(:exists?).and_return false
-      lambda { Person.find(1) }.should raise_error MassiveRecord::ORM::RecordNotFound
-    end
-
-    it "should simply return empty array if table does not exists" do
-      pending
-      Person.table.should_receive(:exists?).and_return false
-      Person.all.should == []
-    end
-
     it "should raise RecordNotFound if id is nil" do
       lambda { Person.find(nil) }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
