@@ -109,6 +109,8 @@ module MassiveRecord
 
 
         def decode(value)
+          value = value.force_encoding(Encoding::UTF_8) if utf_8_encoded? && value.respond_to?(:force_encoding)
+
           return value if value.nil? || value_is_already_decoded?(value)
           
           value = case type
@@ -197,6 +199,10 @@ module MassiveRecord
 
         def hex_string_to_integer(string)
           Wrapper::Cell.hex_string_to_integer(string)
+        end
+
+        def utf_8_encoded?
+          type != :integer
         end
       end
     end
