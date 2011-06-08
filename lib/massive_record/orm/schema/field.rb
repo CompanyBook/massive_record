@@ -143,15 +143,13 @@ module MassiveRecord
         end
 
         def encode(value)
+          return value if value.nil? || [:string, :integer].include?(type)
+
           if type == :string && !(value.nil? || value == @@encoded_nil_value)
             value
           else
             value = value.try(:utc) if Base.time_zone_aware_attributes && field_affected_by_time_zone_awareness?
-            if type == :integer
-              value
-            else
-              coder.dump(value).to_s
-            end
+            coder.dump(value).to_s
           end
         end
 

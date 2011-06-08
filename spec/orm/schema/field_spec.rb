@@ -132,12 +132,12 @@ describe MassiveRecord::ORM::Schema::Field do
 
     it "should decode string null correctly" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
-      @subject.decode(@subject.encode("null")).should == "null"
+      @subject.decode(@subject.coder.dump("null")).should == "null"
     end
 
     it "should decode string with value nil correctly" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
-      @subject.decode(@subject.encode(nil)).should == nil
+      @subject.decode(nil).should == nil
     end
 
     it "should decode an integer value" do
@@ -252,12 +252,12 @@ describe MassiveRecord::ORM::Schema::Field do
 
     it "should encode string if value is null" do
       @subject.type = :string
-      @subject.encode("null").should == @subject.coder.dump("null")
+      @subject.encode("null").should == "null"
     end
 
     it "should encode string if value is nil" do
       @subject.type = :string
-      @subject.encode(nil).should == "null"
+      @subject.encode(nil).should == nil
     end
 
     it "should encode fixnum to fixnum" do
