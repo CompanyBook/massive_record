@@ -115,6 +115,7 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode("0").should be_false
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+      @subject.decode("null").should be_nil
     end
 
     it "should decode a string value" do

@@ -115,7 +115,7 @@ module MassiveRecord
           
           value = case type
                   when :boolean
-                    value.blank? ? nil : !value.to_s.match(/^(true|1)$/i).nil?
+                    value.blank? || value == @@encoded_nil_value ? nil : !value.to_s.match(/^(true|1)$/i).nil?
                   when :date
                     value.blank? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
                   when :time
