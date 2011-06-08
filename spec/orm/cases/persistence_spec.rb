@@ -108,6 +108,11 @@ describe "persistence" do
       @person.send(:attributes_to_row_values_hash)["base"].keys.should include("pts")
       @person.send(:attributes_to_row_values_hash)["base"].keys.should_not include("points")
     end
+
+    it "should include integer value, even if it is set as string" do
+      @person.age = "20"
+      @person.send(:attributes_to_row_values_hash)["info"]["age"].should == 20
+    end
   end
 
 
