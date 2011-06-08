@@ -37,11 +37,7 @@ module MassiveRecord
       def self.instance
         if table_exists?
           begin
-            if @instance
-              @instance.reload
-            else
-              @instance = find(ID)
-            end
+            @instance = find(ID) unless @instance
           rescue RecordNotFound
             @instance = nil
           end
