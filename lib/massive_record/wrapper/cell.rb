@@ -34,7 +34,6 @@ module MassiveRecord
         raise "#{v} was a #{v.class}, but it must be a one of: #{SUPPORTED_TYPES.join(', ')}" unless SUPPORTED_TYPES.include? v.class
 
         @value = v.duplicable? ? v.dup : v
-        @value = @value.force_encoding(Encoding::UTF_8) if @value.respond_to? :force_encoding
       end
 
       def value_to_thrift
