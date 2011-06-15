@@ -236,9 +236,9 @@ module MassiveRecord
         field = attributes_schema[attr_name]  
         raise "Not an integer field" unless field.try(:type) == :integer
 
-        raw_value = self.class.table.get(id, field.column_family.name, field.name)
-
-        store_record_to_database('update', [attr_name]) if raw_value =~ /\A\d*\Z/
+        if raw_value = self.class.table.get(id, field.column_family.name, field.name)
+          store_record_to_database('update', [attr_name]) if raw_value =~ /\A\d*\Z/
+        end
       end
     end
   end

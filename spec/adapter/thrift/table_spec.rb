@@ -80,6 +80,10 @@ describe "A table" do
       it "should only load one column" do
         @table.get("ID1", :info, :first_name).should == "John"
       end
+
+      it "should return nil if column does not exist" do
+        @table.get("ID1", :info, :unkown_column).should be_nil
+      end
       
       it "should only load one column family" do
         @table.first(:select => ["info"]).column_families.should == ["info"]

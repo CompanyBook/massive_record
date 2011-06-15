@@ -115,7 +115,9 @@ module MassiveRecord
         # table.get("my_id", :info, :name) # => "Bob"
         #
         def get(id, column_family_name, column_name)
-          MassiveRecord::Wrapper::Cell.new(:value => connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.value).value
+          if value = connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.try(:value)
+            MassiveRecord::Wrapper::Cell.new(:value => value).value # might seems a bit strange.. Just to "enforice" that the value is a supported type
+          end
         end
         
         #
