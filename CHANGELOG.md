@@ -1,5 +1,6 @@
 # v0.2.1 (git develop)
 
+- record.reload now resets relations.
 - If you have a persisted record and you set one attribute to nil that attribute will be
   deleted from HBase to represent the nil-value. The fact that the schema of that record
   class knows of that attribute will be the reason for it to still respond and return nil.
