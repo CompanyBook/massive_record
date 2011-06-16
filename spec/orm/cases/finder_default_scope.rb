@@ -1,12 +1,13 @@
 require 'spec_helper'
 require 'orm/models/person'
+require 'orm/models/test_class'
 
 describe "Default scope in" do
   include SetUpHbaseConnectionBeforeAll
   include SetTableNamesToTestTable
 
   describe Person do
-    let(:subject) { Person.new :id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
+    let(:subject) { Person.new "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
 
     before do
       subject.save!
@@ -48,6 +49,12 @@ describe "Default scope in" do
       person = Person.first
       person.points.should == 111
       person.name.should be_nil
+    end
+
+    it "should not share scopes between classes" do
+      Person.class_eval { default_scope :select => :base }
+      Person.default_scoping.should be_instance_of MassiveRecord::ORM::Finders::Scope
+      TestClass.default_scoping.should be_nil
     end
   end
 end

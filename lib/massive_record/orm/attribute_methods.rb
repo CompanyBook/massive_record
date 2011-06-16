@@ -1,12 +1,31 @@
+unless ActiveModel::AttributeMethods.const_defined? 'COMPILABLE_REGEXP'
+  ActiveModel::AttributeMethods::COMPILABLE_REGEXP = /\A[a-zA-Z_]\w*[!?=]?\Z/
+end
+
 module MassiveRecord
   module ORM
     module AttributeMethods
       extend ActiveSupport::Concern
       include ActiveModel::AttributeMethods      
+      include ActiveModel::MassAssignmentSecurity
 
       module ClassMethods
         def define_attribute_methods
           super(known_attribute_names)
+          @attribute_methods_generated = true
+        end
+
+        def attribute_methods_generated?
+          @attribute_methods_generated ||= false
+        end
+
+        def undefine_attribute_methods(*args)
+          super
+          @attribute_methods_generated = false
+        end
+
+        def attributes_protected_by_default
+          ['id', inheritance_attribute]
         end
       end
 
@@ -18,7 +37,7 @@ module MassiveRecord
       def attributes=(new_attributes)
         return unless new_attributes.is_a?(Hash)
 
-        new_attributes.each do |attr, value|
+        sanitize_for_mass_assignment(new_attributes).each do |attr, value|
           writer_method = "#{attr}="
           if respond_to? writer_method
             send(writer_method, value)
@@ -41,6 +60,13 @@ module MassiveRecord
       def respond_to?(*args)
         self.class.define_attribute_methods unless self.class.attribute_methods_generated?
         super
+      end
+
+
+      protected
+
+      def attribute_method?(attr_name)
+        attr_name == 'id' || (defined?(@attributes) && @attributes.include?(attr_name))
       end
 
       private

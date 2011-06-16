@@ -8,7 +8,7 @@ describe "Single table inheritance" do
 
   [Friend, BestFriend, BestFriend::SuperBestFriend].each do |klass|
     describe klass do
-      let(:subject) { klass.new(:id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
+      let(:subject) { klass.new("ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
 
       its(:type) { should == klass.to_s }
 
@@ -20,7 +20,7 @@ describe "Single table inheritance" do
   end
 
   it "should not set type if record being saved is base class" do
-    person = Person.new :id => "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true
+    person = Person.new "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true
     person.type.should be_nil
   end
 end

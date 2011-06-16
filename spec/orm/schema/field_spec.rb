@@ -115,6 +115,7 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode("0").should be_false
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+      @subject.decode("null").should be_nil
     end
 
     it "should decode a string value" do
@@ -122,6 +123,7 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode("value").should == "value"
       @subject.decode("").should == ""
       @subject.decode(nil).should be_nil
+      @subject.decode("frozen".freeze).should eq "frozen"
     end
 
     it "should cast symbols to strings" do
@@ -131,20 +133,33 @@ describe MassiveRecord::ORM::Schema::Field do
 
     it "should decode string null correctly" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
-      @subject.decode(@subject.encode("null")).should == "null"
+      @subject.decode(@subject.coder.dump("null")).should == "null"
     end
 
     it "should decode string with value nil correctly" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
-      @subject.decode(@subject.encode(nil)).should == nil
+      @subject.decode(nil).should == nil
     end
 
     it "should decode an integer value" do
+      old_combatibility = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+      MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
       @subject.decode("1").should == 1
       @subject.decode(1).should == 1
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+
+      MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_combatibility
+    end
+
+    it "decodes an integer value is represented as a binary string" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
+      @subject.decode(nil).should be_nil
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x01").should eq 1
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x1C").should eq 28
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x1E").should eq 30
     end
 
     it "should decode an float value" do
@@ -174,6 +189,12 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode(@subject.coder.dump(today)).to_i.should == today.to_i
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+    end
+
+    it "should decode time when value is ActiveSupport::TimeWithZone" do
+      today = Time.now.in_time_zone('Europe/Stockholm')
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+      @subject.decode(today).to_i.should == today.to_i
     end
 
     it "should set time to nil if date could not be parsed" do
@@ -232,19 +253,41 @@ describe MassiveRecord::ORM::Schema::Field do
 
     it "should encode string if value is null" do
       @subject.type = :string
-      @subject.encode("null").should == @subject.coder.dump("null")
+      @subject.encode("null").should == "null"
     end
 
     it "should encode string if value is nil" do
       @subject.type = :string
-      @subject.encode(nil).should == "null"
+      @subject.encode(nil).should == nil
     end
 
-    (MassiveRecord::ORM::Schema::Field::TYPES - [:string]).each do |type|
+    it "should encode fixnum to fixnum" do
+      @subject.type = :integer
+      @subject.encode(1).should == 1
+    end
+
+    (MassiveRecord::ORM::Schema::Field::TYPES - [:integer, :string]).each do |type|
       it "should ask coder to dump value when type is #{type}" do
         @subject.type = type
         @subject.coder.should_receive(:dump)
         @subject.encode("{}")
+      end
+    end
+
+    context "time_zone_aware_attributes" do
+      before do
+        @old_time_zone_aware_attributes = MassiveRecord::ORM::Base.time_zone_aware_attributes
+        MassiveRecord::ORM::Base.time_zone_aware_attributes = true
+      end
+
+      after do
+        MassiveRecord::ORM::Base.time_zone_aware_attributes = @old_time_zone_aware_attributes
+      end
+
+      it "should encode times in UTC" do
+        europe_time = Time.now.in_time_zone('Europe/Stockholm')
+        @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+        @subject.encode(europe_time).should == subject.coder.dump(europe_time.utc)
       end
     end
   end
@@ -348,6 +391,19 @@ describe MassiveRecord::ORM::Schema::Field do
         subject.type = :hash
         subject.default = {:foo => :bar}
         subject.default.should == {:foo => :bar}
+      end
+    end
+  end
+
+
+
+  describe "#hex_string_to_integer" do
+    subject { MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer) }
+
+    ((-2..2).to_a + [4611686018427387903]).each do |integer|
+      it "decodes signed integer '#{integer}' correctly" do
+        int_representation_in_hbase = [integer].pack('q').reverse
+        subject.send(:hex_string_to_integer, int_representation_in_hbase).should eq integer
       end
     end
   end

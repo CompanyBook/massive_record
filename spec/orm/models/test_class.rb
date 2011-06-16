@@ -5,5 +5,6 @@ class TestClass < MassiveRecord::ORM::Table
   column_family :test_family do
     field :foo, :string
     field :hash_not_allow_nil, :hash, :allow_nil => false
+    field :tested_at, :time
   end
 end

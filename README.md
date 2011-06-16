@@ -59,6 +59,9 @@ Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some f
     - Timestamps like created_at and updated_at. Updated at will always be available, created_at must be defined. See example down:
     - Finder scopes. Like: Person.select(:only_columns_from_this_family).limit(10).collect(&:name)
     - Ability to set a default scope.
+    - Time zone aware time attributes.
+    - Basic instrumentation and logging of query times.
+    - Attribute mass assignment security.
 
 Tables also have:
     - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
@@ -98,6 +101,7 @@ Here is an example of usage, both for Table and Column:
         field :with_a_lot_of_uninteresting_data
       end
 
+      attr_accessible :name, :email, :phone_number, :date_of_birth
 
       validates_presence_of :name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
@@ -122,6 +126,7 @@ Here is an example of usage, both for Table and Column:
       field :nice_place, :boolean, :default => true
     end
 
+You can find a small example application here: https://github.com/thhermansen/massive_record_test_app
 
 ### Related gems
 

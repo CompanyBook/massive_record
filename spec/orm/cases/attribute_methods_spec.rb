@@ -3,7 +3,7 @@ require 'orm/models/person'
 
 describe "attribute methods" do
   before do
-    @model = Person.new :id => 5, :name => "John", :age => "15"
+    @model = Person.new "5", :name => "John", :age => "15"
   end
 
   it "should define reader method" do
@@ -26,6 +26,11 @@ describe "attribute methods" do
 
   it "should return casted value when read" do
     @model.read_attribute(:age).should == 15
+  end
+
+  it "should read from a method if it has been defined" do
+    @model.should_receive(:_name).and_return("my name is")
+    @model.read_attribute(:name).should eq "my name is"
   end
   
   describe "#attributes" do

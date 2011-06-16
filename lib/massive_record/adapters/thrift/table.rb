@@ -42,6 +42,7 @@ module MassiveRecord
     
         def destroy
           disable
+          @table_exists = false
           client.deleteTable(name).nil?
         end
     
@@ -114,22 +115,35 @@ module MassiveRecord
         # table.get("my_id", :info, :name) # => "Bob"
         #
         def get(id, column_family_name, column_name)
-          MassiveRecord::Wrapper::Cell.new(:value => connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.value).value
-        end
-        
-        def find(*args)
-          arg  = args[0]
-          opts = args[1] || {}
-          if arg.is_a?(Array)
-            arg.collect{|id| first(opts.merge(:start => id))}
-          else
-            # need to replace by connection.getRowWithColumns("companies_development", "NO0000000812676342", ["info:name", "info:org_num"]).first
-            first(opts.merge(:start => arg))
+          if value = connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.try(:value)
+            MassiveRecord::Wrapper::Cell.new(:value => value).value # might seems a bit strange.. Just to "enforice" that the value is a supported type
           end
         end
-    
+        
+        #
+        # Finds one or multiple ids
+        #
+        # Returns nil if id is not found
+        #
+        def find(*args)
+          what_to_find = args.first
+          options = args.extract_options!.symbolize_keys
+
+          if what_to_find.is_a?(Array)
+            what_to_find.collect { |id| find(id, options) }
+          else
+            if column_families_to_find = options[:select]
+              column_families_to_find = column_families_to_find.collect { |c| c.to_s }
+            end
+
+            if t_row_result = connection.getRowWithColumns(name, what_to_find, column_families_to_find).first
+              Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
+            end
+          end
+        end
+
         def find_in_batches(opts = {})        
-          results_limit = opts.delete(:limit)
+          results_limit = opts[:limit]
           results_found = 0
           
           scanner(opts) do |s|
@@ -148,7 +162,7 @@ module MassiveRecord
         end
     
         def exists?
-          connection.tables.include?(name)
+          @table_exists ||= connection.tables.include?(name)
         end
     
         def regions

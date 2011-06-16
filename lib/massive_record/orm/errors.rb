@@ -20,6 +20,10 @@ module MassiveRecord
     class RecordNotFound < MassiveRecordError
     end
 
+    # Raised when we try to create a new record with an id which exists.
+    class RecordNotUnique < MassiveRecordError
+    end
+
     # Raised if an attribute is unkown
     class UnknownAttributeError < MassiveRecordError
     end

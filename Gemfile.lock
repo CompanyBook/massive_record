@@ -1,10 +1,11 @@
 PATH
   remote: .
   specs:
-    massive_record (0.2.0)
+    massive_record (0.2.1.rc1)
       activemodel
       activesupport
       thrift (>= 0.5.0)
+      tzinfo
 
 GEM
   remote: http://rubygems.org/
@@ -26,6 +27,7 @@ GEM
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.5.0)
     thrift (0.6.0)
+    tzinfo (0.3.27)
 
 PLATFORMS
   ruby

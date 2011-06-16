@@ -175,7 +175,7 @@ describe MassiveRecord::ORM::Base do
     end
 
     it "should return the id if persisted" do
-      TestClass.create!(:id => 1).to_param.should == "1"
+      TestClass.create!(1).to_param.should == "1"
     end
   end
 
@@ -185,7 +185,7 @@ describe MassiveRecord::ORM::Base do
     end
 
     it "should return id in an array persisted" do
-      TestClass.create!(:id => "1").to_key.should == ["1"]
+      TestClass.create!("1").to_key.should == ["1"]
     end
   end
 
@@ -215,7 +215,7 @@ describe MassiveRecord::ORM::Base do
 
     it "should start with the record's id if it has any" do
       @person.id = 3
-      @person.inspect.should include "#<Person id: 3,"
+      @person.inspect.should include '#<Person id: "3",'
     end
 
     it "should start with the record's id if it has any" do
@@ -286,7 +286,7 @@ describe MassiveRecord::ORM::Base do
   
   describe "#clone" do
     before do
-      @test_object = TestClass.create!(:id => "1", :foo => 'bar')
+      @test_object = TestClass.create!("1", :foo => 'bar')
       @clone_object = @test_object.clone
     end
     
@@ -311,6 +311,20 @@ describe MassiveRecord::ORM::Base do
   describe "coder" do
     it "should have a default coder" do
       Person.coder.should be_instance_of MassiveRecord::ORM::Coders::JSON
+    end
+  end
+
+  describe "id as first argument to" do
+    [:new, :create, :create!].each do |creation_method|
+      describe creation_method do
+        it "sets first argument as records id" do
+          TestClass.send(creation_method, "idfirstarg").id.should == "idfirstarg"
+        end
+
+        it "sets first argument as record id, hash as it's attribute" do
+          TestClass.send(creation_method, "idfirstarg", foo: 'works').foo.should == 'works'
+        end
+      end
     end
   end
 end

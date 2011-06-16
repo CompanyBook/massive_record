@@ -56,7 +56,7 @@ describe TestReferencesOnePolymorphicProxy do
     it "should set the proxy_target's type in proxy_owner" do
       proxy_owner.attachable_type = nil
       proxy_owner.attachable = proxy_target
-      proxy_owner.attachable_type.should == proxy_target.class.to_s.underscore
+      proxy_owner.attachable_type.should == proxy_target.class.to_s
     end
 
     it "should reset the proxy_targets foreign key if proxy_target is nil" do
@@ -102,5 +102,11 @@ describe TestReferencesOnePolymorphicProxy do
       proxy_owner.attachable = proxy_target
       proxy_owner.attachable_id.should == proxy_target.id
     end
+  end
+
+  it "resets when the proxy owner is asked to reload" do
+    subject.loaded!
+    proxy_owner.reload
+    should_not be_loaded
   end
 end

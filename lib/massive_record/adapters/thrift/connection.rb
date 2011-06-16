@@ -1,3 +1,5 @@
+require 'active_support/notifications'
+
 module MassiveRecord
   module Adapters
     module Thrift
@@ -9,21 +11,30 @@ module MassiveRecord
           @timeout = 4000
           @host    = opts[:host]
           @port    = opts[:port] || 9090
+          @instrumenter = ActiveSupport::Notifications.instrumenter
         end
       
         def transport
           @transport ||= ::Thrift::BufferedTransport.new(::Thrift::Socket.new(@host, @port, @timeout))
         end
       
-        def open
-          protocol = ::Thrift::BinaryProtocol.new(transport)
-          @client = Apache::Hadoop::Hbase::Thrift::Hbase::Client.new(protocol)
-        
-          begin
-            transport.open()
-            true
-          rescue
-            raise MassiveRecord::Wrapper::Errors::ConnectionException.new, "Unable to connect to HBase on #{@host}, port #{@port}"
+        def open(options = {})
+          options = options.merge({
+            :adapter => 'Thrift',
+            :host => @host,
+            :port => @port
+          })
+
+          @instrumenter.instrument "adapter_connecting.massive_record", options do
+            protocol = ::Thrift::BinaryProtocol.new(transport)
+            @client = Apache::Hadoop::Hbase::Thrift::Hbase::Client.new(protocol)
+
+            begin
+              transport.open()
+              true
+            rescue
+              raise MassiveRecord::Wrapper::Errors::ConnectionException.new, "Unable to connect to HBase on #{@host}, port #{@port}"
+            end
           end
         end
       
@@ -55,14 +66,10 @@ module MassiveRecord
           begin
             open if not @client
             client.send(method, *args) if @client
-          rescue IOError
-            @client = nil
-            open
-            client.send(method, *args) if @client
-          rescue ::Thrift::TransportException
+          rescue ::Thrift::TransportException => error
             @transport = nil
             @client = nil
-            open
+            open(:reconnecting => true, :reason => error.class)
             client.send(method, *args) if @client
           end
         end

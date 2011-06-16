@@ -23,21 +23,6 @@ describe "finders" do
       lambda { Person.find }.should raise_error ArgumentError
     end
 
-    it "should simply return nil on first if table does not exists" do
-      Person.table.should_receive(:exists?).and_return false
-      Person.first.should be_nil
-    end
-
-    it "should raise record not found error on find if table does not exists" do
-      Person.table.should_receive(:exists?).and_return false
-      lambda { Person.find(1) }.should raise_error MassiveRecord::ORM::RecordNotFound
-    end
-
-    it "should simply return empty array if table does not exists" do
-      Person.table.should_receive(:exists?).and_return false
-      Person.all.should == []
-    end
-
     it "should raise RecordNotFound if id is nil" do
       lambda { Person.find(nil) }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
@@ -164,8 +149,13 @@ describe "finders" do
       @bob = Person.find("ID2")
     end
 
-    it "should return nil if id is not found" do
+    it "should raise record not found error" do
       lambda { Person.find("not_found") }.should raise_error MassiveRecord::ORM::RecordNotFound
+    end
+
+    it "should raise MassiveRecord::ORM::RecordNotFound error if table does not exist" do
+      Person.table.destroy
+      expect { Person.find("id") }.to raise_error MassiveRecord::ORM::RecordNotFound
     end
 
     it "should return the person object when found" do
@@ -185,7 +175,7 @@ describe "finders" do
     end
 
     it "should find all persons, even if it is more than 10" do
-      15.times { |i| Person.create! :id => "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
+      15.times { |i| Person.create! "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
       Person.all.length.should > 10
     end
 
@@ -214,7 +204,7 @@ describe "finders" do
     end
 
     it "should not do a thing if table does not exist" do
-      Person.table.should_receive(:exists?).and_return false
+      Person.table.destroy
 
       counter = 0
 

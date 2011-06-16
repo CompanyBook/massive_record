@@ -5,7 +5,7 @@ describe "dirty" do
     include MockMassiveRecordConnection
 
     before do
-      @person = Person.new :id => 1, :name => "Alice", :age => 20, :email => "foo@bar.com"
+      @person = Person.new '1', :name => "Alice", :age => 20, :email => "foo@bar.com"
     end
 
     it "should not be changed after created" do
@@ -21,6 +21,30 @@ describe "dirty" do
       @person.name = "Bob"
       @person.should be_changed
     end
+
+    it "should notice changes in boolean values from false to true" do
+      @person.status = !@person.status
+      @person.should be_status_changed
+    end
+
+    it "should notice changes in boolean values from true to false" do
+      @person.status = true
+      @person.save
+      @person.status = false
+      @person.should be_status_changed
+    end
+
+    it "should not consider age set as string to the same as integer a change" do
+      @person.age = "20"
+      @person.should_not be_age_changed
+    end
+
+    it "should not consider age set as string back to original value a change" do
+      @person.age = 30
+      @person.age = "20"
+      @person.should_not be_age_changed
+    end
+
 
     it "should know when a attribute is set to it's original value" do
       original_name = @person.name

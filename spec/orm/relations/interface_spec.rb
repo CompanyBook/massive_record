@@ -146,14 +146,14 @@ describe MassiveRecord::ORM::Relations::Interface do
 
         it "should set the type in proxy_owner when proxy_target is set" do
           subject.attachable = attachable
-          subject.attachable_type.should == attachable.class.to_s.underscore
+          subject.attachable_type.should == attachable.class.to_s
         end
 
 
 
         [Person, PersonWithTimestamp].each do |polymorphic_class|
           describe "polymorphic association to class #{polymorphic_class}" do
-            let (:attachable) { polymorphic_class.new :id => "ID1" }
+            let (:attachable) { polymorphic_class.new "ID1" }
 
             before do
               subject.attachable_id = attachable.id

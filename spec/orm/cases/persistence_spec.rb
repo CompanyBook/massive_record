@@ -15,27 +15,27 @@ describe "persistence" do
     end
 
     it "should be persisted if saved" do
-      model = TestClass.new :id => "id1"
+      model = TestClass.new "id1"
       model.save
       model.should be_persisted
     end
 
     it "should be destroyed when destroyed" do
-      model = TestClass.new :id => "id1"
+      model = TestClass.new "id1"
       model.save
       model.destroy
       model.should be_destroyed
     end
 
     it "should not be persisted if destroyed" do
-      model = TestClass.new :id => "id1"
+      model = TestClass.new "id1"
       model.save
       model.destroy
       model.should_not be_persisted
     end
 
     it "should be possible to create new objects" do
-      TestClass.create(:id => "id1").should be_persisted
+      TestClass.create("id1").should be_persisted
     end
 
     it "should raise an error if validation fails on save!" do
@@ -91,22 +91,27 @@ describe "persistence" do
     end
 
     it "should return a row with id set" do
-      Person.new({:id => "foo"}).send(:row_for_record).id.should == "foo"
+      Person.new("foo").send(:row_for_record).id.should == "foo"
     end
 
     it "should return a row with table set" do
-      Person.new({:id => "foo"}).send(:row_for_record).table.should == Person.table
+      Person.new("foo").send(:row_for_record).table.should == Person.table
     end
   end
   
   describe "#attributes_to_row_values_hash" do
     before do
-      @person = Person.new({ :id => "new_id", :name => "Vincent", :points => 15 })
+      @person = Person.new("new_id", :name => "Vincent", :points => 15)
     end
     
     it "should include the 'pts' field in the database which has 'points' as an alias" do
       @person.send(:attributes_to_row_values_hash)["base"].keys.should include("pts")
       @person.send(:attributes_to_row_values_hash)["base"].keys.should_not include("points")
+    end
+
+    it "should include integer value, even if it is set as string" do
+      @person.age = "20"
+      @person.send(:attributes_to_row_values_hash)["info"]["age"].should == 20
     end
   end
 
@@ -116,7 +121,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.create! :id => "new_id", :name => "Thorbjorn", :age => "22"
+        @person = Person.create! "new_id", :name => "Thorbjorn", :age => "22"
       end
 
       it "should update given attriubte when valid" do
@@ -134,7 +139,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.create! :id => "new_id", :name => "Thorbjorn", :age => "22"
+        @person = Person.create! "new_id", :name => "Thorbjorn", :age => "22"
       end
 
       it "should update given attriubtes when valid" do
@@ -162,7 +167,7 @@ describe "persistence" do
       end
 
       it "should delegate save to update if its a persisted record" do
-        person = Person.new :id => 14, :name => "Bob", :age => 33
+        person = Person.new '14', :name => "Bob", :age => 33
         person.should_receive(:new_record?).and_return(false)
         person.should_receive(:update)
         person.save
@@ -171,6 +176,7 @@ describe "persistence" do
 
     describe "database test" do
       include SetUpHbaseConnectionBeforeAll
+      include SetTableNamesToTestTable
       
       describe "create" do
         describe "when table does not exists" do
@@ -187,7 +193,7 @@ describe "persistence" do
               end
             end
 
-            @new_instance = @new_class.new :id => "id_of_foo", :foo => "bar"
+            @new_instance = @new_class.new "id_of_foo", :foo => "bar"
           end
 
           after do
@@ -220,12 +226,37 @@ describe "persistence" do
           include CreatePersonBeforeEach
 
           it "should store (create) new objects" do
-            person = Person.new :id => "new_id", :name => "Thorbjorn", :age => "22"
+            person = Person.new "new_id", :name => "Thorbjorn", :age => "22"
             person.save!
             person_from_db = Person.find(person.id)
             person_from_db.should == person
             person_from_db.name.should == "Thorbjorn"
           end
+        end
+
+        it "raises an error if id already exists" do
+          check_was = Person.check_record_uniqueness_on_create
+          Person.check_record_uniqueness_on_create = true
+
+          Person.create! "foo", :name => "Thorbjorn", :age => "22"
+          expect {
+            Person.create! "foo", :name => "Anders", :age => "22"
+          }.to raise_error MassiveRecord::ORM::RecordNotUnique
+
+          Person.find("foo").name.should eq "Thorbjorn"
+          
+          Person.check_record_uniqueness_on_create = check_was
+        end
+
+        it "raises no error if exist checking is turned off" do
+          check_was = Person.check_record_uniqueness_on_create
+          Person.check_record_uniqueness_on_create = false
+
+          Person.create! "foo", :name => "Thorbjorn", :age => "22"
+          Person.create! "foo", :name => "Anders", :age => "22" # This will result in an "update"
+          Person.find("foo").name.should eq "Anders"
+
+          Person.check_record_uniqueness_on_create = check_was
         end
       end
 
@@ -292,7 +323,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.new :id => "id1"
+        @person = Person.new "id1"
         @person.stub!(:new_record?).and_return(false)
         @row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
         @person.should_receive(:row_for_record).and_return(@row)
@@ -333,7 +364,7 @@ describe "persistence" do
       include SetTableNamesToTestTable
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should be removed by destroy" do
@@ -355,7 +386,7 @@ describe "persistence" do
 
       describe "#destroy_all" do
         it "should remove all when calling remove_all" do
-          Person.create! :id => "id2", :name => "Going to die :-(", :age => 99
+          Person.create! "id2", :name => "Going to die :-(", :age => 99
           Person.destroy_all
           Person.all.length.should == 0
         end
@@ -365,7 +396,7 @@ describe "persistence" do
         end
 
         it "should destroy all even if it is above 10 rows (obviously)" do
-          15.times { |i| Person.create! :id => "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
+          15.times { |i| Person.create! "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
           Person.destroy_all
           Person.all.length.should == 0
         end
@@ -380,7 +411,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should being able to increment age" do
@@ -414,7 +445,7 @@ describe "persistence" do
       include SetTableNamesToTestTable
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should delegate it's call to increment" do
@@ -428,11 +459,44 @@ describe "persistence" do
         @person.age.should == 30
       end
 
-      it "should be able to do atomic increments" do
-        @person.atomic_increment!(:age).should == 30
-        @person.age.should == 30
-        @person.reload
-        @person.age.should == 30
+
+      describe "atomic increments" do
+        it "should be able to do atomic increments on existing objects" do
+          @person.atomic_increment!(:age).should == 30
+          @person.age.should == 30
+          @person.reload
+          @person.age.should == 30
+        end
+
+        it "is a persisted record after incrementation" do
+          person = Person.new('id2')
+          person.atomic_increment!(:age).should eq 1
+          person.should be_persisted
+        end
+
+        it "increments correctly when value is '1'" do
+          old_ensure = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
+          person = Person.new('id2')
+          person.atomic_increment!(:age).should eq 1
+
+          atomic_field = Person.attributes_schema['age']
+
+          # Enter incompatible data, number as string.
+          Person.table.find("id2").tap do |row|
+            row.update_column(
+              atomic_field.column_family.name,
+              atomic_field.name,
+              MassiveRecord::ORM::Base.coder.dump(1)
+            )
+            row.save
+          end
+
+          person.atomic_increment!(:age).should eq 2
+
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_ensure
+        end
       end
     end
   end
@@ -442,7 +506,7 @@ describe "persistence" do
       include MockMassiveRecordConnection
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should being able to decrement age" do
@@ -476,7 +540,7 @@ describe "persistence" do
       include SetTableNamesToTestTable
 
       before do
-        @person = Person.create! :id => "id1", :name => "Thorbjorn", :age => 29
+        @person = Person.create! "id1", :name => "Thorbjorn", :age => 29
       end
 
       it "should delegate it's call to decrement" do
@@ -496,17 +560,58 @@ describe "persistence" do
     include MockMassiveRecordConnection
 
     it "should raise an error if new record is read only and you try to save it" do
-      person = Person.new :id => "id1", :name => "Thorbjorn", :age => 29
+      person = Person.new "id1", :name => "Thorbjorn", :age => 29
       person.readonly!
       lambda { person.save }.should raise_error MassiveRecord::ORM::ReadOnlyRecord
     end
 
     it "should raise an error if record is read only and you try to save it" do
-      person = Person.create :id => "id1", :name => "Thorbjorn", :age => 29
+      person = Person.create "id1", :name => "Thorbjorn", :age => 29
       person.should be_persisted
 
       person.readonly!
       lambda { person.save }.should raise_error MassiveRecord::ORM::ReadOnlyRecord
+    end
+  end
+
+  describe "id as int" do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+    it "saves id as string and reloads correctly" do
+      person = Person.new :name => "Thorbjorn", :age => 29
+      person.id = 1
+      person.save!
+
+      person.reload
+      person.id.should == "1"
+    end
+  end
+
+
+  describe "attributes with nil value" do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+
+    subject do
+      Person.create!("id", {
+        :name => "Thorbjorn",
+        :age => 22,
+        :points => 1,
+        :addresses => {'home' => 'Here'},
+        :status => true
+      })
+    end
+
+    %w(points addresses status).each do |attr|
+      it "removes the cell from hbase when #{attr} is set to nil" do
+        subject[attr] = nil
+        subject.save!
+
+        raw_values = Person.table.find(subject.id).values
+        raw_values[subject.attributes_schema[attr].unique_name].should be_nil
+      end
     end
   end
 end

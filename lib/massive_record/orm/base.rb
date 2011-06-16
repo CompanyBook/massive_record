@@ -4,6 +4,7 @@ require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/subclasses'
 require 'active_support/core_ext/module'
 require 'active_support/core_ext/string'
+require 'active_support/core_ext/array'
 require 'active_support/memoizable'
 
 require 'massive_record/orm/schema'
@@ -13,7 +14,9 @@ require 'massive_record/orm/config'
 require 'massive_record/orm/relations'
 require 'massive_record/orm/finders'
 require 'massive_record/orm/finders/scope'
+require 'massive_record/orm/finders/rescue_missing_table_on_find'
 require 'massive_record/orm/attribute_methods'
+require 'massive_record/orm/attribute_methods/time_zone_conversion'
 require 'massive_record/orm/attribute_methods/write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
@@ -22,6 +25,8 @@ require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
+require 'massive_record/orm/default_id'
+require 'massive_record/orm/query_instrumentation'
 
 
 module MassiveRecord
@@ -35,6 +40,19 @@ module MassiveRecord
       # Accepts a logger conforming to the interface of Log4r or the default Ruby 1.8+ Logger class,
       cattr_accessor :logger, :instance_writer => false
 
+
+      #
+      # Integers are now persisted as a hax representation in hbase, not as
+      # a string any more. This makes for instance atomic_increment!(:int_attr) work
+      # as expected.
+      #
+      # The problem is that if you have old data in your database, you need to handle
+      # this. Every new integer will still be written as hex though.
+      #
+      cattr_accessor :backward_compatibility_integers_might_be_persisted_as_strings, :instance_writer => false
+      self.backward_compatibility_integers_might_be_persisted_as_strings = false
+
+
       # Add a prefix or a suffix to the table name
       # example:
       #
@@ -47,6 +65,18 @@ module MassiveRecord
       
       class_attribute :table_name_suffix, :instance_writer => false
       self.table_name_suffix = ""
+
+      #
+      # Will do a simple exists?(id) check before create as a simple (and
+      # kinda insecure) sanity check on if that ID exists or not. If it do
+      # exists a RecordNotUnique will be raised. This is done from the ORM
+      # layer, so obviously there is a speed cost on create.
+      #
+      class_attribute :check_record_uniqueness_on_create, :instance_writer => false
+      self.check_record_uniqueness_on_create = false
+
+      class_attribute :auto_increment_id, :instance_writer => false
+      self.auto_increment_id = true
      
       class << self
         def table_name
@@ -104,15 +134,20 @@ module MassiveRecord
       # and assign to instance variables. How read- and write 
       # methods are defined might change over time when the DSL
       # for describing column families and fields are in place
+      # You can call initialize in multiple ways:
+      #   ORMClass.new(attr_one: value, attr_two: value)
+      #   ORMClass.new("the-id-of-the-new-record")
+      #   ORMClass.new("the-id-of-the-new-record", attr_one: value, attr_two: value)
       #
-      def initialize(attributes = {})
+      def initialize(*args)
+        attributes = args.extract_options!
+        id = args.first
+
         @new_record = true
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
 
-        attributes = {} if attributes.nil?
-
-        self.attributes_raw = attributes_from_field_definition
+        self.attributes_raw = attributes_from_field_definition.merge('id' => id)
         self.attributes = attributes
 
         clear_dirty_states!
@@ -186,6 +221,11 @@ module MassiveRecord
         read_attribute(:id)
       end
 
+      def id=(id)
+        id = id.to_s unless id.blank?
+        write_attribute(:id, id)
+      end
+
 
 
       def readonly?
@@ -238,17 +278,20 @@ module MassiveRecord
 
     Base.class_eval do
       include Config
-      include Relations::Interface
       include Persistence
+      include Relations::Interface
       include Finders
-      include ActiveModel::Translation
+      extend  RescueMissingTableOnFind
       include AttributeMethods
       include AttributeMethods::Write, AttributeMethods::Read
+      include AttributeMethods::TimeZoneConversion
       include AttributeMethods::Dirty
       include Validations
       include Callbacks
       include Timestamps
       include SingleTableInheritance
+      include DefaultId
+      include QueryInstrumentation
 
 
       alias [] read_attribute
@@ -257,10 +300,9 @@ module MassiveRecord
   end
 end
 
-
-
-
-
 require 'massive_record/orm/table'
 require 'massive_record/orm/column'
 require 'massive_record/orm/id_factory'
+require 'massive_record/orm/log_subscriber'
+
+ActiveSupport.run_load_hooks(:massive_record, MassiveRecord::ORM::Base)
