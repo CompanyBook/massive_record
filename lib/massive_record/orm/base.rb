@@ -25,6 +25,7 @@ require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
+require 'massive_record/orm/default_id'
 require 'massive_record/orm/query_instrumentation'
 
 
@@ -73,6 +74,9 @@ module MassiveRecord
       #
       class_attribute :check_record_uniqueness_on_create, :instance_writer => false
       self.check_record_uniqueness_on_create = false
+
+      class_attribute :auto_increment_id, :instance_writer => false
+      self.auto_increment_id = true
      
       class << self
         def table_name
@@ -286,6 +290,7 @@ module MassiveRecord
       include Callbacks
       include Timestamps
       include SingleTableInheritance
+      include DefaultId
       include QueryInstrumentation
 
 
