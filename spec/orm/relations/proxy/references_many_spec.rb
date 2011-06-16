@@ -621,4 +621,10 @@ describe TestReferencesManyProxy do
       end
     end
   end
+
+  it "resets when the proxy owner is asked to reload" do
+    subject.loaded!
+    proxy_owner.reload
+    should_not be_loaded
+  end
 end

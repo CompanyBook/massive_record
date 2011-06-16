@@ -274,8 +274,8 @@ module MassiveRecord
 
     Base.class_eval do
       include Config
-      include Relations::Interface
       include Persistence
+      include Relations::Interface
       include Finders
       extend  RescueMissingTableOnFind
       include AttributeMethods

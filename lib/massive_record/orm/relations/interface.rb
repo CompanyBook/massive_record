@@ -146,6 +146,12 @@ module MassiveRecord
 
 
 
+        def reload
+          reset_relation_proxies
+          super
+        end
+
+
         private
 
         def relation_proxy(name)
@@ -167,6 +173,10 @@ module MassiveRecord
 
         def relation_proxy_set(name, proxy)
           @relation_proxy_cache[name.to_s] = proxy
+        end
+
+        def reset_relation_proxies
+          @relation_proxy_cache.values.each(&:reset)
         end
       end
     end

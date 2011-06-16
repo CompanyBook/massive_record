@@ -103,4 +103,10 @@ describe TestReferencesOnePolymorphicProxy do
       proxy_owner.attachable_id.should == proxy_target.id
     end
   end
+
+  it "resets when the proxy owner is asked to reload" do
+    subject.loaded!
+    proxy_owner.reload
+    should_not be_loaded
+  end
 end

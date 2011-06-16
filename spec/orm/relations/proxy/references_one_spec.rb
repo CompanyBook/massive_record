@@ -108,4 +108,11 @@ describe TestReferencesOneProxy do
       lambda { subject.send :raise_if_type_mismatch, person_with_timestamp }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
     end
   end
+
+
+  it "resets when the proxy owner is asked to reload" do
+    subject.loaded!
+    proxy_owner.reload
+    should_not be_loaded
+  end
 end
