@@ -1,4 +1,6 @@
-# v0.2.1 (git develop)
+# v0.2.2 (git develop)
+
+# v0.2.1.rc1 (git master)
 
 - Models without any default_id will now by default get an id via next_id(). You can turn it off
   via the setting auto_increment_id on ORM::Base or on the Model class itself.
@@ -38,7 +40,7 @@
 - Removed inclusion of ActiveModel::Translation in ORM::Base class, as including ActiveModel::Validations
   extends ORM::Base with Translation as well (and it should never have been included; it should have been extended with..)
 
-# v0.2.0 (git master)
+# v0.2.0
 
 - Intersection and union operations on arrays containing MassiveRecord objects is now working as expected.
 - You can now disallow nil values, and in that case we will ensure that given field has its default value.
