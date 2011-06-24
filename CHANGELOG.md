@@ -1,6 +1,7 @@
 # v0.2.2 (git develop)
 
-# v0.2.1.rc1 (git master)
+
+# v0.2.1 (git master)
 
 - Models without any default_id will now by default get an id via next_id(). You can turn it off
   via the setting auto_increment_id on ORM::Base or on the Model class itself.
