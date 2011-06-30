@@ -162,6 +162,13 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x1E").should eq 30
     end
 
+    it "it forces encoding on the value to be BINARY if value is integer" do
+      value = "\x00\x00\x00\x00\x00\x00\x00\x01"
+      value.should_receive(:force_encoding).and_return(value)
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
+      @subject.decode(value)
+    end
+
     it "should decode an float value" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :code, :type => :float)
       @subject.decode("12.345").should == 12.345

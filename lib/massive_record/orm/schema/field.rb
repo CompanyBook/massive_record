@@ -126,6 +126,8 @@ module MassiveRecord
                       coder.load(value)
                     end
                   when :integer
+                    value = value.force_encoding(Encoding::BINARY)
+
                     if value =~ /\A\d*\Z/
                       coder.load(value) if value.present?
                     else
