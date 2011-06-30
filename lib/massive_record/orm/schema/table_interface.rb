@@ -54,6 +54,8 @@ module MassiveRecord
           # It should be on a unique and complete form like ["info:name", "info:phone"]
           #
           def autoload_column_families_and_fields_with(column_names)
+            ensure_column_families_exists
+
             column_names.each do |column_family_and_column_name|
               family_name, column_name = column_family_and_column_name.split(":")
               
