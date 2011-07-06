@@ -1,5 +1,5 @@
 # v0.2.2 (git develop)
-
+- Atomic decrements where added to the Thrift adapter and the ORM.
 
 # v0.2.1 (git master)
 

@@ -461,6 +461,10 @@ describe "persistence" do
 
 
       describe "atomic increments" do
+        it "raises error if called on non integer fields" do
+          lambda { @person.atomic_increment!(:name) }.should raise_error MassiveRecord::ORM::NotNumericalFieldError
+        end
+
         it "should be able to do atomic increments on existing objects" do
           @person.atomic_increment!(:age).should == 30
           @person.age.should == 30
@@ -494,6 +498,49 @@ describe "persistence" do
           end
 
           person.atomic_increment!(:age).should eq 2
+
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_ensure
+        end
+      end
+
+      describe "atomic decrements" do
+        it "raises error if called on non integer fields" do
+          lambda { @person.atomic_decrement!(:name) }.should raise_error MassiveRecord::ORM::NotNumericalFieldError
+        end
+
+        it "should be able to do atomic decrements on existing objects" do
+          @person.atomic_decrement!(:age).should == 28
+          @person.age.should == 28
+          @person.reload
+          @person.age.should == 28
+        end
+
+        it "is a persisted record after decrementation" do
+          person = Person.new('id2')
+          person.atomic_decrement!(:age).should eq -1
+          person.should be_persisted
+        end
+
+        it "decrementss correctly when value is '1'" do
+          old_ensure = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
+          person = Person.new('id2')
+          person.atomic_increment!(:age).should eq 1
+
+          atomic_field = Person.attributes_schema['age']
+
+          # Enter incompatible data, number as string.
+          Person.table.find("id2").tap do |row|
+            row.update_column(
+              atomic_field.column_family.name,
+              atomic_field.name,
+              MassiveRecord::ORM::Base.coder.dump(1)
+            )
+            row.save
+          end
+
+          person.atomic_decrement!(:age).should eq 0
 
           MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_ensure
         end
