@@ -119,20 +119,10 @@ module MassiveRecord
         increment(attr_name, by).update_attribute(attr_name, self[attr_name])
       end
 
-      # Atomic increment of an attribute. Please note that it's the
-      # adapter (or the wrapper) which needs to guarantee that the update
-      # is atomic, and as of writing this the Thrift adapter / wrapper does
-      # not do this anatomic.
       def atomic_increment!(attr_name, by = 1)
-        self.class.ensure_that_we_have_table_and_column_families!
-        attr_name = attr_name.to_s
-
-        ensure_proper_binary_integer_representation(attr_name)
-
-        self[attr_name] = row_for_record.atomic_increment(attributes_schema[attr_name].unique_name, by)
-        @new_record = false
-        self[attr_name]
+        atomic_operation(:increment, attr_name, by)
       end
+
 
       def decrement(attr_name, by = 1)
         raise NotNumericalFieldError unless attributes_schema[attr_name.to_s].type == :integer
@@ -144,6 +134,11 @@ module MassiveRecord
       def decrement!(attr_name, by = 1)
         decrement(attr_name, by).update_attribute(attr_name, self[attr_name])
       end
+
+      def atomic_decrement!(attr_name, by = 1)
+        atomic_operation(:decrement, attr_name, by)
+      end
+
       
 
       private
@@ -214,8 +209,26 @@ module MassiveRecord
       end
 
       #
+      # Atomic decrement of an attribute. Please note that it's the
+      # adapter (or the wrapper) which needs to guarantee that the update
+      # is atomic. Thrift adapter is working with atomic decrementation.
+      #
+      def atomic_operation(operation, attr_name, by)
+        raise NotNumericalFieldError unless attributes_schema[attr_name.to_s].type == :integer
+
+        self.class.ensure_that_we_have_table_and_column_families!
+        attr_name = attr_name.to_s
+
+        ensure_proper_binary_integer_representation(attr_name)
+
+        self[attr_name] = row_for_record.send("atomic_#{operation}", attributes_schema[attr_name].unique_name, by)
+        @new_record = false
+        self[attr_name]
+      end
+
+      #
       # To cope with the problem which arises when you ask to
-      # do atomic incrementation of an attribute and that attribute
+      # do atomic incrementation / decrementation of an attribute and that attribute
       # has a string representation of a number, like "1", instead of
       # the binary representation, like "\x00\x00\x00\x00\x00\x00\x00\x01".
       #
@@ -226,7 +239,7 @@ module MassiveRecord
       # backward compatibility we are doing this.
       #
       # Now, there is a risk of doing this; if two calls are made to
-      # atomic_increment! on a record where it's value is a string
+      # atomic_increment! or atomic_decrement! on a record where it's value is a string
       # representation this operation might be compromised. Therefor
       # you need to enable this feature.
       #
@@ -234,12 +247,12 @@ module MassiveRecord
         return if !backward_compatibility_integers_might_be_persisted_as_strings || new_record?
 
         field = attributes_schema[attr_name]  
-        raise "Not an integer field" unless field.try(:type) == :integer
 
         if raw_value = self.class.table.get(id, field.column_family.name, field.name)
           store_record_to_database('update', [attr_name]) if raw_value =~ /\A\d*\Z/
         end
       end
+
     end
   end
 end

@@ -86,6 +86,10 @@ module MassiveRecord
         def atomic_increment(column_name, by = 1)
           @table.client.atomicIncrement(@table.name, id.to_s, column_name, by) 
         end
+
+        def atomic_decrement(column_name, by = 1)
+          atomic_increment(column_name, -by)
+        end
         
         def read_atomic_integer_value(column_name)
           atomic_increment(column_name, 0)
