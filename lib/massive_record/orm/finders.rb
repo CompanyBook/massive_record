@@ -177,8 +177,12 @@ module MassiveRecord
         end
 
         def instantiate(record) # :nodoc:
-          model = if klass = record[inheritance_attribute] and klass.present?
-                    klass.constantize.allocate
+          model = if record.has_key?(inheritance_attribute)
+                    if klass = record[inheritance_attribute] and klass.present?
+                      klass.constantize.allocate
+                    else
+                      base_class.allocate
+                    end
                   else
                     allocate
                   end
