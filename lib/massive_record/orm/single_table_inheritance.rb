@@ -9,8 +9,18 @@ module MassiveRecord
 
 
       module ClassMethods
+        def do_find(*args)
+          result = super
+          single_table_inheritance_enabled? ? ensure_only_class_or_subclass_of_self_are_returned(result) : result
+        end
 
         private
+
+        def ensure_only_class_or_subclass_of_self_are_returned(result)
+          multiple_result = result.is_a? Array
+          filtered_results = (multiple_result ? result : [result]).select { |result| result.kind_of? self }
+          multiple_result ? filtered_results : filtered_results.first
+        end
 
         #
         # In Rails development environment class files are not required before they are needed.
@@ -33,6 +43,10 @@ module MassiveRecord
 
         def ensure_sti_class_is_loaded(klass) # :nodoc:
           klass.constantize
+        end
+
+        def single_table_inheritance_enabled?
+          !!attributes_schema[inheritance_attribute]
         end
       end
 
