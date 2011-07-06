@@ -121,8 +121,7 @@ module MassiveRecord
 
       # Atomic increment of an attribute. Please note that it's the
       # adapter (or the wrapper) which needs to guarantee that the update
-      # is atomic, and as of writing this the Thrift adapter / wrapper does
-      # not do this anatomic.
+      # is atomic. Thrift adapter is working with atomic incrementation.
       def atomic_increment!(attr_name, by = 1)
         self.class.ensure_that_we_have_table_and_column_families!
         attr_name = attr_name.to_s
