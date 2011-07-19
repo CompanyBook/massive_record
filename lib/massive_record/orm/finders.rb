@@ -51,7 +51,11 @@ module MassiveRecord
         # Entry point for method delegation like find, first, all etc.
         #
         def finder_scope
-          default_scoping || unscoped
+          if default_scoping
+            default_scoping.dup
+          else
+            unscoped
+          end
         end
 
 
