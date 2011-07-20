@@ -34,6 +34,22 @@ module MassiveRecord
           self.default_timezone = :utc
         end
       end
+
+      config.after_initialize do
+        ActiveSupport.on_load(:massive_record) do
+          instantiate_observers
+
+          if ::Rails::VERSION::MAJOR >= 3 && ::Rails::VERSION::MINOR >= 1
+            ActionDispatch::Reloader.to_prepare do
+              MassiveRecord::ORM::Base.instantiate_observers
+            end
+          else
+            ActionDispatch::Callbacks.to_prepare(:massive_record_instantiate_observers) do
+              MassiveRecord::ORM::Base.instantiate_observers
+            end
+          end
+        end
+      end
     end
   end
 end
