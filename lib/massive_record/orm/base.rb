@@ -27,6 +27,7 @@ require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
 require 'massive_record/orm/default_id'
 require 'massive_record/orm/query_instrumentation'
+require 'massive_record/orm/observer'
 
 
 module MassiveRecord
@@ -287,7 +288,7 @@ module MassiveRecord
       include AttributeMethods::TimeZoneConversion
       include AttributeMethods::Dirty
       include Validations
-      include Callbacks
+      include Callbacks, ActiveModel::Observing
       include Timestamps
       include SingleTableInheritance
       include DefaultId

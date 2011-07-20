@@ -1,6 +1,8 @@
 module MassiveRecord
   module Rails
     class Railtie < ::Rails::Railtie
+      config.massive_record = ActiveSupport::OrderedOptions.new
+
       initializer "massive_record.logger" do
         MassiveRecord::ORM::Base.logger = ::Rails.logger
       end
