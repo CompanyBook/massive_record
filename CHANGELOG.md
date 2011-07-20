@@ -1,5 +1,6 @@
 # v0.2.2 (git develop)
 
+- Added support for Observers. See MassiveRecord::ORM::Observer.
 - Fixed a nasty bug with default scope. Guess we have not used default scope that much not noticing this one until now.
 - Fixed a couple of issues related to STI. We are filtering on type now, so doing find() on a subclass will no longer find superclasses.
   (Or, it will find it, but it will be filtered away before result are returned. Even beter if this could have been done in the database..)

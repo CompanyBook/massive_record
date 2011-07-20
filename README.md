@@ -72,9 +72,10 @@ Tables also have:
     - Auto-creation of table and column families on save if table does not exists.
     - Destroy records
     - Relations: See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
+    - Observable. See MassiveRecord::ORM::Observer. If you know how to use ActiveRecord's observer you know how to use this one.
 
 
-Here is an example of usage, both for Table and Column:
+Here are some examples of usages:
 
     class Person < MassiveRecord::ORM::Table
       references_one :boss, :class_name => "Person", :store_in => :info
@@ -116,6 +117,13 @@ Here is an example of usage, both for Table and Column:
     class Friend < Person
       # This one will be stored in Person's table with it's type set to Friend.
       # Calling Person.all will return object back as a Friend.
+    end
+
+
+    class PersonObserver < MassiveRecord::ORM::Observer
+      def after_create(person_created)
+        # Do something smart with that person
+      end
     end
 
     
