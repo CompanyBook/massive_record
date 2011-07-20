@@ -3,6 +3,12 @@ module MassiveRecord
     class Railtie < ::Rails::Railtie
       config.massive_record = ActiveSupport::OrderedOptions.new
 
+      initializer "massive_record.set_configs" do |app|
+        ActiveSupport.on_load(:massive_record) do
+          app.config.massive_record.each { |k,v| send("#{k}=", v) }
+        end
+      end
+
       initializer "massive_record.logger" do
         MassiveRecord::ORM::Base.logger = ::Rails.logger
       end
