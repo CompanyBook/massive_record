@@ -156,15 +156,27 @@ module MassiveRecord
                                 hbase_query_find(what_to_find, options)
                               end
 
-          [find_many, expected_result_size, what_to_find, result_from_table]
+          [find_many, expected_result_size, what_to_find, ensure_id_is_utf8_encoded(result_from_table)]
         end
 
-        def hbase_query_all_first(type, args)
+        def hbase_query_all_first(type, args) # :nodoc:
           table.send(type, *args) # first() / all()
         end
 
-        def hbase_query_find(what_to_find, options)
+        def hbase_query_find(what_to_find, options) # :nodoc:
           table.find(what_to_find, options)
+        end
+
+        def ensure_id_is_utf8_encoded(result_from_table) # :nodoc
+          return nil if result_from_table.nil?
+
+          if result_from_table.respond_to? :id
+            result_from_table.id.force_encoding(Encoding::UTF_8) if result_from_table.id.respond_to? :force_encoding
+          elsif result_from_table.respond_to? :each
+            result_from_table.collect! { |result| ensure_id_is_utf8_encoded(result) }
+          end
+
+          result_from_table
         end
 
         def transpose_hbase_columns_to_record_attributes(row) #: nodoc:

@@ -87,9 +87,12 @@ module MassiveRecord
         end
       
         def format_options_for_scanner(opts = {})
+          start = opts[:start] && opts[:start].dup.force_encoding(Encoding::BINARY)
+          offset = opts[:offset] && opts[:offset].dup.force_encoding(Encoding::BINARY)
+
           {
-            :start_key  => opts[:start],
-            :offset_key => opts[:offset],
+            :start_key  => start,
+            :offset_key => offset,
             :created_at => opts[:created_at],
             :columns    => opts[:select], # list of column families to fetch from hbase
             :limit      => opts[:limit] || opts[:batch_size]
@@ -115,7 +118,7 @@ module MassiveRecord
         # table.get("my_id", :info, :name) # => "Bob"
         #
         def get(id, column_family_name, column_name)
-          if value = connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.try(:value)
+          if value = connection.get(name, id.dup.force_encoding(Encoding::BINARY), "#{column_family_name.to_s}:#{column_name.to_s}").first.try(:value)
             MassiveRecord::Wrapper::Cell.new(:value => value).value # might seems a bit strange.. Just to "enforice" that the value is a supported type
           end
         end
@@ -136,7 +139,7 @@ module MassiveRecord
               column_families_to_find = column_families_to_find.collect { |c| c.to_s }
             end
 
-            if t_row_result = connection.getRowWithColumns(name, what_to_find, column_families_to_find).first
+            if t_row_result = connection.getRowWithColumns(name, what_to_find.dup.force_encoding(Encoding::BINARY), column_families_to_find).first
               Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
           end
