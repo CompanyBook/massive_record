@@ -169,7 +169,7 @@ module MassiveRecord
 
         def ensure_id_is_utf8_encoded(result_from_table) # :nodoc
           if result_from_table.respond_to? :id
-            result_from_table.id.force_encoding(Encoding::UTF_8)
+            result_from_table.id.force_encoding(Encoding::UTF_8) if result_from_table.id.respond_to? :force_encoding
           elsif result_from_table.respond_to? :each
             result_from_table.collect! { |result| ensure_id_is_utf8_encoded(result) }
           end
