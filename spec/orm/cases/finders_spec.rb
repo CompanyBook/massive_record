@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 require 'orm/models/test_class'
 require 'orm/models/person'
@@ -162,6 +163,12 @@ describe "finders" do
       @person.name.should == "John Doe"
       @person.email.should == "john@base.com"
       @person.age.should == 20
+    end
+
+    it "should maintain encoding of ids" do
+      id = "thorbjørn"
+      person = Person.create! id, :name => "Thorbjørn", :age => 20
+      Person.find(id).should eq person
     end
 
     it "should find first person" do
