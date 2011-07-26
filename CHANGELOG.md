@@ -1,5 +1,6 @@
 # v0.2.2 (git develop)
 
+- Fixed a problem with utf-8 encoded strings in ids. The Thrift adapter will no longer blow up.
 - Added support for Observers. See MassiveRecord::ORM::Observer.
 - Fixed a nasty bug with default scope. Guess we have not used default scope that much not noticing this one until now.
 - Fixed a couple of issues related to STI. We are filtering on type now, so doing find() on a subclass will no longer find superclasses.

@@ -58,6 +58,14 @@ describe MassiveRecord::Wrapper::Row do
       it "gets a cell" do
         table.get(id, :misc, :name).should eq name
       end
+
+      it "finds with start option" do
+        table.all(:start => id).first.values["misc:name"].should eq name
+      end
+
+      it "finds with offset option" do
+        table.all(:offset => id).first.values["misc:name"].should eq name
+      end
     end
   end
 end

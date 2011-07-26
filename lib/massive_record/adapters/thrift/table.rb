@@ -87,9 +87,12 @@ module MassiveRecord
         end
       
         def format_options_for_scanner(opts = {})
+          start = opts[:start] && opts[:start].dup.force_encoding(Encoding::BINARY)
+          offset = opts[:offset] && opts[:offset].dup.force_encoding(Encoding::BINARY)
+
           {
-            :start_key  => opts[:start],
-            :offset_key => opts[:offset],
+            :start_key  => start,
+            :offset_key => offset,
             :created_at => opts[:created_at],
             :columns    => opts[:select], # list of column families to fetch from hbase
             :limit      => opts[:limit] || opts[:batch_size]
