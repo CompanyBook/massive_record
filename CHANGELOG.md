@@ -1,5 +1,6 @@
 # v0.2.2 (git develop)
 
+- References many can now handle find_in_batches and find_each.
 - Fixed a problem with utf-8 encoded strings in ids. The Thrift adapter will no longer blow up.
 - Added support for Observers. See MassiveRecord::ORM::Observer.
 - Fixed a nasty bug with default scope. Guess we have not used default scope that much not noticing this one until now.
