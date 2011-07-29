@@ -167,6 +167,17 @@ module MassiveRecord
           end
 
           #
+          # Fetches records in batches of 1000 (by default), iterates over each batch
+          # and yields one and one record in to given block. See find_in_batches for
+          # options.
+          #
+          def find_each(options = {})
+            find_in_batches(options) do |batch|
+              batch.each { |record| yield record }
+            end
+          end
+
+          #
           # Returns a limited result set of target records.
           #
           # TODO  If we know all our foreign keys (basically we also know our length)

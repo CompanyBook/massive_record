@@ -234,6 +234,27 @@ describe TestReferencesManyProxy do
   end
 
 
+  describe "#find_each" do
+    it "delegate to find_in_batches" do
+      subject.should_receive(:find_in_batches).with(:batch_size => 2, :start => :from_here)
+      subject.find_each(:batch_size => 2, :start => :from_here)  
+    end
+
+    it "yields one and one record" do
+      proxy_owner.save!
+      proxy_owner.test_classes.concat(proxy_target, proxy_target_2, proxy_target_3)
+
+      result = []
+
+      subject.find_each do |record|
+        result << record
+      end
+
+      result.should eq [proxy_target, proxy_target_2, proxy_target_3]
+    end
+  end
+
+
   describe "adding records to collection" do
     [:<<, :push, :concat].each do |add_method|
       describe "by ##{add_method}" do
