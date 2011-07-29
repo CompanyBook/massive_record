@@ -145,6 +145,13 @@ module MassiveRecord
             record
           end
 
+          #
+          # Find records in batches, yields batch into your block
+          #
+          # Options:
+          #   <tt>:batch_size</tt>    The number of records you want per batch
+          #   <tt>:start</tt>         The ids starts with this
+          #
           def find_in_batches(options = {}, &block)
             if loaded?
               raise "Sorry, not implemented yet."

@@ -146,6 +146,32 @@ describe TestReferencesManyProxy do
 
         result.should eq [records.slice(0, 3), records.slice(3, 3)]
       end
+
+      describe "an overridden start id" do
+        (11..16).each do |i|
+          let("record_#{i}") { TestClass.create! "test-1-#{i}" }
+        end
+
+        let(:records_above_10) { (11..16).collect { |i| send("record_#{i}") } }
+
+        before { records_above_10 }
+
+        it "returns only records with given start" do
+          result = []
+
+          subject.find_in_batches(:batch_size => 3, :start => "test-1-") do |records_batch|
+            result << records_batch
+          end
+
+          result.should eq [records_above_10.slice(0, 3), records_above_10.slice(3, 3)]
+        end
+
+        it "raises an error if your start option starst with some incorrect value" do
+          expect {
+            subject.find_in_batches(:start => 'incorrect_value') { |b| }
+          }.to raise_error MassiveRecord::ORM::Relations::InvalidStartOption
+        end
+      end
     end
   end
 

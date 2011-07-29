@@ -3,6 +3,9 @@ require 'active_support/core_ext/array/extract_options'
 module MassiveRecord
   module ORM
     module Relations
+      # Raised when an invalid start option is given to a find_in_batches
+      class InvalidStartOption < MassiveRecordError
+      end
 
       #
       # The master of metadata related to a relation. For instance;
@@ -114,7 +117,15 @@ module MassiveRecord
           relation_type == 'references_many'
         end
 
-        
+        #
+        # Sets a method which we should ask for how to find where
+        # related records starts with. Method injects a find_with
+        # Proc which finds are made through.
+        #
+        # That proc takes different options as it sends on to the
+        # receiving finder method on target class. It also takes a
+        # block which is sent on to the finder method.
+        #
         def records_starts_from=(method)
           @records_starts_from = method
 
@@ -122,8 +133,15 @@ module MassiveRecord
             self.find_with = Proc.new do |proxy_owner, options = {}, &block|
               finder_method = options.delete(:finder_method) || :all
 
-              if start = proxy_owner.send(records_starts_from)
-                proxy_target_class.send(finder_method, options.merge({:start => start}), &block)
+              if ids_starts_with = proxy_owner.send(records_starts_from)
+                if options[:start]
+                  if options[:start].starts_with?(ids_starts_with)
+                    ids_starts_with = options[:start]
+                  else
+                    raise InvalidStartOption.new("The start option: #{options[:start]} must begin with: #{ids_starts_with}.")
+                  end
+                end
+                proxy_target_class.send(finder_method, options.merge({:start => ids_starts_with}), &block)
               end
             end
           else
