@@ -8,13 +8,6 @@ module MassiveRecord
           # to make sure we don't remove any pushed proxy_targets only cause we load the
           # proxy_targets.
           #
-          # TODO  - Implement methods like:
-          #         * find_in_batches
-          #         * find_each
-          #         * etc :-)
-          #
-          #       - A counter cache is also nice.
-          #
           def load_proxy_target
             proxy_target_before_load = proxy_target
             proxy_target_after_load = super
@@ -165,7 +158,11 @@ module MassiveRecord
             elsif find_with_proc?
               find_proxy_target_with_proc(options.merge(:finder_method => :find_in_batches), &block)
             else
-              raise "Sorry, not implemented yet."
+              all_ids = proxy_owner.send(metadata.foreign_key)
+              all_ids.select! { |id| id.starts_with? options[:start] } if options[:start]
+              all_ids.in_groups_of(options[:batch_size]).each do |ids_in_batch|
+                yield Array(find_proxy_target(ids_in_batch))
+              end
             end
           end
 

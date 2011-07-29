@@ -137,7 +137,35 @@ describe TestReferencesManyProxy do
     end
 
     context "when persisted foreign keys" do
-      pending
+      before do
+        proxy_owner.save!
+        proxy_owner.test_classes.concat(proxy_target, proxy_target_2, proxy_target_3)
+        subject.reset
+      end
+
+      it "returns records in batches of given size" do
+        result = []
+
+        subject.find_in_batches(:batch_size => 1) do |records_batch|
+          result << records_batch 
+        end
+
+        result.should eq [[proxy_target], [proxy_target_2], [proxy_target_3]]
+      end
+
+      it "filters when given :start" do
+        proxy_target_3_3 = TestClass.new("test-class-id-3-1")
+        proxy_owner.test_classes << proxy_target_3_3
+        subject.reset
+
+        result = []
+
+        subject.find_in_batches(:batch_size => 1, :start => "test-class-id-3") do |records_batch|
+          result << records_batch 
+        end
+
+        result.should eq [[proxy_target_3], [proxy_target_3_3]]
+      end
     end
 
     context "when finding with a given start id" do
