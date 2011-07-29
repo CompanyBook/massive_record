@@ -105,6 +105,51 @@ describe TestReferencesManyProxy do
   end
 
 
+  describe "#find_in_batches" do
+    context "when persisted foreign keys" do
+      pending
+    end
+
+    context "when finding with a given start id" do
+      (1..6).each do |i|
+        let("record_#{i}") { TestClass.create! "test-#{i}" }
+      end
+
+      let(:records) { (1..6).collect { |i| send("record_#{i}") } }
+
+      before do
+        records # touch to save
+
+        subject.metadata.records_starts_from = :test_classes_starts_from
+        subject.proxy_owner.should_receive(:test_classes_starts_from).and_return("test-")
+      end
+
+      after { subject.metadata.records_starts_from = nil }
+
+
+      it "returns records in one batch" do
+        result = []
+
+        subject.find_in_batches(:batch_size => 10) do |records_batch|
+          result << records_batch
+        end
+
+        result.should eq [records]
+      end
+
+      it "returns records in one batch" do
+        result = []
+
+        subject.find_in_batches(:batch_size => 3) do |records_batch|
+          result << records_batch
+        end
+
+        result.should eq [records.slice(0, 3), records.slice(3, 3)]
+      end
+    end
+  end
+
+
   describe "adding records to collection" do
     [:<<, :push, :concat].each do |add_method|
       describe "by ##{add_method}" do

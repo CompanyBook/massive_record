@@ -145,6 +145,16 @@ module MassiveRecord
             record
           end
 
+          def find_in_batches(options = {}, &block)
+            if loaded?
+              raise "Sorry, not implemented yet."
+            elsif find_with_proc?
+              find_proxy_target_with_proc(options.merge(:finder_method => :find_in_batches), &block)
+            else
+              raise "Sorry, not implemented yet."
+            end
+          end
+
           #
           # Returns a limited result set of target records.
           #
