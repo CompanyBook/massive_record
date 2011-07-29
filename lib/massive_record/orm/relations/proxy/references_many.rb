@@ -160,7 +160,7 @@ module MassiveRecord
             else
               ids = proxy_owner.send(metadata.foreign_key).slice(0, limit)
               ids = ids.first if ids.length == 1
-              [find_proxy_target(ids)].flatten
+              Array(find_proxy_target(ids))
             end
           end
 
@@ -189,7 +189,7 @@ module MassiveRecord
           end
 
           def find_proxy_target_with_proc(options = {})
-            [super].compact.flatten
+            Array(super).compact
           end
 
           def can_find_proxy_target?
