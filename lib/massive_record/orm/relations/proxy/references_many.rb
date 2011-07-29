@@ -149,12 +149,19 @@ module MassiveRecord
           # Find records in batches, yields batch into your block
           #
           # Options:
-          #   <tt>:batch_size</tt>    The number of records you want per batch
+          #   <tt>:batch_size</tt>    The number of records you want per batch. Defaults to 1000
           #   <tt>:start</tt>         The ids starts with this
           #
           def find_in_batches(options = {}, &block)
+            options[:batch_size] ||= 1000
+
             if loaded?
-              raise "Sorry, not implemented yet."
+              collection =  if options[:start]
+                              proxy_target.select { |r| r.id.starts_with? options[:start] }
+                            else
+                              proxy_target
+                            end
+              collection.in_groups_of(options[:batch_size], false, &block)
             elsif find_with_proc?
               find_proxy_target_with_proc(options.merge(:finder_method => :find_in_batches), &block)
             else

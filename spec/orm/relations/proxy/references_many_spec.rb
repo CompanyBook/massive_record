@@ -106,6 +106,36 @@ describe TestReferencesManyProxy do
 
 
   describe "#find_in_batches" do
+    context "when the proxy is loaded" do
+      before do
+        proxy_owner.save!
+        proxy_owner.test_classes.concat(proxy_target, proxy_target_2, proxy_target_3)
+      end
+
+      it "returns records in batches of given size" do
+        result = []
+
+        subject.find_in_batches(:batch_size => 1) do |records_batch|
+          result << records_batch 
+        end
+
+        result.should eq [[proxy_target], [proxy_target_2], [proxy_target_3]]
+      end
+
+      it "filters when given :start" do
+        proxy_target_3_3 = TestClass.new("test-class-id-3-1")
+        proxy_owner.test_classes << proxy_target_3_3
+
+        result = []
+
+        subject.find_in_batches(:batch_size => 1, :start => "test-class-id-3") do |records_batch|
+          result << records_batch 
+        end
+
+        result.should eq [[proxy_target_3], [proxy_target_3_3]]
+      end
+    end
+
     context "when persisted foreign keys" do
       pending
     end
