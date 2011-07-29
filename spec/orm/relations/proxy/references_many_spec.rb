@@ -105,6 +105,156 @@ describe TestReferencesManyProxy do
   end
 
 
+  describe "#find_in_batches" do
+    context "when the proxy is loaded" do
+      before do
+        proxy_owner.save!
+        proxy_owner.test_classes.concat(proxy_target, proxy_target_2, proxy_target_3)
+      end
+
+      it "returns records in batches of given size" do
+        result = []
+
+        subject.find_in_batches(:batch_size => 1) do |records_batch|
+          result << records_batch 
+        end
+
+        result.should eq [[proxy_target], [proxy_target_2], [proxy_target_3]]
+      end
+
+      it "filters when given :start" do
+        proxy_target_3_3 = TestClass.new("test-class-id-3-1")
+        proxy_owner.test_classes << proxy_target_3_3
+
+        result = []
+
+        subject.find_in_batches(:batch_size => 1, :start => "test-class-id-3") do |records_batch|
+          result << records_batch 
+        end
+
+        result.should eq [[proxy_target_3], [proxy_target_3_3]]
+      end
+    end
+
+    context "when persisted foreign keys" do
+      before do
+        proxy_owner.save!
+        proxy_owner.test_classes.concat(proxy_target, proxy_target_2, proxy_target_3)
+        subject.reset
+      end
+
+      it "returns records in batches of given size" do
+        result = []
+
+        subject.find_in_batches(:batch_size => 1) do |records_batch|
+          result << records_batch 
+        end
+
+        result.should eq [[proxy_target], [proxy_target_2], [proxy_target_3]]
+      end
+
+      it "filters when given :start" do
+        proxy_target_3_3 = TestClass.new("test-class-id-3-1")
+        proxy_owner.test_classes << proxy_target_3_3
+        subject.reset
+
+        result = []
+
+        subject.find_in_batches(:batch_size => 1, :start => "test-class-id-3") do |records_batch|
+          result << records_batch 
+        end
+
+        result.should eq [[proxy_target_3], [proxy_target_3_3]]
+      end
+    end
+
+    context "when finding with a given start id" do
+      (1..6).each do |i|
+        let("record_#{i}") { TestClass.create! "test-#{i}" }
+      end
+
+      let(:records) { (1..6).collect { |i| send("record_#{i}") } }
+
+      before do
+        records # touch to save
+
+        subject.metadata.records_starts_from = :test_classes_starts_from
+        subject.proxy_owner.should_receive(:test_classes_starts_from).and_return("test-")
+      end
+
+      after { subject.metadata.records_starts_from = nil }
+
+
+      it "returns records in one batch" do
+        result = []
+
+        subject.find_in_batches(:batch_size => 10) do |records_batch|
+          result << records_batch
+        end
+
+        result.should eq [records]
+      end
+
+      it "returns records in one batch" do
+        result = []
+
+        subject.find_in_batches(:batch_size => 3) do |records_batch|
+          result << records_batch
+        end
+
+        result.should eq [records.slice(0, 3), records.slice(3, 3)]
+      end
+
+      describe "an overridden start id" do
+        (11..16).each do |i|
+          let("record_#{i}") { TestClass.create! "test-1-#{i}" }
+        end
+
+        let(:records_above_10) { (11..16).collect { |i| send("record_#{i}") } }
+
+        before { records_above_10 }
+
+        it "returns only records with given start" do
+          result = []
+
+          subject.find_in_batches(:batch_size => 3, :start => "test-1-") do |records_batch|
+            result << records_batch
+          end
+
+          result.should eq [records_above_10.slice(0, 3), records_above_10.slice(3, 3)]
+        end
+
+        it "raises an error if your start option starst with some incorrect value" do
+          expect {
+            subject.find_in_batches(:start => 'incorrect_value') { |b| }
+          }.to raise_error MassiveRecord::ORM::Relations::InvalidStartOption
+        end
+      end
+    end
+  end
+
+
+  describe "#find_each" do
+    it "delegate to find_in_batches" do
+      subject.should_receive(:find_in_batches).with(:batch_size => 2, :start => :from_here)
+      subject.find_each(:batch_size => 2, :start => :from_here)  
+    end
+
+    it "yields one and one record" do
+      proxy_owner.save!
+      proxy_owner.test_classes.concat(proxy_target, proxy_target_2, proxy_target_3)
+
+      result = []
+
+      subject.find_each do |record|
+        result << record
+      end
+
+      result.should eq [proxy_target, proxy_target_2, proxy_target_3]
+    end
+  end
+
+
   describe "adding records to collection" do
     [:<<, :push, :concat].each do |add_method|
       describe "by ##{add_method}" do

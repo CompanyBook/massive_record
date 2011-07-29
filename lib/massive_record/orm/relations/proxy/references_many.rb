@@ -8,13 +8,6 @@ module MassiveRecord
           # to make sure we don't remove any pushed proxy_targets only cause we load the
           # proxy_targets.
           #
-          # TODO  - Implement methods like:
-          #         * find_in_batches
-          #         * find_each
-          #         * etc :-)
-          #
-          #       - A counter cache is also nice.
-          #
           def load_proxy_target
             proxy_target_before_load = proxy_target
             proxy_target_after_load = super
@@ -146,6 +139,45 @@ module MassiveRecord
           end
 
           #
+          # Find records in batches, yields batch into your block
+          #
+          # Options:
+          #   <tt>:batch_size</tt>    The number of records you want per batch. Defaults to 1000
+          #   <tt>:start</tt>         The ids starts with this
+          #
+          def find_in_batches(options = {}, &block)
+            options[:batch_size] ||= 1000
+
+            if loaded?
+              collection =  if options[:start]
+                              proxy_target.select { |r| r.id.starts_with? options[:start] }
+                            else
+                              proxy_target
+                            end
+              collection.in_groups_of(options[:batch_size], false, &block)
+            elsif find_with_proc?
+              find_proxy_target_with_proc(options.merge(:finder_method => :find_in_batches), &block)
+            else
+              all_ids = proxy_owner.send(metadata.foreign_key)
+              all_ids.select! { |id| id.starts_with? options[:start] } if options[:start]
+              all_ids.in_groups_of(options[:batch_size]).each do |ids_in_batch|
+                yield Array(find_proxy_target(ids_in_batch))
+              end
+            end
+          end
+
+          #
+          # Fetches records in batches of 1000 (by default), iterates over each batch
+          # and yields one and one record in to given block. See find_in_batches for
+          # options.
+          #
+          def find_each(options = {})
+            find_in_batches(options) do |batch|
+              batch.each { |record| yield record }
+            end
+          end
+
+          #
           # Returns a limited result set of target records.
           #
           # TODO  If we know all our foreign keys (basically we also know our length)
@@ -160,7 +192,7 @@ module MassiveRecord
             else
               ids = proxy_owner.send(metadata.foreign_key).slice(0, limit)
               ids = ids.first if ids.length == 1
-              [find_proxy_target(ids)].flatten
+              Array(find_proxy_target(ids))
             end
           end
 
@@ -188,8 +220,8 @@ module MassiveRecord
             proxy_target_class.find(ids, :skip_expected_result_check => true)
           end
 
-          def find_proxy_target_with_proc(options = {})
-            [super].compact.flatten
+          def find_proxy_target_with_proc(options = {}, &block)
+            Array(super).compact
           end
 
           def can_find_proxy_target?

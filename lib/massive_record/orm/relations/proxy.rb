@@ -132,8 +132,8 @@ module MassiveRecord
         # references_many proxy ensures that the result of proc
         # is put inside of an array.
         #
-        def find_proxy_target_with_proc(options = {})
-          metadata.find_with.call(proxy_owner, options)
+        def find_proxy_target_with_proc(options = {}, &block)
+          metadata.find_with.call(proxy_owner, options, &block)
         end
 
         #
