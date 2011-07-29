@@ -119,8 +119,12 @@ module MassiveRecord
           @records_starts_from = method
 
           if @records_starts_from
-            self.find_with = Proc.new do |proxy_owner, options = {}|
-              start = proxy_owner.send(records_starts_from) and proxy_target_class.all(options.merge({:start => start}))
+            self.find_with = Proc.new do |proxy_owner, options = {}, &block|
+              finder_method = options.delete(:finder_method) || :all
+
+              if start = proxy_owner.send(records_starts_from)
+                proxy_target_class.send(finder_method, options.merge({:start => start}), &block)
+              end
             end
           else
             self.find_with = nil

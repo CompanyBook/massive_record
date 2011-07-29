@@ -188,7 +188,7 @@ module MassiveRecord
             proxy_target_class.find(ids, :skip_expected_result_check => true)
           end
 
-          def find_proxy_target_with_proc(options = {})
+          def find_proxy_target_with_proc(options = {}, &block)
             Array(super).compact
           end
 
