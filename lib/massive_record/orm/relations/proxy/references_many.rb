@@ -159,7 +159,7 @@ module MassiveRecord
               find_proxy_target_with_proc(options.merge(:finder_method => :find_in_batches), &block)
             else
               all_ids = proxy_owner.send(metadata.foreign_key)
-              all_ids.select! { |id| id.starts_with? options[:start] } if options[:start]
+              all_ids = all_ids.select { |id| id.starts_with? options[:start] } if options[:start]
               all_ids.in_groups_of(options[:batch_size]).each do |ids_in_batch|
                 yield Array(find_proxy_target(ids_in_batch))
               end

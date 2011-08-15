@@ -166,6 +166,15 @@ describe TestReferencesManyProxy do
 
         result.should eq [[proxy_target_3], [proxy_target_3_3]]
       end
+
+      it "does not alter foreign keys in proxy owner" do
+        foreign_keys_before_batches = proxy_owner.test_class_ids.dup
+
+        subject.find_in_batches(:batch_size => 1, :start => "test-class-id-3") do |records_batch|
+        end
+
+        proxy_owner.test_class_ids.should eq foreign_keys_before_batches
+      end
     end
 
     context "when finding with a given start id" do
