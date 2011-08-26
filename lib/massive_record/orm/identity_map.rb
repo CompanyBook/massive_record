@@ -14,6 +14,9 @@ module MassiveRecord
       extend ActiveSupport::Concern
 
       class << self
+        #
+        # Switch to either turn on or off the identity map
+        #
         def enabled=(boolean)
           Thread.current[:identity_map_enabled] = !!boolean
         end
@@ -24,6 +27,10 @@ module MassiveRecord
         alias enabled? enabled
 
 
+        #
+        # Call this with a block to ensure that IdentityMap is enabled
+        # for that block and reset to it's origianl setting thereafter
+        #
         def use
           original_value, self.enabled = enabled, true
           yield
@@ -31,6 +38,10 @@ module MassiveRecord
           self.enabled = original_value
         end
 
+        #
+        # Call this with a block to ensure that IdentityMap is disabled
+        # for that block and reset to it's origianl setting thereafter
+        #
         def without
           original_value, self.enabled = enabled, false
           yield
@@ -38,11 +49,6 @@ module MassiveRecord
           self.enabled = original_value
         end
 
-
-        def repository
-          Thread.current[:identity_map_repository] ||= Hash.new { |hash, key| hash[key] = {} }
-        end
-        delegate :clear, :to => :repository
 
 
         def get(klass, id)
@@ -57,9 +63,15 @@ module MassiveRecord
           repository[record_class_to_repository_key(record)].delete record.id
         end
 
+        delegate :clear, :to => :repository
+
 
 
         private
+
+        def repository
+          Thread.current[:identity_map_repository] ||= Hash.new { |hash, key| hash[key] = {} }
+        end
 
         def record_class_to_repository_key(record)
           class_to_repository_key record.class

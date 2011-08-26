@@ -60,15 +60,15 @@ describe MassiveRecord::ORM::IdentityMap do
         its(:repository) { should eq Hash.new }
 
         it "has values as a hash by default for any key" do
-          subject.repository['some_class'].should eq Hash.new
+          subject.send(:repository)['some_class'].should eq Hash.new
         end
       end
 
       describe ".clear" do
         it "removes all values from repository" do
-          subject.repository['some_class']['an_id'] = Object.new
+          subject.send(:repository)['some_class']['an_id'] = Object.new
           subject.clear
-          subject.repository.should be_empty
+          subject.send(:repository).should be_empty
         end
       end
 
@@ -105,12 +105,12 @@ describe MassiveRecord::ORM::IdentityMap do
       describe ".add" do
         it "persists the record" do
           subject.add person
-          subject.repository[subject.send(:record_class_to_repository_key, person)][person.id].should eq person
+          subject.get(person.class, person.id).should eq person
         end
 
         it "persists a single table inheritance record" do
           subject.add friend
-          subject.repository[subject.send(:record_class_to_repository_key, friend)][friend.id].should eq friend
+          subject.get(friend.class, friend.id).should eq friend
         end
       end
 
