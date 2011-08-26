@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'orm/models/test_class'
 require 'orm/models/friend'
 require 'orm/models/best_friend'
 
@@ -26,6 +27,7 @@ describe MassiveRecord::ORM::IdentityMap do
     describe "persistence" do
       let(:person) { Person.new "id1" }
       let(:friend) { Friend.new "id2" }
+      let(:test_class) { TestClass.new "id2" }
 
       describe ".repository" do
         its(:repository) { should eq Hash.new }
@@ -55,6 +57,21 @@ describe MassiveRecord::ORM::IdentityMap do
             subject.add person
             subject.get(person.class, person.id).should eq person
           end
+
+          it "returns a single table inheritance record" do
+            subject.add friend
+            subject.get(friend.class, friend.id).should eq friend
+          end
+
+          it "returns the correct record when they have the same id" do
+            person.id = test_class.id = "same_id"
+
+            subject.add(person)
+            subject.add(test_class)
+
+            subject.get(person.class, person.id).should eq person
+            subject.get(test_class.class, "same_id").should eq test_class
+          end
         end
       end
 
@@ -63,6 +80,11 @@ describe MassiveRecord::ORM::IdentityMap do
           subject.add person
           subject.repository[subject.send(:record_class_to_repository_key, person)][person.id].should eq person
         end
+
+        it "persists a single table inheritance record" do
+          subject.add friend
+          subject.repository[subject.send(:record_class_to_repository_key, friend)][friend.id].should eq friend
+        end
       end
 
       describe ".remove" do
@@ -70,6 +92,12 @@ describe MassiveRecord::ORM::IdentityMap do
           subject.add person
           subject.remove person
           subject.get(person.class, person.id).should be_nil
+        end
+
+        it "removes a single table inheritance record" do
+          subject.add friend
+          subject.remove friend
+          subject.get(friend.class, friend.id).should be_nil
         end
       end
     end
