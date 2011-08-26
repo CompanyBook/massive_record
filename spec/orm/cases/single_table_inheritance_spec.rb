@@ -26,11 +26,6 @@ describe "Single table inheritance" do
 
   describe "fetching and restrictions" do
     describe "#first" do
-      it "returns nil if class found is a super class of look-up class" do
-        Person.create!("ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true)
-        Friend.first.should be_nil
-      end
-
       it "returns record if class found is the look-up class" do
         person = Person.create!("ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true)
         Person.first.should eq person
@@ -41,9 +36,12 @@ describe "Single table inheritance" do
         Person.first.should eq friend
       end
 
-      it "returns record if class found is subclass of look up class, when class is not base class" do
-        best_friend = BestFriend.create!("ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true)
-        Friend.first.should eq best_friend
+      it "raises an error if you call first on sub class" do
+        expect { Friend.first }.to raise_error MassiveRecord::ORM::SingleTableInheritance::FirstUnsupported
+      end
+
+      it "does not raise error if you call first on base class" do
+        Person.first.should eq nil
       end
     end
 

@@ -5,13 +5,17 @@ module MassiveRecord
 
       included do
         class << self
-          delegate :find, :first, :last, :all, :select, :limit, :to => :finder_scope
+          delegate :find, :last, :all, :select, :limit, :to => :finder_scope
         end
 
         class_attribute :default_scoping, :instance_writer => false
       end
 
       module ClassMethods
+        def first(*args)
+          finder_scope.first(*args)
+        end
+
         #
         # Find records in batches. Makes it easier to work with
         # big data sets where you don't want to load every record up front.

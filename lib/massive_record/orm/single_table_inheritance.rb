@@ -3,6 +3,19 @@ module MassiveRecord
     module SingleTableInheritance
       extend ActiveSupport::Concern
 
+      # 
+      # Raised if you call first on any sub class of your base class.
+      # Calling first() on a sub class can't be easily done through
+      # thrift as we can't apply any column filter on the STI type column.
+      # 
+      # What you need to do is, the very inefficient, SubClass.all.first
+      # When doing an all, all records will be fetched, but at least the
+      # array or records will be filtered and only correct class will be
+      # returned.
+      #
+      class FirstUnsupported < MassiveRecordError; end
+
+
       included do
         after_initialize :ensure_proper_type
       end
@@ -12,6 +25,14 @@ module MassiveRecord
         def do_find(*args)
           result = super
           single_table_inheritance_enabled? ? ensure_only_class_or_subclass_of_self_are_returned(result) : result
+        end
+
+        def first(*args)
+          if base_class == self
+            super
+          else
+            raise FirstUnsupported.new("Sorry, first() on '#{self}' (sub class of the base class '#{base_class}') is unsupported due to unable to efficiently filter this through Thrift.")
+          end
         end
 
         private
