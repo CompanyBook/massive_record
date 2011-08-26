@@ -60,7 +60,11 @@ module MassiveRecord
         end
 
         def remove(record)
-          repository[record_class_to_repository_key(record)].delete record.id
+          remove_by_id record.class, record.id
+        end
+
+        def remove_by_id(klass, id)
+          repository[class_to_repository_key(klass)].delete id
         end
 
         delegate :clear, :to => :repository

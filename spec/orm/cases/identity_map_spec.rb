@@ -115,16 +115,38 @@ describe MassiveRecord::ORM::IdentityMap do
       end
 
       describe ".remove" do
+        it "returns nil if record was not found" do
+          subject.remove(person).should eq nil
+        end
+
         it "removes the record" do
           subject.add person
           subject.remove person
           subject.get(person.class, person.id).should be_nil
         end
 
+        it "returns the removed record" do
+          subject.add person
+          subject.remove(person).should eq person
+        end
+
         it "removes a single table inheritance record" do
           subject.add friend
           subject.remove friend
           subject.get(friend.class, friend.id).should be_nil
+        end
+      end
+
+      describe ".remove_by_id" do
+        it "removes the record by it's class and id directly" do
+          subject.add person
+          subject.remove_by_id person.class, person.id
+          subject.get(person.class, person.id).should be_nil
+        end
+
+        it "returns the removed record" do
+          subject.add person
+          subject.remove_by_id(person.class, person.id).should eq person
         end
       end
     end
