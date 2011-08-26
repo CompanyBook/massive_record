@@ -283,6 +283,7 @@ module MassiveRecord
       include Persistence
       include Relations::Interface
       include Finders
+      include IdentityMap
       extend  RescueMissingTableOnFind
       include AttributeMethods
       include AttributeMethods::Write, AttributeMethods::Read

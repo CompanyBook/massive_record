@@ -4,7 +4,13 @@ require 'orm/models/friend'
 require 'orm/models/best_friend'
 
 describe MassiveRecord::ORM::IdentityMap do
-  before { MassiveRecord::ORM::IdentityMap.clear }
+  before do
+    MassiveRecord::ORM::IdentityMap.clear
+    MassiveRecord::ORM::IdentityMap.enabled = true
+  end
+
+  after(:all) { MassiveRecord::ORM::IdentityMap.enabled = false }
+
 
   describe "class methods" do
     subject { described_class }
@@ -12,6 +18,7 @@ describe MassiveRecord::ORM::IdentityMap do
     describe "confirguration" do
       describe ".enabled" do
         context "when disabled" do
+          before { MassiveRecord::ORM::IdentityMap.enabled = false }
           its(:enabled) { should be_false }
           its(:enabled?) { should be_false }
         end
@@ -21,6 +28,26 @@ describe MassiveRecord::ORM::IdentityMap do
           its(:enabled) { should be_true }
           its(:enabled?) { should be_true }
         end
+      end
+
+      it ".use sets enabled to true, yield block and ensure to reset it to what it was" do
+        MassiveRecord::ORM::IdentityMap.enabled = false
+
+        MassiveRecord::ORM::IdentityMap.use do
+          MassiveRecord::ORM::IdentityMap.should be_enabled
+        end
+
+        MassiveRecord::ORM::IdentityMap.should_not be_enabled
+      end
+
+      it ".without sets enabled to true, yield block and ensure to reset it to what it was" do
+        MassiveRecord::ORM::IdentityMap.enabled = true
+
+        MassiveRecord::ORM::IdentityMap.without do
+          MassiveRecord::ORM::IdentityMap.should_not be_enabled
+        end
+
+        MassiveRecord::ORM::IdentityMap.should be_enabled
       end
     end
 
@@ -98,6 +125,49 @@ describe MassiveRecord::ORM::IdentityMap do
           subject.add friend
           subject.remove friend
           subject.get(friend.class, friend.id).should be_nil
+        end
+      end
+    end
+  end
+
+
+  describe "lifecycles on records" do
+    include SetUpHbaseConnectionBeforeAll
+    include SetTableNamesToTestTable
+
+    let(:person) { Person.create!("ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
+
+    describe "#find" do
+      context "when the record is not in the identity map" do
+        it "asks do find for the record" do
+          Person.should_receive(:do_find).and_return(nil)
+          Person.find("1").should be_nil
+        end
+
+        it "adds, if any, the found record" do
+          pending
+        end
+      end
+
+      context "when record is in identity map" do
+        it "returns that record" do
+          pending
+
+          MassiveRecord::ORM::IdentityMap.add(person)
+          Person.table.should_not_receive(:find)
+          Person.find(person.id).should eq person
+        end
+      end
+    end
+
+    describe "#save" do
+      context "a sew record" do
+        it "adds the record to the identity map after being created" do
+          pending
+
+          person
+          Person.table.should_not_receive(:find)
+          Person.find(person.id).should eq person
         end
       end
     end

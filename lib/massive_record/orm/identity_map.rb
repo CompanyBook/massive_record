@@ -10,7 +10,9 @@ module MassiveRecord
     # You can enable / disable Identity map by doing:
     # MassiveRecord::ORM::IdentityMap.enabled = flag
     #
-    class IdentityMap
+    module IdentityMap
+      extend ActiveSupport::Concern
+
       class << self
         def enabled=(boolean)
           Thread.current[:identity_map_enabled] = !!boolean
@@ -20,6 +22,21 @@ module MassiveRecord
           Thread.current[:identity_map_enabled]
         end
         alias enabled? enabled
+
+
+        def use
+          original_value, self.enabled = enabled, true
+          yield
+        ensure
+          self.enabled = original_value
+        end
+
+        def without
+          original_value, self.enabled = enabled, false
+          yield
+        ensure
+          self.enabled = original_value
+        end
 
 
         def repository
