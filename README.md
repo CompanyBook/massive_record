@@ -1,9 +1,6 @@
 # Massive Record
 
-Massive Record is an ORM for HBase. It currently uses
-Thrift to communicate with HBase and will in time support
-other forms for communicating with Hbase.
-
+Massive Record is a Ruby client for HBase. It provides a basic API through Thrift and an ORM with advanced features.
 
 See introduction to HBase model architecture:  
 http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture  
