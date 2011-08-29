@@ -7,6 +7,7 @@ http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture
 Understanding terminology of Table / Row / Column family / Column / Cell:  
 http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
+
 ## HBase requirement
 
 MassiveRecord is following the Cloudera packages of HBase:
@@ -246,20 +247,18 @@ You can, if you'd like, work directly against the adapter.
     table.destroy
 
 
-
 ## Planned work
 
-- Rename Wrapper to Adapter, and make it easy to switch from Thrift to another way of communicating with Hbase.
 - Embedded objects.
 - Cache the decoded values of attributes, not use the value_is_already_decoded?. This will fix possible problem with YAML as coder backend.
 - Implement other Adapters, for instance using jruby and the Java API.
-
 
 
 ## Contribute
 
 If you want to contribute feel free to fork this project :-)
 Make a feature branch, write test, implement and make a pull request.
+
 
 ### Getting started
 
@@ -296,8 +295,6 @@ Checkout the massive_record project and install it as a Gem :
 We have created a helper module MassiveRecord::Rspec::SimpleDatabaseCleaner which, when included into rspec tests, will clean
 the database for ORM records between each test case. You can also take a look into spec/support/mock_massive_record_connection.rb
 for some functionality which will mock a hbase connection making it easier (faster) to test code where no real database is needed.
-
-    
 
 
 ## More Information and Resources
