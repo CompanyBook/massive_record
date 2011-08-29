@@ -49,30 +49,32 @@ it easy to use. The second way of doing things is working directly against the w
 ### ORM
     
 Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some functionality which you can expect from an ORM. This includes:
-    - An initializer which takes attribute hash and assigns them to your object.
-    - Write and read methods for the attributes
-    - Validations, as you expect from an ActiveRecord.
-    - Callbacks, as you expect from an ActiveRecord.
-    - Information about changes on attributes.
-    - Casting of attributes
-    - Serialization of array / hashes
-    - Timestamps like created_at and updated_at. Updated at will always be available, created_at must be defined. See example down:
-    - Finder scopes. Like: Person.select(:only_columns_from_this_family).limit(10).collect(&:name)
-    - Ability to set a default scope.
-    - Time zone aware time attributes.
-    - Basic instrumentation and logging of query times.
-    - Attribute mass assignment security.
+
+- An initializer which takes attribute hash and assigns them to your object.
+- Write and read methods for the attributes
+- Validations, as you expect from an ActiveRecord.
+- Callbacks, as you expect from an ActiveRecord.
+- Information about changes on attributes.
+- Casting of attributes
+- Serialization of array / hashes
+- Timestamps like created_at and updated_at. Updated at will always be available, created_at must be defined. See example down:
+- Finder scopes. Like: Person.select(:only_columns_from_this_family).limit(10).collect(&:name)
+- Ability to set a default scope.
+- Time zone aware time attributes.
+- Basic instrumentation and logging of query times.
+- Attribute mass assignment security.
 
 Tables also have:
-    - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
-    - Easy access to adapter's connection via Person.connection
-    - Easy access to adapter's hbase table via Person.table
-    - Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
-    - Save / update methods
-    - Auto-creation of table and column families on save if table does not exists.
-    - Destroy records
-    - Relations: See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
-    - Observable. See MassiveRecord::ORM::Observer. If you know how to use ActiveRecord's observer you know how to use this one.
+
+- Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
+- Easy access to adapter's connection via Person.connection
+- Easy access to adapter's hbase table via Person.table
+- Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
+- Save / update methods
+- Auto-creation of table and column families on save if table does not exists.
+- Destroy records
+- Relations: See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
+- Observable. See MassiveRecord::ORM::Observer. If you know how to use ActiveRecord's observer you know how to use this one.
 
 
 Here are some examples of usages:
