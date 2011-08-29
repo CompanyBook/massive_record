@@ -135,15 +135,12 @@ Here are some examples of usages:
       # Calling Person.all will return object back as a Friend.
     end
 
-
     class PersonObserver < MassiveRecord::ORM::Observer
       def after_create(person_created)
         # Do something smart with that person
       end
     end
 
-    
-    
     class Address < MassiveRecord::ORM::Column
       field :street
       field :number, :integer
