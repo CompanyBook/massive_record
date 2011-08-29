@@ -91,13 +91,13 @@ Tables also have:
 - Observable. See MassiveRecord::ORM::Observer. If you know how to use ActiveRecord's observer you know how to use this one.
 
 
-Here are some examples of usages:
+Here are some examples setting up models:
 
     class Person < MassiveRecord::ORM::Table
       references_one :boss, :class_name => "Person", :store_in => :info
       references_one :attachment, :polymorphic => true
       references_many :friends, :store_in => :info
-      references_many :cars, :records_starts_from => :cars_start_id
+      references_many :blog_posts, :records_starts_from => :posts_start_id
 
       default_scope select(:info)
 
@@ -123,9 +123,9 @@ Here are some examples of usages:
       validates_presence_of :name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
 
-      # Returns the id the scanner should start from in the Car table
-      # to fetch cars related to this person
-      def cars_start_id
+      # Returns the id the scanner should start from in the BlogPost table
+      # to fetch blog posts related to this person
+      def posts_start_id
         id+'-'
       end
     end
@@ -146,6 +146,37 @@ Here are some examples of usages:
       field :number, :integer
       field :nice_place, :boolean, :default => true
     end
+    
+    class BlogPost < MassiveRecord::ORM::Column
+      references_one :author, :class_name => "Person", :store_in => :info
+    
+      field :title
+      field :content
+      
+      private
+      
+      # Set yourself an ID to your model
+      def default_id
+        "#{author_id}|#{Time.now.strftime("%Y-%m-%d-%k-%M")}"
+      end
+    end
+
+Perform requests:
+
+    # Fetch an object
+    u = User.find("45")
+    
+    # Blog posts associated
+    u.blog_posts
+    
+    # Blog posts associated during May 2011
+    u.blog_posts(:start => "45-2011-05") # user_id - year - month
+    
+    # Blog posts from May 2011
+    u.blog_posts(:offset => "45-2011-05")
+    
+    # Only five blog posts
+    u.blog_posts(:limit => 5)
 
 You can find a small example application here: https://github.com/thhermansen/massive_record_test_app
 
