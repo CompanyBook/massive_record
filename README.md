@@ -10,6 +10,20 @@ http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture
 Understanding terminology of Table / Row / Column family / Column / Cell:  
 http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
+## HBase requirement
+
+MassiveRecord is following the Cloudera packages of HBase:
+http://www.cloudera.com
+
+Currently, MassiveRecord is tested against HBase 0.90.3, which can be found at the following address:
+https://ccp.cloudera.com/display/SUPPORT/CDH3+Downloadable+Tarballs
+
+Install HBase (OSX):  
+Download the package 'HBase 0.90.3+15.3' and extract it.  
+Start HBase using the following command:
+
+    path_to_hbase/bin/start-hbase.sh
+
 
 ## Installation
 
