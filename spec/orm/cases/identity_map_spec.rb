@@ -170,28 +170,34 @@ describe MassiveRecord::ORM::IdentityMap do
         end
       end
 
-      context "when the record is not in the identity map" do
-        it "asks do find for the record" do
-          Person.should_receive(:do_find).and_return(nil)
-          Person.find(id).should be_nil
+      describe "one" do
+        context "when the record is not in the identity map" do
+          it "asks do find for the record" do
+            Person.should_receive(:do_find).and_return(nil)
+            Person.find(id).should be_nil
+          end
+
+          it "adds the found record" do
+            person
+
+            MassiveRecord::ORM::IdentityMap.get(person.class, person.id).should be_nil
+            Person.find(id)
+            MassiveRecord::ORM::IdentityMap.get(person.class, person.id).should eq person
+          end
         end
 
-        it "adds the found record" do
-          person
+        context "when record is in identity map" do
+          before { MassiveRecord::ORM::IdentityMap.add(person) }
 
-          MassiveRecord::ORM::IdentityMap.get(person.class, person.id).should be_nil
-          Person.find(id)
-          MassiveRecord::ORM::IdentityMap.get(person.class, person.id).should eq person
+          it "returns that record" do
+            Person.table.should_not_receive(:find)
+            Person.find(person.id).should eq person
+          end
         end
       end
 
-      context "when record is in identity map" do
-        before { MassiveRecord::ORM::IdentityMap.add(person) }
-
-        it "returns that record" do
-          Person.table.should_not_receive(:find)
-          Person.find(person.id).should eq person
-        end
+      describe "many" do
+        pending
       end
     end
 
