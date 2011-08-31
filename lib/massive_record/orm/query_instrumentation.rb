@@ -18,31 +18,6 @@ module MassiveRecord
             super
           end
         end
-
-
-
-
-        private
-
-        def hbase_query_all_first(type, *args)
-          ActiveSupport::Notifications.instrument("find_query.massive_record", {
-            :name => [model_name, 'query'].join(' '),
-            :description => type,
-            :options => args
-          }) do
-            super
-          end
-        end
-
-        def hbase_query_find(what_to_find, options)
-          ActiveSupport::Notifications.instrument("find_query.massive_record", {
-            :name => [model_name, 'query'].join(' '),
-            :description => "find id(s): #{what_to_find}",
-            :options => options
-          }) do
-            super
-          end
-        end
       end
 
 
