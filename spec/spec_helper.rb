@@ -14,3 +14,12 @@ end
 Dir["#{SPEC_DIR}/orm/models/*.rb"].each { |f| require f }
 Dir["#{SPEC_DIR}/support/**/*.rb"].each { |f| require f }
 Dir["#{SPEC_DIR}/shared/**/*.rb"].each { |f| require f }
+
+
+MassiveRecord::ORM::IdentityMap.enabled = false
+if MassiveRecord::ORM::IdentityMap.enabled?
+  Rspec.configure do |c|
+    puts "IdentityMap is enabled!"
+    c.before { MassiveRecord::ORM::IdentityMap.clear }
+  end
+end
