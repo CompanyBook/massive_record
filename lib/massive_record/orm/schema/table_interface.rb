@@ -65,6 +65,12 @@ module MassiveRecord
             end
           end
 
+          #
+          # Makes it a bit more convenient to get all the column family names
+          #
+          def known_column_family_names
+            (column_families || []).collect &:name
+          end
 
 
 
