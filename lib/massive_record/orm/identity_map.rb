@@ -106,6 +106,11 @@ module MassiveRecord
 
 
       module InstanceMethods
+        def reload
+          IdentityMap.remove(self) if IdentityMap.enabled?
+          super
+        end
+
         private
 
 

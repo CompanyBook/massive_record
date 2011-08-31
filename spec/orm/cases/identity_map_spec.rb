@@ -221,5 +221,15 @@ describe MassiveRecord::ORM::IdentityMap do
         Person.should_not be_exists person.id
       end
     end
+
+    describe "#reload" do
+      it "reloads it's attributes" do
+        what_it_was = person.name
+        person.name = person.name.reverse
+
+        person.reload
+        person.name.should eq what_it_was
+      end
+    end
   end
 end
