@@ -56,6 +56,8 @@ module MassiveRecord
         end
 
         def add(record)
+          return if record.nil?
+
           repository[record_class_to_repository_key(record)][record.id] = record
         end
 

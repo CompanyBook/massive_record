@@ -103,6 +103,10 @@ describe MassiveRecord::ORM::IdentityMap do
       end
 
       describe ".add" do
+        it "does not do anything if trying to add nil" do
+          subject.add(nil).should be_nil
+        end
+
         it "persists the record" do
           subject.add person
           subject.get(person.class, person.id).should eq person
