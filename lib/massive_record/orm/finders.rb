@@ -153,7 +153,16 @@ module MassiveRecord
         end
 
         def find_all(options) # :nodoc:
+          select_known_column_families_if_no_selections_are_added(options)
           query_hbase { table.all(options) }
+        end
+
+
+        def select_known_column_families_if_no_selections_are_added(options)
+          unless options.has_key? :select
+            default_selection = known_column_family_names
+            options[:select] = default_selection if default_selection.any?
+          end
         end
 
 
@@ -166,11 +175,18 @@ module MassiveRecord
           result =  if block_given?
                       yield
                     else
+                      select_known_column_families_if_no_selections_are_added(options)
                       table.find(what_to_find, options)
                     end
 
           ensure_id_is_utf8_encoded(Array(result).compact).collect do |row|
             instantiate_row_from_hbase(row)
+          end
+        rescue => e
+          if e.is_a?(Apache::Hadoop::Hbase::Thrift::IOError) && e.message =~ /NoSuchColumnFamilyException/
+            raise ColumnFamiliesMissingError.new(self, calculate_missing_family_names)
+          else
+            raise e
           end
         end
 

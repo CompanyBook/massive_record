@@ -28,16 +28,35 @@ describe "finders" do
       lambda { Person.find(nil) }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
 
-    it "should raise an error if conditions are given to first" do
-      lambda { Person.first(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+    describe "conditions" do
+      it "should raise an error if conditions are given to first" do
+        lambda { Person.first(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
+
+      it "should raise an error if conditions are given to all" do
+        lambda { Person.all(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
+
+      it "should raise an error if conditions are given to find" do
+        lambda { Person.find(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
     end
 
-    it "should raise an error if conditions are given to all" do
-      lambda { Person.all(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
-    end
+    describe "default select" do
+      it "applies all the known column families to finder options as a default on all()" do
+        @mocked_table.should_receive(:all).with(hash_including(:select => Person.known_column_family_names)).and_return []
+        Person.all
+      end
 
-    it "should raise an error if conditions are given to find" do
-      lambda { Person.find(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      it "applies all the known column families to finder options as a default on first()" do
+        @mocked_table.should_receive(:all).with(hash_including(:select => Person.known_column_family_names)).and_return []
+        Person.first
+      end
+
+      it "applies all the known column families to finder options as a default on first()" do
+        @mocked_table.should_receive(:find).with("ID1", hash_including(:select => Person.known_column_family_names)).and_return(@row)
+        Person.find("ID1")
+      end
     end
 
     it "should ask the table to look up by it's id" do
@@ -69,7 +88,7 @@ describe "finders" do
     end
     
     it "should call table's all with limit 1 on find(:first)" do
-      @mocked_table.should_receive(:all).with(:limit => 1).and_return([@row])
+      @mocked_table.should_receive(:all).with(hash_including(:limit => 1)).and_return([@row])
       Person.find(:first).should be_instance_of Person
     end
 
