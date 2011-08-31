@@ -1,5 +1,6 @@
 # v0.2.2 (git develop)
 
+- When you do a find without any :select option given we will add known column families to be selected as default.
 - do_find() (internal method) was re-factored to be more readable and easier to extend/hook in to.
 - References many can now handle find_in_batches and find_each.
 - Fixed a problem with utf-8 encoded strings in ids. The Thrift adapter will no longer blow up.

@@ -303,9 +303,7 @@ describe "persistence" do
             end
           end
 
-          @person = Person.find(@person.id)
-          @person.new = "new"
-          lambda { @person.save }.should raise_error MassiveRecord::ORM::ColumnFamiliesMissingError
+          expect { @person = Person.find(@person.id) }.to raise_error MassiveRecord::ORM::ColumnFamiliesMissingError
 
           # Clen up the inserted column family above
           # TODO  Might want to wrap this inside of the column families object?
