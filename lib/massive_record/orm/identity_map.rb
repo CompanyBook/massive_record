@@ -106,10 +106,19 @@ module MassiveRecord
 
 
       module InstanceMethods
+        private
+
+
         def create
           return super unless IdentityMap.enabled?
 
           super.tap { IdentityMap.add(self) }
+        end
+
+        def destroy
+          return super unless IdentityMap.enabled?
+
+          super.tap { IdentityMap.remove(self) }
         end
       end
     end
