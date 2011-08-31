@@ -140,7 +140,7 @@ module MassiveRecord
           end
         end
 
-        def find_some(ids, options # :nodoc:
+        def find_some(ids, options) # :nodoc:
           expected_result_size = ids.length 
 
           query_hbase(ids, options).tap do |records|
@@ -152,24 +152,33 @@ module MassiveRecord
           end
         end
 
-        def find_all(options # :nodoc:
-          table.all(options).collect { |row| instantiate_row_from_hbase(row) }
-        end
-
-        def query_hbase(what_to_find, options) # :nodoc:
-          ensure_id_is_utf8_encoded(
-            Array(table.find(what_to_find, options)).compact
-          ).collect { |row| instantiate_row_from_hbase(row) }
+        def find_all(options) # :nodoc:
+          query_hbase { table.all(options) }
         end
 
 
 
+        #
+        # Queries hbase. Either looks for what to find with given options
+        # or yields the block and uses that as result when instantiate records from rows
+        #
+        def query_hbase(what_to_find = nil, options = nil) # :nodoc:
+          result =  if block_given?
+                      yield
+                    else
+                      table.find(what_to_find, options)
+                    end
 
-
+          ensure_id_is_utf8_encoded(Array(result).compact).collect do |row|
+            instantiate_row_from_hbase(row)
+          end
+        end
 
         def instantiate_row_from_hbase(row)
           instantiate(transpose_hbase_columns_to_record_attributes(row)) # :nodoc:
         end
+
+
 
         def instantiate(record) # :nodoc:
           model = if record.has_key?(inheritance_attribute)
