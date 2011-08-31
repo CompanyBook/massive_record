@@ -68,9 +68,9 @@ describe "finders" do
       lambda { Person.find("ID1", "ID2") }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
     
-    it "should call table's first on find(:first)" do
-      @mocked_table.should_receive(:first).and_return(@row)
-      Person.find(:first)
+    it "should call table's all with limit 1 on find(:first)" do
+      @mocked_table.should_receive(:all).with(:limit => 1).and_return([@row])
+      Person.find(:first).should be_instance_of Person
     end
 
     it "should call table's all on find(:all)" do
@@ -155,6 +155,7 @@ describe "finders" do
     end
 
     it "should raise MassiveRecord::ORM::RecordNotFound error if table does not exist" do
+      pending
       Person.table.destroy
       expect { Person.find("id") }.to raise_error MassiveRecord::ORM::RecordNotFound
     end

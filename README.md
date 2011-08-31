@@ -1,14 +1,26 @@
 # Massive Record
 
-Massive Record is an ORM for HBase. It currently uses
-Thrift to communicate with HBase and will in time support
-other forms for communicating with Hbase.
-
+Massive Record is a Ruby client for HBase. It provides a basic API through Thrift and an ORM with advanced features.
 
 See introduction to HBase model architecture:  
 http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture  
 Understanding terminology of Table / Row / Column family / Column / Cell:  
 http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
+
+
+## HBase requirement
+
+MassiveRecord is following the Cloudera packages of HBase:
+http://www.cloudera.com
+
+Currently, MassiveRecord is tested against HBase 0.90.3, which can be found at the following address:
+https://ccp.cloudera.com/display/SUPPORT/CDH3+Downloadable+Tarballs
+
+Install HBase (OSX):  
+Download the package 'HBase 0.90.3+15.3' and extract it.  
+Start HBase using the following command:
+
+    path_to_hbase/bin/start-hbase.sh
 
 
 ## Installation
@@ -49,39 +61,41 @@ it easy to use. The second way of doing things is working directly against the w
 ### ORM
     
 Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some functionality which you can expect from an ORM. This includes:
-    - An initializer which takes attribute hash and assigns them to your object.
-    - Write and read methods for the attributes
-    - Validations, as you expect from an ActiveRecord.
-    - Callbacks, as you expect from an ActiveRecord.
-    - Information about changes on attributes.
-    - Casting of attributes
-    - Serialization of array / hashes
-    - Timestamps like created_at and updated_at. Updated at will always be available, created_at must be defined. See example down:
-    - Finder scopes. Like: Person.select(:only_columns_from_this_family).limit(10).collect(&:name)
-    - Ability to set a default scope.
-    - Time zone aware time attributes.
-    - Basic instrumentation and logging of query times.
-    - Attribute mass assignment security.
+
+- An initializer which takes attribute hash and assigns them to your object.
+- Write and read methods for the attributes
+- Validations, as you expect from an ActiveRecord.
+- Callbacks, as you expect from an ActiveRecord.
+- Information about changes on attributes.
+- Casting of attributes
+- Serialization of array / hashes
+- Timestamps like created_at and updated_at. Updated at will always be available, created_at must be defined. See example down:
+- Finder scopes. Like: Person.select(:only_columns_from_this_family).limit(10).collect(&:name)
+- Ability to set a default scope.
+- Time zone aware time attributes.
+- Basic instrumentation and logging of query times.
+- Attribute mass assignment security.
 
 Tables also have:
-    - Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
-    - Easy access to adapter's connection via Person.connection
-    - Easy access to adapter's hbase table via Person.table
-    - Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
-    - Save / update methods
-    - Auto-creation of table and column families on save if table does not exists.
-    - Destroy records
-    - Relations: See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
-    - Observable. See MassiveRecord::ORM::Observer. If you know how to use ActiveRecord's observer you know how to use this one.
+
+- Persistencey method calls like create, save and destroy (but they do not actually save things to hbase)
+- Easy access to adapter's connection via Person.connection
+- Easy access to adapter's hbase table via Person.table
+- Finder method, like Person.find("an_id"), Person.find("id1", "id2"), Person.all etc
+- Save / update methods
+- Auto-creation of table and column families on save if table does not exists.
+- Destroy records
+- Relations: See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
+- Observable. See MassiveRecord::ORM::Observer. If you know how to use ActiveRecord's observer you know how to use this one.
 
 
-Here are some examples of usages:
+Here are some examples setting up models:
 
     class Person < MassiveRecord::ORM::Table
       references_one :boss, :class_name => "Person", :store_in => :info
       references_one :attachment, :polymorphic => true
       references_many :friends, :store_in => :info
-      references_many :cars, :records_starts_from => :cars_start_id
+      references_many :blog_posts, :records_starts_from => :posts_start_id
 
       default_scope select(:info)
 
@@ -107,9 +121,9 @@ Here are some examples of usages:
       validates_presence_of :name, :email
       validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i
 
-      # Returns the id the scanner should start from in the Car table
-      # to fetch cars related to this person
-      def cars_start_id
+      # Returns the id the scanner should start from in the BlogPost table
+      # to fetch blog posts related to this person
+      def posts_start_id
         id+'-'
       end
     end
@@ -119,20 +133,48 @@ Here are some examples of usages:
       # Calling Person.all will return object back as a Friend.
     end
 
-
     class PersonObserver < MassiveRecord::ORM::Observer
       def after_create(person_created)
         # Do something smart with that person
       end
     end
 
-    
-    
     class Address < MassiveRecord::ORM::Column
       field :street
       field :number, :integer
       field :nice_place, :boolean, :default => true
     end
+    
+    class BlogPost < MassiveRecord::ORM::Column
+      references_one :author, :class_name => "Person", :store_in => :info
+    
+      field :title
+      field :content
+      
+      private
+      
+      # Set yourself an ID to your model
+      def default_id
+        "#{author_id}|#{Time.now.strftime("%Y-%m-%d-%k-%M")}"
+      end
+    end
+
+Perform requests:
+
+    # Fetch an object
+    u = User.find("45")
+    
+    # Blog posts associated
+    u.blog_posts
+    
+    # Blog posts associated during May 2011
+    u.blog_posts(:start => "45-2011-05") # user_id - year - month
+    
+    # Blog posts from May 2011
+    u.blog_posts(:offset => "45-2011-05")
+    
+    # Only five blog posts
+    u.blog_posts(:limit => 5)
 
 You can find a small example application here: https://github.com/thhermansen/massive_record_test_app
 
@@ -205,20 +247,18 @@ You can, if you'd like, work directly against the adapter.
     table.destroy
 
 
-
 ## Planned work
 
-- Rename Wrapper to Adapter, and make it easy to switch from Thrift to another way of communicating with Hbase.
 - Embedded objects.
 - Cache the decoded values of attributes, not use the value_is_already_decoded?. This will fix possible problem with YAML as coder backend.
 - Implement other Adapters, for instance using jruby and the Java API.
-
 
 
 ## Contribute
 
 If you want to contribute feel free to fork this project :-)
 Make a feature branch, write test, implement and make a pull request.
+
 
 ### Getting started
 
@@ -255,8 +295,6 @@ Checkout the massive_record project and install it as a Gem :
 We have created a helper module MassiveRecord::Rspec::SimpleDatabaseCleaner which, when included into rspec tests, will clean
 the database for ORM records between each test case. You can also take a look into spec/support/mock_massive_record_connection.rb
 for some functionality which will mock a hbase connection making it easier (faster) to test code where no real database is needed.
-
-    
 
 
 ## More Information and Resources

@@ -91,110 +91,94 @@ module MassiveRecord
 
 
         #
-        # This do_find method is not very nice it's logic should be re-factored at some point.
+        # Method actually doing the find operation. It handles first, last (not supported though), all
+        # and find records by id(s). It simply delegates to more spesific methods.
         #
         def do_find(*args) # :nodoc:
           options = args.extract_options!.to_options
-          raise ArgumentError.new("At least one argument required!") if args.empty?
-          raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.") if args.first.nil?
+
           raise ArgumentError.new("Sorry, conditions are not supported!") if options.has_key? :conditions
 
-          skip_expected_result_check = options.delete(:skip_expected_result_check)
-
-          args << options
-
-          type = args.shift if args.first.is_a? Symbol
-          find_many = type == :all
-          expected_result_size = nil
-          what_to_find = []
-          result_from_table = []
-          
-          find_many, expected_result_size, what_to_find, result_from_table = query_hbase(type, args, find_many)
-
-          # Filter out unexpected IDs (unless type is set (all/first), in that case
-          # we have no expectations on the returned rows' ids)
-          unless type || result_from_table.blank?
-            if find_many
-              result_from_table.select! { |result| what_to_find.include? result.try(:id) }
-            else 
-              if result_from_table.id != what_to_find
-                result_from_table = nil
-              end
-            end
+          case args.first
+          when :first, :last
+            send(args.first, options)
+          when :all
+            find_all(options)
+          else
+            find_by_ids(*args, options)
           end
-
-          raise RecordNotFound.new("Could not find #{model_name} with id=#{what_to_find}") if result_from_table.blank? && type.nil?
-          
-          if find_many && !skip_expected_result_check && expected_result_size && expected_result_size != result_from_table.length
-            raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{result_from_table.length}")
-          end
-          
-          records = [result_from_table].compact.flatten.collect do |row|
-            instantiate(transpose_hbase_columns_to_record_attributes(row))
-          end
-
-          find_many ? records : records.first
         end
+
 
 
 
 
         private
 
-        def query_hbase(type, args, find_many) # :nodoc:
-          result_from_table = if type
-                                hbase_query_all_first(type, args)
-                              else
-                                options = args.extract_options!
-                                what_to_find = args.first
-                                expected_result_size = 1
 
-                                if args.first.kind_of?(Array)
-                                  find_many = true
-                                elsif args.length > 1
-                                  find_many = true
-                                  what_to_find = args
-                                end
 
-                                expected_result_size = what_to_find.length if what_to_find.is_a? Array
-                                hbase_query_find(what_to_find, options)
-                              end
+        def find_by_ids(*ids, options) # :nodoc:
+          raise ArgumentError.new("At least one argument required!") if ids.empty?
 
-          [find_many, expected_result_size, what_to_find, ensure_id_is_utf8_encoded(result_from_table)]
-        end
+          find_many = ids.first.is_a? Array
+          ids = ids.flatten.compact.uniq
 
-        def hbase_query_all_first(type, args) # :nodoc:
-          table.send(type, *args) # first() / all()
-        end
-
-        def hbase_query_find(what_to_find, options) # :nodoc:
-          table.find(what_to_find, options)
-        end
-
-        def ensure_id_is_utf8_encoded(result_from_table) # :nodoc
-          return nil if result_from_table.nil?
-
-          if result_from_table.respond_to? :id
-            result_from_table.id.force_encoding(Encoding::UTF_8) if result_from_table.id.respond_to? :force_encoding
-          elsif result_from_table.respond_to? :each
-            result_from_table.collect! { |result| ensure_id_is_utf8_encoded(result) }
+          case ids.length
+          when 0
+            raise RecordNotFound.new("Can't find a #{model_name.human} without an ID.")
+          when 1
+            record = find_one(ids.first, options)
+            find_many ? [record] : record
+          else
+            find_some(ids, options)
           end
-
-          result_from_table
         end
 
-        def transpose_hbase_columns_to_record_attributes(row) #: nodoc:
-          attributes = {:id => row.id}
-          
-          autoload_column_families_and_fields_with(row.columns.keys)
-
-          # Parse the schema to populate the instance attributes
-          attributes_schema.each do |key, field|
-            cell = row.columns[field.unique_name]
-            attributes[field.name] = cell.nil? ? nil : field.decode(cell.value)
+        def find_one(id, options) # :nodoc:
+          query_hbase(id, options).first.tap do |record|
+            raise RecordNotFound.new("Could not find #{model_name} with id=#{id}") if record.nil? || record.id != id
           end
-          attributes
         end
+
+        def find_some(ids, options) # :nodoc:
+          expected_result_size = ids.length 
+
+          query_hbase(ids, options).tap do |records|
+            records.select! { |record| ids.include?(record.id) }
+
+            if !options[:skip_expected_result_check] && records.length != expected_result_size
+              raise RecordNotFound.new("Expected to find #{expected_result_size} records, but found only #{records.length}")
+            end
+          end
+        end
+
+        def find_all(options) # :nodoc:
+          query_hbase { table.all(options) }
+        end
+
+
+
+        #
+        # Queries hbase. Either looks for what to find with given options
+        # or yields the block and uses that as result when instantiate records from rows
+        #
+        def query_hbase(what_to_find = nil, options = nil) # :nodoc:
+          result =  if block_given?
+                      yield
+                    else
+                      table.find(what_to_find, options)
+                    end
+
+          ensure_id_is_utf8_encoded(Array(result).compact).collect do |row|
+            instantiate_row_from_hbase(row)
+          end
+        end
+
+        def instantiate_row_from_hbase(row)
+          instantiate(transpose_hbase_columns_to_record_attributes(row)) # :nodoc:
+        end
+
+
 
         def instantiate(record) # :nodoc:
           model = if record.has_key?(inheritance_attribute)
@@ -208,6 +192,33 @@ module MassiveRecord
                   end
 
           model.init_with('attributes' => record)
+        end
+
+
+
+        def ensure_id_is_utf8_encoded(result_from_table) # :nodoc
+          return nil if result_from_table.nil?
+
+          if result_from_table.respond_to? :id
+            result_from_table.id.force_encoding(Encoding::UTF_8) if result_from_table.id.respond_to? :force_encoding
+          elsif result_from_table.respond_to? :each
+            result_from_table.collect! { |result| ensure_id_is_utf8_encoded(result) }
+          end
+
+          result_from_table
+        end
+
+        def transpose_hbase_columns_to_record_attributes(row) # :nodoc:
+          attributes = {:id => row.id}
+          
+          autoload_column_families_and_fields_with(row.columns.keys)
+
+          # Parse the schema to populate the instance attributes
+          attributes_schema.each do |key, field|
+            cell = row.columns[field.unique_name]
+            attributes[field.name] = cell.nil? ? nil : field.decode(cell.value)
+          end
+          attributes
         end
       end
     end
