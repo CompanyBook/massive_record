@@ -96,10 +96,16 @@ module MassiveRecord
         private
 
 
-        def find_one(id, option)
-          return super unless IdentityMap.enabled?
+        def find_one(id, options)
+          return super unless IdentityMap.enabled? && can_use_identity_map_with?(options)
 
           IdentityMap.get(self, id) || IdentityMap.add(super)
+        end
+
+
+
+        def can_use_identity_map_with?(finder_options)
+          !finder_options.has_key?(:select)
         end
       end
 

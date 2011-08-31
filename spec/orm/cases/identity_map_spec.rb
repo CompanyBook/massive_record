@@ -190,6 +190,11 @@ describe MassiveRecord::ORM::IdentityMap do
             Person.table.should_not_receive(:find)
             Person.find(person.id).should eq person
           end
+
+          it "returns record from database when select option is used" do
+            MassiveRecord::ORM::IdentityMap.should_not_receive(:get)
+            Person.select(:info).find(person.id).should eq person
+          end
         end
       end
 
