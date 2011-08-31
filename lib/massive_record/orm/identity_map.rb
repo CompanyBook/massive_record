@@ -87,6 +87,19 @@ module MassiveRecord
           klass.to_s
         end
       end
+
+
+
+
+
+      module ClassMethods
+        private
+
+
+        def find_one(id, option)
+          IdentityMap.get(self, id) || IdentityMap.add(super)
+        end
+      end
     end
   end
 end
