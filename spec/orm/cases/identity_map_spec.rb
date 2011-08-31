@@ -162,13 +162,14 @@ describe MassiveRecord::ORM::IdentityMap do
     include SetTableNamesToTestTable
 
     let(:id) { "ID1" }
-    let(:person) do
-      MassiveRecord::ORM::IdentityMap.without do
-        Person.create!(id, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true)
-      end
-    end
 
     describe "#find" do
+      let(:person) do
+        MassiveRecord::ORM::IdentityMap.without do
+          Person.create!(id, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true)
+        end
+      end
+
       context "when the record is not in the identity map" do
         it "asks do find for the record" do
           Person.should_receive(:do_find).and_return(nil)
@@ -195,13 +196,18 @@ describe MassiveRecord::ORM::IdentityMap do
     end
 
     describe "#save" do
-      context "a sew record" do
-        it "adds the record to the identity map after being created" do
-          pending
+      let(:person) { Person.create!(id, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
 
+      context "a new record" do
+        it "adds the record to the identity map after being created" do
           person
           Person.table.should_not_receive(:find)
           Person.find(person.id).should eq person
+        end
+
+        it "does not add the record if validation fails" do
+          invalid_person = Person.create "ID2", :name => "Person2"
+          Person.should_not be_exists invalid_person.id
         end
       end
     end

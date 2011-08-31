@@ -97,7 +97,19 @@ module MassiveRecord
 
 
         def find_one(id, option)
+          return super unless IdentityMap.enabled?
+
           IdentityMap.get(self, id) || IdentityMap.add(super)
+        end
+      end
+
+
+
+      module InstanceMethods
+        def create
+          return super unless IdentityMap.enabled?
+
+          super.tap { IdentityMap.add(self) }
         end
       end
     end
