@@ -162,13 +162,10 @@ describe MassiveRecord::ORM::IdentityMap do
     include SetTableNamesToTestTable
 
     let(:id) { "ID1" }
+    let(:person) { Person.create!(id, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
 
     describe "#find" do
-      let(:person) do
-        MassiveRecord::ORM::IdentityMap.without do
-          Person.create!(id, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true)
-        end
-      end
+      before { MassiveRecord::ORM::IdentityMap.remove(person) }
 
       describe "one" do
         context "when the record is not in the identity map" do
@@ -202,8 +199,6 @@ describe MassiveRecord::ORM::IdentityMap do
     end
 
     describe "#save" do
-      let(:person) { Person.create!(id, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
-
       context "a new record" do
         it "adds the record to the identity map after being created" do
           person
