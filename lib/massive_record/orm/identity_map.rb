@@ -51,8 +51,17 @@ module MassiveRecord
 
 
 
-        def get(klass, id)
-          repository[class_to_repository_key(klass)][id]
+        def get(klass, *ids)
+          ids.flatten!
+
+          case ids.length
+          when 0
+            raise ArgumentError.new("Must have at least one ID!")
+          when 1
+            get_one(klass, ids.first)
+          else
+            get_some(klass, ids)
+          end
         end
 
         def add(record)
@@ -74,6 +83,16 @@ module MassiveRecord
 
 
         private
+
+        def get_one(klass, id)
+          if record = repository[class_to_repository_key(klass)][id]
+            return record if klass == record.class || klass.descendants.include?(record.class)
+          end
+        end
+
+        def get_some(klass, ids)
+          ids.collect { |id| get_one(klass, id) }.compact
+        end
 
         def repository
           Thread.current[:identity_map_repository] ||= Hash.new { |hash, key| hash[key] = {} }

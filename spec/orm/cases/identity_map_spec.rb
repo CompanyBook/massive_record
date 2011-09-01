@@ -73,9 +73,17 @@ describe MassiveRecord::ORM::IdentityMap do
       end
 
       describe ".get" do
+        it "raises error if no ids are given" do
+          expect { subject.get(person.class) }.to raise_error ArgumentError
+        end
+
         context "when it does not has the record" do
           it "returns nil" do
             subject.get(person.class, person.id).should be_nil
+          end
+
+          it "returns empty array if asked for multiple records" do
+            subject.get(person.class, 1, 2).should eq []
           end
         end
 
@@ -85,9 +93,41 @@ describe MassiveRecord::ORM::IdentityMap do
             subject.get(person.class, person.id).should eq person
           end
 
-          it "returns a single table inheritance record" do
-            subject.add friend
-            subject.get(friend.class, friend.id).should eq friend
+          describe "single table inheritahce" do
+            before { subject.add friend }
+
+            it "returns the record when looked up by it's class" do
+              subject.get(friend.class, friend.id).should eq friend
+            end
+
+            it "returns the record when looked up by it's parent class" do
+              subject.get(person.class, friend.id).should eq friend
+            end
+
+            it "returns nil when not a descendants of look up class" do
+              subject.add person
+              subject.get(friend.class, person.id).should be_nil
+            end
+          end
+
+          describe "get multiple" do
+            it "returns multiple records when asked for multiple ids" do
+              subject.add person
+              subject.add friend
+              subject.get(person.class, person.id, friend.id).should include person, friend
+            end
+
+            it "returns multiple records when asked for multiple ids as an array" do
+              subject.add person
+              subject.add friend
+              subject.get(person.class, [person.id, friend.id]).should include person, friend
+            end
+
+            it "returns nothing for unkown ids" do
+              subject.add person
+              subject.add friend
+              subject.get(person.class, person.id, friend.id, "unkown").length.should eq 2
+            end
           end
 
           it "returns the correct record when they have the same id" do
