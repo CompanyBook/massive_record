@@ -162,11 +162,11 @@ describe MassiveRecord::ORM::IdentityMap do
     include SetTableNamesToTestTable
 
     let(:id) { "ID1" }
+    let(:id_2) { "ID2" }
     let(:person) { Person.create!(id, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
+    let(:friend) { Friend.create!(id_2, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
 
     describe "#find" do
-      before { MassiveRecord::ORM::IdentityMap.remove(person) }
-
       describe "one" do
         context "when the record is not in the identity map" do
           it "asks do find for the record" do
@@ -175,7 +175,7 @@ describe MassiveRecord::ORM::IdentityMap do
           end
 
           it "adds the found record" do
-            person
+            MassiveRecord::ORM::IdentityMap.without { person }
 
             MassiveRecord::ORM::IdentityMap.get(person.class, person.id).should be_nil
             Person.find(id)
@@ -194,6 +194,12 @@ describe MassiveRecord::ORM::IdentityMap do
           it "returns record from database when select option is used" do
             MassiveRecord::ORM::IdentityMap.should_not_receive(:get)
             Person.select(:info).find(person.id).should eq person
+          end
+
+          it "returns record from identity map when you ask for a sub class by its parent class" do
+            MassiveRecord::ORM::IdentityMap.add(friend)
+            Person.table.should_not_receive(:find)
+            Person.find(friend.id).should eq friend
           end
         end
       end

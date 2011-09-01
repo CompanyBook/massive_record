@@ -84,7 +84,7 @@ module MassiveRecord
         end
 
         def class_to_repository_key(klass)
-          klass.to_s
+          klass.base_class
         end
       end
 
