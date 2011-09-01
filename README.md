@@ -22,6 +22,10 @@ Start HBase using the following command:
 
     path_to_hbase/bin/start-hbase.sh
 
+Start Thrift (HBase service interface):
+
+    path_to_hbase/bin/hbase thrift -b 127.0.0.1 start
+    
 
 ## Installation
 
