@@ -112,6 +112,7 @@ Here are some examples setting up models:
         field :newsletter, :boolean, :default => false
         field :type # Used for single table inheritance
         field :in_the_future, :time, :default => Proc.new { 2.hours.from_now }
+        field :hobbies, :array, :allow_nil => false # Default to empty array
 
         timestamps # ..or field :created_at, :time
       end
