@@ -70,15 +70,26 @@ module MassiveRecord
 
           ids.flatten!
 
-          case ids.length
-          when 0
-            raise ArgumentError.new("Must have at least one ID!")
-          when 1
-            result = get_one(klass, ids.first)
-            get_many ? [result].compact : result
-          else
-            get_some(klass, ids)
+          result =  case ids.length
+                    when 0
+                      raise ArgumentError.new("Must have at least one ID!")
+                    when 1
+                      result = get_one(klass, ids.first)
+                      get_many ? [result].compact : result
+                    else
+                      get_some(klass, ids)
+                    end
+
+          if records = Array(result).compact and records.any?
+            ActiveSupport::Notifications.instrument("identity_map.massive_record", {
+              :name => [klass, 'loaded from identity map'].join(' '),
+              :records => records
+            }) do
+              result
+            end
           end
+
+          result
         end
 
         def add(record)

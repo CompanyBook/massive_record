@@ -65,6 +65,19 @@ describe "log subscriber" do
         wait
         subject.logged(:debug).first.should include 'options: ["dummy",'
       end
+
+
+
+
+      it "includes information about loading from identity map" do
+        MassiveRecord::ORM::IdentityMap.use do
+          person = Person.create! "ID1", :name => "Name", :age => 20
+          Person.find(person.id)
+
+          wait
+          subject.logged(:debug).second.should match /Person.+?loaded from identity map/
+        end
+      end
     end
 
     

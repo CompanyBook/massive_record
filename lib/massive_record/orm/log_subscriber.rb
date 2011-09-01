@@ -42,6 +42,24 @@ module MassiveRecord
         debug "  " + [name, description, options].compact.join("  ")
       end
 
+      def identity_map(event)
+        return unless logger.debug?
+
+        payload = event.payload
+        name = '%s (%.1fms)' % [payload[:name], event.duration]
+        records = payload[:records]
+        ids = "id(s): #{records.collect(&:id)}"
+
+        if odd?
+          name = color(name, CYAN, true)
+          description = color(description, nil, true)
+        else
+          name = color(name, MAGENTA, true)
+        end
+
+        debug "  " + [name, ids].compact.join("  ")
+      end
+
       def query(event)
         return unless logger.debug?
 
