@@ -57,7 +57,7 @@ module MassiveRecord
           name = color(name, MAGENTA, true)
         end
 
-        debug "  " + [name, ids].compact.join("  ")
+        debug "    " + [name, ids].compact.join("  ")
       end
 
       def query(event)
