@@ -104,9 +104,11 @@ describe MassiveRecord::ORM::IdentityMap do
               subject.get(person.class, friend.id).should eq friend
             end
 
-            it "returns nil when not a descendants of look up class" do
+            it "raises an error when you request a parent class via a descendant class" do
               subject.add person
-              subject.get(friend.class, person.id).should be_nil
+              expect {
+                subject.get(friend.class, person.id)
+              }.to raise_error MassiveRecord::ORM::IdentityMap::RecordIsSuperClassOfQueriedClass
             end
           end
 

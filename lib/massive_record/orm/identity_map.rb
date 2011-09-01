@@ -13,6 +13,20 @@ module MassiveRecord
     module IdentityMap
       extend ActiveSupport::Concern
 
+      #
+      # Error is raised internally of the identity map to signal that
+      # you tried to get a record from a parent class, but you looked
+      # it up via it's sub class. For instance A is a super class of B.
+      # IdentityMap.get(B, "id-belonging-to-an-A-class") will raise the
+      # error.
+      #
+      # This error will however not "leak" outside of the identity map's
+      # code. It should be handled internally, and the goal for it is just
+      # not to hit the database more than we need to if we know that the
+      # database will return nil as well.
+      #
+      class RecordIsSuperClassOfQueriedClass < MassiveRecordError; end
+
       class << self
         #
         # Switch to either turn on or off the identity map
@@ -86,7 +100,11 @@ module MassiveRecord
 
         def get_one(klass, id)
           if record = repository[class_to_repository_key(klass)][id]
-            return record if klass == record.class || klass.descendants.include?(record.class)
+            if klass == record.class || klass.descendants.include?(record.class)
+              record
+            else
+              raise RecordIsSuperClassOfQueriedClass.new("#{record.class} is a super class of #{klass}. Please look your #{klass}-record up by do a #{klass}.find(#{record.id.inspect})")
+            end
           end
         end
 
@@ -119,6 +137,8 @@ module MassiveRecord
           return super unless IdentityMap.enabled? && can_use_identity_map_with?(options)
 
           IdentityMap.get(self, id) || IdentityMap.add(super)
+        rescue RecordIsSuperClassOfQueriedClass
+          nil
         end
 
 
