@@ -117,6 +117,13 @@ module MassiveRecord
           super
         end
 
+        def destroy
+          return super unless IdentityMap.enabled?
+
+          super.tap { IdentityMap.remove(self) }
+        end
+        alias_method :delete, :destroy
+
         private
 
 
@@ -124,12 +131,6 @@ module MassiveRecord
           return super unless IdentityMap.enabled?
 
           super.tap { IdentityMap.add(self) }
-        end
-
-        def destroy
-          return super unless IdentityMap.enabled?
-
-          super.tap { IdentityMap.remove(self) }
         end
       end
     end

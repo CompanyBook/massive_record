@@ -219,10 +219,23 @@ describe MassiveRecord::ORM::IdentityMap do
     end
 
     describe "#destroy" do
-      let(:person) { Person.create!(id, :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true) }
-
       it "removes the record from identiy map" do
         person.destroy
+        Person.should_not be_exists person.id
+      end
+    end
+
+    describe "#destroy_all" do
+      it "removes the record from identiy map" do
+        person
+        Person.destroy_all
+        Person.should_not be_exists person.id
+      end
+    end
+
+    describe "#delete" do
+      it "removes the record from identiy map" do
+        person.delete
         Person.should_not be_exists person.id
       end
     end
