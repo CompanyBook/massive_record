@@ -66,13 +66,16 @@ module MassiveRecord
 
 
         def get(klass, *ids)
+          get_many = ids.first.is_a?(Array)
+
           ids.flatten!
 
           case ids.length
           when 0
             raise ArgumentError.new("Must have at least one ID!")
           when 1
-            get_one(klass, ids.first)
+            result = get_one(klass, ids.first)
+            get_many ? [result].compact : result
           else
             get_some(klass, ids)
           end
@@ -109,7 +112,13 @@ module MassiveRecord
         end
 
         def get_some(klass, ids)
-          ids.collect { |id| get_one(klass, id) }.compact
+          ids.collect do |id|
+            begin
+              get_one(klass, id)
+            rescue RecordIsSuperClassOfQueriedClass
+              nil
+            end
+          end.compact
         end
 
         def repository
@@ -139,6 +148,22 @@ module MassiveRecord
           IdentityMap.get(self, id) || IdentityMap.add(super)
         rescue RecordIsSuperClassOfQueriedClass
           nil
+        end
+
+        def find_some(ids, options)
+          return super unless IdentityMap.enabled? && can_use_identity_map_with?(options)
+
+          records_from_database = []
+          records_from_identity_map = IdentityMap.get(self, ids)
+
+          missing_ids = ids - records_from_identity_map.collect(&:id)
+
+          if missing_ids.any?
+            records_from_database = super(missing_ids, options)
+            records_from_database.each { |record| IdentityMap.add(record) }
+          end
+
+          records_from_identity_map | records_from_database
         end
 
 

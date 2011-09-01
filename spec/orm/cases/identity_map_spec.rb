@@ -125,6 +125,11 @@ describe MassiveRecord::ORM::IdentityMap do
               subject.get(person.class, [person.id, friend.id]).should include person, friend
             end
 
+            it "returns array when get got an array, even with only one id" do
+              subject.add friend
+              subject.get(person.class, [friend.id]).should eq [friend]
+            end
+
             it "returns nothing for unkown ids" do
               subject.add person
               subject.add friend
@@ -243,11 +248,62 @@ describe MassiveRecord::ORM::IdentityMap do
             Person.table.should_not_receive(:find)
             Person.find(friend.id).should eq friend
           end
+
+          it "returns nil when you ask for a parent class" do
+            Friend.table.should_not_receive(:find)
+            Friend.find(person.id).should be_nil
+          end
         end
       end
 
       describe "many" do
-        pending
+        it "returns records from database when select option is used" do
+          MassiveRecord::ORM::IdentityMap.should_not_receive(:get)
+          Person.select(:info).find([person.id, friend.id]).should include person, friend
+        end
+
+        context "when no records are in the identity map" do
+          it "asks find for the two records" do
+            Person.should_receive(:do_find).with([id, id_2], anything).and_return []
+            Person.find([id, id_2]).should eq []
+          end
+
+          it "adds the found recods" do
+            MassiveRecord::ORM::IdentityMap.without { person; friend }
+            MassiveRecord::ORM::IdentityMap.get(person.class, person.id, friend.id).should be_empty
+
+            Person.find([id, id_2])
+            MassiveRecord::ORM::IdentityMap.get(person.class, person.id, friend.id).should include person, friend
+          end
+        end
+
+        context "when all records are in the identity map" do
+          before do
+            MassiveRecord::ORM::IdentityMap.add(person)
+            MassiveRecord::ORM::IdentityMap.add(friend)
+          end
+
+          it "returns records from identity map" do
+            Person.table.should_not_receive(:find)
+            Person.find([person.id, friend.id])
+          end
+
+          it "returns only records equal to or descendants of queried class" do
+            Friend.find([person.id, friend.id]).should eq [friend]
+          end
+        end
+
+        context "when some records are in the identity map" do
+          before do
+            MassiveRecord::ORM::IdentityMap.add(person)
+            MassiveRecord::ORM::IdentityMap.without { friend }
+          end
+
+          it "returns records from identity map" do
+            Person.should_receive(:query_hbase).with([friend.id], anything).and_return [friend]
+            Person.find([person.id, friend.id])
+          end
+        end
       end
     end
 
