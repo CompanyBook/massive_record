@@ -32,11 +32,11 @@ module MassiveRecord
         # Switch to either turn on or off the identity map
         #
         def enabled=(boolean)
-          Thread.current[:identity_map_enabled] = !!boolean
+          Thread.current[:identity_map_enabled] = boolean
         end
 
         def enabled
-          Thread.current[:identity_map_enabled]
+          !!Thread.current[:identity_map_enabled]
         end
         alias enabled? enabled
 
