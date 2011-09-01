@@ -208,6 +208,44 @@ module MassiveRecord
           super.tap { IdentityMap.add(self) }
         end
       end
+
+
+
+
+      class Middleware
+        class BodyProxy
+          def initialize(target, original_identity_map_state)
+            @target = target
+            @original_identity_map_state = original_identity_map_state
+          end
+
+          def each(&block)
+            @target.each(&block)
+          end
+
+          def close
+            @target.close if @target.respond_to?(:close)
+          ensure
+            IdentityMap.enabled = @original_identity_map_state
+            IdentityMap.clear
+          end
+          
+        end
+
+
+
+        def initialize(app)
+          @app = app
+        end
+
+        def call(env)
+          original_identity_map_state = IdentityMap.enabled?
+          IdentityMap.enabled = true
+
+          status, headers, body = @app.call(env)
+          [status, headers, BodyProxy.new(body, original_identity_map_state)]
+        end
+      end
     end
   end
 end
