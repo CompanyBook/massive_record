@@ -59,7 +59,7 @@ Create an config/hbase.yml file with the following content:
 ## Usage
 
 There are two ways for using the Massive Record library. At the highest level we have ORM. This is Active Model compliant and makes
-it easy to use. The second way of doing things is working directly against the wrapper (soon to be called adapter).
+it easy to use. The second way of doing things is working directly against the adapter.
 
 
 ### ORM
@@ -91,6 +91,7 @@ Tables also have:
 - Destroy records
 - Relations: See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
 - Observable. See MassiveRecord::ORM::Observer. If you know how to use ActiveRecord's observer you know how to use this one.
+- IdentityMap (when enabled)
 
 
 Here are some examples setting up models:
@@ -203,6 +204,7 @@ Makes it easier to make things searchable with solr.
 ## Wrapper (adapter) API
 
 You can, if you'd like, work directly against the adapter.
+It is however adviced to use the ORM as the interface to the adapter is not yet very well defined.
   
     # Init a new connection with HBase
     conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)

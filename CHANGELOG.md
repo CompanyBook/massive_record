@@ -1,5 +1,10 @@
 # v0.2.2 (git develop)
 
+- Added a basic IdentityMap. Calling User.find("an-id") twice will only load it once from the database.
+  Calling User.find(["an-id", "another"]) will only load "another" from the database, and the "an-id" from
+  the identity map. The identity map needs to be enabled. In Rails you can add a configuration option in
+  your config/application.rb like: config.massive_record.identity_map = true. This will insert a Rack middleware
+  which enables identity map per request. Note that the identity map only caches objects per request.
 - When you do a find without any :select option given we will add known column families to be selected as default.
 - do_find() (internal method) was re-factored to be more readable and easier to extend/hook in to.
 - References many can now handle find_in_batches and find_each.

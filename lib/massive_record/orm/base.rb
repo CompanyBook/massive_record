@@ -28,6 +28,7 @@ require 'massive_record/orm/persistence'
 require 'massive_record/orm/default_id'
 require 'massive_record/orm/query_instrumentation'
 require 'massive_record/orm/observer'
+require 'massive_record/orm/identity_map'
 
 
 module MassiveRecord
@@ -282,6 +283,7 @@ module MassiveRecord
       include Persistence
       include Relations::Interface
       include Finders
+      include IdentityMap
       extend  RescueMissingTableOnFind
       include AttributeMethods
       include AttributeMethods::Write, AttributeMethods::Read

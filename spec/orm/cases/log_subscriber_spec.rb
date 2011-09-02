@@ -57,13 +57,26 @@ describe "log subscriber" do
       it "should have some clue written that it is first" do
         Person.first
         wait
-        subject.logged(:debug).first.should include "options: [:all, {:limit=>1}]"
+        subject.logged(:debug).first.should include ":limit=>1"
       end
 
       it "should have one log when doing find" do
         Person.find("dummy") rescue nil
         wait
-        subject.logged(:debug).first.should include 'options: ["dummy", {}]'
+        subject.logged(:debug).first.should include 'options: ["dummy",'
+      end
+
+
+
+
+      it "includes information about loading from identity map" do
+        MassiveRecord::ORM::IdentityMap.use do
+          person = Person.create! "ID1", :name => "Name", :age => 20
+          Person.find(person.id)
+
+          wait
+          subject.logged(:debug).second.should match /Person.+?loaded from identity map/
+        end
       end
     end
 

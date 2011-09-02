@@ -4,19 +4,20 @@ module MassiveRecord
       extend ActiveSupport::Concern
 
       module ClassMethods
-        #
-        # do_find is the method which *all* find operations goes
-        # through. For instrumentation on the query only see
-        # hbase_query_all_first /hbase_query_find
-        #
-        def do_find(*args)
-          ActiveSupport::Notifications.instrument("load.massive_record", {
-            :name => [model_name, 'load'].join(' '),
-            :description => "",
-            :options => args
-          }) do
-            super
-          end
+        %w(find_one find_some find_all).each do |method_to_instrument|
+          module_eval <<-RUBY, __FILE__, __LINE__
+
+            def #{method_to_instrument}(*args)
+              ActiveSupport::Notifications.instrument("load.massive_record", {
+                :name => [model_name, 'load'].join(' '),
+                :description => "#{method_to_instrument}",
+                :options => args
+              }) do
+                super
+              end
+            end
+
+          RUBY
         end
       end
 
