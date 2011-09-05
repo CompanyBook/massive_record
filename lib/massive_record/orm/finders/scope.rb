@@ -16,7 +16,7 @@ module MassiveRecord
       #
       class Scope
         MULTI_VALUE_METHODS = %w(select)
-        SINGLE_VALUE_METHODS = %w(limit)
+        SINGLE_VALUE_METHODS = %w(limit starts_with offset)
         
         attr_accessor *MULTI_VALUE_METHODS.collect { |m| m + "_values" }
         attr_accessor *SINGLE_VALUE_METHODS.collect { |m| m + "_value" }
@@ -61,6 +61,16 @@ module MassiveRecord
 
         def limit(limit)
           self.limit_value = limit
+          self
+        end
+
+        def starts_with(starts_with)
+          self.starts_with_value = starts_with
+          self
+        end
+
+        def offset(offset)
+          self.offset_value = offset
           self
         end
 

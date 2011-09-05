@@ -76,6 +76,30 @@ describe MassiveRecord::ORM::Finders::Scope do
           subject.limit_value.should == 5
         end
       end
+
+      describe "starts_with" do
+        it "should set a starts_with" do
+          subject.starts_with(5)
+          subject.starts_with_value.should == 5
+        end
+
+        it "should be set to the last value set" do
+          subject.starts_with(1).starts_with(5)
+          subject.starts_with_value.should == 5
+        end
+      end
+
+      describe "offset" do
+        it "should set a offset" do
+          subject.offset(5)
+          subject.offset_value.should == 5
+        end
+
+        it "should be set to the last value set" do
+          subject.offset(1).offset(5)
+          subject.offset_value.should == 5
+        end
+      end
     end
   end
 
@@ -91,6 +115,14 @@ describe MassiveRecord::ORM::Finders::Scope do
 
     it "should include selection when asked for it" do
       subject.select(:info).send(:find_options).should include :select => ['info']
+    end
+
+    it "includes a starts_with when asked for it" do
+      subject.starts_with("id-something").send(:find_options).should include :starts_with => "id-something"
+    end
+
+    it "includes an offset when asked for it" do
+      subject.offset("id-something").send(:find_options).should include :offset => "id-something"
     end
   end
 
@@ -219,10 +251,12 @@ describe MassiveRecord::ORM::Finders::Scope do
     describe "with a person" do
       let(:person_1) { Person.create "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
       let(:person_2) { Person.create "ID2", :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
+      let(:person_3) { Person.create "other", :name => "Person3", :email => "three@person.com", :age => 33, :points => 333, :status => true }
 
       before do
         person_1.save!
         person_2.save!
+        person_3.save!
       end
 
       (MassiveRecord::ORM::Finders::Scope::MULTI_VALUE_METHODS + MassiveRecord::ORM::Finders::Scope::SINGLE_VALUE_METHODS).each do |method|
@@ -249,10 +283,18 @@ describe MassiveRecord::ORM::Finders::Scope do
         person.should_not be_readonly
       end
 
+      it "ensures records starts with string" do
+        Person.starts_with("ID").should == [person_1, person_2]
+      end
+
+      it "sets an offset point to begin read rows from" do
+        Person.offset("ID2").should == [person_2, person_3]
+      end
+
       it "should be possible to iterate over a collection with each" do
         result = []
 
-        Person.limit(5).each do |person|
+        Person.starts_with("ID").limit(2).each do |person|
           result << person.name
         end
 
@@ -260,7 +302,7 @@ describe MassiveRecord::ORM::Finders::Scope do
       end
 
       it "should be possible to collect" do
-        Person.select(:info).collect(&:name).should == ["Person1", "Person2"]
+        Person.select(:info).collect(&:name).should == ["Person1", "Person2", "Person3"]
       end
 
       it "should be possible to checkc if it includes something" do

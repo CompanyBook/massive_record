@@ -174,7 +174,7 @@ Perform requests:
     u.blog_posts
     
     # Blog posts associated during May 2011
-    u.blog_posts(:start => "45-2011-05") # user_id - year - month
+    u.blog_posts(:starts_with => "45-2011-05") # user_id - year - month
     
     # Blog posts from May 2011
     u.blog_posts(:offset => "45-2011-05")
@@ -245,7 +245,7 @@ It is however adviced to use the ORM as the interface to the adapter is not yet 
     table.all(:limit => 10) # => [MassiveRecord#ID1, MassiveRecord#ID2, ...]
     table.find("ID2") # => MassiveRecord#ID2
     table.find(["ID1", "ID2"]) # => [MassiveRecord#ID1, MassiveRecord#ID2]
-    table.all(:limit => 3, :start => "ID2") # => [MassiveRecord#ID2, MassiveRecord#ID3, MassiveRecord#ID4]
+    table.all(:limit => 3, :starts_with => "ID2") # => [MassiveRecord#ID2, MassiveRecord#ID3, MassiveRecord#ID4]
     
     # Manipulate rows
     table.first.destroy # => true

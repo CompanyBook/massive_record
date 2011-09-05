@@ -122,13 +122,13 @@ describe TestReferencesManyProxy do
         result.should eq [[proxy_target], [proxy_target_2], [proxy_target_3]]
       end
 
-      it "filters when given :start" do
+      it "filters when given :starts_with" do
         proxy_target_3_3 = TestClass.new("test-class-id-3-1")
         proxy_owner.test_classes << proxy_target_3_3
 
         result = []
 
-        subject.find_in_batches(:batch_size => 1, :start => "test-class-id-3") do |records_batch|
+        subject.find_in_batches(:batch_size => 1, :starts_with => "test-class-id-3") do |records_batch|
           result << records_batch 
         end
 
@@ -153,14 +153,14 @@ describe TestReferencesManyProxy do
         result.should eq [[proxy_target], [proxy_target_2], [proxy_target_3]]
       end
 
-      it "filters when given :start" do
+      it "filters when given :starts_with" do
         proxy_target_3_3 = TestClass.new("test-class-id-3-1")
         proxy_owner.test_classes << proxy_target_3_3
         subject.reset
 
         result = []
 
-        subject.find_in_batches(:batch_size => 1, :start => "test-class-id-3") do |records_batch|
+        subject.find_in_batches(:batch_size => 1, :starts_with => "test-class-id-3") do |records_batch|
           result << records_batch 
         end
 
@@ -170,7 +170,7 @@ describe TestReferencesManyProxy do
       it "does not alter foreign keys in proxy owner" do
         foreign_keys_before_batches = proxy_owner.test_class_ids.dup
 
-        subject.find_in_batches(:batch_size => 1, :start => "test-class-id-3") do |records_batch|
+        subject.find_in_batches(:batch_size => 1, :starts_with => "test-class-id-3") do |records_batch|
         end
 
         proxy_owner.test_class_ids.should eq foreign_keys_before_batches
@@ -226,7 +226,7 @@ describe TestReferencesManyProxy do
         it "returns only records with given start" do
           result = []
 
-          subject.find_in_batches(:batch_size => 3, :start => "test-1-") do |records_batch|
+          subject.find_in_batches(:batch_size => 3, :starts_with => "test-1-") do |records_batch|
             result << records_batch
           end
 
@@ -235,7 +235,7 @@ describe TestReferencesManyProxy do
 
         it "raises an error if your start option starst with some incorrect value" do
           expect {
-            subject.find_in_batches(:start => 'incorrect_value') { |b| }
+            subject.find_in_batches(:starts_with => 'incorrect_value') { |b| }
           }.to raise_error MassiveRecord::ORM::Relations::InvalidStartOption
         end
       end
@@ -245,8 +245,8 @@ describe TestReferencesManyProxy do
 
   describe "#find_each" do
     it "delegate to find_in_batches" do
-      subject.should_receive(:find_in_batches).with(:batch_size => 2, :start => :from_here)
-      subject.find_each(:batch_size => 2, :start => :from_here)  
+      subject.should_receive(:find_in_batches).with(:batch_size => 2, :starts_with => :from_here)
+      subject.find_each(:batch_size => 2, :starts_with => :from_here)  
     end
 
     it "yields one and one record" do

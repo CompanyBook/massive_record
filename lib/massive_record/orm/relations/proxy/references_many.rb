@@ -143,14 +143,16 @@ module MassiveRecord
           #
           # Options:
           #   <tt>:batch_size</tt>    The number of records you want per batch. Defaults to 1000
-          #   <tt>:start</tt>         The ids starts with this
+          #   <tt>:starts_with</tt>         The ids starts with this
           #
           def find_in_batches(options = {}, &block)
+            options = MassiveRecord::Adapters::Thrift::Table.warn_and_change_deprecated_finder_options(options)
+
             options[:batch_size] ||= 1000
 
             if loaded?
-              collection =  if options[:start]
-                              proxy_target.select { |r| r.id.starts_with? options[:start] }
+              collection =  if options[:starts_with]
+                              proxy_target.select { |r| r.id.starts_with? options[:starts_with] }
                             else
                               proxy_target
                             end
@@ -159,7 +161,7 @@ module MassiveRecord
               find_proxy_target_with_proc(options.merge(:finder_method => :find_in_batches), &block)
             else
               all_ids = proxy_owner.send(metadata.foreign_key)
-              all_ids = all_ids.select { |id| id.starts_with? options[:start] } if options[:start]
+              all_ids = all_ids.select { |id| id.starts_with? options[:starts_with] } if options[:starts_with]
               all_ids.in_groups_of(options[:batch_size]).each do |ids_in_batch|
                 yield Array(find_proxy_target(ids_in_batch))
               end

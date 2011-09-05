@@ -131,17 +131,19 @@ module MassiveRecord
 
           if @records_starts_from
             self.find_with = Proc.new do |proxy_owner, options = {}, &block|
+              options = MassiveRecord::Adapters::Thrift::Table.warn_and_change_deprecated_finder_options(options)
+
               finder_method = options.delete(:finder_method) || :all
 
               if ids_starts_with = proxy_owner.send(records_starts_from)
-                if options[:start]
-                  if options[:start].starts_with?(ids_starts_with)
-                    ids_starts_with = options[:start]
+                if options[:starts_with]
+                  if options[:starts_with].starts_with?(ids_starts_with)
+                    ids_starts_with = options[:starts_with]
                   else
-                    raise InvalidStartOption.new("The start option: #{options[:start]} must begin with: #{ids_starts_with}.")
+                    raise InvalidStartOption.new("The start option: #{options[:starts_with]} must begin with: #{ids_starts_with}.")
                   end
                 end
-                proxy_target_class.send(finder_method, options.merge({:start => ids_starts_with}), &block)
+                proxy_target_class.send(finder_method, options.merge({:starts_with => ids_starts_with}), &block)
               end
             end
           else

@@ -1,5 +1,8 @@
 # v0.2.2 (git develop)
 
+- Added starts_with and offset to the scope, so now you can do:
+  Person.starts_with("id-have-to-start-with-this").offset("id-have-to-start-with-this-and-starts-read-from-this").limit(1)
+- Finder option :start has been deprecated and renamed to :starts_with.
 - Added a basic IdentityMap. Calling User.find("an-id") twice will only load it once from the database.
   Calling User.find(["an-id", "another"]) will only load "another" from the database, and the "an-id" from
   the identity map. The identity map needs to be enabled. In Rails you can add a configuration option in

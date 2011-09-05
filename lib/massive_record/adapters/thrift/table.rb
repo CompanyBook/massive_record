@@ -5,6 +5,27 @@ module MassiveRecord
         
         attr_accessor :connection, :name, :column_families
     
+        #
+        # TODO
+        # Helper method to inform about changed options. Remove this in next version..
+        # Also note that this method is used other places to wrap same functionality.
+        #
+        def self.warn_and_change_deprecated_finder_options(options)
+          deprecations = {
+            :start => :starts_with
+          }
+
+          deprecations.each do |deprecated, current|
+            if options.has_key? deprecated
+              # TODO remove this for next version
+              ActiveSupport::Deprecation.warn("finder option '#{deprecated}' is deprecated. Please use: '#{current}'")
+              options[current] = options.delete deprecated
+            end
+          end
+          
+          options
+        end
+
         def initialize(connection, table_name)
           @connection = connection
           @name = table_name.to_s
@@ -87,7 +108,9 @@ module MassiveRecord
         end
       
         def format_options_for_scanner(opts = {})
-          start = opts[:start] && opts[:start].dup.force_encoding(Encoding::BINARY)
+          opts = self.class.warn_and_change_deprecated_finder_options(opts)
+
+          start = opts[:starts_with] && opts[:starts_with].dup.force_encoding(Encoding::BINARY)
           offset = opts[:offset] && opts[:offset].dup.force_encoding(Encoding::BINARY)
 
           {

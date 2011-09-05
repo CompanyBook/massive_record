@@ -189,12 +189,12 @@ describe MassiveRecord::ORM::Relations::Metadata do
       end
 
       it "should call proxy_target class with all, start with proxy_owner's start from id response" do
-        Person.should_receive(:all).with(hash_including(:start => proxy_owner.friends_records_starts_from_id))
+        Person.should_receive(:all).with(hash_including(:starts_with => proxy_owner.friends_records_starts_from_id))
         find_with_proc.call(proxy_owner)
       end
 
       it "should be possible to send in options to the proc" do
-        Person.should_receive(:all).with(hash_including(:limit => 10, :start => proxy_owner.friends_records_starts_from_id))
+        Person.should_receive(:all).with(hash_including(:limit => 10, :starts_with => proxy_owner.friends_records_starts_from_id))
         find_with_proc.call(proxy_owner, {:limit => 10})
       end
     end

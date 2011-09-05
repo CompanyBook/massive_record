@@ -5,7 +5,7 @@ module MassiveRecord
 
       included do
         class << self
-          delegate :find, :last, :all, :select, :limit, :to => :finder_scope
+          delegate :find, :last, :all, :select, :limit, :starts_with, :offset, :to => :finder_scope
         end
 
         class_attribute :default_scoping, :instance_writer => false
