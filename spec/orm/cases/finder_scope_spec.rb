@@ -155,7 +155,7 @@ describe MassiveRecord::ORM::Finders::Scope do
     end
 
 
-    [:to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?].each do |method|
+    [:to_xml, :to_yaml, :length, :size, :collect, :map, :each, :all?, :include?].each do |method|
       it "should delegate #{method} to to_a" do
         records = []
         records.should_receive(method)

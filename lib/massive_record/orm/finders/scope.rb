@@ -24,7 +24,7 @@ module MassiveRecord
         alias :loaded? :loaded
 
 
-        delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to => :to_a
+        delegate :to_xml, :to_yaml, :length, :size, :collect, :map, :each, :all?, :include?, :to => :to_a
         
 
         def initialize(klass, options = {})
