@@ -1,5 +1,7 @@
 # v0.2.2 (git develop)
 
+- Scope methods like Person.limit(2).offset("some-id") now returns a cloned version of the previous one. This
+  keeps state of one scope apart from the other and fixes obvious problems which can arise if building and using scopes.
 - Added starts_with and offset to the scope, so now you can do:
   Person.starts_with("id-have-to-start-with-this").offset("id-have-to-start-with-this-and-starts-read-from-this").limit(1)
 - Finder option :start has been deprecated and renamed to :starts_with.

@@ -73,7 +73,7 @@ module MassiveRecord
                                     when Scope, nil
                                       scope
                                     when Hash
-                                      Scope.new(self, :find_options => scope)
+                                      Scope.new(self).apply_finder_options(scope)
                                     else
                                       raise "Don't know how to set scope with #{scope.class}."
                                     end

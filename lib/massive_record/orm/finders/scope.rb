@@ -20,27 +20,30 @@ module MassiveRecord
         
         attr_accessor *MULTI_VALUE_METHODS.collect { |m| m + "_values" }
         attr_accessor *SINGLE_VALUE_METHODS.collect { |m| m + "_value" }
-        attr_accessor :loaded, :klass
+        attr_accessor :loaded, :klass, :extra_finder_options
         alias :loaded? :loaded
 
 
         delegate :to_xml, :to_yaml, :length, :size, :collect, :map, :each, :all?, :include?, :to => :to_a
         
 
-        def initialize(klass, options = {})
+        def initialize(klass)
           @klass = klass
           @extra_finder_options = {}
 
           reset
           reset_single_values_options
           reset_multi_values_options
+        end
 
-          apply_finder_options(options[:find_options]) if options.has_key? :find_options
+        def initialize_copy(old)
+          reset
         end
         
-        
+
         def reset
           @loaded = false
+          @records = []
         end
 
 
@@ -50,8 +53,7 @@ module MassiveRecord
         #
 
         def select(*select)
-          self.select_values |= select.flatten.compact.collect(&:to_s)
-          self
+          cloned_version_with { self.select_values |= select.flatten.compact.collect(&:to_s) }
         end
 
 
@@ -60,18 +62,15 @@ module MassiveRecord
         #
 
         def limit(limit)
-          self.limit_value = limit
-          self
+          cloned_version_with { self.limit_value = limit }
         end
 
         def starts_with(starts_with)
-          self.starts_with_value = starts_with
-          self
+          cloned_version_with { self.starts_with_value = starts_with }
         end
 
         def offset(offset)
-          self.offset_value = offset
-          self
+          cloned_version_with { self.offset_value = offset }
         end
 
 
@@ -93,24 +92,32 @@ module MassiveRecord
 
         def find(*args)
           options = args.extract_options!.to_options
-          apply_finder_options(options)
-          args << options.merge(find_options)
-
-          klass.do_find(*args)
+          
+          if options.any?
+            apply_finder_options(options).find(*args)
+          else
+            klass.do_find(*args << find_options)
+          end
         end
 
         def all(options = {})
-          apply_finder_options(options)
-          to_a
+          if options.empty?
+            to_a
+          else
+            apply_finder_options(options).to_a
+          end
         end
 
         def first(options = {})
-          apply_finder_options(options)
-          limit(1).to_a.first
+          if loaded? && options.empty?
+            @records.first
+          else
+            apply_finder_options(options).limit(1).to_a.first
+          end
         end
 
         def last(*args)
-          raise "Sorry, not implemented!"
+          raise "Sorry, but query last requires all records to be fetched. If you really want to do this, do an scope.all.last instead."
         end
 
 
@@ -122,11 +129,32 @@ module MassiveRecord
           @records
         end
 
+        
+        #
+        # Takes a hash of finder options, applies them to
+        # a new scope and returns a that scope.
+        #
+        def apply_finder_options(options)
+          scope = clone
+          return scope if options.empty?
 
+          options.each do |scope_method, arguments|
+            if respond_to? scope_method
+              scope = scope.send(scope_method, arguments)
+            else
+              scope.extra_finder_options[scope_method] = arguments              
+            end
+          end
+
+          scope
+        end
 
 
         private
 
+        def cloned_version_with(&block)
+          clone.tap { |scope| scope.instance_eval(&block) }
+        end
 
         def load_records
           @records = klass.do_find(:all, find_options)
@@ -134,6 +162,7 @@ module MassiveRecord
           @records
         end
 
+        # Returns find options which adapter's find understands.
         def find_options
           options = {}
 
@@ -147,21 +176,6 @@ module MassiveRecord
 
           options.merge(@extra_finder_options)
         end
-
-
-
-        def apply_finder_options(options)
-          options.each do |scope_method, arguments|
-            if respond_to? scope_method
-              send(scope_method, arguments)
-            else
-              @extra_finder_options[scope_method] = arguments              
-            end
-          end
-        end
-
-
-
 
         def reset_single_values_options
           SINGLE_VALUE_METHODS.each { |m| instance_variable_set("@#{m}_value", nil) } 
