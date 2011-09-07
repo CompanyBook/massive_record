@@ -3,6 +3,20 @@ module MassiveRecord
     module Relations
       class Proxy
         class ReferencesMany < Proxy
+
+          #
+          # Raised when we are in a references many relationship where the
+          # target's foreign keys are persisted in the owner and you try to
+          # do a person.cars.all(:limit => 1, :offset => "something") and
+          # some of these options are unsupported. The reason for these being
+          # unsupported is that we have to implement offset and limitiation
+          # in pure Ruby working on that car_ids array in the person. Its
+          # nothing close to impossible; it just has not been done yet.
+          #
+          class UnsupportedFinderOption < MassiveRecordError
+            OPTIONS = %w(limit offset starts_with)
+          end
+
           #
           # Loading proxy_targets will merge it with records found currently in proxy,
           # to make sure we don't remove any pushed proxy_targets only cause we load the
@@ -225,6 +239,17 @@ module MassiveRecord
 
           def find_proxy_target(options = {})
             ids = options.delete(:ids) || proxy_owner.send(metadata.foreign_key)
+            unsupported_finder_options = UnsupportedFinderOption::OPTIONS & options.keys.collect(&:to_s)
+
+            if unsupported_finder_options.any?
+              raise UnsupportedFinderOption.new(
+                <<-TXT
+                  Sorry, option(s): #{unsupported_finder_options.join(', ')} are not supported when foreign
+                  keys are persisted in proxy owner #{proxy_owner.class}
+                TXT
+              )
+            end
+
             proxy_target_class.find(ids, :skip_expected_result_check => true)
           end
 

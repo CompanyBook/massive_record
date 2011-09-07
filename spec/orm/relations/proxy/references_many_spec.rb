@@ -712,6 +712,14 @@ describe TestReferencesManyProxy do
         subject.all.should_not include proxy_target_3
       end
 
+      [:limit, :offset, :starts_with].each do |finder_option|
+        it "raises an error when asked to do a #{finder_option}" do
+          expect {
+            subject.all(finder_option => "value")
+          }.to raise_error MassiveRecord::ORM::Relations::Proxy::ReferencesMany::UnsupportedFinderOption
+        end
+      end
+
       it "does not hit database if targets has been loaded" do
         subject.load_proxy_target
         subject.proxy_target_class.should_not_receive :find
