@@ -164,8 +164,12 @@ module MassiveRecord
               relation_proxy(metadata.name)
             end
 
+            redefine_method(metadata.name+'=') do |records|
+              relation_proxy(metadata.name).replace(records)
+            end
+
             if metadata.persisting_foreign_key?
-              add_field_to_column_family(metadata.store_in, metadata.foreign_key, :type => :array, :default => [])
+              add_field_to_column_family(metadata.store_in, metadata.foreign_key, :type => :array, :allow_nil => false)
             end
           end
 
@@ -177,6 +181,12 @@ module MassiveRecord
           end
         end
 
+
+
+        def reload
+          reset_relation_proxies
+          super
+        end
 
 
         private
@@ -200,6 +210,10 @@ module MassiveRecord
 
         def relation_proxy_set(name, proxy)
           @relation_proxy_cache[name.to_s] = proxy
+        end
+
+        def reset_relation_proxies
+          @relation_proxy_cache.values.each(&:reset)
         end
       end
     end

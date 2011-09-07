@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 require 'orm/models/test_class'
 require 'orm/models/person'
@@ -7,7 +8,7 @@ describe "finders" do
     include MockMassiveRecordConnection
 
     before do
-      @mocked_table = mock(MassiveRecord::Wrapper::Table).as_null_object
+      @mocked_table = mock(MassiveRecord::Wrapper::Table, :to_ary => []).as_null_object
       Person.stub(:table).and_return(@mocked_table)
       
       @row = MassiveRecord::Wrapper::Row.new
@@ -23,35 +24,39 @@ describe "finders" do
       lambda { Person.find }.should raise_error ArgumentError
     end
 
-    it "should simply return nil on first if table does not exists" do
-      Person.table.should_receive(:exists?).and_return false
-      lambda { Person.first }.should raise_error MassiveRecord::ORM::RecordNotFound
-    end
-
-    it "should simply return nil on find if table does not exists" do
-      Person.table.should_receive(:exists?).and_return false
-      lambda { Person.find(1) }.should raise_error MassiveRecord::ORM::RecordNotFound
-    end
-
-    it "should simply return empty array if table does not exists" do
-      Person.table.should_receive(:exists?).and_return false
-      Person.all.should == []
-    end
-
     it "should raise RecordNotFound if id is nil" do
       lambda { Person.find(nil) }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
 
-    it "should raise an error if conditions are given to first" do
-      lambda { Person.first(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+    describe "conditions" do
+      it "should raise an error if conditions are given to first" do
+        lambda { Person.first(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
+
+      it "should raise an error if conditions are given to all" do
+        lambda { Person.all(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
+
+      it "should raise an error if conditions are given to find" do
+        lambda { Person.find(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
     end
 
-    it "should raise an error if conditions are given to all" do
-      lambda { Person.all(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
-    end
+    describe "default select" do
+      it "applies all the known column families to finder options as a default on all()" do
+        @mocked_table.should_receive(:all).with(hash_including(:select => Person.known_column_family_names)).and_return []
+        Person.all
+      end
 
-    it "should raise an error if conditions are given to find" do
-      lambda { Person.find(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      it "applies all the known column families to finder options as a default on first()" do
+        @mocked_table.should_receive(:all).with(hash_including(:select => Person.known_column_family_names)).and_return []
+        Person.first
+      end
+
+      it "applies all the known column families to finder options as a default on first()" do
+        @mocked_table.should_receive(:find).with("ID1", hash_including(:select => Person.known_column_family_names)).and_return(@row)
+        Person.find("ID1")
+      end
     end
 
     it "should ask the table to look up by it's id" do
@@ -82,9 +87,9 @@ describe "finders" do
       lambda { Person.find("ID1", "ID2") }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
     
-    it "should call table's first on find(:first)" do
-      @mocked_table.should_receive(:first).and_return(@row)
-      Person.find(:first)
+    it "should call table's all with limit 1 on find(:first)" do
+      @mocked_table.should_receive(:all).with(hash_including(:limit => 1)).and_return([@row])
+      Person.find(:first).should be_instance_of Person
     end
 
     it "should call table's all on find(:all)" do
@@ -98,7 +103,6 @@ describe "finders" do
     end
 
     it "should return nil on first if no results was found" do
-      @mocked_table.should_receive(:first).and_return(nil)
       Person.first.should be_nil
     end
 
@@ -113,20 +117,37 @@ describe "finders" do
     end
   end
 
-  %w(first all).each do |method|
-    it "should respond to #{method}" do
-      TestClass.should respond_to method
+  describe "all" do
+    it "should respond to all" do
+      TestClass.should respond_to :all
     end
 
-    it "should delegate #{method} to find with first argument as :#{method}" do
-      TestClass.should_receive(:find).with(method.to_sym)
-      TestClass.send(method)
+    it "should call find with :all" do
+      TestClass.should_receive(:do_find).with(:all, anything)
+      TestClass.all
     end
 
-    it "should delegate #{method}'s call to find with it's args as second argument" do
+    it "should delegate all's call to find with it's args as second argument" do
       options = {:foo => :bar}
-      TestClass.should_receive(:find).with(anything, options)
-      TestClass.send(method, options)
+      TestClass.should_receive(:do_find).with(anything, options)
+      TestClass.all options
+    end
+  end
+
+  describe "first" do
+    it "should respond to first" do
+      TestClass.should respond_to :first
+    end
+
+    it "should call find with :first" do
+      TestClass.should_receive(:do_find).with(:all, {:limit => 1}).and_return([])
+      TestClass.first
+    end
+
+    it "should delegate first's call to find with it's args as second argument" do
+      options = {:foo => :bar}
+      TestClass.should_receive(:do_find).with(anything, hash_including(options)).and_return([])
+      TestClass.first options
     end
   end
 
@@ -148,14 +169,25 @@ describe "finders" do
       @bob = Person.find("ID2")
     end
 
-    it "should return nil if id is not found" do
+    it "should raise record not found error" do
       lambda { Person.find("not_found") }.should raise_error MassiveRecord::ORM::RecordNotFound
+    end
+
+    it "should raise MassiveRecord::ORM::RecordNotFound error if table does not exist" do
+      Person.table.destroy
+      expect { Person.find("id") }.to raise_error MassiveRecord::ORM::RecordNotFound
     end
 
     it "should return the person object when found" do
       @person.name.should == "John Doe"
       @person.email.should == "john@base.com"
       @person.age.should == 20
+    end
+
+    it "should maintain encoding of ids" do
+      id = "thorbjørn"
+      person = Person.create! id, :name => "Thorbjørn", :age => 20
+      Person.find(id).should eq person
     end
 
     it "should find first person" do
@@ -169,7 +201,7 @@ describe "finders" do
     end
 
     it "should find all persons, even if it is more than 10" do
-      15.times { |i| Person.create! :id => "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
+      15.times { |i| Person.create! "id-#{i}", :name => "Going to die :-(", :age => i + 20 }
       Person.all.length.should > 10
     end
 
@@ -198,7 +230,7 @@ describe "finders" do
     end
 
     it "should not do a thing if table does not exist" do
-      Person.table.should_receive(:exists?).and_return false
+      Person.table.destroy
 
       counter = 0
 

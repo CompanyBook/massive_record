@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe MassiveRecord::ORM::Schema::Field do
   describe "initializer" do
-    %w(name column default).each do |attr_name|
+    %w(name column default allow_nil).each do |attr_name|
       it "should set #{attr_name}" do
         field = MassiveRecord::ORM::Schema::Field.new attr_name => "a_value"
         field.send(attr_name).should == "a_value"
@@ -16,6 +16,10 @@ describe MassiveRecord::ORM::Schema::Field do
     it "should default to type string" do
       MassiveRecord::ORM::Schema::Field.new(:name => "a_value").type.should == :string
     end
+
+    it "should default allow nil to true" do
+      MassiveRecord::ORM::Schema::Field.new(:name => "a_value").allow_nil.should be_true
+    end
   end
 
   describe "new_with_arguments_from_dsl" do
@@ -26,6 +30,11 @@ describe MassiveRecord::ORM::Schema::Field do
 
     it "should take the second argument as type" do
       field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info", "integer")
+      field.type.should == :integer
+    end
+
+    it "should take type as an option" do
+      field = MassiveRecord::ORM::Schema::Field.new_with_arguments_from_dsl("info", :type => :integer)
       field.type.should == :integer
     end
 
@@ -106,6 +115,7 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode("0").should be_false
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+      @subject.decode("null").should be_nil
     end
 
     it "should decode a string value" do
@@ -113,13 +123,50 @@ describe MassiveRecord::ORM::Schema::Field do
       @subject.decode("value").should == "value"
       @subject.decode("").should == ""
       @subject.decode(nil).should be_nil
+      @subject.decode("frozen".freeze).should eq "frozen"
+    end
+
+    it "should cast symbols to strings" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode(:value).should == "value"
+    end
+
+    it "should decode string null correctly" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode(@subject.coder.dump("null")).should == "null"
+    end
+
+    it "should decode string with value nil correctly" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :string)
+      @subject.decode(nil).should == nil
     end
 
     it "should decode an integer value" do
+      old_combatibility = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+      MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
       @subject.decode("1").should == 1
+      @subject.decode(1).should == 1
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+
+      MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_combatibility
+    end
+
+    it "decodes an integer value is represented as a binary string" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
+      @subject.decode(nil).should be_nil
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x01").should eq 1
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x1C").should eq 28
+      @subject.decode("\x00\x00\x00\x00\x00\x00\x00\x1E").should eq 30
+    end
+
+    it "it forces encoding on the value to be BINARY if value is integer" do
+      value = "\x00\x00\x00\x00\x00\x00\x00\x01"
+      value.should_receive(:force_encoding).and_return(value)
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
+      @subject.decode(value)
     end
 
     it "should decode an float value" do
@@ -146,15 +193,109 @@ describe MassiveRecord::ORM::Schema::Field do
     it "should decode a time type" do
       today = Time.now
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
-      @subject.decode(today.to_s).to_i.should == today.to_i
+      @subject.decode(@subject.coder.dump(today)).to_i.should == today.to_i
       @subject.decode("").should be_nil
       @subject.decode(nil).should be_nil
+    end
+
+    it "should decode time when value is ActiveSupport::TimeWithZone" do
+      today = Time.now.in_time_zone('Europe/Stockholm')
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+      @subject.decode(today).to_i.should == today.to_i
     end
 
     it "should set time to nil if date could not be parsed" do
       today = "foobar"
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
       @subject.decode(today).should be_nil
+    end
+
+    it "should deserialize array" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :array)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      @subject.decode(nil).should == nil
+      @subject.decode("").should == nil
+      @subject.decode("[]").should == []
+      @subject.decode([1, 2].to_json).should == [1, 2]
+    end
+
+    it "should deserialize hash" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :hash)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      @subject.decode(nil).should == nil
+      @subject.decode("").should == nil
+      @subject.decode("{}").should == {}
+      @subject.decode({:foo => 'bar'}.to_json).should == {'foo' => 'bar'}
+    end
+
+    it "should raise an argument if expecting array but getting something else" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :array)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      lambda { @subject.decode("false") }.should raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
+
+    it "should raise an argument if expecting hash but getting something else" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :hash)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      lambda { @subject.decode("[]") }.should raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
+
+    it "should not raise an argument if expecting hash getting nil" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :hash)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+      lambda { @subject.decode("null") }.should_not raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
+  end
+
+  describe "#encode" do
+    before do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status)
+      @subject.coder = MassiveRecord::ORM::Coders::JSON.new
+    end
+
+    it "should encode normal strings" do
+      @subject.type = :string
+      @subject.encode("fooo").should == "fooo"
+    end
+
+    it "should encode string if value is null" do
+      @subject.type = :string
+      @subject.encode("null").should == "null"
+    end
+
+    it "should encode string if value is nil" do
+      @subject.type = :string
+      @subject.encode(nil).should == nil
+    end
+
+    it "should encode fixnum to fixnum" do
+      @subject.type = :integer
+      @subject.encode(1).should == 1
+    end
+
+    (MassiveRecord::ORM::Schema::Field::TYPES - [:integer, :string]).each do |type|
+      it "should ask coder to dump value when type is #{type}" do
+        @subject.type = type
+        @subject.coder.should_receive(:dump)
+        @subject.encode("{}")
+      end
+    end
+
+    context "time_zone_aware_attributes" do
+      before do
+        @old_time_zone_aware_attributes = MassiveRecord::ORM::Base.time_zone_aware_attributes
+        MassiveRecord::ORM::Base.time_zone_aware_attributes = true
+      end
+
+      after do
+        MassiveRecord::ORM::Base.time_zone_aware_attributes = @old_time_zone_aware_attributes
+      end
+
+      it "should encode times in UTC" do
+        europe_time = Time.now.in_time_zone('Europe/Stockholm')
+        @subject = MassiveRecord::ORM::Schema::Field.new(:name => :created_at, :type => :time)
+        @subject.encode(europe_time).should == subject.coder.dump(europe_time.utc)
+      end
     end
   end
 
@@ -204,5 +345,73 @@ describe MassiveRecord::ORM::Schema::Field do
     default_array = []
     field = MassiveRecord::ORM::Schema::Field.new :name => "array", :type => :array, :default => default_array
     field.default.object_id.should_not == default_array.object_id
+  end
+
+
+  describe "default values" do
+    it "should be able to set to a proc" do
+      subject.type = :string
+      subject.default = Proc.new { "foo" }
+      subject.default.should == "foo"
+    end
+
+    context "when nil is allowed" do
+      MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.each do |type, default|
+        default = default.respond_to?(:call) ? default.call : default
+
+        it "should should default to nil" do
+          subject.type = type
+          subject.default.should == nil
+        end
+
+        it "should default to set value" do
+          subject.type = type
+          subject.default = default
+          subject.default.should == default
+        end
+      end
+    end
+
+
+    context "when nil is not allowed" do
+      subject { MassiveRecord::ORM::Schema::Field.new(:name => :test, :allow_nil => false) }
+
+      it { should_not be_allow_nil }
+
+      MassiveRecord::ORM::Schema::Field::TYPES_DEFAULTS_TO.reject { |type| type == :time }.each do |type, default|
+        default = default.respond_to?(:call) ? default.call : default
+
+        it "should default to #{default} when type is #{type}" do
+          subject.type = type
+          subject.default.should == default
+        end
+      end
+
+      it "should default to Time.now when type is time" do
+        subject.type = :time
+        time = Time.now
+        Time.should_receive(:now).and_return(time)
+        subject.default.should == time
+      end
+
+      it "should be possible to override the default nil-not-allowed-value" do
+        subject.type = :hash
+        subject.default = {:foo => :bar}
+        subject.default.should == {:foo => :bar}
+      end
+    end
+  end
+
+
+
+  describe "#hex_string_to_integer" do
+    subject { MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer) }
+
+    ((-2..2).to_a + [4611686018427387903]).each do |integer|
+      it "decodes signed integer '#{integer}' correctly" do
+        int_representation_in_hbase = [integer].pack('q').reverse
+        subject.send(:hex_string_to_integer, int_representation_in_hbase).should eq integer
+      end
+    end
   end
 end

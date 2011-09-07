@@ -52,7 +52,7 @@ describe "Person which is a table" do
   end
 
   it "should keep different column families per sub class" do
-    Person.column_families.collect(&:name).should == ["info"]
+    Person.column_families.collect(&:name).should include "info", "base"
     TestClass.column_families.collect(&:name).should == ["test_family"]
   end
   

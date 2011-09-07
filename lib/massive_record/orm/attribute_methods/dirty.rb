@@ -62,11 +62,11 @@ module MassiveRecord
         end
 
         def will_change_attribute?(attr_name, value)
-          read_attribute(attr_name) != value
+          read_attribute(attr_name) != decode_attribute(attr_name, value)
         end
 
         def will_change_back_to_original_value?(attr_name, value)
-          original_attribute_value(attr_name) == value
+          original_attribute_value(attr_name) == decode_attribute(attr_name, value)
         end
 
         def clear_dirty_states!

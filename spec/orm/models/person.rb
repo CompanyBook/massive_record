@@ -3,11 +3,18 @@ class Person < MassiveRecord::ORM::Table
     field :name
     field :email
     field :age, :integer
-    field :points, :integer, :default => 1, :column => :pts
+    field :carma, :float
     field :date_of_birth, :date
-    field :status, :boolean, :default => false
     field :addresses, :hash, :default => {}
+    field :type
   end
+
+  column_family :base do
+    field :points, :integer, :default => 1, :column => :pts
+    field :status, :boolean, :default => false
+    field :phone_numbers, :array, :allow_nil => false
+  end
+
 
   references_one :boss, :class_name => "PersonWithTimestamp", :store_in => :info
   references_many :test_classes, :store_in => :info

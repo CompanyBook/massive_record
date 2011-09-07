@@ -20,7 +20,7 @@ module MassiveRecord
         end
       
         def key
-          start_key.empty? ? offset_key : start_key
+          offset_key.empty? ? start_key : offset_key
         end
       
         def open
@@ -45,11 +45,7 @@ module MassiveRecord
       
         def populate_rows(results)
           results.collect do |result|
-            if offset_key.empty?
-              populate_row(result) unless result.row.match(/^#{start_key}/).nil?
-            else
-              populate_row(result)            
-            end
+            populate_row(result) unless result.row.match(/^#{start_key.gsub("|", "\\|")}/).nil?
           end.select{|r| !r.nil?}
         end
       

@@ -38,7 +38,7 @@ module MassiveRecord
     
         # = Parse columns / cells and create a Hash from them
         def values
-          @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.deserialize_value; h}
+          @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.value; h}
         end
 
         def values=(data)
@@ -58,33 +58,9 @@ module MassiveRecord
           column = "#{column_family_name}:#{column_name}"
       
           if @columns[column].nil?
-            @columns[column] =  MassiveRecord::Wrapper::Cell.new({ :value =>  MassiveRecord::Wrapper::Cell.serialize_value(value), :created_at => Time.now })
+            @columns[column] =  MassiveRecord::Wrapper::Cell.new({:value =>  value, :created_at => Time.now})
           else
-            @columns[column].serialize_value(value)
-          end
-        end
-    
-        # = Merge column values with new data : it implies that column values is a JSON encoded string
-        def merge_columns(data)
-          data.each do |column_family_name, columns|
-            columns.each do |column_name, values|
-              if values.is_a?(Hash)
-                unless @columns["#{column_family_name}:#{column_name}"].nil?
-                  column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value.merge(values)
-                else
-                  column_value = values
-                end            
-              elsif values.is_a?(Array)
-                unless @columns["#{column_family_name}:#{column_name}"].nil?
-                  column_value = @columns["#{column_family_name}:#{column_name}"].deserialize_value | values
-                else
-                  column_value = values
-                end            
-              else
-                column_value = values
-              end
-              update_column(column_family_name, column_name, column_value)
-            end
+            @columns[column].value = value
           end
         end
     
@@ -93,46 +69,30 @@ module MassiveRecord
           mutations = []
       
           @columns.each do |column_name, cell|
-            m        = Apache::Hadoop::Hbase::Thrift::Mutation.new
-            m.column = column_name
-            m.value  = cell.serialized_value
-        
-            mutations.push(m)
+            mutations << Apache::Hadoop::Hbase::Thrift::Mutation.new(:column => column_name).tap do |mutation|
+              if new_value = cell.value_to_thrift
+                mutation.value = new_value
+              else
+                mutation.isDelete = true
+              end
+            end
           end
 
-          @table.client.mutateRow(@table.name, id.to_s, mutations).nil?
+          @table.client.mutateRow(@table.name, id.to_s.dup.force_encoding(Encoding::BINARY), mutations).nil?
         end
 
 
-        #
-        # FIXME
-        # 
-        # The thrift wrapper is only working with strings as far as I can see,
-        # and the atomicIncrement call on strings kinda doesn't make sense on strings
-        #
-        # For now I'll implement this without atomicIncrement, to get the behaviour we want.
-        # Guess this in time will either be fixed or raised an not-supported-error. If the
-        # latter is the case I guess we'll need to shift over to a jruby adapter and use the
-        # java api instead of thrift.
-        #
+        
         def atomic_increment(column_name, by = 1)
-          # @table.client.atomicIncrement(@table.name, id.to_s, column_name, by) 
-          value_to_increment = @columns[column_name.to_s].value
+          @table.client.atomicIncrement(@table.name, id.to_s, column_name, by) 
+        end
 
-          raise "Value to increment (#{value_to_increment}) doesnt seem to be a number!" unless value_to_increment =~ /^\d+$/
-          raise "Argument by must be an integer" unless by.is_a? Fixnum
-
-          value_to_increment = value_to_increment.to_i
-          value_to_increment += by
-          value_to_increment = value_to_increment.to_s
-
-          mutation = Apache::Hadoop::Hbase::Thrift::Mutation.new
-          mutation.column = column_name
-          mutation.value = value_to_increment
-
-          if @table.client.mutateRow(@table.name, id.to_s, [mutation]).nil?
-            value_to_increment
-          end
+        def atomic_decrement(column_name, by = 1)
+          atomic_increment(column_name, -by)
+        end
+        
+        def read_atomic_integer_value(column_name)
+          atomic_increment(column_name, 0)
         end
     
         def self.populate_from_trow_result(result, connection, table_name, column_families = [])

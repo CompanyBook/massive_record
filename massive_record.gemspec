@@ -14,11 +14,12 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "massive_record"
 
 
-  s.add_dependency "thrift", ">= 0.5.0"
-  s.add_dependency "activesupport"
-  s.add_dependency "activemodel"
+  s.add_dependency "thrift", "= 0.6.0"
+  s.add_dependency "activesupport", "~> 3.0.7"
+  s.add_dependency "activemodel", "~> 3.0.7"
+  s.add_dependency "tzinfo"
 
-  s.add_development_dependency "rspec", ">= 2.1.0"
+  s.add_development_dependency "rspec"
 
 
   s.files         = `git ls-files`.split("\n")

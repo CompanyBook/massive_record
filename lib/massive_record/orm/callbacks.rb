@@ -44,7 +44,7 @@ module MassiveRecord
         _run_create_callbacks { super }
       end 
 
-      def update
+      def update(*)
         _run_update_callbacks { super }
       end
     end

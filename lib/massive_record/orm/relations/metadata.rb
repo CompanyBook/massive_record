@@ -1,6 +1,11 @@
+require 'active_support/core_ext/array/extract_options'
+
 module MassiveRecord
   module ORM
     module Relations
+      # Raised when an invalid start option is given to a find_in_batches
+      class InvalidStartsWithOption < MassiveRecordError
+      end
 
       #
       # The master of metadata related to a relation. For instance;
@@ -112,13 +117,34 @@ module MassiveRecord
           relation_type == 'references_many'
         end
 
-        
+        #
+        # Sets a method which we should ask for how to find where
+        # related records starts with. Method injects a find_with
+        # Proc which finds are made through.
+        #
+        # That proc takes different options as it sends on to the
+        # receiving finder method on target class. It also takes a
+        # block which is sent on to the finder method.
+        #
         def records_starts_from=(method)
           @records_starts_from = method
 
           if @records_starts_from
-            self.find_with = Proc.new do |proxy_owner, options = {}|
-              start = proxy_owner.send(records_starts_from) and proxy_target_class.all(options.merge({:start => start}))
+            self.find_with = Proc.new do |proxy_owner, options = {}, &block|
+              options = MassiveRecord::Adapters::Thrift::Table.warn_and_change_deprecated_finder_options(options)
+
+              finder_method = options.delete(:finder_method) || :all
+
+              if ids_starts_with = proxy_owner.send(records_starts_from)
+                if options[:starts_with]
+                  if options[:starts_with].starts_with?(ids_starts_with)
+                    ids_starts_with = options[:starts_with]
+                  else
+                    raise InvalidStartsWithOption.new("The starts with option: #{options[:starts_with]} must begin with: #{ids_starts_with}.")
+                  end
+                end
+                proxy_target_class.send(finder_method, options.merge({:starts_with => ids_starts_with}), &block)
+              end
             end
           else
             self.find_with = nil

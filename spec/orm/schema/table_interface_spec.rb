@@ -40,6 +40,20 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestInterface.known_attribute_names.should == ["name"]
   end
 
+  it "should return a list of known collum families" do
+    class TestInterface
+      column_family :info do
+        field :name
+      end
+    end
+
+    TestInterface.known_column_family_names.should == ["info"]
+  end
+
+  it "returns no known column family names if no one are defined" do
+    TestInterface.known_column_family_names.should == []
+  end
+
   it "should return attributes schema based on DSL" do
     class TestInterface
       column_family :info do

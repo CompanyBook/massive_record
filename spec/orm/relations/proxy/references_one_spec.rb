@@ -68,8 +68,14 @@ describe TestReferencesOneProxy do
       proxy_owner.boss_id.should be_nil
     end
 
-    it "should not set the proxy_target's ida as the foreign key if we are not persisting the foreign key" do
+    it "should not set the proxy_target's id as the foreign key if we are not persisting the foreign key" do
       proxy_owner.stub(:respond_to?).and_return(false)
+      proxy_owner.boss = proxy_target
+      proxy_owner.boss_id.should be_nil
+    end
+
+    it "should not set the proxy_target's id as the foreign key if the owner has been destroyed" do
+      proxy_owner.should_receive(:destroyed?).and_return true
       proxy_owner.boss = proxy_target
       proxy_owner.boss_id.should be_nil
     end
@@ -101,5 +107,12 @@ describe TestReferencesOneProxy do
     it "should not raise error if metadata's class corresponds to given proxy_target" do
       lambda { subject.send :raise_if_type_mismatch, person_with_timestamp }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
     end
+  end
+
+
+  it "resets when the proxy owner is asked to reload" do
+    subject.loaded!
+    proxy_owner.reload
+    should_not be_loaded
   end
 end

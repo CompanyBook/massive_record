@@ -24,8 +24,8 @@ module MassiveRecord
 
 
       module ClassMethods
-        def create!(attributes = {})
-          record = new(attributes)
+        def create!(*args)
+          record = new(*args)
           record.save!
           record
         end

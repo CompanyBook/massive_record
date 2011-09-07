@@ -3,19 +3,26 @@ module MassiveRecord
     module Relations
       class Proxy
         class ReferencesMany < Proxy
+
+          #
+          # Raised when we are in a references many relationship where the
+          # target's foreign keys are persisted in the owner and you try to
+          # do a person.cars.all(:limit => 1, :offset => "something") and
+          # some of these options are unsupported. The reason for these being
+          # unsupported is that we have to implement offset and limitiation
+          # in pure Ruby working on that car_ids array in the person. Its
+          # nothing close to impossible; it just has not been done yet.
+          #
+          class UnsupportedFinderOption < MassiveRecordError
+            OPTIONS = %w(limit offset starts_with)
+          end
+
           #
           # Loading proxy_targets will merge it with records found currently in proxy,
           # to make sure we don't remove any pushed proxy_targets only cause we load the
           # proxy_targets.
           #
-          # TODO  - Implement methods like:
-          #         * find_in_batches
-          #         * find_each
-          #         * etc :-)
-          #
-          #       - A counter cache is also nice.
-          #
-          def load_proxy_target
+          def load_proxy_target(options = {})
             proxy_target_before_load = proxy_target
             proxy_target_after_load = super
 
@@ -145,6 +152,60 @@ module MassiveRecord
             record
           end
 
+          def all(options = {})
+            options = MassiveRecord::Adapters::Thrift::Table.warn_and_change_deprecated_finder_options(options)
+
+            load_proxy_target(options)
+          end
+
+          #
+          # Find records in batches, yields batch into your block
+          #
+          # Options:
+          #   <tt>:batch_size</tt>    The number of records you want per batch. Defaults to 1000
+          #   <tt>:starts_with</tt>         The ids starts with this
+          #
+          def find_in_batches(options = {}, &block)
+            options = MassiveRecord::Adapters::Thrift::Table.warn_and_change_deprecated_finder_options(options)
+
+            options[:batch_size] ||= 1000
+
+            if loaded?
+              collection =  if options[:starts_with]
+                              proxy_target.select { |r| r.id.starts_with? options[:starts_with] }
+                            else
+                              proxy_target
+                            end
+              collection.in_groups_of(options[:batch_size], false, &block)
+            elsif find_with_proc?
+              find_proxy_target_with_proc(options.merge(:finder_method => :find_in_batches), &block)
+            else
+              all_ids = proxy_owner.send(metadata.foreign_key)
+              all_ids = all_ids.select { |id| id.starts_with? options[:starts_with] } if options[:starts_with]
+              all_ids.in_groups_of(options[:batch_size]).each do |ids_in_batch|
+                yield Array(find_proxy_target(:ids => ids_in_batch))
+              end
+            end
+          end
+
+          #
+          # Fetches records in batches of 1000 (by default), iterates over each batch
+          # and yields one and one record in to given block. See find_in_batches for
+          # options.
+          #
+          def find_each(options = {})
+            find_in_batches(options) do |batch|
+              batch.each { |record| yield record }
+            end
+          end
+
+          #
+          # Returns a limited result set of target records.
+          #
+          # TODO  If we know all our foreign keys (basically we also know our length)
+          #       we can then mark our self as loaded if limit is equal to or greater
+          #       than foreign keys length.
+          #
           def limit(limit)
             if loaded?
               proxy_target.slice(0, limit)
@@ -153,7 +214,7 @@ module MassiveRecord
             else
               ids = proxy_owner.send(metadata.foreign_key).slice(0, limit)
               ids = ids.first if ids.length == 1
-              [find_proxy_target(ids)].flatten
+              Array(find_proxy_target(:ids => ids))
             end
           end
 
@@ -176,13 +237,24 @@ module MassiveRecord
 
 
 
-          def find_proxy_target(ids = nil)
-            ids = proxy_owner.send(metadata.foreign_key) if ids.nil?
+          def find_proxy_target(options = {})
+            ids = options.delete(:ids) || proxy_owner.send(metadata.foreign_key)
+            unsupported_finder_options = UnsupportedFinderOption::OPTIONS & options.keys.collect(&:to_s)
+
+            if unsupported_finder_options.any?
+              raise UnsupportedFinderOption.new(
+                <<-TXT
+                  Sorry, option(s): #{unsupported_finder_options.join(', ')} are not supported when foreign
+                  keys are persisted in proxy owner #{proxy_owner.class}
+                TXT
+              )
+            end
+
             proxy_target_class.find(ids, :skip_expected_result_check => true)
           end
 
-          def find_proxy_target_with_proc(options = {})
-            [super].compact.flatten
+          def find_proxy_target_with_proc(options = {}, &block)
+            Array(super).compact
           end
 
           def can_find_proxy_target?
@@ -194,7 +266,7 @@ module MassiveRecord
 
 
           def add_foreign_key_in_proxy_owner(id)
-            if proxy_owner.respond_to? metadata.foreign_key
+            if update_foreign_key_fields_in_proxy_owner? && proxy_owner.respond_to?(metadata.foreign_key)
               proxy_owner.send(metadata.foreign_key) << id
               notify_of_change_in_proxy_owner_foreign_key
             end

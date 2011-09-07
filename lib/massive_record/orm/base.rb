@@ -4,21 +4,32 @@ require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/subclasses'
 require 'active_support/core_ext/module'
 require 'active_support/core_ext/string'
+require 'active_support/core_ext/array'
 require 'active_support/memoizable'
 
 require 'massive_record/orm/schema'
+require 'massive_record/orm/coders'
 require 'massive_record/orm/errors'
 require 'massive_record/orm/config'
 require 'massive_record/orm/relations'
 require 'massive_record/orm/finders'
+require 'massive_record/orm/finders/scope'
+require 'massive_record/orm/finders/rescue_missing_table_on_find'
 require 'massive_record/orm/attribute_methods'
+require 'massive_record/orm/attribute_methods/time_zone_conversion'
 require 'massive_record/orm/attribute_methods/write'
+require 'massive_record/orm/attribute_methods/cast_numbers_on_write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
+require 'massive_record/orm/single_table_inheritance'
 require 'massive_record/orm/validations'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
+require 'massive_record/orm/default_id'
+require 'massive_record/orm/query_instrumentation'
+require 'massive_record/orm/observer'
+require 'massive_record/orm/identity_map'
 
 
 module MassiveRecord
@@ -26,8 +37,24 @@ module MassiveRecord
     class Base
       include ActiveModel::Conversion
       
+      class_attribute :coder, :instance_writer => false
+      self.coder = Coders::JSON.new
+
       # Accepts a logger conforming to the interface of Log4r or the default Ruby 1.8+ Logger class,
       cattr_accessor :logger, :instance_writer => false
+
+
+      #
+      # Integers are now persisted as a hax representation in hbase, not as
+      # a string any more. This makes for instance atomic_increment!(:int_attr) work
+      # as expected.
+      #
+      # The problem is that if you have old data in your database, you need to handle
+      # this. Every new integer will still be written as hex though.
+      #
+      cattr_accessor :backward_compatibility_integers_might_be_persisted_as_strings, :instance_writer => false
+      self.backward_compatibility_integers_might_be_persisted_as_strings = false
+
 
       # Add a prefix or a suffix to the table name
       # example:
@@ -41,10 +68,26 @@ module MassiveRecord
       
       class_attribute :table_name_suffix, :instance_writer => false
       self.table_name_suffix = ""
+
+      #
+      # Will do a simple exists?(id) check before create as a simple (and
+      # kinda insecure) sanity check on if that ID exists or not. If it do
+      # exists a RecordNotUnique will be raised. This is done from the ORM
+      # layer, so obviously there is a speed cost on create.
+      #
+      class_attribute :check_record_uniqueness_on_create, :instance_writer => false
+      self.check_record_uniqueness_on_create = false
+
+      class_attribute :auto_increment_id, :instance_writer => false
+      self.auto_increment_id = true
      
       class << self
         def table_name
-          @table_name ||= table_name_prefix + (table_name_overriden.blank? ? self.to_s.demodulize.underscore.pluralize : table_name_overriden) + table_name_suffix
+          @table_name ||= table_name_prefix + table_name_without_pre_and_suffix + table_name_suffix
+        end
+
+        def table_name_without_pre_and_suffix
+          (table_name_overriden.blank? ? base_class.to_s.demodulize.underscore.pluralize : table_name_overriden)
         end
 
         def table_name=(name)
@@ -56,6 +99,36 @@ module MassiveRecord
           @table_name = self.table_name_overriden = nil
           self.table_name_prefix = self.table_name_suffix = ""
         end
+
+        def base_class
+          class_of_descendant(self)
+        end
+
+
+        def inheritance_attribute
+          @inheritance_attribute ||= "type"
+        end
+
+        def set_inheritance_attribute(value = nil, &block)
+          define_attr_method :inheritance_attribute, value, &block
+        end
+        alias :inheritance_attribute= :set_inheritance_attribute
+
+
+        def ===(other)
+          other.is_a? self
+        end
+
+        
+        private
+        
+        def class_of_descendant(klass)
+          if klass.superclass.superclass == Base
+            klass
+          else
+            class_of_descendant(klass.superclass)
+          end
+        end
       end
 
       #
@@ -64,14 +137,23 @@ module MassiveRecord
       # and assign to instance variables. How read- and write 
       # methods are defined might change over time when the DSL
       # for describing column families and fields are in place
+      # You can call initialize in multiple ways:
+      #   ORMClass.new(attr_one: value, attr_two: value)
+      #   ORMClass.new("the-id-of-the-new-record")
+      #   ORMClass.new("the-id-of-the-new-record", attr_one: value, attr_two: value)
       #
-      def initialize(attributes = {})
+      def initialize(*args)
+        attributes = args.extract_options!
+        id = args.first
+
         @new_record = true
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
 
-        self.attributes_raw = attributes_from_field_definition.merge(attributes)
+        self.attributes_raw = attributes_from_field_definition.merge('id' => id)
         self.attributes = attributes
+
+        clear_dirty_states!
 
         _run_initialize_callbacks
       end
@@ -84,6 +166,9 @@ module MassiveRecord
       # trust the coder's attributes and not load it with default values.
       #
       #   class Person < MassiveRecord::ORM::Table
+      #     column_family :base do
+      #       field :name
+      #     end
       #   end
       #
       #   person = Person.allocate
@@ -95,9 +180,12 @@ module MassiveRecord
         @relation_proxy_cache = {}
 
         self.attributes_raw = coder['attributes']
+        fill_attributes_with_default_values_where_nil_is_not_allowed
 
         _run_find_callbacks
         _run_initialize_callbacks
+
+        self
       end
 
 
@@ -106,6 +194,9 @@ module MassiveRecord
       end
       alias_method :eql?, :==
 
+      def hash
+        id.hash
+      end
 
       def freeze
         @attributes.freeze
@@ -133,6 +224,11 @@ module MassiveRecord
         read_attribute(:id)
       end
 
+      def id=(id)
+        id = id.to_s unless id.blank?
+        write_attribute(:id, id)
+      end
+
 
 
       def readonly?
@@ -143,6 +239,13 @@ module MassiveRecord
         @readonly = true
       end
 
+
+      def clone
+        object = self.class.new
+        object.init_with('attributes' => attributes.select{|k| !['id', 'created_at', 'updated_at'].include?(k)})
+        object
+      end
+      
 
       private
 
@@ -178,16 +281,22 @@ module MassiveRecord
 
     Base.class_eval do
       include Config
-      include Relations::Interface
       include Persistence
+      include Relations::Interface
       include Finders
-      include ActiveModel::Translation
+      include IdentityMap
+      extend  RescueMissingTableOnFind
       include AttributeMethods
       include AttributeMethods::Write, AttributeMethods::Read
+      include AttributeMethods::TimeZoneConversion
       include AttributeMethods::Dirty
+      include AttributeMethods::CastNumbersOnWrite
       include Validations
-      include Callbacks
+      include Callbacks, ActiveModel::Observing
       include Timestamps
+      include SingleTableInheritance
+      include DefaultId
+      include QueryInstrumentation
 
 
       alias [] read_attribute
@@ -196,10 +305,9 @@ module MassiveRecord
   end
 end
 
-
-
-
-
 require 'massive_record/orm/table'
 require 'massive_record/orm/column'
 require 'massive_record/orm/id_factory'
+require 'massive_record/orm/log_subscriber'
+
+ActiveSupport.run_load_hooks(:massive_record, MassiveRecord::ORM::Base)

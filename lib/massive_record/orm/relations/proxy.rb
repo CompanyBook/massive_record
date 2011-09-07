@@ -46,8 +46,8 @@ module MassiveRecord
         # Returns the proxy_target. Loads it, if it's not there.
         # Returns nil if for some reason proxy_target could not be found.
         #
-        def load_proxy_target
-          self.proxy_target = find_proxy_target_or_find_with_proc if find_proxy_target?
+        def load_proxy_target(options = {})
+          self.proxy_target = find_proxy_target_or_find_with_proc(options) if find_proxy_target?
           proxy_target
         rescue RecordNotFound
           reset
@@ -113,8 +113,8 @@ module MassiveRecord
 
         protected
 
-        def find_proxy_target_or_find_with_proc
-          find_with_proc? ? find_proxy_target_with_proc : find_proxy_target
+        def find_proxy_target_or_find_with_proc(options = {})
+          find_with_proc? ? find_proxy_target_with_proc(options) : find_proxy_target(options)
         end
 
         #
@@ -123,7 +123,7 @@ module MassiveRecord
         # data contains a find_with proc; in that case find_proxy_target_with_proc
         # is used instead
         #
-        def find_proxy_target
+        def find_proxy_target(options = {})
         end
         
         #
@@ -132,8 +132,8 @@ module MassiveRecord
         # references_many proxy ensures that the result of proc
         # is put inside of an array.
         #
-        def find_proxy_target_with_proc(options = {})
-          metadata.find_with.call(proxy_owner, options)
+        def find_proxy_target_with_proc(options = {}, &block)
+          metadata.find_with.call(proxy_owner, options, &block)
         end
 
         #
@@ -149,6 +149,10 @@ module MassiveRecord
         #
         def can_find_proxy_target?
           find_with_proc?
+        end
+
+        def update_foreign_key_fields_in_proxy_owner?
+          !proxy_owner.destroyed?
         end
 
         #
