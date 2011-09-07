@@ -6,13 +6,13 @@ module MassiveRecord
 
         def write_attribute(attr_name, value)
           if value.present?
-            field = attributes_schema[attr_name]
-
-            case field.type
-            when :integer
-              value = value.to_i
-            when :float
-              value = value.to_f
+            if field = attributes_schema[attr_name]
+              case field.type
+              when :integer
+                value = value.to_i
+              when :float
+                value = value.to_f
+              end
             end
           end
 
