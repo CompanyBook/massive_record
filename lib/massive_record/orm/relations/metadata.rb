@@ -4,7 +4,7 @@ module MassiveRecord
   module ORM
     module Relations
       # Raised when an invalid start option is given to a find_in_batches
-      class InvalidStartOption < MassiveRecordError
+      class InvalidStartsWithOption < MassiveRecordError
       end
 
       #
@@ -140,7 +140,7 @@ module MassiveRecord
                   if options[:starts_with].starts_with?(ids_starts_with)
                     ids_starts_with = options[:starts_with]
                   else
-                    raise InvalidStartOption.new("The start option: #{options[:starts_with]} must begin with: #{ids_starts_with}.")
+                    raise InvalidStartsWithOption.new("The starts with option: #{options[:starts_with]} must begin with: #{ids_starts_with}.")
                   end
                 end
                 proxy_target_class.send(finder_method, options.merge({:starts_with => ids_starts_with}), &block)

@@ -236,7 +236,7 @@ describe TestReferencesManyProxy do
         it "raises an error if your start option starst with some incorrect value" do
           expect {
             subject.find_in_batches(:starts_with => 'incorrect_value') { |b| }
-          }.to raise_error MassiveRecord::ORM::Relations::InvalidStartOption
+          }.to raise_error MassiveRecord::ORM::Relations::InvalidStartsWithOption
         end
       end
     end
