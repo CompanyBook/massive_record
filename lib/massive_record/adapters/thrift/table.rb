@@ -152,16 +152,19 @@ module MassiveRecord
         # Returns nil if id is not found
         #
         def find(*args)
-          what_to_find = args.first
           options = args.extract_options!.symbolize_keys
+          what_to_find = args.first
 
-          if what_to_find.is_a?(Array)
-            what_to_find.collect { |id| find(id, options) }
-          else
-            if column_families_to_find = options[:select]
-              column_families_to_find = column_families_to_find.collect { |c| c.to_s }
+          if column_families_to_find = options[:select]
+            column_families_to_find = column_families_to_find.collect { |c| c.to_s }
+          end
+
+          if what_to_find.is_a? Array
+            what_to_find.collect! { |id| id.dup.force_encoding(Encoding::BINARY) }
+            connection.getRowsWithColumns(name, what_to_find, column_families_to_find).collect do |t_row_result|
+              Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
-
+          else
             if t_row_result = connection.getRowWithColumns(name, what_to_find.dup.force_encoding(Encoding::BINARY), column_families_to_find).first
               Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
