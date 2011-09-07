@@ -1,5 +1,6 @@
 # v0.2.2 (git develop)
 
+- Fetching multiple ids via Thrift is 4x faster.
 - Assigning integers or float values as strings is now ran through to_i or to_f in the writer method.
 - A references_many proxy now supports all(options). I would like to give better support for scopes on relations as well,
   as you right now cannot do a_person.cars.limit(2).offset("id-to-start-at"). The limit(2) will actually return the two first records.
