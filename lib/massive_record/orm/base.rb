@@ -18,6 +18,7 @@ require 'massive_record/orm/finders/rescue_missing_table_on_find'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/time_zone_conversion'
 require 'massive_record/orm/attribute_methods/write'
+require 'massive_record/orm/attribute_methods/cast_numbers_on_write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
 require 'massive_record/orm/single_table_inheritance'
@@ -289,6 +290,7 @@ module MassiveRecord
       include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::TimeZoneConversion
       include AttributeMethods::Dirty
+      include AttributeMethods::CastNumbersOnWrite
       include Validations
       include Callbacks, ActiveModel::Observing
       include Timestamps

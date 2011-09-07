@@ -20,6 +20,51 @@ describe "attribute methods" do
     @model.name.should == "baaaaar"
   end
 
+
+  it "converts correcly written floats as string to float on write" do
+    @model.write_attribute(:carma, "1.5")
+    @model.carma.should eq 1.5
+  end
+
+  it "converts baldy written floats as string to float on write" do
+    @model.write_attribute(:carma, "1.5f")
+    @model.carma.should eq 1.5
+  end
+
+  it "keeps nil when assigned to float" do
+    @model.write_attribute(:carma, nil)
+    @model.carma.should eq nil
+  end
+
+  it "keeps empty string when assigned to float" do
+    @model.write_attribute(:carma, "")
+    @model.carma.should eq nil
+  end
+
+  it "converts correcly written integers as string to integer on write" do
+    @model.write_attribute(:points, "1")
+    @model.points.should eq 1
+  end
+
+  it "converts baldy written integers as string to integer on write" do
+    @model.write_attribute(:points, "1f")
+    @model.points.should eq 1
+  end
+
+  it "keeps nil when assigned to integer" do
+    @model.write_attribute(:points, nil)
+    @model.points.should eq nil
+  end
+
+  it "keeps empty string when assigned to integer" do
+    @model.write_attribute(:points, "")
+    @model.points.should eq nil
+  end
+
+
+
+
+
   it "should be possible to read attributes" do
     @model.read_attribute(:name).should == "John"
   end

@@ -3,6 +3,7 @@ class Person < MassiveRecord::ORM::Table
     field :name
     field :email
     field :age, :integer
+    field :carma, :float
     field :date_of_birth, :date
     field :addresses, :hash, :default => {}
     field :type
