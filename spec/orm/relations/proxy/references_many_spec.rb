@@ -748,6 +748,27 @@ describe TestReferencesManyProxy do
         subject.all.should_not include proxy_target_3
       end
 
+      it "accepts to limit the result" do
+        subject.all(:limit => 1).should include proxy_target
+        subject.all.should_not include proxy_target_3, proxy_target_2
+      end
+
+      it "accepts to offset the result" do
+        subject.all(:offset => proxy_owner.id+"-friend-2").should include proxy_target_2
+        subject.all.should_not include proxy_target_3, proxy_target
+      end
+
+      it "accepts to modify the starts_with" do
+        subject.all(:starts_with => proxy_owner.id+"-friend-1").should include proxy_target
+        subject.all.should_not include proxy_target_3, proxy_target_2
+      end
+
+      it "raises an error on invalid starts_with option" do
+        expect {
+          subject.all(:starts_with => "foobar")
+        }.to raise_error MassiveRecord::ORM::Relations::InvalidStartsWithOption
+      end
+
       it "accepts option offset" do
         records = subject.all(:offset => proxy_owner.id+"-friend-2")
         records.should_not include proxy_target, proxy_target_3
