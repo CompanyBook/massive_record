@@ -20,7 +20,7 @@ module MassiveRecord
 
           private
 
-          def find_proxy_target
+          def find_proxy_target(options = {})
             proxy_target_class.find(proxy_owner.send(metadata.foreign_key))
           end
 

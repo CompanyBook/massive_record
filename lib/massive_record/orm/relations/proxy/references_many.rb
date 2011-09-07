@@ -8,7 +8,7 @@ module MassiveRecord
           # to make sure we don't remove any pushed proxy_targets only cause we load the
           # proxy_targets.
           #
-          def load_proxy_target
+          def load_proxy_target(options = {})
             proxy_target_before_load = proxy_target
             proxy_target_after_load = super
 
@@ -138,6 +138,12 @@ module MassiveRecord
             record
           end
 
+          def all(options = {})
+            options = MassiveRecord::Adapters::Thrift::Table.warn_and_change_deprecated_finder_options(options)
+
+            load_proxy_target(options)
+          end
+
           #
           # Find records in batches, yields batch into your block
           #
@@ -163,7 +169,7 @@ module MassiveRecord
               all_ids = proxy_owner.send(metadata.foreign_key)
               all_ids = all_ids.select { |id| id.starts_with? options[:starts_with] } if options[:starts_with]
               all_ids.in_groups_of(options[:batch_size]).each do |ids_in_batch|
-                yield Array(find_proxy_target(ids_in_batch))
+                yield Array(find_proxy_target(:ids => ids_in_batch))
               end
             end
           end
@@ -194,7 +200,7 @@ module MassiveRecord
             else
               ids = proxy_owner.send(metadata.foreign_key).slice(0, limit)
               ids = ids.first if ids.length == 1
-              Array(find_proxy_target(ids))
+              Array(find_proxy_target(:ids => ids))
             end
           end
 
@@ -217,8 +223,8 @@ module MassiveRecord
 
 
 
-          def find_proxy_target(ids = nil)
-            ids = proxy_owner.send(metadata.foreign_key) if ids.nil?
+          def find_proxy_target(options = {})
+            ids = options.delete(:ids) || proxy_owner.send(metadata.foreign_key)
             proxy_target_class.find(ids, :skip_expected_result_check => true)
           end
 

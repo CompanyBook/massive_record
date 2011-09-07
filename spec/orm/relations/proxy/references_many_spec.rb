@@ -695,6 +695,65 @@ describe TestReferencesManyProxy do
     end
   end
 
+  describe "#all" do
+    let(:not_among_targets) { proxy_target_3 }
+
+    describe "stored foreign keys" do
+      before do
+        proxy_owner.save!
+        subject << proxy_target << proxy_target_2
+        subject.reset
+
+        not_among_targets.save!
+      end
+
+      it "returns all the targets" do
+        subject.all.should include proxy_target, proxy_target_2
+        subject.all.should_not include proxy_target_3
+      end
+
+      it "does not hit database if targets has been loaded" do
+        subject.load_proxy_target
+        subject.proxy_target_class.should_not_receive :find
+        subject.all
+      end
+    end
+
+    describe "with records starts from (proc)" do
+      let(:proxy_target) { Person.new proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+      let(:proxy_target_2) { Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+      let(:not_among_targets) { Person.new "NOT-friend-1", :name => "H", :age => 9 }
+      let(:metadata) { subject.metadata }
+
+      subject { proxy_owner.send(:relation_proxy, 'friends') }
+
+      before do
+        proxy_owner.save!
+        subject << proxy_target << proxy_target_2
+        subject.reset
+
+        not_among_targets.save!
+      end
+
+      it "returns all the targets" do
+        subject.all.should include proxy_target, proxy_target_2
+        subject.all.should_not include proxy_target_3
+      end
+
+      it "accepts option offset" do
+        records = subject.all(:offset => proxy_owner.id+"-friend-2")
+        records.should_not include proxy_target, proxy_target_3
+        records.should include proxy_target_2
+      end
+
+      it "does not hit database if targets has been loaded" do
+        subject.load_proxy_target
+        Person.should_not_receive(:do_find)
+        subject.all
+      end
+    end
+  end
+
 
 
   describe "#limit" do

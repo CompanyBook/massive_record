@@ -1,5 +1,7 @@
 # v0.2.2 (git develop)
 
+- A references_many proxy now supports all(options). I would like to give better support for scopes on relations as well,
+  as you right now cannot do a_person.cars.limit(2).offset("id-to-start-at"). The limit(2) will actually return the two first records.
 - Scope methods like Person.limit(2).offset("some-id") now returns a cloned version of the previous one. This
   keeps state of one scope apart from the other and fixes obvious problems which can arise if building and using scopes.
 - Added starts_with and offset to the scope, so now you can do:
