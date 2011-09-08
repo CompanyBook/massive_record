@@ -184,12 +184,16 @@ describe MassiveRecord::ORM::Schema::TableInterface do
           autoload_fields
         end
 
+        column_family :integers_only do
+          autoload_fields :type => :integer
+        end
+
         column_family :misc do
           field :text
         end
       end
 
-      @column_names = %w(info:name misc:other)
+      @column_names = %w(info:name misc:other integers_only:number)
     end
 
     it "should not add fields to misc" do
@@ -200,6 +204,13 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     it "should add fields to info" do
       TestInterface.column_families.family_by_name("info").should_receive(:add?)
       TestInterface.autoload_column_families_and_fields_with(@column_names)
+    end
+
+    it "creates fields with same options as you give to autoload fields" do
+      TestInterface.autoload_column_families_and_fields_with(@column_names)
+      family = TestInterface.column_families.family_by_name("integers_only")
+      autoloaded_field = family.field_by_name(:number)
+      autoloaded_field.type.should eq :integer
     end
 
     it "should be possible to run twice" do

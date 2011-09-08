@@ -1,5 +1,7 @@
 # v0.2.2 (git develop)
 
+- You can now give options when auto loading fields. For instance if all your fields are
+  expected to be integers you can do column_family(:something) { autoload_fields :type => :integer }.
 - Context of validations are now set to :create or :update automatically, so that
   validates :something, :validator => true, :on => :update works.
 - Fetching multiple ids via Thrift is 4x faster.
