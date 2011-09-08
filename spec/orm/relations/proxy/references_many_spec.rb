@@ -297,7 +297,7 @@ describe TestReferencesManyProxy do
         end
 
         it "should not update array of foreign keys in proxy_owner if it does not respond to it" do
-          proxy_owner.should_receive(:respond_to?).twice.and_return(false)
+          proxy_owner.should_receive(:respond_to?).and_return(false)
           subject.send(add_method, proxy_target)
           proxy_owner.test_class_ids.should_not include(proxy_target.id)
         end
@@ -608,15 +608,35 @@ describe TestReferencesManyProxy do
     end
   end
 
+  #describe "#any?" do
+    #it "checks the length and return true if it is greater than 0" do
+      #pending
+      #subject.should_receive(:length).and_return 1
+      #subject.any?.should be_true
+    #end
+
+    #it "checks the length and return false if it is 0" do
+      #pending
+      #subject.should_receive(:length).and_return 0
+      #subject.any?.should be_false
+    #end
+  #end
 
   describe "#include?" do
-    it "uses find as it's query method" do
+    it "uses find as it's query method when loaded" do
+      subject.should_receive(:loaded?).and_return true
+      subject.should_receive(:find).with(proxy_target.id).and_return true
+      subject.should include proxy_target
+    end
+
+    it "uses find as it's query method when find with proc" do
+      subject.should_receive(:find_with_proc?).and_return true
       subject.should_receive(:find).with(proxy_target.id).and_return true
       subject.should include proxy_target
     end
 
     it "can answer to ids as well" do
-      subject.should_receive(:find).with(proxy_target.id).and_return true
+      subject.should_receive(:foreign_key_in_proxy_owner_exists?).with(proxy_target.id).and_return true
       subject.should include proxy_target.id
     end
 
