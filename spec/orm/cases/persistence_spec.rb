@@ -168,7 +168,7 @@ describe "persistence" do
 
       it "should delegate save to update if its a persisted record" do
         person = Person.new '14', :name => "Bob", :age => 33
-        person.should_receive(:new_record?).and_return(false)
+        person.should_receive(:new_record?).any_number_of_times.and_return(false)
         person.should_receive(:update)
         person.save
       end

@@ -1,5 +1,7 @@
 # v0.2.2 (git develop)
 
+- Context of validations are now set to :create or :update automatically, so that
+  validates :something, :validator => true, :on => :update works.
 - Fetching multiple ids via Thrift is 4x faster.
 - Assigning integers or float values as strings is now ran through to_i or to_f in the writer method.
 - A references_many proxy now supports all(options). I would like to give better support for scopes on relations as well,
