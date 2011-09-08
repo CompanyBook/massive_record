@@ -522,6 +522,89 @@ describe TestReferencesManyProxy do
           end
         end
       end
+
+      context "foreign keys persisted in owner" do
+        before do
+          proxy_owner.save!
+          subject << proxy_target << proxy_target_2
+        end
+
+        context "targets not loaded" do
+          before { subject.reset }
+
+          it "loads nothing" do
+            TestClass.should_not_receive(:find)
+            subject.length
+          end
+
+          it "reads length from proxy owner's foreign keys list" do
+            proxy_owner.should_receive(:test_class_ids).and_return([proxy_target.id, proxy_target_2.id])
+            subject.length
+          end
+
+          it "returns correct length" do
+            subject.length.should eq 2
+          end
+        end
+
+        context "targets loaded" do
+          before { subject.reload }
+
+          it "loads nothing" do
+            TestClass.should_not_receive(:find)
+            subject.length
+          end
+
+          it "reads length from proxy_target" do
+            subject.should_receive(:proxy_target).and_return([proxy_target, proxy_target_2])
+            subject.length
+          end
+
+          it "returns correct length" do
+            subject.length.should eq 2
+          end
+        end
+      end
+
+      context "when we are using a starts_with to find related records" do
+        let(:proxy_target) { Person.new proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+        let(:proxy_target_2) { Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+        let(:not_proxy_target) { Person.new "foo"+"-friend-2", :name => "H", :age => 1 }
+        let(:metadata) { subject.metadata }
+
+        subject { proxy_owner.send(:relation_proxy, 'friends') }
+
+        before do
+          proxy_owner.save!
+          subject << proxy_target << proxy_target_2
+        end
+
+        context "targets not loaded" do
+          before { subject.reset }
+
+          it "loads all the targets and returns it's length" do
+            subject.should_receive(:load_proxy_target).and_return [proxy_target, proxy_target_2] 
+            subject.length
+          end
+
+          it "returns correct length" do
+            subject.length.should eq 2
+          end
+        end
+
+        context "targets loaded" do
+          before { subject.reload }
+
+          it "loads nothing" do
+            subject.should_not_receive(:load_proxy_target)
+            subject.length
+          end
+
+          it "returns correct length" do
+            subject.length.should eq 2
+          end
+        end
+      end
     end
   end
 

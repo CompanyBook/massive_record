@@ -123,7 +123,13 @@ module MassiveRecord
           #       can simply do a owner's foreign keys and ask for it's length.
           #
           def length
-            load_proxy_target.length
+            if loaded?
+              proxy_target.length
+            elsif find_with_proc?
+              load_proxy_target.length
+            else
+              foreign_keys_in_proxy_owner.length
+            end
           end
           alias_method :count, :length
           alias_method :size, :length
@@ -280,7 +286,11 @@ module MassiveRecord
           end
 
           def foreign_key_in_proxy_owner_exists?(id)
-            proxy_owner.send(metadata.foreign_key).include? id
+            foreign_keys_in_proxy_owner.include? id
+          end
+
+          def foreign_keys_in_proxy_owner
+            proxy_owner.send(metadata.foreign_key)
           end
 
           def notify_of_change_in_proxy_owner_foreign_key
