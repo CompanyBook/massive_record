@@ -608,7 +608,18 @@ describe TestReferencesManyProxy do
     end
   end
 
-  describe "#include" do
+
+  describe "#include?" do
+    it "uses find as it's query method" do
+      subject.should_receive(:find).with(proxy_target.id).and_return true
+      subject.should include proxy_target
+    end
+
+    it "can answer to ids as well" do
+      subject.should_receive(:find).with(proxy_target.id).and_return true
+      subject.should include proxy_target.id
+    end
+
     [true, false].each do |should_persist_proxy_owner|
       describe "with proxy_owner " + (should_persist_proxy_owner ? "persisted" : "not persisted") do
         before do

@@ -107,20 +107,15 @@ module MassiveRecord
           #
           # Checks if record is included in collection
           #
-          # TODO  This needs a bit of work, depending on if proxy's proxy_target
-          #       has been loaded or not. For now, we are just checking
-          #       what we currently have in @proxy_target
-          #
-          def include?(record)
-            load_proxy_target.include? record
+          def include?(record_or_id)
+            id = record_or_id.respond_to?(:id) ? record_or_id.id : record_or_id
+            !!find(id)
+          rescue RecordNotFound
+            false
           end
 
           #
           # Returns the length of targes
-          #
-          # TODO  This can be smarter as well. For instance; if we have not
-          #       loaded targets, and we have foreign keys in the owner we
-          #       can simply do a owner's foreign keys and ask for it's length.
           #
           def length
             if loaded?
