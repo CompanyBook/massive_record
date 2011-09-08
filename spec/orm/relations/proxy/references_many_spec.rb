@@ -608,19 +608,33 @@ describe TestReferencesManyProxy do
     end
   end
 
-  #describe "#any?" do
-    #it "checks the length and return true if it is greater than 0" do
-      #pending
-      #subject.should_receive(:length).and_return 1
-      #subject.any?.should be_true
-    #end
+  describe "#any?" do
+    before { subject.reset }
 
-    #it "checks the length and return false if it is 0" do
-      #pending
-      #subject.should_receive(:length).and_return 0
-      #subject.any?.should be_false
-    #end
-  #end
+    it "checks the length and return true if it is greater than 0" do
+      subject.should_receive(:length).and_return 1
+      subject.any?.should be_true
+    end
+
+    it "checks the length and return false if it is 0" do
+      subject.should_receive(:length).and_return 0
+      subject.any?.should be_false
+    end
+  end
+
+  describe "#present?" do
+    before { subject.reset }
+
+    it "checks the length and return true if it is greater than 0" do
+      subject.should_receive(:length).and_return 1
+      subject.present?.should be_true
+    end
+
+    it "checks the length and return false if it is 0" do
+      subject.should_receive(:length).and_return 0
+      subject.present?.should be_false
+    end
+  end
 
   describe "#include?" do
     it "uses find as it's query method when loaded" do

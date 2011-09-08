@@ -138,6 +138,12 @@ module MassiveRecord
             length == 0
           end
 
+          def any?
+            !empty?
+          end
+          alias_method :present?, :any?
+
+
           def first
             limit(1).first
           end
