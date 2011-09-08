@@ -220,6 +220,9 @@ module MassiveRecord
           end
 
 
+          def is_a?(klass)
+            klass == Array
+          end
 
           private
 
