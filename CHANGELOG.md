@@ -1,5 +1,8 @@
 # v0.2.2 (git develop)
 
+- Optimization on references many proxy. It is now a bit smarter when you do any of:
+  length, include?, present? and any?. Previously it loaded all the targets to figure
+  out the length and if it included a record. Now it does these more efficient based on the proxy state.
 - You can now give options when auto loading fields. For instance if all your fields are
   expected to be integers you can do column_family(:something) { autoload_fields :type => :integer }.
 - Context of validations are now set to :create or :update automatically, so that
