@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe MassiveRecord::ORM::Schema::ColumnFamily do
+
+  let(:families) { MassiveRecord::ORM::Schema::ColumnFamilies.new }
+  subject { MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name", :column_families => families }
+
   describe "initializer" do
     it "should take a name" do
       column_family = MassiveRecord::ORM::Schema::ColumnFamily.new :name => "family_name"
@@ -126,6 +130,23 @@ describe MassiveRecord::ORM::Schema::ColumnFamily do
         @column_family.contained_in.should_not_receive(:attribute_name_taken?)
         @column_family.attribute_name_taken?(:foo, true).should be_false
       end
+    end
+  end
+
+  describe "#autoload_fields" do
+    it "sets self to be autoloaded" do
+      subject.instance_eval do
+        autoload_fields 
+      end
+      subject.should be_autoload_fields
+    end
+
+    it "takes options for created fields when autoloading" do
+      options = {:type => :integer}
+      subject.instance_eval do
+        autoload_fields options
+      end
+      subject.options_for_autoload_created_fields.should eq options
     end
   end
 end
