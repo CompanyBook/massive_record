@@ -620,6 +620,15 @@ describe TestReferencesManyProxy do
       subject.should include proxy_target.id
     end
 
+    it "does not load record if foreign keys are presisted in proxy owner" do
+      proxy_owner.save!
+      subject << proxy_target
+      subject.reset
+
+      TestClass.should_not_receive(:find)
+      subject.should include proxy_target
+    end
+
     [true, false].each do |should_persist_proxy_owner|
       describe "with proxy_owner " + (should_persist_proxy_owner ? "persisted" : "not persisted") do
         before do

@@ -109,7 +109,12 @@ module MassiveRecord
           #
           def include?(record_or_id)
             id = record_or_id.respond_to?(:id) ? record_or_id.id : record_or_id
-            !!find(id)
+
+            if loaded? || find_with_proc?
+              !!find(id)
+            else
+              foreign_key_in_proxy_owner_exists? id
+            end
           rescue RecordNotFound
             false
           end
