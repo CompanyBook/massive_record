@@ -620,6 +620,23 @@ describe TestReferencesManyProxy do
       subject.should_receive(:length).and_return 0
       subject.any?.should be_false
     end
+
+    context "when find with proc" do
+      before do
+        subject.should_receive(:loaded?).and_return false
+        subject.should_receive(:find_with_proc?).and_return true
+      end
+
+      it "asks for first and returns false if first is nil" do
+        subject.should_receive(:first).and_return nil
+        subject.any?.should be_false
+      end
+
+      it "asks for first and returns true if first is a record" do
+        subject.should_receive(:first).and_return proxy_target
+        subject.any?.should be_true
+      end
+    end
   end
 
   describe "#present?" do

@@ -139,7 +139,11 @@ module MassiveRecord
           end
 
           def any?
-            !empty?
+            if !loaded? && find_with_proc?
+              !!first
+            else
+              !empty?
+            end
           end
           alias_method :present?, :any?
 
