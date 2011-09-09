@@ -242,9 +242,10 @@ describe "persistence" do
         end
 
         it "should only include changed attributes" do
-          row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
-          row.should_receive(:values=).with({"info" => {"name" => @new_name}})
-          @person.should_receive(:row_for_record).and_return(row)
+          MassiveRecord::ORM::Persistence::Operations.should_receive(:update).with(
+            @person, hash_including(:attribute_names_to_update => ["name"])
+          ).and_return(mock(Object, :execute => true))
+
 
           @person.name = @new_name
           @person.save
@@ -287,40 +288,40 @@ describe "persistence" do
     describe "dry run" do
       include MockMassiveRecordConnection
 
+      let(:person) { Person.new "id1" }
+      let(:operation) { MassiveRecord::ORM::Persistence::Operations::Destroy.new(person) }
+
       before do
-        @person = Person.new "id1"
-        @person.stub!(:new_record?).and_return(false)
-        @row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
-        @person.should_receive(:row_for_record).and_return(@row)
+        person.stub(:new_record?).and_return(false)
+        MassiveRecord::ORM::Persistence::Operations.stub(:destroy).and_return operation
       end
 
 
       it "should not be destroyed if wrapper returns false" do
-        @row.should_receive(:destroy).and_return(false)
-        @person.destroy
-        @person.should_not be_destroyed
+        operation.should_receive(:execute).and_return false
+        person.destroy
+        person.should_not be_destroyed
       end
 
       it "should be destroyed if wrapper returns true" do
-        @row.should_receive(:destroy).and_return(true)
-        @person.destroy
-        @person.should be_destroyed
+        person.destroy
+        person.should be_destroyed
       end
 
       it "should be frozen after destroy" do
-        @person.destroy
-        @person.should be_frozen
+        person.destroy
+        person.should be_frozen
       end
 
       it "should be frozen after delete" do
-        @person.delete
-        @person.should be_frozen
+        person.delete
+        person.should be_frozen
       end
       
       it "should not be frozen if wrapper returns false" do
-        @row.should_receive(:destroy).and_return(false)
-        @person.destroy
-        @person.should_not be_frozen
+        operation.should_receive(:execute).and_return false
+        person.destroy
+        person.should_not be_frozen
       end
     end
 
