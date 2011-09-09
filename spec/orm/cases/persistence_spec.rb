@@ -81,40 +81,7 @@ describe "persistence" do
       Person.new.reload
     end
   end
-
-
-  describe "#row_for_record" do
-    include MockMassiveRecordConnection
-
-    it "should raise error if id is not set" do
-      lambda { Person.new.send(:row_for_record) }.should raise_error MassiveRecord::ORM::IdMissing
-    end
-
-    it "should return a row with id set" do
-      Person.new("foo").send(:row_for_record).id.should == "foo"
-    end
-
-    it "should return a row with table set" do
-      Person.new("foo").send(:row_for_record).table.should == Person.table
-    end
-  end
   
-  describe "#attributes_to_row_values_hash" do
-    before do
-      @person = Person.new("new_id", :name => "Vincent", :points => 15)
-    end
-    
-    it "should include the 'pts' field in the database which has 'points' as an alias" do
-      @person.send(:attributes_to_row_values_hash)["base"].keys.should include("pts")
-      @person.send(:attributes_to_row_values_hash)["base"].keys.should_not include("points")
-    end
-
-    it "should include integer value, even if it is set as string" do
-      @person.age = "20"
-      @person.send(:attributes_to_row_values_hash)["info"]["age"].should == 20
-    end
-  end
-
 
   describe "update attribute" do
     describe "dry run" do
