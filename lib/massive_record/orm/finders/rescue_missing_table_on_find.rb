@@ -35,7 +35,7 @@ module MassiveRecord
             raise error
           else
             logger.try :info, "*** TABLE MISSING: Table '#{table_name}' seems to be missing. Will create it, then retry call to find()."
-            hbase_create_table!
+            Persistence::Operations::TableOperationHelpers.hbase_create_table!(self)
             yield
           end
         end

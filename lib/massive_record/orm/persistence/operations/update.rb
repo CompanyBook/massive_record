@@ -8,7 +8,7 @@ module MassiveRecord
           include Operations, TableOperationHelpers
 
           def execute
-            klass.ensure_that_we_have_table_and_column_families!
+            ensure_that_we_have_table_and_column_families!
             store_record_to_database('update', attribute_names_to_update)
           end
 

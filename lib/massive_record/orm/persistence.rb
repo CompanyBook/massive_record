@@ -16,42 +16,6 @@ module MassiveRecord
         def destroy_all
           all.each { |record| record.destroy }
         end
-        
-
-        #
-        # Iterates over tables and column families and ensure that we
-        # have what we need
-        #
-        def ensure_that_we_have_table_and_column_families! # :nodoc:
-          # 
-          # TODO: Can we skip checking if it exists at all, and instead, rescue it if it does not?
-          #
-          hbase_create_table! unless table.exists?
-          raise ColumnFamiliesMissingError.new(self, calculate_missing_family_names) if calculate_missing_family_names.any?
-        end
-
-
-        private
-
-        #
-        # Creates table for this ORM class
-        #
-        def hbase_create_table!
-          missing_family_names = calculate_missing_family_names
-          table.create_column_families(missing_family_names) unless missing_family_names.empty?
-          table.save
-        end
-
-        #
-        # Calculate which column families are missing in the database in
-        # context of what the schema instructs.
-        #
-        def calculate_missing_family_names
-          existing_family_names = table.fetch_column_families.collect(&:name) rescue []
-          expected_family_names = column_families ? column_families.collect(&:name) : []
-
-          expected_family_names.collect(&:to_s) - existing_family_names.collect(&:to_s)
-        end
       end
 
 
@@ -180,13 +144,6 @@ module MassiveRecord
       def update(attribute_names_to_update = attributes.keys)
         Operations.update(self, :attribute_names_to_update => attribute_names_to_update).execute
       end
-
-
-
-
-
-
-
 
       #
       # Atomic decrement of an attribute. Please note that it's the

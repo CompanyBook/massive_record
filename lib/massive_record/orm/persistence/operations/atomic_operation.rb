@@ -10,7 +10,7 @@ module MassiveRecord
           def execute
             raise NotNumericalFieldError unless record.attributes_schema[attr_name].type == :integer
 
-            klass.ensure_that_we_have_table_and_column_families!
+            ensure_that_we_have_table_and_column_families!
             ensure_proper_binary_integer_representation(attr_name)
             record[attr_name] = row_for_record.send("atomic_#{operation}", record.attributes_schema[attr_name].unique_name, by)
           ensure

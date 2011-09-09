@@ -18,7 +18,7 @@ describe MassiveRecord::ORM::Persistence::Operations::AtomicOperation do
     end
 
     it "ensures that we have table and column families" do
-      record.class.should_receive(:ensure_that_we_have_table_and_column_families!)
+      subject.should_receive(:ensure_that_we_have_table_and_column_families!)
       subject.execute
     end
 

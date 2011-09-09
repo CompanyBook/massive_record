@@ -8,7 +8,7 @@ module MassiveRecord
           include Operations, TableOperationHelpers
 
           def execute
-            klass.ensure_that_we_have_table_and_column_families!
+            ensure_that_we_have_table_and_column_families!
             raise RecordNotUnique if klass.check_record_uniqueness_on_create && klass.exists?(record.id)
             store_record_to_database('create')
           end
