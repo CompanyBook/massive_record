@@ -1,3 +1,5 @@
+require 'massive_record/orm/persistence/operations'
+
 module MassiveRecord
   module ORM
     module Persistence
@@ -101,7 +103,7 @@ module MassiveRecord
       end
 
       def destroy
-        @destroyed = (persisted? ? row_for_record.destroy : true) and freeze
+        @destroyed = (persisted? ? Operations.destroy(self) : true) and freeze
       end
       alias_method :delete, :destroy
 
@@ -170,63 +172,21 @@ module MassiveRecord
       end
 
       def create
-        self.class.ensure_that_we_have_table_and_column_families!
-
-        raise RecordNotUnique if check_record_uniqueness_on_create && self.class.exists?(id)
-
-        if saved = store_record_to_database('create')
+        Operations.insert(self).execute.tap do |saved|
           @new_record = false
         end
-        saved
       end
 
       def update(attribute_names_to_update = attributes.keys)
-        self.class.ensure_that_we_have_table_and_column_families!
-
-        store_record_to_database('update', attribute_names_to_update)
+        Operations.update(self, :attribute_names_to_update => attribute_names_to_update).execute
       end
 
 
 
 
-      #
-      # Takes care of the actual storing of the record to the database
-      # Both update and create is using this
-      #
-      def store_record_to_database(action, attribute_names_to_update = [])
-        row = row_for_record
-        row.values = attributes_to_row_values_hash(attribute_names_to_update)
-        row.save
-      end
 
 
 
-      #
-      # Returns a Wrapper::Row class which we can manipulate this
-      # record in the database with
-      #
-      def row_for_record
-        raise IdMissing.new("You must set an ID before save.") if id.blank?
-
-        MassiveRecord::Wrapper::Row.new({
-          :id => id,
-          :table => self.class.table
-        })
-      end
-
-      #
-      # Returns attributes on a form which Wrapper::Row expects
-      #
-      def attributes_to_row_values_hash(only_attr_names = [])
-        values = Hash.new { |hash, key| hash[key] = Hash.new }
-
-        attributes_schema.each do |attr_name, orm_field|
-          next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
-          values[orm_field.column_family.name][orm_field.column] = orm_field.encode(self[attr_name])
-        end
-
-        values
-      end
 
       #
       # Atomic decrement of an attribute. Please note that it's the
