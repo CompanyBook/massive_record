@@ -1,8 +1,18 @@
+require 'massive_record/orm/query_instrumentation'
+
 module MassiveRecord
   module ORM
     module Persistence
       module Operations
         module TableOperationHelpers
+
+          def self.included(base)
+            base.class_eval do
+              include MassiveRecord::ORM::QueryInstrumentation::Operations
+            end
+          end
+
+
           #
           # Returns a Wrapper::Row class which we can manipulate this
           # record in the database with
