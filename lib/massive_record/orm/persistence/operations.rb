@@ -1,6 +1,7 @@
 require 'massive_record/orm/persistence/operations/insert'
 require 'massive_record/orm/persistence/operations/update'
 require 'massive_record/orm/persistence/operations/destroy'
+require 'massive_record/orm/persistence/operations/atomic_operation'
 
 module MassiveRecord
   module ORM
@@ -32,6 +33,10 @@ module MassiveRecord
 
           def destroy(record, options = {})
             Destroy.new(record, options)
+          end
+
+          def atomic_operation(record, options = {})
+            AtomicOperation.new(record, options)
           end
         end
 
