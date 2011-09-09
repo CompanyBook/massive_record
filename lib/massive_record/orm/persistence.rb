@@ -106,6 +106,26 @@ module MassiveRecord
       alias_method :delete, :destroy
 
 
+      def change_id!(new_id)
+        old_id, self.id = id, new_id
+
+        @new_record = true
+        unless save
+          raise <<-TXT
+            Unable to save #{self.class} with updated id '#{new_id}'.
+            Old id '#{old_id}' was not deleted so in theory nothing should be changed in the database.
+          TXT
+        end
+
+        unless self.class.find(old_id).destroy
+          raise <<-TXT
+            Unable to destroy #{self.class} with id '#{old_id}'.
+            You now how duplicate records in the database. New id is: '#{new_id}.'
+          TXT
+        end
+
+        reload
+      end
 
 
       def increment(attr_name, by = 1)

@@ -1,5 +1,6 @@
 # v0.2.2 (git develop)
 
+- If you, for some reason, need to change id on an existing record, you may do so with change_id!("new_id").
 - Optimization on references many proxy. It is now a bit smarter when you do any of:
   length, include?, present? and any?. Previously it loaded all the targets to figure
   out the length and if it included a record. Now it does these more efficient based on the proxy state.
