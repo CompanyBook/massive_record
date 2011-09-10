@@ -20,6 +20,15 @@ describe "persistence" do
       model.should be_persisted
     end
 
+    it "is still a new record if saved to database failed" do
+      operation = mock(Object, :execute => false)
+      MassiveRecord::ORM::Persistence::Operations.should_receive(:insert).and_return(operation)
+
+      model = TestClass.new "id1"
+      model.save
+      model.should_not be_persisted
+    end
+
     it "should be destroyed when destroyed" do
       model = TestClass.new "id1"
       model.save

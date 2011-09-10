@@ -137,7 +137,7 @@ module MassiveRecord
 
       def create
         Operations.insert(self).execute.tap do |saved|
-          @new_record = false
+          @new_record = false if saved
         end
       end
 
