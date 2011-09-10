@@ -43,6 +43,17 @@ describe "persistence" do
       model.should_not be_persisted
     end
 
+    it "should not be marked as destroyed if operation failed" do
+      operation = mock(Object, :execute => false)
+      MassiveRecord::ORM::Persistence::Operations.should_receive(:destroy).and_return(operation)
+
+      model = TestClass.new "id1"
+      model.save
+      model.destroy
+      model.should_not be_destroyed
+      model.should_not be_frozen
+    end
+
     it "should be possible to create new objects" do
       TestClass.create("id1").should be_persisted
     end
