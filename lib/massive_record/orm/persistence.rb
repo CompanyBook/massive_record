@@ -1,3 +1,5 @@
+require 'massive_record/orm/persistence/operations'
+
 module MassiveRecord
   module ORM
     module Persistence
@@ -13,42 +15,6 @@ module MassiveRecord
 
         def destroy_all
           all.each { |record| record.destroy }
-        end
-        
-
-        #
-        # Iterates over tables and column families and ensure that we
-        # have what we need
-        #
-        def ensure_that_we_have_table_and_column_families! # :nodoc:
-          # 
-          # TODO: Can we skip checking if it exists at all, and instead, rescue it if it does not?
-          #
-          hbase_create_table! unless table.exists?
-          raise ColumnFamiliesMissingError.new(self, calculate_missing_family_names) if calculate_missing_family_names.any?
-        end
-
-
-        private
-
-        #
-        # Creates table for this ORM class
-        #
-        def hbase_create_table!
-          missing_family_names = calculate_missing_family_names
-          table.create_column_families(missing_family_names) unless missing_family_names.empty?
-          table.save
-        end
-
-        #
-        # Calculate which column families are missing in the database in
-        # context of what the schema instructs.
-        #
-        def calculate_missing_family_names
-          existing_family_names = table.fetch_column_families.collect(&:name) rescue []
-          expected_family_names = column_families ? column_families.collect(&:name) : []
-
-          expected_family_names.collect(&:to_s) - existing_family_names.collect(&:to_s)
         end
       end
 
@@ -101,7 +67,7 @@ module MassiveRecord
       end
 
       def destroy
-        @destroyed = (persisted? ? row_for_record.destroy : true) and freeze
+        @destroyed = (persisted? ? Operations.destroy(self).execute : true) and freeze
       end
       alias_method :delete, :destroy
 
@@ -170,62 +136,13 @@ module MassiveRecord
       end
 
       def create
-        self.class.ensure_that_we_have_table_and_column_families!
-
-        raise RecordNotUnique if check_record_uniqueness_on_create && self.class.exists?(id)
-
-        if saved = store_record_to_database('create')
-          @new_record = false
+        Operations.insert(self).execute.tap do |saved|
+          @new_record = false if saved
         end
-        saved
       end
 
       def update(attribute_names_to_update = attributes.keys)
-        self.class.ensure_that_we_have_table_and_column_families!
-
-        store_record_to_database('update', attribute_names_to_update)
-      end
-
-
-
-
-      #
-      # Takes care of the actual storing of the record to the database
-      # Both update and create is using this
-      #
-      def store_record_to_database(action, attribute_names_to_update = [])
-        row = row_for_record
-        row.values = attributes_to_row_values_hash(attribute_names_to_update)
-        row.save
-      end
-
-
-
-      #
-      # Returns a Wrapper::Row class which we can manipulate this
-      # record in the database with
-      #
-      def row_for_record
-        raise IdMissing.new("You must set an ID before save.") if id.blank?
-
-        MassiveRecord::Wrapper::Row.new({
-          :id => id,
-          :table => self.class.table
-        })
-      end
-
-      #
-      # Returns attributes on a form which Wrapper::Row expects
-      #
-      def attributes_to_row_values_hash(only_attr_names = [])
-        values = Hash.new { |hash, key| hash[key] = Hash.new }
-
-        attributes_schema.each do |attr_name, orm_field|
-          next unless only_attr_names.empty? || only_attr_names.include?(attr_name)
-          values[orm_field.column_family.name][orm_field.column] = orm_field.encode(self[attr_name])
-        end
-
-        values
+        Operations.update(self, :attribute_names_to_update => attribute_names_to_update).execute
       end
 
       #
@@ -234,45 +151,8 @@ module MassiveRecord
       # is atomic. Thrift adapter is working with atomic decrementation.
       #
       def atomic_operation(operation, attr_name, by)
-        raise NotNumericalFieldError unless attributes_schema[attr_name.to_s].type == :integer
-
-        self.class.ensure_that_we_have_table_and_column_families!
-        attr_name = attr_name.to_s
-
-        ensure_proper_binary_integer_representation(attr_name)
-
-        self[attr_name] = row_for_record.send("atomic_#{operation}", attributes_schema[attr_name].unique_name, by)
-        @new_record = false
-        self[attr_name]
+        Operations.atomic_operation(self, :operation => operation, :attr_name => attr_name, :by => by).execute
       end
-
-      #
-      # To cope with the problem which arises when you ask to
-      # do atomic incrementation / decrementation of an attribute and that attribute
-      # has a string representation of a number, like "1", instead of
-      # the binary representation, like "\x00\x00\x00\x00\x00\x00\x00\x01".
-      #
-      # We then need to re-write that string representation into
-      # hex representation. Now, if you are on a completely new
-      # database and have never used MassiveRecord before we should not
-      # need to do this at all; numbers are now stored as hex, but for
-      # backward compatibility we are doing this.
-      #
-      # Now, there is a risk of doing this; if two calls are made to
-      # atomic_increment! or atomic_decrement! on a record where it's value is a string
-      # representation this operation might be compromised. Therefor
-      # you need to enable this feature.
-      #
-      def ensure_proper_binary_integer_representation(attr_name)
-        return if !backward_compatibility_integers_might_be_persisted_as_strings || new_record?
-
-        field = attributes_schema[attr_name]  
-
-        if raw_value = self.class.table.get(id, field.column_family.name, field.name)
-          store_record_to_database('update', [attr_name]) if raw_value =~ /\A\d*\Z/
-        end
-      end
-
     end
   end
 end

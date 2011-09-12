@@ -296,7 +296,7 @@ module MassiveRecord
       include Timestamps
       include SingleTableInheritance
       include DefaultId
-      include QueryInstrumentation
+      include QueryInstrumentation::Table
 
 
       alias [] read_attribute

@@ -20,6 +20,15 @@ describe "persistence" do
       model.should be_persisted
     end
 
+    it "is still a new record if saved to database failed" do
+      operation = mock(Object, :execute => false)
+      MassiveRecord::ORM::Persistence::Operations.should_receive(:insert).and_return(operation)
+
+      model = TestClass.new "id1"
+      model.save
+      model.should_not be_persisted
+    end
+
     it "should be destroyed when destroyed" do
       model = TestClass.new "id1"
       model.save
@@ -32,6 +41,17 @@ describe "persistence" do
       model.save
       model.destroy
       model.should_not be_persisted
+    end
+
+    it "should not be marked as destroyed if operation failed" do
+      operation = mock(Object, :execute => false)
+      MassiveRecord::ORM::Persistence::Operations.should_receive(:destroy).and_return(operation)
+
+      model = TestClass.new "id1"
+      model.save
+      model.destroy
+      model.should_not be_destroyed
+      model.should_not be_frozen
     end
 
     it "should be possible to create new objects" do
@@ -81,40 +101,7 @@ describe "persistence" do
       Person.new.reload
     end
   end
-
-
-  describe "#row_for_record" do
-    include MockMassiveRecordConnection
-
-    it "should raise error if id is not set" do
-      lambda { Person.new.send(:row_for_record) }.should raise_error MassiveRecord::ORM::IdMissing
-    end
-
-    it "should return a row with id set" do
-      Person.new("foo").send(:row_for_record).id.should == "foo"
-    end
-
-    it "should return a row with table set" do
-      Person.new("foo").send(:row_for_record).table.should == Person.table
-    end
-  end
   
-  describe "#attributes_to_row_values_hash" do
-    before do
-      @person = Person.new("new_id", :name => "Vincent", :points => 15)
-    end
-    
-    it "should include the 'pts' field in the database which has 'points' as an alias" do
-      @person.send(:attributes_to_row_values_hash)["base"].keys.should include("pts")
-      @person.send(:attributes_to_row_values_hash)["base"].keys.should_not include("points")
-    end
-
-    it "should include integer value, even if it is set as string" do
-      @person.age = "20"
-      @person.send(:attributes_to_row_values_hash)["info"]["age"].should == 20
-    end
-  end
-
 
   describe "update attribute" do
     describe "dry run" do
@@ -275,9 +262,10 @@ describe "persistence" do
         end
 
         it "should only include changed attributes" do
-          row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
-          row.should_receive(:values=).with({"info" => {"name" => @new_name}})
-          @person.should_receive(:row_for_record).and_return(row)
+          MassiveRecord::ORM::Persistence::Operations.should_receive(:update).with(
+            @person, hash_including(:attribute_names_to_update => ["name"])
+          ).and_return(mock(Object, :execute => true))
+
 
           @person.name = @new_name
           @person.save
@@ -320,40 +308,40 @@ describe "persistence" do
     describe "dry run" do
       include MockMassiveRecordConnection
 
+      let(:person) { Person.new "id1" }
+      let(:operation) { MassiveRecord::ORM::Persistence::Operations::Destroy.new(person) }
+
       before do
-        @person = Person.new "id1"
-        @person.stub!(:new_record?).and_return(false)
-        @row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
-        @person.should_receive(:row_for_record).and_return(@row)
+        person.stub(:new_record?).and_return(false)
+        MassiveRecord::ORM::Persistence::Operations.stub(:destroy).and_return operation
       end
 
 
       it "should not be destroyed if wrapper returns false" do
-        @row.should_receive(:destroy).and_return(false)
-        @person.destroy
-        @person.should_not be_destroyed
+        operation.should_receive(:execute).and_return false
+        person.destroy
+        person.should_not be_destroyed
       end
 
       it "should be destroyed if wrapper returns true" do
-        @row.should_receive(:destroy).and_return(true)
-        @person.destroy
-        @person.should be_destroyed
+        person.destroy
+        person.should be_destroyed
       end
 
       it "should be frozen after destroy" do
-        @person.destroy
-        @person.should be_frozen
+        person.destroy
+        person.should be_frozen
       end
 
       it "should be frozen after delete" do
-        @person.delete
-        @person.should be_frozen
+        person.delete
+        person.should be_frozen
       end
       
       it "should not be frozen if wrapper returns false" do
-        @row.should_receive(:destroy).and_return(false)
-        @person.destroy
-        @person.should_not be_frozen
+        operation.should_receive(:execute).and_return false
+        person.destroy
+        person.should_not be_frozen
       end
     end
 
