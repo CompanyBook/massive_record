@@ -1,5 +1,9 @@
 # v0.2.2 (git develop)
 
+- Reworked how the persistence module actually does the database specific calls like save, update and destroy.
+  Before, all of the hbase-table-specific code lived inside of the Persistence module. It has now been extracted
+  out into small Persistence::Operations classes. This should enable us to customize the save operation based
+  on which context we are in (table or an embedded object).
 - If you, for some reason, need to change id on an existing record, you may do so with change_id!("new_id").
 - Optimization on references many proxy. It is now a bit smarter when you do any of:
   length, include?, present? and any?. Previously it loaded all the targets to figure
