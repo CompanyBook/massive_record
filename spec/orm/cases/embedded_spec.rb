@@ -35,12 +35,12 @@ describe MassiveRecord::ORM::Embedded do
     end
 
     %w(
-      create! create reload save save!
+      reload save save! save
       update_attribute update_attributes update_attributes! touch destroy
-      delete increment! atomic_increment! decrement!
+      delete increment! decrement! atomic_increment! atomic_decrement!
     ).each do |method|
-      it "should not respond to instance method #{method}" do
-        subject.should_not respond_to method
+      it "do respond to #{method}" do
+        subject.should respond_to method
       end
     end
   end
