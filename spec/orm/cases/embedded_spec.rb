@@ -1,10 +1,8 @@
 require 'spec_helper'
 require 'orm/models/address'
 
-describe "column classes" do
-  before do
-    @address = Address.new(:street => "Asker", :number => 5)
-  end
+describe MassiveRecord::ORM::Embedded do
+  subject { Address.new(:street => "Asker", :number => 5) }
 
   it "should have known_attribute_names" do
     Address.should have(3).known_attribute_names
@@ -22,7 +20,7 @@ describe "column classes" do
   end
 
   it "should have a default value set" do
-    @address.nice_place.should be_true
+    subject.nice_place.should be_true
   end
 
 
@@ -42,7 +40,7 @@ describe "column classes" do
       delete increment! atomic_increment! decrement!
     ).each do |method|
       it "should not respond to instance method #{method}" do
-        @address.should_not respond_to method
+        subject.should_not respond_to method
       end
     end
   end

@@ -3,7 +3,7 @@ require 'massive_record/orm/schema/common_interface'
 module MassiveRecord
   module ORM
     module Schema
-      module ColumnInterface
+      module EmbeddedInterface
         extend ActiveSupport::Concern
 
         included do
@@ -17,7 +17,7 @@ module MassiveRecord
           #
           # DSL method exposed into class. Makes it possible to do:
           #
-          # class Person < MassiveRecord::ORM::Column
+          # class Person < MassiveRecord::ORM::Embedded
           #  field :name
           #  field :age, :integer, :default => 0
           #  field :points, :integer, :column => :number_of_points
