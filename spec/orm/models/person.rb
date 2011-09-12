@@ -26,6 +26,11 @@ class Person < MassiveRecord::ORM::Table
   validates_numericality_of :age, :greater_than_or_equal_to => 0
   validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i, :allow_blank => true
 
+  validates :carma, :presence => true, :if => :consider_carma?, :on => :create 
+
+  attr_accessor :consider_carma
+  alias :consider_carma? :consider_carma
+
 
   def friends_records_starts_from_id
     id+'-'

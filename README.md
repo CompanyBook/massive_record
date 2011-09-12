@@ -64,7 +64,7 @@ it easy to use. The second way of doing things is working directly against the a
 
 ### ORM
     
-Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Column do now have some functionality which you can expect from an ORM. This includes:
+Both MassiveRecord::ORM::Table and MassiveRecord::ORM::Embedded do now have some functionality which you can expect from an ORM. This includes:
 
 - An initializer which takes attribute hash and assigns them to your object.
 - Write and read methods for the attributes
@@ -145,13 +145,13 @@ Here are some examples setting up models:
       end
     end
 
-    class Address < MassiveRecord::ORM::Column
+    class Address < MassiveRecord::ORM::Embedded
       field :street
       field :number, :integer
       field :nice_place, :boolean, :default => true
     end
     
-    class BlogPost < MassiveRecord::ORM::Column
+    class BlogPost < MassiveRecord::ORM::Embedded
       references_one :author, :class_name => "Person", :store_in => :info
     
       field :title

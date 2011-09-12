@@ -107,23 +107,29 @@ module MassiveRecord
           #
           # Checks if record is included in collection
           #
-          # TODO  This needs a bit of work, depending on if proxy's proxy_target
-          #       has been loaded or not. For now, we are just checking
-          #       what we currently have in @proxy_target
-          #
-          def include?(record)
-            load_proxy_target.include? record
+          def include?(record_or_id)
+            id = record_or_id.respond_to?(:id) ? record_or_id.id : record_or_id
+
+            if loaded? || find_with_proc?
+              !!find(id)
+            else
+              foreign_key_in_proxy_owner_exists? id
+            end
+          rescue RecordNotFound
+            false
           end
 
           #
           # Returns the length of targes
           #
-          # TODO  This can be smarter as well. For instance; if we have not
-          #       loaded targets, and we have foreign keys in the owner we
-          #       can simply do a owner's foreign keys and ask for it's length.
-          #
           def length
-            load_proxy_target.length
+            if loaded?
+              proxy_target.length
+            elsif find_with_proc?
+              load_proxy_target.length
+            else
+              foreign_keys_in_proxy_owner.length
+            end
           end
           alias_method :count, :length
           alias_method :size, :length
@@ -131,6 +137,16 @@ module MassiveRecord
           def empty?
             length == 0
           end
+
+          def any?
+            if !loaded? && find_with_proc?
+              !!first
+            else
+              !empty?
+            end
+          end
+          alias_method :present?, :any?
+
 
           def first
             limit(1).first
@@ -219,6 +235,9 @@ module MassiveRecord
           end
 
 
+          def is_a?(klass)
+            klass == Array
+          end
 
           private
 
@@ -280,7 +299,11 @@ module MassiveRecord
           end
 
           def foreign_key_in_proxy_owner_exists?(id)
-            proxy_owner.send(metadata.foreign_key).include? id
+            foreign_keys_in_proxy_owner.include? id
+          end
+
+          def foreign_keys_in_proxy_owner
+            proxy_owner.send(metadata.foreign_key)
           end
 
           def notify_of_change_in_proxy_owner_foreign_key

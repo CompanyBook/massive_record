@@ -184,7 +184,7 @@ module MassiveRecord
           end
         rescue => e
           if e.is_a?(Apache::Hadoop::Hbase::Thrift::IOError) && e.message =~ /NoSuchColumnFamilyException/
-            raise ColumnFamiliesMissingError.new(self, calculate_missing_family_names)
+            raise ColumnFamiliesMissingError.new(self, Persistence::Operations::TableOperationHelpers.calculate_missing_family_names(self))
           else
             raise e
           end

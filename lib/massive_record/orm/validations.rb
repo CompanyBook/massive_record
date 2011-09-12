@@ -40,6 +40,10 @@ module MassiveRecord
         perform_validation(options) ? super : raise(RecordInvalid.new(self))
       end
 
+      def valid?(context = nil)
+        context ||= (new_record? ? :create : :update)
+        super
+      end
 
       private
 

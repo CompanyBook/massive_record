@@ -60,7 +60,9 @@ module MassiveRecord
               family_name, column_name = column_family_and_column_name.split(":")
               
               if family = column_families.family_by_name(family_name) and family.autoload_fields?
-                family.add? Field.new(:name => column_name)
+                family.add?(Field.new(
+                  family.options_for_autoload_created_fields.merge(:name => column_name)
+                ))
               end
             end
           end

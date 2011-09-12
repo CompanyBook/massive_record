@@ -21,7 +21,8 @@ module MockMassiveRecordConnection
       # Setting up a mock connection when asked for new
       mock_connection = mock(MassiveRecord::Wrapper::Connection,
         :open => true,
-        :tables => MassiveRecord::ORM::Table.descendants.collect(&:table_name)
+        :tables => MassiveRecord::ORM::Table.descendants.collect(&:table_name),
+        :atomicIncrement => 1
       )
       MassiveRecord::Wrapper::Connection.stub(:new).and_return(mock_connection)
 

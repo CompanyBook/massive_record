@@ -1,4 +1,4 @@
-class Address < MassiveRecord::ORM::Column
+class Address < MassiveRecord::ORM::Embedded
   field :street
   field :number, :integer
   field :nice_place, :boolean, :default => true

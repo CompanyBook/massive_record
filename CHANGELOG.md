@@ -1,5 +1,21 @@
 # v0.2.2 (git develop)
 
+- MassiveRecord::ORM::Column is now named Embedded. You can still use Column though, but it is deprecated.
+  I guess in most cases not many have ever used Column, as its usage has been limited up until we implement the
+  embedded relations.
+- Reworked how the persistence module actually does the database specific calls like save, update and destroy.
+  Before, all of the hbase-table-specific code lived inside of the Persistence module. It has now been extracted
+  out into small Persistence::Operations classes. This should enable us to customize the save operation based
+  on which context we are in (table or an embedded object).
+- If you, for some reason, need to change id on an existing record, you may do so with change_id!("new_id").
+- Optimization on references many proxy. It is now a bit smarter when you do any of:
+  length, include?, present? and any?. Previously it loaded all the targets to figure
+  out the length and if it included a record. Now it does these more efficient based on the proxy state.
+- You can now give options when auto loading fields. For instance if all your fields are
+  expected to be integers you can do column_family(:something) { autoload_fields :type => :integer }.
+- Context of validations are now set to :create or :update automatically, so that
+  validates :something, :validator => true, :on => :update works.
+- Fetching multiple ids via Thrift is 4x faster.
 - Assigning integers or float values as strings is now ran through to_i or to_f in the writer method.
 - A references_many proxy now supports all(options). I would like to give better support for scopes on relations as well,
   as you right now cannot do a_person.cars.limit(2).offset("id-to-start-at"). The limit(2) will actually return the two first records.

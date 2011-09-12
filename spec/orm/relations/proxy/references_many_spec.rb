@@ -297,7 +297,7 @@ describe TestReferencesManyProxy do
         end
 
         it "should not update array of foreign keys in proxy_owner if it does not respond to it" do
-          proxy_owner.should_receive(:respond_to?).twice.and_return(false)
+          proxy_owner.should_receive(:respond_to?).and_return(false)
           subject.send(add_method, proxy_target)
           proxy_owner.test_class_ids.should_not include(proxy_target.id)
         end
@@ -522,10 +522,164 @@ describe TestReferencesManyProxy do
           end
         end
       end
+
+      context "foreign keys persisted in owner" do
+        before do
+          proxy_owner.save!
+          subject << proxy_target << proxy_target_2
+        end
+
+        context "targets not loaded" do
+          before { subject.reset }
+
+          it "loads nothing" do
+            TestClass.should_not_receive(:find)
+            subject.length
+          end
+
+          it "reads length from proxy owner's foreign keys list" do
+            proxy_owner.should_receive(:test_class_ids).and_return([proxy_target.id, proxy_target_2.id])
+            subject.length
+          end
+
+          it "returns correct length" do
+            subject.length.should eq 2
+          end
+        end
+
+        context "targets loaded" do
+          before { subject.reload }
+
+          it "loads nothing" do
+            TestClass.should_not_receive(:find)
+            subject.length
+          end
+
+          it "reads length from proxy_target" do
+            subject.should_receive(:proxy_target).and_return([proxy_target, proxy_target_2])
+            subject.length
+          end
+
+          it "returns correct length" do
+            subject.length.should eq 2
+          end
+        end
+      end
+
+      context "when we are using a starts_with to find related records" do
+        let(:proxy_target) { Person.new proxy_owner.id+"-friend-1", :name => "T", :age => 2 }
+        let(:proxy_target_2) { Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9 }
+        let(:not_proxy_target) { Person.new "foo"+"-friend-2", :name => "H", :age => 1 }
+        let(:metadata) { subject.metadata }
+
+        subject { proxy_owner.send(:relation_proxy, 'friends') }
+
+        before do
+          proxy_owner.save!
+          subject << proxy_target << proxy_target_2
+        end
+
+        context "targets not loaded" do
+          before { subject.reset }
+
+          it "loads all the targets and returns it's length" do
+            subject.should_receive(:load_proxy_target).and_return [proxy_target, proxy_target_2] 
+            subject.length
+          end
+
+          it "returns correct length" do
+            subject.length.should eq 2
+          end
+        end
+
+        context "targets loaded" do
+          before { subject.reload }
+
+          it "loads nothing" do
+            subject.should_not_receive(:load_proxy_target)
+            subject.length
+          end
+
+          it "returns correct length" do
+            subject.length.should eq 2
+          end
+        end
+      end
     end
   end
 
-  describe "#include" do
+  describe "#any?" do
+    before { subject.reset }
+
+    it "checks the length and return true if it is greater than 0" do
+      subject.should_receive(:length).and_return 1
+      subject.any?.should be_true
+    end
+
+    it "checks the length and return false if it is 0" do
+      subject.should_receive(:length).and_return 0
+      subject.any?.should be_false
+    end
+
+    context "when find with proc" do
+      before do
+        subject.should_receive(:loaded?).and_return false
+        subject.should_receive(:find_with_proc?).and_return true
+      end
+
+      it "asks for first and returns false if first is nil" do
+        subject.should_receive(:first).and_return nil
+        subject.any?.should be_false
+      end
+
+      it "asks for first and returns true if first is a record" do
+        subject.should_receive(:first).and_return proxy_target
+        subject.any?.should be_true
+      end
+    end
+  end
+
+  describe "#present?" do
+    before { subject.reset }
+
+    it "checks the length and return true if it is greater than 0" do
+      subject.should_receive(:length).and_return 1
+      subject.present?.should be_true
+    end
+
+    it "checks the length and return false if it is 0" do
+      subject.should_receive(:length).and_return 0
+      subject.present?.should be_false
+    end
+  end
+
+  describe "#include?" do
+    it "uses find as it's query method when loaded" do
+      subject.should_receive(:loaded?).and_return true
+      subject.should_receive(:find).with(proxy_target.id).and_return true
+      subject.should include proxy_target
+    end
+
+    it "uses find as it's query method when find with proc" do
+      subject.should_receive(:find_with_proc?).and_return true
+      subject.should_receive(:find).with(proxy_target.id).and_return true
+      subject.should include proxy_target
+    end
+
+    it "can answer to ids as well" do
+      subject.should_receive(:foreign_key_in_proxy_owner_exists?).with(proxy_target.id).and_return true
+      subject.should include proxy_target.id
+    end
+
+    it "does not load record if foreign keys are presisted in proxy owner" do
+      proxy_owner.save!
+      subject << proxy_target
+      subject.reset
+
+      TestClass.should_not_receive(:find)
+      subject.should include proxy_target
+    end
+
     [true, false].each do |should_persist_proxy_owner|
       describe "with proxy_owner " + (should_persist_proxy_owner ? "persisted" : "not persisted") do
         before do

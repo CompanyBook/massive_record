@@ -199,6 +199,11 @@ module MassiveRecord
         end
         alias_method :delete, :destroy
 
+        def change_id!(new_id)
+          IdentityMap.remove(self)
+          super
+        end
+
         private
 
 

@@ -58,6 +58,15 @@ shared_examples_for "validateable massive record model" do
       @model.class.stub(:new).and_return(@model)
       lambda { @model.class.create! }.should raise_error MassiveRecord::ORM::RecordInvalid
     end
+
+    describe ":on option" do
+      before { @model.consider_carma = true }
+
+      it "takes :on => create into consideration" do
+        @model.should_not be_valid
+        @model.errors[:carma].length.should eq 1
+      end
+    end
   end
 end
 
