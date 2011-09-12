@@ -3,6 +3,10 @@ require 'massive_record/orm/persistence/operations/update'
 require 'massive_record/orm/persistence/operations/destroy'
 require 'massive_record/orm/persistence/operations/atomic_operation'
 
+require 'massive_record/orm/persistence/operations/embedded/insert'
+require 'massive_record/orm/persistence/operations/embedded/update'
+require 'massive_record/orm/persistence/operations/embedded/destroy'
+
 module MassiveRecord
   module ORM
     module Persistence
@@ -24,19 +28,30 @@ module MassiveRecord
       module Operations
         class << self
           def insert(record, options = {})
-            Insert.new(record, options)
+            operator_for :insert, record, options
           end
 
           def update(record, options = {})
-            Update.new(record, options)
+            operator_for :update, record, options
           end
 
           def destroy(record, options = {})
-            Destroy.new(record, options)
+            operator_for :destroy, record, options
           end
 
           def atomic_operation(record, options = {})
-            AtomicOperation.new(record, options)
+            operator_for :atomic_operation, record, options
+          end
+
+          private
+          
+          def operator_for(operation, record, options)
+            class_parts = [self]
+            class_parts << "Embedded" if record.kind_of? ORM::Embedded
+            class_parts << operation.to_s.classify
+
+            klass = class_parts.join("::").constantize
+            klass.new(record, options)
           end
         end
 
