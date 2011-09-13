@@ -251,6 +251,10 @@ describe MassiveRecord::ORM::Relations::Interface do
         subject.addresses.should be_empty
       end
 
+      it "has a known column family for the embedded records" do
+        subject.column_families.collect(&:name).should include "addresses"
+      end
+
       it "should be assignable" do
         subject.addresses = [address]
         subject.addresses.should == [address]

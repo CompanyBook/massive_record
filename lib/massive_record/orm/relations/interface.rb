@@ -119,6 +119,7 @@ module MassiveRecord
           #
           def embeds_many(name, *args)
             metadata = set_up_relation('embeds_many', name, *args)
+            add_column_family(metadata.store_in)
             create_embeds_many_accessors(metadata)
           end
 
