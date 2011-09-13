@@ -6,7 +6,7 @@ class PersonWithTimestamp < MassiveRecord::ORM::Table
     field :points, :integer, :default => 1, :column => :pts
     field :date_of_birth, :date
     field :status, :boolean, :default => false
-    field :addresses, :hash, :default => {}
+    field :dictionary, :hash, :default => {}
 
     field :created_at, :time
   end

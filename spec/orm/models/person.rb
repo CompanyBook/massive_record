@@ -5,7 +5,7 @@ class Person < MassiveRecord::ORM::Table
     field :age, :integer
     field :carma, :float
     field :date_of_birth, :date
-    field :addresses, :hash, :default => {}
+    field :dictionary, :hash, :default => {}
     field :type
   end
 

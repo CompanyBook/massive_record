@@ -632,12 +632,12 @@ describe "persistence" do
         :name => "Thorbjorn",
         :age => 22,
         :points => 1,
-        :addresses => {'home' => 'Here'},
+        :dictionary => {'home' => 'Here'},
         :status => true
       })
     end
 
-    %w(points addresses status).each do |attr|
+    %w(points dictionary status).each do |attr|
       it "removes the cell from hbase when #{attr} is set to nil" do
         subject[attr] = nil
         subject.save!

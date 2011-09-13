@@ -13,7 +13,7 @@ describe "default values" do
   end
 
   context "new record" do
-    its(:addresses) { should eq Hash.new }
+    its(:dictionary) { should eq Hash.new }
     its(:points) { should eq 1 }
     its(:status) { should eq false }
     its(:phone_numbers) { should eq [] }
@@ -21,7 +21,7 @@ describe "default values" do
 
   context "persisted record" do
     before do
-      subject.addresses = nil
+      subject.dictionary = nil
       subject.points = nil
       subject.status = nil
       subject.phone_numbers = nil
@@ -29,7 +29,7 @@ describe "default values" do
       subject.reload
     end
 
-    its(:addresses) { should be_nil }
+    its(:dictionary) { should be_nil }
     its(:points) { should be_nil }
     its(:status) { should be_nil }
     its(:phone_numbers) { should eq [] }

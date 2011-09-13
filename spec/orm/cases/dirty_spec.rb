@@ -141,13 +141,13 @@ describe "dirty" do
     end
 
     it "should update dirty status correctly after a reload" do
-      @person.addresses = {:something => "strage"}
+      @person.dictionary = {:something => "strage"}
       @person.save! :validate => false
       @person.reload
-      @person.addresses = {}
+      @person.dictionary = {}
       @person.save! :validate => false
       @person.reload
-      @person.addresses.should == {}
+      @person.dictionary.should == {}
     end
   end
 end
