@@ -90,7 +90,7 @@ module MassiveRecord
 
           private
 
-          def find_proxy_target
+          def find_proxy_target(options = {})
             [] # TODO - Array of records
           end
 
