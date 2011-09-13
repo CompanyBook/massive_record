@@ -121,6 +121,8 @@ shared_examples_for "relation proxy" do
     let(:new_proxy_target) { subject.represents_a_collection? ? [subject.proxy_target_class.new] : subject.proxy_target_class.new }
 
     before do
+      new_proxy_target.each { |target| target.stub(:valid?).and_return true }
+      old_proxy_target.each { |target| target.stub(:valid?).and_return true }
       subject.proxy_target = old_proxy_target
     end
 

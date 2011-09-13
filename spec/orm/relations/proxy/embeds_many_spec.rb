@@ -50,6 +50,29 @@ describe TestEmbedsManyProxy do
 
 
 
+  describe "adding records to collection" do
+    [:<<, :push, :concat].each do |add_method|
+      describe "by ##{add_method}" do
+        it "includes added record in proxy target" do
+          subject.send add_method, proxy_target
+          subject.proxy_target.should include proxy_target
+        end
+
+        it "does not accept invalid records" do
+          proxy_target.should_receive(:valid?).and_return false
+          subject.send(add_method, proxy_target).should be_false
+          subject.should be_empty
+        end
+
+        it "should be possible to chain calls" do
+          subject.send(add_method, proxy_target).send(add_method, proxy_target_2)
+          subject.proxy_target.should include proxy_target, proxy_target_2
+        end
+      end
+    end
+  end
+
+
   describe "#can_find_proxy_target?" do
     it "is false when we have no raw targets in owner" do
       subject.should_not be_can_find_proxy_target
@@ -68,6 +91,11 @@ describe TestEmbedsManyProxy do
       before { proxy_owner.instance_variable_set(:@raw_data, {'addresses' => {}}) }
 
       its(:load_proxy_target) { should eq [] }
+
+      it "includes added records to collection" do
+        subject << proxy_target
+        subject.load_proxy_target.should include proxy_target
+      end
     end
 
     context "filled proxy_targets_raw" do

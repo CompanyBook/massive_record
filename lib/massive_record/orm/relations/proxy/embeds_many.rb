@@ -8,9 +8,23 @@ module MassiveRecord
           end
 
 
-          def proxy_targets_raw
+          #
+          # Returns the raw hash of attributes for embedded objects
+          #
+          def proxy_targets_raw # :nodoc:
             proxy_owner.raw_data[metadata.store_in]
           end
+
+
+          # FIXME Common to all proxies representing multiple values
+          def load_proxy_target(options = {})
+            proxy_target_before_load = proxy_target
+            proxy_target_after_load = super
+
+            self.proxy_target = (proxy_target_before_load + proxy_target_after_load).uniq
+          end
+
+
 
 
           def find(id)
@@ -44,6 +58,15 @@ module MassiveRecord
           # Adding record(s) to the collection.
           #
           def <<(*records)
+            records.flatten!
+
+            if records.all? &:valid?
+              records.each do |record|
+                proxy_target << record
+              end
+
+              self
+            end
           end
           alias_method :push, :<<
           alias_method :concat, :<<
@@ -115,6 +138,10 @@ module MassiveRecord
             end
           end
 
+          # FIXME Common to all proxies representing multiple values
+          def find_proxy_target_with_proc(options = {}, &block)
+            Array(super).compact
+          end
 
           def delete_or_destroy(*records, method)
           end
