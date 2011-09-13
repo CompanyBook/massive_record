@@ -70,7 +70,8 @@ module MassiveRecord
         end
 
         def store_in
-          @store_in.to_s if @store_in
+          return @store_in.to_s if @store_in
+          @store_in = name if embedded?
         end
 
         def store_foreign_key_in
@@ -84,17 +85,19 @@ module MassiveRecord
         end
 
         def persisting_foreign_key?
-          !!store_in && !records_starts_from
+          !embedded? && !!store_in && !records_starts_from
         end
 
 
         def polymorphic
           !!@polymorphic
         end
+        alias polymorphic? polymorphic
 
-        def polymorphic?
-          polymorphic
+        def embedded
+          relation_type == "embeds_many"
         end
+        alias embedded? embedded
 
 
         def new_relation_proxy(proxy_owner)
@@ -114,7 +117,7 @@ module MassiveRecord
 
 
         def represents_a_collection?
-          relation_type == 'references_many'
+          %w(references_many embeds_many).include? relation_type
         end
 
         #

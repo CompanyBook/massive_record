@@ -11,7 +11,10 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
 
   it "should be setting values by initializer" do
-    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info, :polymorphic => true, :records_starts_from => :records_starts_from
+    metadata = subject.class.new(:car, {
+      :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info,
+      :polymorphic => true, :records_starts_from => :records_starts_from
+    })
     metadata.name.should == "car"
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
@@ -91,26 +94,56 @@ describe MassiveRecord::ORM::Relations::Metadata do
     end
   end
 
+  describe "#embedded?" do
+    %w(references_one references_one_polymorphic, references_many).each do |type|
+      context type do
+        before { subject.relation_type = type }
 
+        its(:embedded?) { should be_false }
+      end
+    end
 
-  describe "#store_in" do
-    its(:store_in) { should be_nil }
+    %w(embeds_many).each do |type|
+      context type do
+        before { subject.relation_type = type }
 
-    it "should be able to set column family to store foreign key in" do
-      subject.store_in = :info
-      subject.store_in.should == "info"
+        its(:embedded?) { should be_true }
+      end
     end
   end
 
-  it "should know its persisting foreign key if foreign key stored in has been set" do
-    subject.store_in = :info
-    should be_persisting_foreign_key
-  end
+  describe "#store_in" do
+    context "references" do
+      before { subject.relation_type = :references_many }
 
-  it "should not be storing the foreign key if records_starts_from is defined" do
-    subject.store_in = :info
-    subject.records_starts_from = :method_which_returns_a_starting_point
-    should_not be_persisting_foreign_key
+      its(:store_in) { should be_nil }
+
+      it "should be able to set column family to store foreign key in" do
+        subject.store_in = :info
+        subject.store_in.should == "info"
+      end
+
+      it "should know its persisting foreign key if foreign key stored in has been set" do
+        subject.store_in = :info
+        should be_persisting_foreign_key
+      end
+
+      it "should not be storing the foreign key if records_starts_from is defined" do
+        subject.store_in = :info
+        subject.records_starts_from = :method_which_returns_a_starting_point
+        should_not be_persisting_foreign_key
+      end
+    end
+
+    context "embedded" do
+      before do
+        subject.name = :addresses
+        subject.relation_type = :embeds_many
+      end
+
+      its(:store_in) { should eq "addresses" }
+      its(:persisting_foreign_key?) { should be_false }
+    end
   end
 
 
