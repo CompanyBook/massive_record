@@ -255,12 +255,12 @@ describe MassiveRecord::ORM::Relations::Interface do
         subject.column_families.collect(&:name).should include "addresses"
       end
 
-      it "should be assignable" do
+      it "is ssignable" do
         subject.addresses = [address]
         subject.addresses.should == [address]
       end
 
-      it "should be assignable in initializer" do
+      it "is assignable in initializer" do
         person = Person.new :addresses => [address]
         person.addresses.should == [address]
       end

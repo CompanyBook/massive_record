@@ -3,6 +3,16 @@ module MassiveRecord
     module Relations
       class Proxy
         class EmbedsMany < Proxy
+          def initialize(options = {})
+            super
+            @raw = {}
+          end
+
+
+          def raw
+            @raw.dup
+          end
+
 
           def find(id)
             raise "TODO" # TODO
@@ -22,8 +32,12 @@ module MassiveRecord
           def replace(*records)
             records.flatten!
 
-            delete_all
-            concat(records)
+            if records.length == 1 and records.first.nil?
+              reset
+            else
+              delete_all
+              concat(records)
+            end
           end
 
 
@@ -31,7 +45,10 @@ module MassiveRecord
           # Adding record(s) to the collection.
           #
           def <<(*records)
-            raise "TODO" #
+            records.flatten.each do |record|
+              @raw[record.id] = record.attributes_to_row_values_hash
+              proxy_target << record
+            end
           end
           alias_method :push, :<<
           alias_method :concat, :<<
@@ -98,12 +115,16 @@ module MassiveRecord
           private
 
           def find_proxy_target(options = {})
-            [] # TODO - Array of records
+            raw.keys.each do |id|
+              metadata.proxy_target_class.init_with :attributes => row[id]
+            end
           end
 
 
           def delete_or_destroy(*records, method)
-            raise "TODO" # TODO
+            records.flatten.each do |record|
+              @raw.delete record.id
+            end
           end
 
           def can_find_proxy_target?
