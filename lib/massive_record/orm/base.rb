@@ -149,6 +149,7 @@ module MassiveRecord
         @new_record = true
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
+        @raw_data = {}
 
         self.attributes_raw = attributes_from_field_definition.merge('id' => id)
         self.attributes = attributes
@@ -178,6 +179,7 @@ module MassiveRecord
         @new_record = false
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
+        @raw_data = coder['raw_data'] || {}
 
         self.attributes_raw = coder['attributes']
         fill_attributes_with_default_values_where_nil_is_not_allowed
@@ -244,6 +246,27 @@ module MassiveRecord
         object = self.class.new
         object.init_with('attributes' => attributes.select{|k| !['id', 'created_at', 'updated_at'].include?(k)})
         object
+      end
+
+
+      #
+      # The raw data is raw values returned by the adapter.
+      # It is a nested hash like:
+      #
+      # {
+      #   'family' => {
+      #     'attr1' => 'value'
+      #     'attr2' => 'value'
+      #   },
+      #
+      #   'addresses' => {
+      #     'address-1' => {'serialized' => 'attributes', 'for' => 'address-2'}
+      #   }
+      #   ...
+      # }
+      #
+      def raw_data
+        @raw_data.dup
       end
       
 

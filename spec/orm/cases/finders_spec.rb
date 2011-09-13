@@ -63,6 +63,12 @@ describe "finders" do
       @mocked_table.should_receive(:find).with("ID1", anything).and_return(@row)
       Person.find("ID1")
     end
+
+    it "persists the raw values from table" do
+      @mocked_table.should_receive(:find).with("ID1", anything).and_return(@row)
+      person = Person.find("ID1")
+      person.raw_data.should eq @row.values_hash
+    end
     
     it "should ask the table to fetch rows from a list of ids given as array" do
       @mocked_table.should_receive(:find).with(["ID1", "ID2"], anything).and_return([@row, @row_2])

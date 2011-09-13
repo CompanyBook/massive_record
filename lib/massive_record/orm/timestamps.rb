@@ -17,10 +17,11 @@ module MassiveRecord
       module ClassMethods
         private
 
-        def transpose_hbase_columns_to_record_attributes(row)
-          attributes = super
-          attributes['updated_at'] = row.updated_at
-          attributes
+        def transpose_hbase_row_to_record_attributes_and_raw_data(row)
+          super.tap do |attributes, raw_values|
+            attributes['updated_at'] = row.updated_at
+            attributes
+          end
         end
       end
 

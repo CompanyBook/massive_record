@@ -23,7 +23,7 @@ module MassiveRecord
         def find_in_batches(*args)
           table.find_in_batches(*args) do |rows|
             records = rows.collect do |row|
-              instantiate(transpose_hbase_columns_to_record_attributes(row))
+              instantiate(*transpose_hbase_row_to_record_attributes_and_raw_data(row))
             end    
             yield records
           end
@@ -191,12 +191,12 @@ module MassiveRecord
         end
 
         def instantiate_row_from_hbase(row)
-          instantiate(transpose_hbase_columns_to_record_attributes(row)) # :nodoc:
+          instantiate(*transpose_hbase_row_to_record_attributes_and_raw_data(row)) # :nodoc:
         end
 
 
 
-        def instantiate(record) # :nodoc:
+        def instantiate(record, raw_data) # :nodoc:
           model = if record.has_key?(inheritance_attribute)
                     if klass = record[inheritance_attribute] and klass.present?
                       klass.constantize.allocate
@@ -207,7 +207,7 @@ module MassiveRecord
                     allocate
                   end
 
-          model.init_with('attributes' => record)
+          model.init_with('attributes' => record, 'raw_data' => raw_data)
         end
 
 
@@ -224,17 +224,19 @@ module MassiveRecord
           result_from_table
         end
 
-        def transpose_hbase_columns_to_record_attributes(row) # :nodoc:
+        def transpose_hbase_row_to_record_attributes_and_raw_data(row) # :nodoc:
           attributes = {:id => row.id}
+          raw_data = row.values_hash
           
           autoload_column_families_and_fields_with(row.columns.keys)
 
           # Parse the schema to populate the instance attributes
           attributes_schema.each do |key, field|
-            cell = row.columns[field.unique_name]
-            attributes[field.name] = cell.nil? ? nil : field.decode(cell.value)
+            value = raw_data.has_key?(field.column_family.name) ? raw_data[field.column_family.name][field.column] : nil
+            attributes[field.name] = value.nil? ? nil : field.decode(value)
           end
-          attributes
+
+          [attributes, raw_data]
         end
       end
     end

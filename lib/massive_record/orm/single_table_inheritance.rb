@@ -46,11 +46,11 @@ module MassiveRecord
         #
         # In Rails development environment class files are not required before they are needed.
         #
-        # transpose_hbase_columns_to_record_attributes uses attributes_schema and
+        # transpose_hbase_row_to_record_attributes_and_raw_data uses attributes_schema and
         # for attributes_schema to have loaded all of it's fields correctly we need
         # to make sure Rails loads class file before attributes_schema renders it's schema.
         #
-        def transpose_hbase_columns_to_record_attributes(row) # :nodoc:
+        def transpose_hbase_row_to_record_attributes_and_raw_data(row) # :nodoc:
           if field = attributes_schema[inheritance_attribute]
             if cell_with_record_sti_class = row.columns[field.unique_name] and cell_with_record_sti_class.present?
               if klass = field.decode(cell_with_record_sti_class.value) and klass.present?
