@@ -122,6 +122,8 @@ module MassiveRecord
             create_embeds_many_accessors(metadata)
           end
 
+
+
           private
 
           def set_up_relation(type, name, *args)
@@ -177,6 +179,10 @@ module MassiveRecord
           def create_embeds_many_accessors(metadata)
             redefine_method(metadata.name) do
               relation_proxy(metadata.name)
+            end
+
+            redefine_method(metadata.name+'=') do |records|
+              relation_proxy(metadata.name).replace(records)
             end
           end
         end

@@ -19,6 +19,13 @@ module MassiveRecord
             @proxy_target = []
           end
 
+          def replace(*records)
+            records.flatten!
+
+            delete_all
+            concat(records)
+          end
+
 
           #
           # Adding record(s) to the collection.

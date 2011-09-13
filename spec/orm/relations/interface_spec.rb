@@ -227,22 +227,22 @@ describe MassiveRecord::ORM::Relations::Interface do
     describe "relation's meta data" do
       subject { Person.relations.detect { |relation| relation.name == "addresses" } }
 
-      it "should have the reference one meta data stored in relations" do
-        Person.relations.detect { |relation| relation.name == "test_classes" }.should_not be_nil
+      it "stores the relation on the class" do
+        Person.relations.detect { |relation| relation.name == "addresses" }.should_not be_nil
       end
 
-      it "should have type set to references_many" do
+      it "has correct type on relation" do
         subject.relation_type.should == "embeds_many"
       end
 
-      it "should raise an error if the same relaton is called for twice" do
-        lambda { Person.references_one :test_classes }.should raise_error MassiveRecord::ORM::RelationAlreadyDefined
+      it "raises error if relation defined twice" do
+        expect { Person.embeds_many :addresses }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
       end
     end
 
     describe "instance" do
       subject { Person.new }
-      let(:test_class) { Address.new }
+      let(:address) { Address.new "id1" }
       let(:proxy) { subject.send(:relation_proxy, "addresses") }
 
       it { should respond_to :addresses }
@@ -251,8 +251,15 @@ describe MassiveRecord::ORM::Relations::Interface do
         subject.addresses.should be_empty
       end
 
+      it "should be assignable" do
+        subject.addresses = [address]
+        subject.addresses.should == [address]
+      end
 
-      # TODO ..test more of the addresses's (proxy) interface here :-)
+      it "should be assignable in initializer" do
+        person = Person.new :addresses => [address]
+        person.addresses.should == [address]
+      end
     end
   end
 end
