@@ -149,7 +149,7 @@ module MassiveRecord
         @new_record = true
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
-        @raw_data = {}
+        @raw_data = Hash.new { |h,k| h[k] = {} }
 
         self.attributes_raw = attributes_from_field_definition.merge('id' => id)
         self.attributes = attributes
@@ -179,7 +179,8 @@ module MassiveRecord
         @new_record = false
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
-        @raw_data = coder['raw_data'] || {}
+        @raw_data = Hash.new { |h,k| h[k] = {} }
+        @raw_data.update(coder['raw_data']) if coder.has_key? 'raw_data'
 
         self.attributes_raw = coder['attributes']
         fill_attributes_with_default_values_where_nil_is_not_allowed

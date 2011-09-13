@@ -5,12 +5,11 @@ module MassiveRecord
         class EmbedsMany < Proxy
           def initialize(options = {})
             super
-            @raw = {}
           end
 
 
-          def raw
-            @raw.dup
+          def proxy_targets_raw
+            proxy_owner.raw_data[metadata.store_in]
           end
 
 
@@ -45,10 +44,6 @@ module MassiveRecord
           # Adding record(s) to the collection.
           #
           def <<(*records)
-            records.flatten.each do |record|
-              @raw[record.id] = record.attributes_to_row_values_hash
-              proxy_target << record
-            end
           end
           alias_method :push, :<<
           alias_method :concat, :<<
@@ -115,20 +110,17 @@ module MassiveRecord
           private
 
           def find_proxy_target(options = {})
-            raw.keys.each do |id|
-              metadata.proxy_target_class.init_with :attributes => row[id]
+            proxy_targets_raw.inject([]) do |records, (id, attributes)|
+              records << proxy_target_class.send(:instantiate, attributes, {})
             end
           end
 
 
           def delete_or_destroy(*records, method)
-            records.flatten.each do |record|
-              @raw.delete record.id
-            end
           end
 
           def can_find_proxy_target?
-            true
+            super || proxy_targets_raw.any?
           end
         end
       end

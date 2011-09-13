@@ -8,28 +8,72 @@ describe TestEmbedsManyProxy do
 
   let(:proxy_owner) { Person.new "person-id-1", :name => "Test", :age => 29 }
   let(:proxy_target) { Address.new "address-1", :street => "Asker", :number => 1 }
-  let(:proxy_target_2) { TeAddressew "address-2", :street => "Asker", :number => 2 }
-  let(:proxy_target_3) { TestAddress "address-3", :street => "Asker", :number => 3 }
+  let(:proxy_target_2) { Address.new "address-2", :street => "Asker", :number => 2 }
+  let(:proxy_target_3) { Address.new "address-3", :street => "Asker", :number => 3 }
   let(:metadata) { subject.metadata }
+
+  let(:raw_data) do
+    {
+      proxy_target.id => proxy_target.attributes,
+      proxy_target_2.id => proxy_target_2.attributes,
+      proxy_target_3.id => proxy_target_3.attributes,
+    }
+  end
+
 
   subject { proxy_owner.send(:relation_proxy, 'addresses') }
 
+
   it_should_behave_like "relation proxy"
 
-  describe "#raw" do
+
+
+  describe "#proxy_targets_raw" do
     it "is a hash" do
-      subject.raw.should be_instance_of Hash
+      subject.proxy_targets_raw.should be_instance_of Hash
     end
 
-    it "keeps id and attributes for added records" do
-      subject << proxy_target
-      subject.raw[proxy_target.id].should eq proxy_target.attributes_to_row_values_hash
+    context "proxy owner is new record" do
+      its(:proxy_targets_raw) { should be_empty }
     end
 
-    it "removes id and attributes for removed records" do
-      subject << proxy_target
-      subject.destroy(proxy_target)
-      subject.raw.should be_empty
+    context "proxy owner is saved and has records" do
+      before do
+        proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data})
+      end
+
+      it "includes raw data from database" do
+        subject.proxy_targets_raw.should eq raw_data
+      end
+    end
+  end
+
+
+
+  describe "#can_find_proxy_target?" do
+    it "is false when we have no raw targets in owner" do
+      subject.should_not be_can_find_proxy_target
+    end
+
+    it "is true when we have some raw targets" do
+      proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data})
+      subject.should be_can_find_proxy_target
+    end
+  end
+
+
+
+  describe "#load_proxy_target" do
+    context "empty proxy targets raw" do
+      before { proxy_owner.instance_variable_set(:@raw_data, {'addresses' => {}}) }
+
+      its(:load_proxy_target) { should eq [] }
+    end
+
+    context "filled proxy_targets_raw" do
+      before { proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data}) }
+
+      its(:load_proxy_target) { should include proxy_target, proxy_target_2, proxy_target_3 }
     end
   end
 end
