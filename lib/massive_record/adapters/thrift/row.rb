@@ -41,6 +41,27 @@ module MassiveRecord
           @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.value; h}
         end
 
+        # Returns values as a nested hash.
+        #
+        # {
+        #   'family' => {
+        #     'attr1' => 'value'
+        #     'attr2' => 'value'
+        #   },
+        #   ...
+        # }
+        #
+        # I think maybe that values should return this instead, as it is what the
+        # values= expects to receive.
+        def values_hash
+          Hash.new { |hash, key| hash[key] = {} }.tap do |hash|
+            @columns.each do |key, column|
+              column_family, name = key.split(':')
+              hash[column_family][name] = column.value
+            end
+          end
+        end
+
         def values=(data)
           @values = {}
           update_columns(data)
