@@ -28,8 +28,15 @@ module MassiveRecord
           #
           #
           def column_family(name, &block)
+            add_column_family(name).instance_eval(&block)
+          end
+
+          #
+          # Adds a column family to your class
+          #
+          def add_column_family(name)
             ensure_column_families_exists
-            column_families.family_by_name_or_new(name).instance_eval(&block)
+            column_families.family_by_name_or_new(name)
           end
 
           #
