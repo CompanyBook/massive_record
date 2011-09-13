@@ -242,7 +242,7 @@ describe MassiveRecord::ORM::Relations::Interface do
 
     describe "instance" do
       subject { Person.new }
-      let(:address) { Address.new "id1" }
+      let(:address) { Address.new "id1", :street => "Asker" }
       let(:proxy) { subject.send(:relation_proxy, "addresses") }
 
       it { should respond_to :addresses }
