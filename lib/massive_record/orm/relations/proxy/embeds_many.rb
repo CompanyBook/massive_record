@@ -65,6 +65,8 @@ module MassiveRecord
                 proxy_target << record
               end
 
+              proxy_owner.save if proxy_owner.persisted?
+
               self
             end
           end

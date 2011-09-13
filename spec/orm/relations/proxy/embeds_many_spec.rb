@@ -64,9 +64,21 @@ describe TestEmbedsManyProxy do
           subject.should be_empty
         end
 
-        it "should be possible to chain calls" do
+        it "returns self so you can chain calls" do
           subject.send(add_method, proxy_target).send(add_method, proxy_target_2)
           subject.proxy_target.should include proxy_target, proxy_target_2
+        end
+
+        it "saves proxy owner if it is already persisted" do
+          proxy_owner.should_receive(:persisted?).and_return true
+          proxy_owner.should_receive(:save).once
+          subject.send add_method, proxy_target
+        end
+
+        it "does not save proxy owner if it is a new record" do
+          proxy_owner.should_receive(:persisted?).and_return false
+          proxy_owner.should_not_receive(:save)
+          subject.send add_method, proxy_target
         end
       end
     end
