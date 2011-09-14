@@ -144,6 +144,7 @@ describe TestEmbedsManyProxy do
     context "no changes" do
       before do
         subject << proxy_target
+        proxy_target.should_receive(:destroyed?).and_return false
         proxy_target.should_receive(:new_record?).and_return false
         proxy_target.should_receive(:changed?).and_return false
       end
@@ -200,6 +201,34 @@ describe TestEmbedsManyProxy do
       it "includes attributes for record to be updated" do
         subject.proxy_targets_update_hash.values.should eq [nil]
       end
+    end
+  end
+
+  describe "#changed?" do
+    before do
+      subject << proxy_target
+      proxy_target.stub(:destroyed?).and_return false
+      proxy_target.stub(:new_record?).and_return false
+      proxy_target.stub(:changed?).and_return false
+    end
+
+    it "returns false if no changes has been made which needs persistence" do
+      should_not be_changed
+    end
+
+    it "returns true if it contains new records" do
+      proxy_target.should_receive(:new_record?).and_return true
+      should be_changed
+    end
+
+    it "returns true if it contains destroyed records" do
+      proxy_target.should_receive(:destroyed?).and_return true
+      should be_changed
+    end
+
+    it "returns true if it contains changed records" do
+      proxy_target.should_receive(:changed?).and_return true
+      should be_changed
     end
   end
 end

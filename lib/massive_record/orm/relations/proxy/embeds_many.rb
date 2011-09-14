@@ -30,6 +30,13 @@ module MassiveRecord
             end.compact]
           end
 
+          def changed?
+            proxy_target.any? do |record|
+              record.new_record? || record.destroyed? || record.changed?
+            end
+          end
+
+
 
           # FIXME Common to all proxies representing multiple values
           def load_proxy_target(options = {})
