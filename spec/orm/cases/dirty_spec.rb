@@ -4,125 +4,149 @@ describe "dirty" do
   describe "dry run" do
     include MockMassiveRecordConnection
 
-    before do
-      @person = Person.new '1', :name => "Alice", :age => 20, :email => "foo@bar.com"
-    end
+    subject { Person.new '1', :name => "Alice", :age => 20, :email => "foo@bar.com" }
+    let(:address) { Address.new("id1", :street => "foo") }
 
     it "should not be changed after created" do
-      @person.should_not be_changed
+      should_not be_changed
     end
 
     it "should not be changed if attribute is set to what it currently is" do
-      @person.name = "Alice"
-      @person.should_not be_changed
+      subject.name = "Alice"
+      should_not be_changed
     end
 
     it "should notice changes" do
-      @person.name = "Bob"
-      @person.should be_changed
+      subject.name = "Bob"
+      should be_changed
+    end
+
+    describe "changes in embedded relations" do
+      before { subject.addresses << address }
+
+      it "iterates over embedded relations and asks them if they have changes" do
+        should be_changed
+      end
+
+      it "includes addresses in changed" do
+        subject.changed.should include "addresses"
+      end
+
+      it "includes knowledge of changes" do
+        address.street = address.street + "_NEW"
+        subject.name = subject.name + "_NEW"
+        subject.changes.should eq({
+          "name" => ["Alice", "Alice_NEW"],
+          "addresses" => {
+            "id1" => {
+              "street" => ["foo", "foo_NEW"]
+            }
+          }
+        })
+      end
     end
 
     it "should notice changes in boolean values from false to true" do
-      @person.status = !@person.status
-      @person.should be_status_changed
+      subject.status = !subject.status
+      should be_status_changed
     end
 
     it "should notice changes in boolean values from true to false" do
-      @person.status = true
-      @person.save
-      @person.status = false
-      @person.should be_status_changed
+      subject.status = true
+      subject.save
+      subject.status = false
+      should be_status_changed
     end
 
     it "should not consider age set as string to the same as integer a change" do
-      @person.age = "20"
-      @person.should_not be_age_changed
+      subject.age = "20"
+      should_not be_age_changed
     end
 
     it "should not consider age set as string back to original value a change" do
-      @person.age = 30
-      @person.age = "20"
-      @person.should_not be_age_changed
+      subject.age = 30
+      subject.age = "20"
+      should_not be_age_changed
     end
 
 
     it "should know when a attribute is set to it's original value" do
-      original_name = @person.name
-      @person.name = "Bob"
-      @person.name = original_name
-      @person.should_not be_changed
+      original_name = subject.name
+      subject.name = "Bob"
+      subject.name = original_name
+      should_not be_changed
     end
 
     it "should always keep the objects original value as _was" do
-      original_name = @person.name
-      @person.name = "Bob"
-      @person.name = "Foo"
-      @person.name_was.should == original_name
+      original_name = subject.name
+      subject.name = "Bob"
+      subject.name = "Foo"
+      subject.name_was.should == original_name
     end
 
     it "should return what name was" do
-      @person.name = "Bob"
-      @person.name_was.should == "Alice"
+      subject.name = "Bob"
+      subject.name_was.should == "Alice"
     end
 
 
     describe "should reset changes" do
       it "on save" do
-        @person.name = "Bob"
-        @person.save
-        @person.should_not be_changed
+        subject.name = "Bob"
+        subject.save
+        should_not be_changed
       end
 
       it "on save, but don't do it if save fails validation" do
-        @person.should_receive(:valid?).and_return(false)
-        @person.name = "Bob"
-        @person.save
-        @person.should be_changed
+        subject.should_receive(:valid?).and_return(false)
+        subject.name = "Bob"
+        subject.save
+        should be_changed
       end
 
       it "on save!" do
-        @person.name = "Bob"
-        @person.save!
-        @person.should_not be_changed
+        subject.name = "Bob"
+        subject.save!
+        should_not be_changed
       end
 
       it "on reload" do
-        @person.name = "Bob"
-        @person.reload
-        @person.should_not be_changed
+        subject.name = "Bob"
+        subject.reload
+        should_not be_changed
       end
     end
 
     describe "previous changes" do
       it "should be blank before save" do
-        @person.previous_changes.should be_blank
+        subject.previous_changes.should be_blank
       end
 
       it "should equal to changes before save" do
-        @person.name = "Bob"
-        changes_before_save = @person.changes
+        subject.name = "Bob"
+        changes_before_save = subject.changes
 
-        @person.save
+        subject.save
 
-        @person.changes.should be_empty
-        @person.previous_changes.should == changes_before_save
+        subject.changes.should be_empty
+        subject.previous_changes.should == changes_before_save
       end
 
       it "should equal to changes before save!" do
-        @person.name = "Bob"
-        changes_before_save = @person.changes
+        subject.name = "Bob"
+        changes_before_save = subject.changes
 
-        @person.save!
+        subject.save!
 
-        @person.changes.should be_empty
-        @person.previous_changes.should == changes_before_save
+        subject.changes.should be_empty
+        subject.previous_changes.should == changes_before_save
       end
 
       it "should be nil after a reload" do
-        @person.name = "Bob"
-        @person.save
-        @person.reload
-        @person.previous_changes.should be_blank
+        subject.name = "Bob"
+        subject.save
+        subject.reload
+        subject.previous_changes.should be_blank
       end
     end
   end
@@ -132,22 +156,23 @@ describe "dirty" do
     include SetUpHbaseConnectionBeforeAll
     include SetTableNamesToTestTable
 
+    subject { Person.new }
+
     before do
-      @person = Person.new
-      @person.id = "test"
-      @person.points = "25"
-      @person.date_of_birth = "19850730"
-      @person.status = "0"
+      subject.id = "test"
+      subject.points = "25"
+      subject.date_of_birth = "19850730"
+      subject.status = "0"
     end
 
     it "should update dirty status correctly after a reload" do
-      @person.dictionary = {:something => "strage"}
-      @person.save! :validate => false
-      @person.reload
-      @person.dictionary = {}
-      @person.save! :validate => false
-      @person.reload
-      @person.dictionary.should == {}
+      subject.dictionary = {:something => "strage"}
+      subject.save! :validate => false
+      subject.reload
+      subject.dictionary = {}
+      subject.save! :validate => false
+      subject.reload
+      subject.dictionary.should == {}
     end
   end
 end

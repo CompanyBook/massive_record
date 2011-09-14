@@ -45,6 +45,24 @@ module MassiveRecord
         end
 
 
+        def changed?
+          super || relation_proxies_for_embedded.any?(&:changed?)
+        end
+
+        def changed
+          super + relation_proxies_for_embedded.select(&:changed?).collect { |proxy| proxy.metadata.name }
+        end
+
+        def changes
+          changes_in_embedded_proxies = {}
+
+          relation_proxies_for_embedded.select(&:changed?).each do |proxy|
+            changes_in_embedded_proxies[proxy.metadata.name] = proxy.changes 
+          end
+
+          super.update(changes_in_embedded_proxies)
+        end
+
         private
 
         def update(*)
