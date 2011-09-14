@@ -196,6 +196,15 @@ module MassiveRecord
         end
 
 
+        def relation_proxies
+          (relations || []).map { |metadata| relation_proxy(metadata.name) }
+        end
+
+        def relation_proxies_for_embedded
+          (relations || []).select(&:embedded?).map { |metadata| relation_proxy(metadata.name) }
+        end
+
+
         private
 
         def relation_proxy(name)
