@@ -15,6 +15,21 @@ module MassiveRecord
             proxy_owner.raw_data[metadata.store_in]
           end
 
+          #
+          # Returns a hash with ids and serialized version
+          # of embedded object which should be updated. The value
+          # will be nil if it is supposed to be destroyed.
+          #
+          def proxy_targets_update_hash # :nodoc:
+            Hash[proxy_target.collect do |record|
+              if record.destroyed?
+                [record.id, nil]
+              elsif record.new_record? || record.changed?
+                [record.id, record.attributes_db_raw_data_hash]
+              end
+            end.compact]
+          end
+
 
           # FIXME Common to all proxies representing multiple values
           def load_proxy_target(options = {})

@@ -133,4 +133,73 @@ describe TestEmbedsManyProxy do
       its(:load_proxy_target) { should include proxy_target, proxy_target_2, proxy_target_3 }
     end
   end
+
+
+
+  describe "#proxy_targets_update_hash" do
+    before do
+      proxy_owner.save!
+    end
+
+    context "no changes" do
+      before do
+        subject << proxy_target
+        proxy_target.should_receive(:new_record?).and_return false
+        proxy_target.should_receive(:changed?).and_return false
+      end
+
+      its(:proxy_targets_update_hash) { should be_empty }
+    end
+
+    context "insert" do
+      before do
+        subject << proxy_target
+        proxy_target.should_receive(:destroyed?).and_return false
+        proxy_target.should_receive(:new_record?).and_return true
+        proxy_target.should_not_receive(:changed?)
+      end
+
+      it "includes id for record to be inserted" do
+        subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+      end
+
+      it "includes attributes for record to be inserted" do
+        subject.proxy_targets_update_hash.values.should eq [proxy_target.attributes_db_raw_data_hash]
+      end
+    end
+
+    context "update" do
+      before do
+        subject << proxy_target
+        proxy_target.should_receive(:destroyed?).and_return false
+        proxy_target.should_receive(:new_record?).and_return false
+        proxy_target.should_receive(:changed?).and_return true
+      end
+
+      it "includes id for record to be updated" do
+        subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+      end
+
+      it "includes attributes for record to be updated" do
+        subject.proxy_targets_update_hash.values.should eq [proxy_target.attributes_db_raw_data_hash]
+      end
+    end
+
+    context "destroy" do
+      before do
+        subject << proxy_target
+        proxy_target.should_receive(:destroyed?).and_return true
+        proxy_target.should_not_receive(:new_record?).and_return false
+        proxy_target.should_not_receive(:changed?).and_return false
+      end
+
+      it "includes id for record to be updated" do
+        subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+      end
+
+      it "includes attributes for record to be updated" do
+        subject.proxy_targets_update_hash.values.should eq [nil]
+      end
+    end
+  end
 end
