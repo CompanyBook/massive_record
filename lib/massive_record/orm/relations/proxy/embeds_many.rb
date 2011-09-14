@@ -135,8 +135,11 @@ module MassiveRecord
           private
 
           def find_proxy_target(options = {})
-            proxy_targets_raw.inject([]) do |records, (id, attributes)|
-              records << proxy_target_class.send(:instantiate, attributes, {})
+            id, raw_data = proxy_targets_raw.first
+
+            proxy_targets_raw.inject([]) do |records, (id, raw_data)|
+              attributes_and_raw_data = proxy_target_class.transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data)
+              records << proxy_target_class.send(:instantiate, *attributes_and_raw_data)
             end
           end
 

@@ -14,9 +14,9 @@ describe TestEmbedsManyProxy do
 
   let(:raw_data) do
     {
-      proxy_target.id => proxy_target.attributes,
-      proxy_target_2.id => proxy_target_2.attributes,
-      proxy_target_3.id => proxy_target_3.attributes,
+      proxy_target.id => proxy_target.attributes_db_raw_data_hash,
+      proxy_target_2.id => proxy_target_2.attributes_db_raw_data_hash,
+      proxy_target_3.id => proxy_target_3.attributes_db_raw_data_hash,
     }
   end
 

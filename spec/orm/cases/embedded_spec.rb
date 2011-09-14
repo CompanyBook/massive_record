@@ -5,7 +5,7 @@ describe MassiveRecord::ORM::Embedded do
   subject { Address.new(:street => "Asker", :number => 5) }
 
   it "should have known_attribute_names" do
-    Address.should have(3).known_attribute_names
+    Address.should have(4).known_attribute_names
     Address.known_attribute_names.should include("street", "number", "nice_place")
   end
 

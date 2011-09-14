@@ -133,4 +133,28 @@ describe MassiveRecord::ORM::Schema::EmbeddedInterface do
       test_interface.add_field :age, :integer, :default => 1
     end
   end
+
+  describe "#attributes_db_raw_data_hash" do
+    subject { Address.new("id", :street => "Asker", :number => 2, :nice_place => true, :zip => '1384') }
+
+    it "returns hash with correct key-value pairs" do
+      subject.attributes_db_raw_data_hash.should eq({
+        "street" => "Asker",
+        "number" => 2,
+        "nice_place" => "true",
+        "postal_code" => "1384"
+      })
+    end
+  end
+
+  describe ".transpose_raw_data_to_record_attributes_and_raw_data" do
+    it "returns correct attributes from db values hash" do
+      attributes, raw_data = Address.transpose_raw_data_to_record_attributes_and_raw_data "id", {
+        "street" => "Oslo",
+        "number" => 3,
+        "nice_place" => "false",
+        "postal_code" => "1111"
+      }
+    end
+  end
 end
