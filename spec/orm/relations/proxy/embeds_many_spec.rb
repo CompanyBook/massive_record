@@ -48,6 +48,12 @@ describe TestEmbedsManyProxy do
     end
   end
 
+  describe "#reload" do
+    it "reloads its's column family and replaces raw data" do
+      pending
+    end
+  end
+
 
 
   describe "adding records to collection" do
@@ -75,10 +81,16 @@ describe TestEmbedsManyProxy do
           subject.send add_method, proxy_target
         end
 
-        it "does not save proxy owner if it is a new record" do
-          proxy_owner.should_receive(:persisted?).and_return false
-          proxy_owner.should_not_receive(:save)
+        it "marks added records as persisted" do
+          proxy_owner.should_receive(:persisted?).and_return true
+          proxy_owner.should_receive(:save).once
           subject.send add_method, proxy_target
+        end
+
+        it "does not save proxy owner if it is a new record" do
+          pending "Actually saving is not yet completed.."
+          subject.send add_method, proxy_target
+          proxy_target.should be_persisted
         end
       end
     end
