@@ -20,7 +20,7 @@ module MassiveRecord
           # of embedded object which should be updated. The value
           # will be nil if it is supposed to be destroyed.
           #
-          def proxy_targets_update_hash # :nodoc:
+          def roxy_targets_update_hash # :nodoc:
             Hash[proxy_target.collect do |record|
               if record.destroyed?
                 [record.id, nil]
@@ -34,6 +34,14 @@ module MassiveRecord
             proxy_target.any? do |record|
               record.new_record? || record.destroyed? || record.changed?
             end
+          end
+
+          def changes
+            Hash[proxy_target.collect do |record|
+              if record.changed?
+                [record.id, record.changes]
+              end
+            end.compact]
           end
 
 

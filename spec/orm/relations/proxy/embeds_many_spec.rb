@@ -231,4 +231,21 @@ describe TestEmbedsManyProxy do
       should be_changed
     end
   end
+
+  describe "#changes" do
+    before do
+      subject << proxy_target
+      proxy_target.stub(:destroyed?).and_return false
+      proxy_target.stub(:new_record?).and_return false
+    end
+
+    it "has no changes when no changes has been made" do
+      subject.changes.should be_empty
+    end
+
+    it "accumelates the changes for the complete collection" do
+      proxy_target.street = proxy_target.street + "_NEW"
+      subject.changes.should eq({"address-1" => {"street" => ["Asker", "Asker_NEW"]}})
+    end
+  end
 end
