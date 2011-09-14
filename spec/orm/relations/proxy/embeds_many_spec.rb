@@ -92,6 +92,11 @@ describe TestEmbedsManyProxy do
           subject.send add_method, proxy_target
           proxy_target.should be_persisted
         end
+
+        it "does not add existing records" do
+          2.times { subject.send add_method, proxy_target }
+          subject.proxy_target.length.should eq 1
+        end
       end
     end
   end

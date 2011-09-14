@@ -62,7 +62,9 @@ module MassiveRecord
 
             if records.all? &:valid?
               records.each do |record|
-                proxy_target << record
+                unless include? record
+                  proxy_target << record
+                end
               end
 
               proxy_owner.save if proxy_owner.persisted?
