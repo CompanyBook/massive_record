@@ -1020,6 +1020,16 @@ describe TestReferencesManyProxy do
         subject.load_proxy_target
         subject.limit(1).should == [proxy_target]
       end
+      it "returns first record if in a dirty state, when no objects are saved" do
+        subject.destroy_all
+        subject.reset
+        proxy_owner.stub(:persisted?).and_return false
+        proxy_owner.stub(:new_record?).and_return true
+
+        new_proxy_target = Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9
+        subject << new_proxy_target
+        subject.limit(1).should eq [new_proxy_target]
+      end
     end
   end
 

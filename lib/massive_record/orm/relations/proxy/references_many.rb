@@ -223,7 +223,7 @@ module MassiveRecord
           #       than foreign keys length.
           #
           def limit(limit)
-            if loaded?
+            if loaded? || proxy_owner.new_record?
               proxy_target.slice(0, limit)
             elsif find_with_proc?
               find_proxy_target_with_proc(:limit => limit)
