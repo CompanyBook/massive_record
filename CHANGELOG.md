@@ -1,6 +1,6 @@
 # v0.2.2 (git develop)
 
-- MassiveRecord::ORM::Column is now named Embedded. You can still use Column though, but it is deprecated.
+- MassiveRecord::ORM::Column is now named Embedded. You need to update your code!
   I guess in most cases not many have ever used Column, as its usage has been limited up until we implement the
   embedded relations.
 - Reworked how the persistence module actually does the database specific calls like save, update and destroy.

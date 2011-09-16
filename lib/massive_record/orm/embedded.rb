@@ -1,4 +1,3 @@
-require 'massive_record/orm/column'
 require 'massive_record/orm/schema/embedded_interface'
 
 module MassiveRecord
