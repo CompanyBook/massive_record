@@ -976,6 +976,13 @@ describe TestReferencesManyProxy do
         subject.load_proxy_target
         subject.limit(1).should == [proxy_target]
       end
+
+      it "returns first record if in a dirty state" do
+        subject.delete(proxy_target_2)
+        subject.reset
+        subject << proxy_target_2
+        subject.limit(1).should eq [proxy_target]
+      end
     end
 
 
@@ -1020,6 +1027,15 @@ describe TestReferencesManyProxy do
         subject.load_proxy_target
         subject.limit(1).should == [proxy_target]
       end
+
+      it "returns first record if in a dirty state" do
+        proxy_target_2.destroy
+        new_proxy_target = Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9
+        subject.reset
+        subject << new_proxy_target
+        subject.limit(1).should eq [proxy_target]
+      end
+
       it "returns first record if in a dirty state, when no objects are saved" do
         subject.destroy_all
         subject.reset
