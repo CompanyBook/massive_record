@@ -520,6 +520,17 @@ describe TestReferencesManyProxy do
             subject << proxy_target_2
             subject.send(method).should == 2
           end
+
+          it "returns correct length if new proxy gets records added" do
+            subject.destroy_all
+            subject.reset
+            proxy_owner.stub(:persisted?).and_return false
+            proxy_owner.stub(:new_record?).and_return true
+
+            new_proxy_target = proxy_target.class.new "id-1"
+            subject << new_proxy_target
+            subject.length.should eq 1
+          end
         end
       end
 
@@ -589,6 +600,11 @@ describe TestReferencesManyProxy do
 
           it "returns correct length" do
             subject.length.should eq 2
+          end
+
+          it "returns correct length after adding a record" do
+            subject <<  Person.new(proxy_owner.id+"-friend-3", :name => "H", :age => 9)
+            subject.length.should eq 3
           end
         end
 
