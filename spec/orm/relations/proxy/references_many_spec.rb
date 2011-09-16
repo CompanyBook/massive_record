@@ -834,6 +834,17 @@ describe TestReferencesManyProxy do
         lambda { subject.find(not_among_targets.id) }.should raise_error MassiveRecord::ORM::RecordNotFound
       end
 
+      it "returns record if in a dirty state, when no objects are saved" do
+        subject.destroy_all
+        subject.reset
+        proxy_owner.stub(:persisted?).and_return false
+        proxy_owner.stub(:new_record?).and_return true
+
+        new_proxy_target = Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9
+        subject << new_proxy_target
+        subject.find(new_proxy_target.id).should eq new_proxy_target
+      end
+
 
 
       it "should not hit database if proxy has been loaded" do

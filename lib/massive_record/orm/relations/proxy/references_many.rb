@@ -153,7 +153,7 @@ module MassiveRecord
           end
 
           def find(id)
-            if loaded?
+            if loaded? || proxy_owner.new_record?
               record = proxy_target.find { |record| record.id == id }
             elsif find_with_proc?
               if id.starts_with? proxy_owner.send(metadata.records_starts_from)
