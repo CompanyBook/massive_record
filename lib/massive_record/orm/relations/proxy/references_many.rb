@@ -153,7 +153,7 @@ module MassiveRecord
           end
 
           def find(id)
-            if loaded?
+            if loaded? || proxy_owner.new_record?
               record = proxy_target.find { |record| record.id == id }
             elsif find_with_proc?
               if id.starts_with? proxy_owner.send(metadata.records_starts_from)
@@ -223,7 +223,7 @@ module MassiveRecord
           #       than foreign keys length.
           #
           def limit(limit)
-            if loaded?
+            if loaded? || proxy_owner.new_record?
               proxy_target.slice(0, limit)
             elsif find_with_proc?
               find_proxy_target_with_proc(:limit => limit)

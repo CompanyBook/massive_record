@@ -520,6 +520,17 @@ describe TestReferencesManyProxy do
             subject << proxy_target_2
             subject.send(method).should == 2
           end
+
+          it "returns correct length if new proxy gets records added" do
+            subject.destroy_all
+            subject.reset
+            proxy_owner.stub(:persisted?).and_return false
+            proxy_owner.stub(:new_record?).and_return true
+
+            new_proxy_target = proxy_target.class.new "id-1"
+            subject << new_proxy_target
+            subject.length.should eq 1
+          end
         end
       end
 
@@ -589,6 +600,11 @@ describe TestReferencesManyProxy do
 
           it "returns correct length" do
             subject.length.should eq 2
+          end
+
+          it "returns correct length after adding a record" do
+            subject <<  Person.new(proxy_owner.id+"-friend-3", :name => "H", :age => 9)
+            subject.length.should eq 3
           end
         end
 
@@ -834,6 +850,17 @@ describe TestReferencesManyProxy do
         lambda { subject.find(not_among_targets.id) }.should raise_error MassiveRecord::ORM::RecordNotFound
       end
 
+      it "returns record if in a dirty state, when no objects are saved" do
+        subject.destroy_all
+        subject.reset
+        proxy_owner.stub(:persisted?).and_return false
+        proxy_owner.stub(:new_record?).and_return true
+
+        new_proxy_target = Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9
+        subject << new_proxy_target
+        subject.find(new_proxy_target.id).should eq new_proxy_target
+      end
+
 
 
       it "should not hit database if proxy has been loaded" do
@@ -976,6 +1003,13 @@ describe TestReferencesManyProxy do
         subject.load_proxy_target
         subject.limit(1).should == [proxy_target]
       end
+
+      it "returns first record if in a dirty state" do
+        subject.delete(proxy_target_2)
+        subject.reset
+        subject << proxy_target_2
+        subject.limit(1).should eq [proxy_target]
+      end
     end
 
 
@@ -1019,6 +1053,25 @@ describe TestReferencesManyProxy do
       it "should return correct result set if proxy is loaded" do
         subject.load_proxy_target
         subject.limit(1).should == [proxy_target]
+      end
+
+      it "returns first record if in a dirty state" do
+        proxy_target_2.destroy
+        new_proxy_target = Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9
+        subject.reset
+        subject << new_proxy_target
+        subject.limit(1).should eq [proxy_target]
+      end
+
+      it "returns first record if in a dirty state, when no objects are saved" do
+        subject.destroy_all
+        subject.reset
+        proxy_owner.stub(:persisted?).and_return false
+        proxy_owner.stub(:new_record?).and_return true
+
+        new_proxy_target = Person.new proxy_owner.id+"-friend-2", :name => "H", :age => 9
+        subject << new_proxy_target
+        subject.limit(1).should eq [new_proxy_target]
       end
     end
   end
