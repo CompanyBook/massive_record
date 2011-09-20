@@ -218,6 +218,21 @@ describe "finders" do
     it "should return what it finds if asked to" do
       lambda { Person.find(["ID1", "not exists"], :skip_expected_result_check => true) }.should_not raise_error MassiveRecord::ORM::RecordNotFound
     end
+
+
+    describe "embedded records" do
+      subject { Person.find("ID1") }
+      let(:address) { Address.new "address-1", :street => "Asker", :number => 1 }
+
+      before do
+        subject.addresses << address
+        subject.reload
+      end
+
+      it "is able to load embeds many relations" do
+        subject.addresses.should eq [address]
+      end
+    end
   end
   
   describe "#find_in_batches" do
