@@ -271,6 +271,16 @@ describe "persistence" do
           @person.save
         end
 
+        it "should include changed attributes for embedded objects" do
+          MassiveRecord::ORM::Persistence::Operations.should_receive(:update).with(
+            @person, hash_including(:attribute_names_to_update => ["name", "addresses"])
+          ).and_return(mock(Object, :execute => true))
+
+
+          @person.name = @new_name
+          @person.addresses << Address.new("id1", :street => "foo")
+        end
+
         it "should persist the changes" do
           @person.name = @new_name
           @person.save

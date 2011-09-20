@@ -141,7 +141,7 @@ module MassiveRecord
         end
       end
 
-      def update(attribute_names_to_update = attributes.keys)
+      def update(attribute_names_to_update = attributes_with_embedded)
         Operations.update(self, :attribute_names_to_update => attribute_names_to_update).execute
       end
 
@@ -152,6 +152,16 @@ module MassiveRecord
       #
       def atomic_operation(operation, attr_name, by)
         Operations.atomic_operation(self, :operation => operation, :attr_name => attr_name, :by => by).execute
+      end
+
+
+
+      #
+      # Gives you all attribute names pluss all known embedded
+      # attributes names. Is used if dirty is active.
+      #
+      def attributes_with_embedded
+        attributes.keys | relation_proxies_for_embedded.collect { |proxy| proxy.metadata.name }
       end
     end
   end
