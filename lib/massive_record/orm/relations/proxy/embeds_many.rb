@@ -3,11 +3,6 @@ module MassiveRecord
     module Relations
       class Proxy
         class EmbedsMany < Proxy
-          def initialize(options = {})
-            super
-          end
-
-
           #
           # Returns the raw hash of attributes for embedded objects
           #
@@ -20,12 +15,14 @@ module MassiveRecord
           # of embedded object which should be updated. The value
           # will be nil if it is supposed to be destroyed.
           #
-          def roxy_targets_update_hash # :nodoc:
+          # # TODO refactor this out maybe, it kinda does not belong here..
+          #
+          def proxy_targets_update_hash # :nodoc:
             Hash[proxy_target.collect do |record|
               if record.destroyed?
                 [record.id, nil]
               elsif record.new_record? || record.changed?
-                [record.id, record.attributes_db_raw_data_hash]
+                [record.id, Base.coder.dump(record.attributes_db_raw_data_hash)]
               end
             end.compact]
           end

@@ -165,7 +165,7 @@ describe TestEmbedsManyProxy do
       end
 
       it "includes attributes for record to be inserted" do
-        subject.proxy_targets_update_hash.values.should eq [proxy_target.attributes_db_raw_data_hash]
+        subject.proxy_targets_update_hash.values.should eq [MassiveRecord::ORM::Base.coder.dump(proxy_target.attributes_db_raw_data_hash)]
       end
     end
 
@@ -182,7 +182,7 @@ describe TestEmbedsManyProxy do
       end
 
       it "includes attributes for record to be updated" do
-        subject.proxy_targets_update_hash.values.should eq [proxy_target.attributes_db_raw_data_hash]
+        subject.proxy_targets_update_hash.values.should eq [MassiveRecord::ORM::Base.coder.dump(proxy_target.attributes_db_raw_data_hash)]
       end
     end
 
