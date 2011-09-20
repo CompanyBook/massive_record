@@ -59,6 +59,7 @@ module MassiveRecord
           #
           def transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data)
             attributes = {:id => id}
+            raw_data = Base.coder.load(raw_data) if raw_data.is_a? String
 
             attributes_schema.each do |attr_name, orm_field|
               value = raw_data.has_key?(orm_field.column) ? raw_data[orm_field.column] : nil

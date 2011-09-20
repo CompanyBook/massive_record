@@ -148,13 +148,29 @@ describe MassiveRecord::ORM::Schema::EmbeddedInterface do
   end
 
   describe ".transpose_raw_data_to_record_attributes_and_raw_data" do
-    it "returns correct attributes from db values hash" do
-      attributes, raw_data = Address.transpose_raw_data_to_record_attributes_and_raw_data "id", {
+    let(:id) { "id" }
+    let(:raw_data) do
+      {
         "street" => "Oslo",
         "number" => 3,
         "nice_place" => "false",
         "postal_code" => "1111"
       }
+    end
+
+    it "returns attributes" do
+      attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data id, raw_data
+      attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111"})
+    end
+
+    it "returns raw data" do
+      attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data id, raw_data
+      raw.should eq raw_data
+    end
+
+    it "returns correct attributes from serialized db values hash" do
+      attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data id, MassiveRecord::ORM::Base.coder.dump(raw_data)
+      attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111"})
     end
   end
 end
