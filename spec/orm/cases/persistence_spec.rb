@@ -85,6 +85,13 @@ describe "persistence" do
       @person.name.should == original_name
     end
 
+    it "should reload the raw data" do
+      @person.name += "_NEW"
+      @person.save!
+      @person.reload
+      @person.raw_data.should eq Person.find("ID1").raw_data
+    end
+
     it "should not be considered changed after reload" do
       original_name = @person.name
       @person.name = original_name + original_name

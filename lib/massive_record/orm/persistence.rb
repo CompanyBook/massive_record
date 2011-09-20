@@ -33,7 +33,12 @@ module MassiveRecord
 
 
       def reload
-        self.attributes_raw = self.class.find(id).attributes if persisted?
+        if persisted?
+          self.class.find(id).tap do |record|
+            self.attributes_raw = record.attributes
+            @raw_data = record.raw_data
+          end
+        end
         self
       end
       
