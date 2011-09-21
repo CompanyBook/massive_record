@@ -148,6 +148,11 @@ describe TestEmbedsManyProxy do
       subject.should_not include proxy_target
     end
 
+    it "makes destroyed objects know about it after being destroyed" do
+      subject.destroy(proxy_target)
+      proxy_target.should be_destroyed
+    end
+
     it "does not call save on proxy owner if it is not persisted" do
       proxy_owner.should_receive(:persisted?).and_return false
       proxy_owner.should_not_receive(:save)
@@ -278,6 +283,18 @@ describe TestEmbedsManyProxy do
       proxy_target.street += "_NEW"
       subject.parent_has_been_saved!
       proxy_target.should_not be_changed
+    end
+
+    it "marks destroyed objects as destroyed" do
+      subject.send(:to_be_destroyed) << proxy_target
+      subject.parent_has_been_saved!
+      proxy_target.should be_destroyed
+    end
+
+    it "clears to_be_destroyed array" do
+      subject.send(:to_be_destroyed) << proxy_target
+      subject.parent_has_been_saved!
+      subject.send(:to_be_destroyed).should be_empty
     end
   end
 

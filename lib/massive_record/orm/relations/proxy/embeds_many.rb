@@ -61,6 +61,9 @@ module MassiveRecord
               record.instance_variable_set(:@new_record, false) if record.new_record?
               record.send(:clear_dirty_states!) if record.changed?
             end
+
+            to_be_destroyed.each { |record| record.instance_variable_set(:@destroyed, true) }
+            to_be_destroyed.clear
           end
 
           def changed?
