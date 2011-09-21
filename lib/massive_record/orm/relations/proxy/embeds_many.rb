@@ -96,7 +96,7 @@ module MassiveRecord
 
 
           def find(id)
-            record =  if loaded?
+            record =  if loaded? || proxy_target.new_record?
                         proxy_target.detect { |record| record.id == id }
                       else
                         find_one_embedded_record_from_raw_data(id)

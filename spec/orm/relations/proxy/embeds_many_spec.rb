@@ -238,7 +238,10 @@ describe TestEmbedsManyProxy do
     end
 
     context "owner new record" do
-      pending 
+      it "finds the added record" do
+        subject << proxy_target
+        subject.find(proxy_target.id).should eq proxy_target
+      end
     end
   end
 
