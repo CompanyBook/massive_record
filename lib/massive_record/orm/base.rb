@@ -269,6 +269,10 @@ module MassiveRecord
       def raw_data
         @raw_data.dup
       end
+
+      def update_raw_data_for_column_family(column_family, new_values) # :nodoc:
+        @raw_data[column_family] = new_values
+      end
       
 
       private
