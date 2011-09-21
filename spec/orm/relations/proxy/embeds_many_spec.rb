@@ -246,6 +246,55 @@ describe TestEmbedsManyProxy do
   end
 
 
+  describe "#limit" do
+    before do
+      subject << proxy_target_2
+      subject << proxy_target_3
+      subject << proxy_target
+    end
+
+    context "owner persisted" do
+      before { proxy_owner.save! }
+
+      context "and proxy loaded" do
+        it "returns the two first records" do
+          subject.limit(2).should eq [proxy_target, proxy_target_2]
+        end
+
+        it "does not call load_proxy_target" do
+          subject.should_not_receive :find_proxy_target
+          subject.limit(2)
+        end
+      end
+
+      context "and proxy not loaded" do
+        before do
+          subject.reset
+        end
+
+        context "with raw data loaded" do
+          it "returns the two first records" do
+            subject.limit(2).should eq [proxy_target, proxy_target_2]
+          end
+        end
+
+        context "without raw data loaded" do
+          before { proxy_owner.update_raw_data_for_column_family(metadata.store_in, {}) }
+
+          it "returns the two first records" do
+            subject.limit(2).should eq [proxy_target, proxy_target_2]
+          end
+        end
+      end
+    end
+
+    context "owner new record" do
+      it "returns the two first records" do
+        subject.limit(2).should eq [proxy_target, proxy_target_2]
+      end
+    end
+  end
+
 
   describe "#load_proxy_target" do
     context "empty proxy targets raw" do

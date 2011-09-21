@@ -106,7 +106,7 @@ module MassiveRecord
           end
 
           def limit(limit)
-            raise "TODO" # TODO
+            load_proxy_target.slice(0, limit)
           end
 
 
