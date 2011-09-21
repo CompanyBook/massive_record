@@ -425,4 +425,27 @@ describe TestEmbedsManyProxy do
       subject.changes.should eq({"address-1" => {"street" => ["Asker", "Asker_NEW"]}})
     end
   end
+
+
+
+  describe "sorting of records" do
+    describe "when added to a persisted proxy owner" do
+      before { proxy_owner.save! }
+
+      it "sorts record when proxy target is loaded" do
+        subject << proxy_target_2
+        subject << proxy_target
+        subject.reload
+        subject.load_proxy_target.should eq [proxy_target, proxy_target_2]
+      end
+    end
+
+    describe "When adding to a proxy owner which is a new record" do
+      it "sorts record in expected order" do
+        subject << proxy_target_2
+        subject << proxy_target
+        subject.load_proxy_target.should eq [proxy_target, proxy_target_2]
+      end
+    end
+  end
 end

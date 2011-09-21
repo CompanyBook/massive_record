@@ -146,7 +146,11 @@ module MassiveRecord
                 end
               end
 
-              proxy_owner.save if proxy_owner.persisted?
+              if proxy_owner.persisted?
+                proxy_owner.save
+              else
+                proxy_target.sort_by! &:id
+              end
 
               self
             end
