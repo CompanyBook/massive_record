@@ -137,7 +137,10 @@ module MassiveRecord
 
       def create_or_update
         raise ReadOnlyRecord if readonly?
-        !!(new_record? ? create : update)
+
+        (!!(new_record? ? create : update)).tap do |saved|
+          relation_proxies_for_embedded.select(&:changed?).each(&:parent_has_been_saved!) if saved
+        end
       end
 
       def create

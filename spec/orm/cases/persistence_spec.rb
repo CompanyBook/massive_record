@@ -226,6 +226,15 @@ describe "persistence" do
             person_from_db.should == person
             person_from_db.name.should == "Thorbjorn"
           end
+
+          it "creates persists embedded documents" do
+            person = Person.new "new_id", :name => "Thorbjorn", :age => "22"
+            address = Address.new "address-1", :street => "Asker", :number => 1
+            person.addresses << address
+            person.save!
+            person_from_db = Person.find(person.id)
+            person_from_db.addresses.should eq [address]
+          end
         end
 
         it "raises an error if id already exists" do
@@ -295,10 +304,29 @@ describe "persistence" do
           Person.find(@person.id).name.should == @new_name
         end
 
+        it "persists changes in embedded documents" do
+          address = Address.new "address-1", :street => "Asker", :number => 1
+          @person.addresses << address
+          @person.save!
+
+          @person_from_db = Person.find(@person.id)
+          @person_from_db.addresses[0].street = "Heggedal"
+          @person_from_db.save!
+
+          @person_from_db = Person.find(@person.id)
+          @person_from_db.addresses[0].street.should eq "Heggedal"
+        end
+
         it "should not have any changes after save" do
           @person.name = @new_name
           @person.save
-          @person.should_not be_changed # ..as it has been stored..
+          @person.should_not be_changed
+        end
+
+        it "has no changes after an embedded object is added and saved" do
+          @person.addresses << Address.new("address-1", :street => "Asker", :number => 1)
+          @person.save
+          @person.should_not be_changed
         end
 
         it "should raise error if column familiy needed does not exist" do
