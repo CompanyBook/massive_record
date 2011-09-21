@@ -104,14 +104,13 @@ describe TestEmbedsManyProxy do
           subject.send add_method, proxy_target
         end
 
-        it "marks added records as persisted" do
-          proxy_owner.should_receive(:persisted?).and_return true
-          proxy_owner.should_receive(:save).once
+        it "does not save added records if owner is not persisted" do
           subject.send add_method, proxy_target
+          proxy_target.should be_new_record
         end
 
         it "does not save proxy owner if it is a new record" do
-          pending "Actually saving is not yet completed.."
+          proxy_owner.save
           subject.send add_method, proxy_target
           proxy_target.should be_persisted
         end
