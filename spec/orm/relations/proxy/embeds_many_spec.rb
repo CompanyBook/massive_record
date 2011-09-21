@@ -49,11 +49,34 @@ describe TestEmbedsManyProxy do
   end
 
   describe "#reload" do
-    it "reloads its's column family and replaces raw data" do
-      pending
+    it "forces the raw data to be reloaded from database" do
+      subject.should_receive(:reload_raw_data)
+      subject.reload
     end
   end
 
+  describe "#reload_raw_data" do
+    before do
+      subject << proxy_target
+      subject << proxy_target_2
+    end
+
+    it "loads only the raw data" do
+      proxy_owner.save!
+      proxy_owner.raw_data[metadata.store_in] = {}
+      subject.send(:reload_raw_data)
+      proxy_owner.raw_data[metadata.store_in].should eq({
+        "address-1" => "{\"street\":\"Asker\",\"number\":1,\"nice_place\":\"true\",\"postal_code\":null}",
+        "address-2" => "{\"street\":\"Asker\",\"number\":2,\"nice_place\":\"true\",\"postal_code\":null}"
+      })
+    end
+
+    it "does nothing if proxy_owner is not persisted" do
+      proxy_owner.raw_data[metadata.store_in] = {}
+      subject.send(:reload_raw_data)
+      proxy_owner.raw_data[metadata.store_in].should eq({})
+    end
+  end
 
 
   describe "adding records to collection" do

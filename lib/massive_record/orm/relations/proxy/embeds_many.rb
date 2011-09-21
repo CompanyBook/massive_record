@@ -96,6 +96,11 @@ module MassiveRecord
 
 
 
+          def reload
+            reload_raw_data
+            super
+          end
+
           def reset
             super
             @proxy_target = []
@@ -201,6 +206,16 @@ module MassiveRecord
             proxy_targets_raw.inject([]) do |records, (id, raw_data)|
               attributes_and_raw_data = proxy_target_class.transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data)
               records << proxy_target_class.send(:instantiate, *attributes_and_raw_data)
+            end
+          end
+
+          #
+          # Replaces the raw_data hash in parent with reloaded data from database
+          #
+          def reload_raw_data
+            if proxy_owner.persisted?
+              reloaded_data = proxy_owner.class.select(metadata.store_in).find(proxy_owner.id).raw_data[metadata.store_in]
+              proxy_owner.update_raw_data_for_column_family(metadata.store_in, reloaded_data)
             end
           end
 
