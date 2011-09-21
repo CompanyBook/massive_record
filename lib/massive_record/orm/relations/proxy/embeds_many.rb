@@ -110,12 +110,6 @@ module MassiveRecord
           end
 
 
-
-          def reload
-            reload_raw_data
-            super
-          end
-
           def reset
             super
             @proxy_target = []

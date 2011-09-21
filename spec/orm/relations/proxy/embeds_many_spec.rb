@@ -99,7 +99,7 @@ describe TestEmbedsManyProxy do
         end
 
         it "saves proxy owner if it is already persisted" do
-          proxy_owner.should_receive(:persisted?).and_return true
+          proxy_owner.should_receive(:persisted?).any_number_of_times.and_return true
           proxy_owner.should_receive(:save).once
           subject.send add_method, proxy_target
         end
@@ -161,12 +161,7 @@ describe TestEmbedsManyProxy do
 
 
   describe "#can_find_proxy_target?" do
-    it "is false when we have no raw targets in owner" do
-      subject.should_not be_can_find_proxy_target
-    end
-
-    it "is true when we have some raw targets" do
-      proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data})
+    it "is true" do
       subject.should be_can_find_proxy_target
     end
   end
