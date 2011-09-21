@@ -292,6 +292,15 @@ describe "persistence" do
             @person, hash_including(:attribute_names_to_update => ["name", "addresses"])
           ).and_return(mock(Object, :execute => true))
 
+          # Makes the reload raw data do nothing. Reason for this is as follows:
+          # We are stubbing out the update operaitons, thus no address are being
+          # inserted to the database for this person.
+          #
+          # The reload_raw_data does a find with select on addresses column family only.
+          # When that is being done, and no data is found it will return nil back (Thrift
+          # api does this). This will in turn result in a record not found error, which is
+          # kinda not what we want.
+          @person.addresses.should_receive(:reload_raw_data)
 
           @person.name = @new_name
           @person.addresses << Address.new("id1", :street => "foo")
