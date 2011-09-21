@@ -255,7 +255,7 @@ module MassiveRecord
           end
 
           def can_find_proxy_target?
-            super || proxy_targets_raw.any?
+            true
           end
 
 
