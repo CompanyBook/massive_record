@@ -124,6 +124,37 @@ describe TestEmbedsManyProxy do
     end
   end
 
+  describe "#destroy" do
+    before do
+      subject << proxy_target
+      subject << proxy_target_2
+      subject << proxy_target_3
+      proxy_owner.save!
+    end
+
+    it "destroys one record" do
+      subject.destroy(proxy_target)
+      subject.should_not include proxy_target
+    end
+
+    it "destroys multiple records" do
+      subject.destroy(proxy_target, proxy_target_2)
+      subject.should_not include proxy_target, proxy_target_2
+    end
+
+    it "is destroyed from the database as well" do
+      subject.destroy(proxy_target)
+      subject.reload
+      subject.should_not include proxy_target
+    end
+
+    it "does not call save on proxy owner if it is not persisted" do
+      proxy_owner.should_receive(:persisted?).and_return false
+      proxy_owner.should_not_receive(:save)
+      subject.destroy(proxy_target)
+    end
+  end
+
 
   describe "#can_find_proxy_target?" do
     it "is false when we have no raw targets in owner" do

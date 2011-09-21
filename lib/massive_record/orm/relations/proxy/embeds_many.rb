@@ -230,7 +230,8 @@ module MassiveRecord
 
           def delete_or_destroy(*records, method)
             self.proxy_target -= records
-            to_be_destroyed |= records
+            to_be_destroyed.concat(records).uniq!
+            proxy_owner.save if proxy_owner.persisted?
           end
 
           def can_find_proxy_target?
