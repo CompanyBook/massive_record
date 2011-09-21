@@ -57,6 +57,8 @@ module MassiveRecord
           # end
           #
           def parent_has_been_saved! # :nodoc:
+            reload_raw_data
+
             proxy_target.each do |record|
               record.instance_variable_set(:@new_record, false) if record.new_record?
               record.send(:clear_dirty_states!) if record.changed?
@@ -94,7 +96,13 @@ module MassiveRecord
 
 
           def find(id)
-            raise "TODO" # TODO
+            record =  if loaded?
+                        proxy_target.detect { |record| record.id == id }
+                      else
+                        find_one_embedded_record_from_raw_data(id)
+                      end
+
+            record or raise RecordNotFound.new("Could not find #{proxy_target_class.model_name} with id=#{id}")
           end
 
           def limit(limit)
@@ -211,8 +219,7 @@ module MassiveRecord
             id, raw_data = proxy_targets_raw.first
 
             proxy_targets_raw.inject([]) do |records, (id, raw_data)|
-              attributes_and_raw_data = proxy_target_class.transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data)
-              records << proxy_target_class.send(:instantiate, *attributes_and_raw_data)
+              records << instantiate_target_class(id, raw_data)
             end
           end
 
@@ -224,6 +231,16 @@ module MassiveRecord
               reloaded_data = proxy_owner.class.select(metadata.store_in).find(proxy_owner.id).raw_data[metadata.store_in]
               proxy_owner.update_raw_data_for_column_family(metadata.store_in, reloaded_data)
             end
+          end
+
+
+          def find_one_embedded_record_from_raw_data(id)
+            raw_data = proxy_targets_raw[id] || load_raw_data_for_id(id)
+            instantiate_target_class(id, raw_data) if raw_data
+          end
+
+          def load_raw_data_for_id(id)
+            proxy_owner.class.table.get(proxy_owner.id, metadata.store_in, id)
           end
 
           # FIXME Common to all proxies representing multiple values
@@ -244,6 +261,10 @@ module MassiveRecord
 
           def to_be_destroyed
             @to_be_destroyed ||= []
+          end
+
+          def instantiate_target_class(id, raw_data)
+            proxy_target_class.send(:instantiate, *proxy_target_class.transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data))
           end
         end
       end

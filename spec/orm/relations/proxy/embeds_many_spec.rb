@@ -172,6 +172,77 @@ describe TestEmbedsManyProxy do
   end
 
 
+  describe "#find" do
+    let(:not_among_targets) { proxy_target_3 }
+
+    context "owner persisted" do
+      before { proxy_owner.save! }
+
+      context "and proxy loaded" do
+        before do
+          subject.concat proxy_target, proxy_target_2
+        end
+
+        it "finds record by id" do
+          subject.find(proxy_target.id).should eq proxy_target
+        end
+
+        it "does not call load_proxy_target" do
+          subject.should_not_receive :load_proxy_target
+          subject.find(proxy_target.id)
+        end
+
+        it "raises error if record is not found" do
+          expect { subject.find(not_among_targets.id) }.to raise_error MassiveRecord::ORM::RecordNotFound
+        end
+      end
+
+      context "and proxy not loaded" do
+        before do
+          subject.concat proxy_target, proxy_target_2
+          subject.reset
+        end
+
+        context "with raw data loaded" do
+          it "finds record by id" do
+            subject.find(proxy_target.id).should eq proxy_target
+          end
+
+          it "does not load from target's class.table.get" do
+            subject.should_not_receive(:find_raw_data_for_id)
+            subject.find(proxy_target.id).should eq proxy_target
+          end
+
+          it "raises error if record is not found" do
+            expect { subject.find(not_among_targets.id) }.to raise_error MassiveRecord::ORM::RecordNotFound
+          end
+        end
+
+        context "without raw data loaded" do
+          before { proxy_owner.update_raw_data_for_column_family(metadata.store_in, {}) }
+
+          it "finds record by id" do
+            subject.find(proxy_target.id).should eq proxy_target
+          end
+
+          it "does not call load_proxy_target" do
+            subject.should_not_receive(:load_proxy_target)
+            subject.find(proxy_target.id)
+          end
+
+          it "raises error if record is not found" do
+            expect { subject.find(not_among_targets.id) }.to raise_error MassiveRecord::ORM::RecordNotFound
+          end
+        end
+      end
+    end
+
+    context "owner new record" do
+      pending 
+    end
+  end
+
+
 
   describe "#load_proxy_target" do
     context "empty proxy targets raw" do
