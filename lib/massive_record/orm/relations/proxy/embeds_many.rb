@@ -216,7 +216,7 @@ module MassiveRecord
           private
 
           def find_proxy_target(options = {})
-            id, raw_data = proxy_targets_raw.first
+            reload_raw_data if proxy_targets_raw.empty?
 
             proxy_targets_raw.inject([]) do |records, (id, raw_data)|
               records << instantiate_target_class(id, raw_data)
