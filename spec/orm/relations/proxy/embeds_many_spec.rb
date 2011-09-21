@@ -212,16 +212,24 @@ describe TestEmbedsManyProxy do
     context "destroy" do
       before do
         subject << proxy_target
-        proxy_target.should_receive(:destroyed?).and_return true
-        proxy_target.should_not_receive(:new_record?).and_return false
-        proxy_target.should_not_receive(:changed?).and_return false
+        proxy_target.should_not_receive(:new_record?)
+        proxy_target.should_not_receive(:changed?)
       end
 
       it "includes id for record to be updated" do
+        proxy_target.should_receive(:destroyed?).and_return true
         subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
       end
 
       it "includes attributes for record to be updated" do
+        proxy_target.should_receive(:destroyed?).and_return true
+        subject.proxy_targets_update_hash.values.should eq [nil]
+      end
+
+      it "includes records in the to_be_destroyed array" do
+        subject.destroy(proxy_target)
+
+        subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
         subject.proxy_targets_update_hash.values.should eq [nil]
       end
     end
@@ -266,6 +274,11 @@ describe TestEmbedsManyProxy do
 
     it "returns true if it contains changed records" do
       proxy_target.should_receive(:changed?).and_return true
+      should be_changed
+    end
+
+    it "returns true if some records has been asked to be destroyed through proxy" do
+      subject.destroy(proxy_target)
       should be_changed
     end
   end

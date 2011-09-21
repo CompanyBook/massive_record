@@ -18,13 +18,17 @@ module MassiveRecord
           # # TODO refactor this out maybe, it kinda does not belong here..
           #
           def proxy_targets_update_hash # :nodoc:
-            Hash[proxy_target.collect do |record|
-              if record.destroyed?
-                [record.id, nil]
-              elsif record.new_record? || record.changed?
-                [record.id, Base.coder.dump(record.attributes_db_raw_data_hash)]
-              end
-            end.compact]
+            update_hash = proxy_target.collect do |record|
+                            if record.destroyed?
+                              [record.id, nil]
+                            elsif record.new_record? || record.changed?
+                              [record.id, Base.coder.dump(record.attributes_db_raw_data_hash)]
+                            end
+                          end
+
+            update_hash |= to_be_destroyed.collect { |record| [record.id, nil] }
+
+            Hash[update_hash.compact]
           end
 
           #
@@ -60,9 +64,9 @@ module MassiveRecord
           end
 
           def changed?
-            proxy_target.any? do |record|
-              record.new_record? || record.destroyed? || record.changed?
-            end
+            to_be_destroyed.any? || proxy_target.any? do |record|
+                                      record.new_record? || record.destroyed? || record.changed?
+                                    end
           end
 
           def changes
@@ -225,10 +229,17 @@ module MassiveRecord
           end
 
           def delete_or_destroy(*records, method)
+            self.proxy_target -= records
+            to_be_destroyed |= records
           end
 
           def can_find_proxy_target?
             super || proxy_targets_raw.any?
+          end
+
+
+          def to_be_destroyed
+            @to_be_destroyed ||= []
           end
         end
       end
