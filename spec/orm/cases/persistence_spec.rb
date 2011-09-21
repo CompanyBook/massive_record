@@ -300,7 +300,7 @@ describe "persistence" do
           # When that is being done, and no data is found it will return nil back (Thrift
           # api does this). This will in turn result in a record not found error, which is
           # kinda not what we want.
-          @person.addresses.should_receive(:reload_raw_data)
+          @person.addresses.should_receive(:reload_raw_data).any_number_of_times
 
           @person.name = @new_name
           @person.addresses << Address.new("id1", :street => "foo")
