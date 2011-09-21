@@ -27,6 +27,38 @@ module MassiveRecord
             end.compact]
           end
 
+          #
+          # Call this when parent is saved. Will change state of proxy
+          # targets so that:
+          #
+          # * New records are marked as persisted.
+          # * Dirty changes are being reset.
+          # * Destroyed records are being wiped.
+          #
+          # ..but the way it is done now is bad, cos it is hooking
+          # into internals of the classes.
+          #
+          # What would be really cool is to have some kind of delayed save
+          # we can use in the push / << / concat method. We want to push
+          # multiple records in before save, but at the same time we want to
+          # call save on each pushed records to get them to do their internal
+          # state logic. So something like
+          #
+          # with_delayed_save do
+          #   # pushing and save each record here
+          #   # embedded_record.save calls are delayed
+          #   #
+          #   # After block to method is yielded
+          #   # we do the actually proxy_owner.save
+          # end
+          #
+          def parent_has_been_saved! # :nodoc:
+            proxy_target.each do |record|
+              record.instance_variable_set(:@new_record, false) if record.new_record?
+              record.send(:clear_dirty_states!) if record.changed?
+            end
+          end
+
           def changed?
             proxy_target.any? do |record|
               record.new_record? || record.destroyed? || record.changed?

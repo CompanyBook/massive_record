@@ -204,6 +204,21 @@ describe TestEmbedsManyProxy do
     end
   end
 
+  describe "#parent_has_been_saved!" do
+    it "marks new records as persisted" do
+      subject << proxy_target
+      subject.parent_has_been_saved!
+      proxy_target.should be_persisted
+    end
+
+    it "resets dirty state of records" do
+      subject << proxy_target
+      proxy_target.street += "_NEW"
+      subject.parent_has_been_saved!
+      proxy_target.should_not be_changed
+    end
+  end
+
   describe "#changed?" do
     before do
       subject << proxy_target
