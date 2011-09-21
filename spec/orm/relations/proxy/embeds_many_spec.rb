@@ -263,6 +263,11 @@ describe TestEmbedsManyProxy do
       end
 
       it "includes records in the to_be_destroyed array" do
+        # Don't want it to actually trigger save as that will
+        # clear out the update hash..
+        proxy_owner.should_receive(:save).and_return true
+
+
         subject.destroy(proxy_target)
 
         subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
