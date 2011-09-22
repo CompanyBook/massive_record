@@ -136,6 +136,7 @@ module MassiveRecord
           #
           def embedded_in(name, *args)
             metadata = set_up_relation('embedded_in', name, *args)
+            metadata.owner_class = self
             create_embedded_in_accessors(metadata)
           end
 

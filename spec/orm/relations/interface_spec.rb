@@ -294,6 +294,11 @@ describe MassiveRecord::ORM::Relations::Interface do
         subject.person = person
         subject.person.should eq person
       end
+
+      it "adds itself to the collection within the target's class" do
+        subject.person = person
+        person.addresses.should include subject
+      end
     end
   end
 end
