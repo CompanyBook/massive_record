@@ -4,17 +4,19 @@ module MassiveRecord
       class Proxy
         class EmbeddedIn < Proxy
 
-          def replace(proxy_target)
+          def replace(proxy_target, update_inverse_relation = true)
             proxy_target_was = self.proxy_target
 
-            super.tap do |proxy_target_is|
-              if proxy_target_is.present?
-                if proxy_target_was.nil?
-                  proxy_target_is.send(metadata.inverse_of).push proxy_owner
-                elsif proxy_target_was != proxy_target_is
-                  proxy_target_was.send(metadata.inverse_of).delete(proxy_owner)
-                  proxy_target_was.save if proxy_target_was.persisted?
-                  proxy_target_is.send(metadata.inverse_of).push proxy_owner
+            super(proxy_target).tap do |proxy_target_is|
+              if update_inverse_relation
+                if proxy_target_is.present?
+                  if proxy_target_was.nil?
+                    proxy_target_is.send(metadata.inverse_of).push proxy_owner
+                  elsif proxy_target_was != proxy_target_is
+                    proxy_target_was.send(metadata.inverse_of).delete(proxy_owner)
+                    proxy_target_was.save if proxy_target_was.persisted?
+                    proxy_target_is.send(metadata.inverse_of).push proxy_owner
+                  end
                 end
               end
             end

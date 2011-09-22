@@ -123,15 +123,18 @@ describe TestEmbedsManyProxy do
         it "raises an error if there is a type mismatch" do
           lambda { subject.send add_method, Person.new(:name => "Foo", :age => 2) }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
         end
+
+        it "sets the inverse of relation in target" do
+          subject.send add_method, proxy_target
+          proxy_target.person.should eq proxy_owner
+        end
       end
     end
   end
 
   describe "#destroy" do
     before do
-      subject << proxy_target
-      subject << proxy_target_2
-      subject << proxy_target_3
+      subject << proxy_target << proxy_target_2 << proxy_target_3
       proxy_owner.save!
     end
 

@@ -35,6 +35,7 @@ module MassiveRecord
                 unless include? record
                   raise_if_type_mismatch(record)
                   proxy_target << record
+                  record.send(metadata.inverse_of).replace(proxy_owner, false)
                 end
               end
 
