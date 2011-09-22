@@ -159,6 +159,49 @@ describe TestEmbedsManyProxy do
     end
   end
 
+  describe "#delete" do
+    before do
+      subject << proxy_target
+      subject << proxy_target_2
+      subject << proxy_target_3
+      proxy_owner.save!
+    end
+
+    it "deletes one record from the collection" do
+      subject.delete(proxy_target)
+      subject.should_not include proxy_target
+    end
+
+    it "deletes multiple records from collection" do
+      subject.delete(proxy_target, proxy_target_2)
+      subject.should_not include proxy_target, proxy_target_2
+    end
+
+    it "is not destroyed from the database as well" do
+      subject.delete(proxy_target)
+      subject.reload
+      subject.should include proxy_target
+    end
+
+    it "makes deleted objects not know about it after being deleted" do
+      subject.delete(proxy_target)
+      proxy_target.should_not be_destroyed
+    end
+
+    it "is being destroyed if parent are saved" do
+      subject.delete(proxy_target)
+      proxy_owner.save
+      subject.reload
+      subject.should_not include proxy_target
+    end
+
+    it "is being destroed on save" do
+      subject.delete(proxy_target)
+      proxy_owner.save
+      proxy_target.should be_destroyed
+    end
+  end
+
 
   describe "#can_find_proxy_target?" do
     it "is true" do
