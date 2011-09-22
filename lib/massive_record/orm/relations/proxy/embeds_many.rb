@@ -3,87 +3,6 @@ module MassiveRecord
     module Relations
       class Proxy
         class EmbedsMany < Proxy
-          #
-          # Returns the raw hash of attributes for embedded objects
-          #
-          def proxy_targets_raw # :nodoc:
-            proxy_owner.raw_data[metadata.store_in]
-          end
-
-          #
-          # Returns a hash with ids and serialized version
-          # of embedded object which should be updated. The value
-          # will be nil if it is supposed to be destroyed.
-          #
-          # # TODO refactor this out maybe, it kinda does not belong here..
-          #
-          def proxy_targets_update_hash # :nodoc:
-            update_hash = proxy_target.collect do |record|
-                            if record.destroyed?
-                              [record.id, nil]
-                            elsif record.new_record? || record.changed?
-                              [record.id, Base.coder.dump(record.attributes_db_raw_data_hash)]
-                            end
-                          end
-
-            update_hash |= to_be_destroyed.collect { |record| [record.id, nil] }
-
-            Hash[update_hash.compact]
-          end
-
-          #
-          # Call this when parent is saved. Will change state of proxy
-          # targets so that:
-          #
-          # * New records are marked as persisted.
-          # * Dirty changes are being reset.
-          # * Destroyed records are being wiped.
-          #
-          # ..but the way it is done now is bad, cos it is hooking
-          # into internals of the classes.
-          #
-          # What would be really cool is to have some kind of delayed save
-          # we can use in the push / << / concat method. We want to push
-          # multiple records in before save, but at the same time we want to
-          # call save on each pushed records to get them to do their internal
-          # state logic. So something like
-          #
-          # with_delayed_save do
-          #   # pushing and save each record here
-          #   # embedded_record.save calls are delayed
-          #   #
-          #   # After block to method is yielded
-          #   # we do the actually proxy_owner.save
-          # end
-          #
-          def parent_has_been_saved! # :nodoc:
-            reload_raw_data
-
-            proxy_target.each do |record|
-              record.instance_variable_set(:@new_record, false) if record.new_record?
-              record.send(:clear_dirty_states!) if record.changed?
-            end
-
-            to_be_destroyed.each { |record| record.instance_variable_set(:@destroyed, true) }
-            to_be_destroyed.clear
-          end
-
-          def changed?
-            to_be_destroyed.any? || proxy_target.any? do |record|
-                                      record.new_record? || record.destroyed? || record.changed?
-                                    end
-          end
-
-          def changes
-            Hash[proxy_target.collect do |record|
-              if record.changed?
-                [record.id, record.changes]
-              end
-            end.compact]
-          end
-
-
-
           # FIXME Common to all proxies representing multiple values
           def load_proxy_target(options = {})
             proxy_target_before_load = proxy_target
@@ -206,6 +125,88 @@ module MassiveRecord
 
           def first
             limit(1).first
+          end
+
+
+
+
+          #
+          # Returns the raw hash of attributes for embedded objects
+          #
+          def proxy_targets_raw # :nodoc:
+            proxy_owner.raw_data[metadata.store_in]
+          end
+
+          #
+          # Returns a hash with ids and serialized version
+          # of embedded object which should be updated. The value
+          # will be nil if it is supposed to be destroyed.
+          #
+          # # TODO refactor this out maybe, it kinda does not belong here..
+          #
+          def proxy_targets_update_hash # :nodoc:
+            update_hash = proxy_target.collect do |record|
+                            if record.destroyed?
+                              [record.id, nil]
+                            elsif record.new_record? || record.changed?
+                              [record.id, Base.coder.dump(record.attributes_db_raw_data_hash)]
+                            end
+                          end
+
+            update_hash |= to_be_destroyed.collect { |record| [record.id, nil] }
+
+            Hash[update_hash.compact]
+          end
+
+          #
+          # Call this when parent is saved. Will change state of proxy
+          # targets so that:
+          #
+          # * New records are marked as persisted.
+          # * Dirty changes are being reset.
+          # * Destroyed records are being wiped.
+          #
+          # ..but the way it is done now is bad, cos it is hooking
+          # into internals of the classes.
+          #
+          # What would be really cool is to have some kind of delayed save
+          # we can use in the push / << / concat method. We want to push
+          # multiple records in before save, but at the same time we want to
+          # call save on each pushed records to get them to do their internal
+          # state logic. So something like
+          #
+          # with_delayed_save do
+          #   # pushing and save each record here
+          #   # embedded_record.save calls are delayed
+          #   #
+          #   # After block to method is yielded
+          #   # we do the actually proxy_owner.save
+          # end
+          #
+          def parent_has_been_saved! # :nodoc:
+            reload_raw_data
+
+            proxy_target.each do |record|
+              record.instance_variable_set(:@new_record, false) if record.new_record?
+              record.send(:clear_dirty_states!) if record.changed?
+            end
+
+            to_be_destroyed.each { |record| record.instance_variable_set(:@destroyed, true) }
+            to_be_destroyed.clear
+          end
+
+          def changed?
+            to_be_destroyed.any? || proxy_target.any? do |record|
+                                      record.new_record? || record.destroyed? || record.changed?
+                                    end
+          end
+
+          def changes
+            Hash[proxy_target.collect do |record|
+              if record.changed?
+                [record.id, record.changes]
+              end
+            end.compact]
           end
 
 
