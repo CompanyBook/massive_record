@@ -131,7 +131,7 @@ module MassiveRecord
 
             to_be_destroyed.each do |record|
               targets_current_owner = record.send(metadata.inverse_of).proxy_target
-              if targets_current_owner.nil? || targets_current_owner == self
+              if targets_current_owner.nil? || targets_current_owner == proxy_owner
                 record.instance_variable_set(:@destroyed, true)
               end
             end
