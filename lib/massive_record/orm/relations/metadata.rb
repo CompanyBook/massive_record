@@ -29,6 +29,7 @@ module MassiveRecord
           self.find_with = options[:find_with]
           self.records_starts_from = options[:records_starts_from] if options[:records_starts_from]
           self.polymorphic = options[:polymorphic]
+          self.inverse_of = options[:inverse_of]
         end
 
 
