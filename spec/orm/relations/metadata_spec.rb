@@ -164,9 +164,16 @@ describe MassiveRecord::ORM::Relations::Metadata do
       subject.inverse_of.should eq 'addresses'
     end
 
-    it "calculates inverse of from the owner_class" do
+    it "calculates inverse of from the owner_class for embedded_in" do
+      subject.relation_type = :embedded_in
       subject.owner_class = Address
       subject.inverse_of.should eq 'addresses'
+    end
+
+    it "calculates inverse of from the owner_class for embeds_many" do
+      subject.relation_type = :embeds_many
+      subject.owner_class = Person
+      subject.inverse_of.should eq 'person'
     end
 
     it "raises an error if not set nor owner class" do
