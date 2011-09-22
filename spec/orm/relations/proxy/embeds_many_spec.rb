@@ -460,6 +460,14 @@ describe TestEmbedsManyProxy do
       proxy_target.should be_destroyed
     end
 
+    it "does not mark targets as destroyed if target's owner has been changed" do
+      subject << proxy_target
+      subject.send(:to_be_destroyed) << proxy_target
+      proxy_target.person = Person.new
+      subject.parent_has_been_saved!
+      proxy_target.should_not be_destroyed
+    end
+
     it "clears to_be_destroyed array" do
       subject.send(:to_be_destroyed) << proxy_target
       subject.parent_has_been_saved!

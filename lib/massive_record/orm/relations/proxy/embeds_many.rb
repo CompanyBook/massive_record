@@ -123,7 +123,12 @@ module MassiveRecord
               record.send(:clear_dirty_states!) if record.changed?
             end
 
-            to_be_destroyed.each { |record| record.instance_variable_set(:@destroyed, true) }
+            to_be_destroyed.each do |record|
+              targets_current_owner = record.send(metadata.inverse_of)
+              if targets_current_owner.nil? || targets_current_owner == self
+                record.instance_variable_set(:@destroyed, true)
+              end
+            end
             to_be_destroyed.clear
           end
 
