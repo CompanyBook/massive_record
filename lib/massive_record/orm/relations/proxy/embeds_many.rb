@@ -123,7 +123,12 @@ module MassiveRecord
               record.send(:clear_dirty_states!) if record.changed?
             end
 
-            to_be_destroyed.each { |record| record.instance_variable_set(:@destroyed, true) }
+            to_be_destroyed.each do |record|
+              targets_current_owner = record.send(metadata.inverse_of)
+              if targets_current_owner.nil? || targets_current_owner == self
+                record.instance_variable_set(:@destroyed, true)
+              end
+            end
             to_be_destroyed.clear
           end
 
@@ -162,6 +167,11 @@ module MassiveRecord
               reloaded_data = proxy_owner.class.select(metadata.store_in).find(proxy_owner.id).raw_data[metadata.store_in]
               proxy_owner.update_raw_data_for_column_family(metadata.store_in, reloaded_data)
             end
+          rescue MassiveRecord::ORM::RecordNotFound
+            # When we try to load raw data we might end up getting nil back, even though
+            # a row exists with given id. The reason for this is that when only selecting
+            # one column family (family for embedded records) and that family is empty for
+            # a given row we'll end up getting nil back, resulting in a record not found error.
           end
 
 

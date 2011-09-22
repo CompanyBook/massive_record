@@ -88,8 +88,9 @@ module MassiveRecord
           @loaded = true
         end
 
-
-
+        def nil?
+          load_proxy_target.nil?
+        end
 
         def respond_to?(*args)
           super || (load_proxy_target && proxy_target.respond_to?(*args))

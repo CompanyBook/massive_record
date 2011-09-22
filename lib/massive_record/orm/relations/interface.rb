@@ -103,8 +103,9 @@ module MassiveRecord
           #
           #
           # The embeds many association should have one column family per association. embeds_many :addresses
-          # will by default be stored in the addresses column family. The way records are stored inside of a
-          # column family will be:
+          # will by default be stored in the addresses column family.
+          # Attributes will be serialized by the Base.coder, by default will be JSON, but it really can be anything.
+          # The way records are stored inside of a column family will be:
           #
           # | key         |   attributes                                        |
           # ---------------------------------------------------------------------
@@ -119,10 +120,26 @@ module MassiveRecord
           #
           def embeds_many(name, *args)
             metadata = set_up_relation('embeds_many', name, *args)
+            metadata.owner_class = self
             add_column_family(metadata.store_in)
             create_embeds_many_accessors(metadata)
           end
 
+
+
+          #
+          # Embedded in is being used together with embeds_many on the other side
+          # of such a relation.
+          #
+          # class Addresses < MassiveRecord::ORM::Embedded
+          #   embedded_in :person
+          # end
+          #
+          def embedded_in(name, *args)
+            metadata = set_up_relation('embedded_in', name, *args)
+            metadata.owner_class = self
+            create_embedded_in_accessors(metadata)
+          end
 
 
           private
@@ -184,6 +201,16 @@ module MassiveRecord
 
             redefine_method(metadata.name+'=') do |records|
               relation_proxy(metadata.name).replace(records)
+            end
+          end
+
+          def create_embedded_in_accessors(metadata)
+            redefine_method(metadata.name) do
+              relation_proxy(metadata.name)
+            end
+
+            redefine_method(metadata.name+'=') do |record|
+              relation_proxy(metadata.name).replace(record)
             end
           end
         end

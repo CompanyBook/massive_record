@@ -266,4 +266,39 @@ describe MassiveRecord::ORM::Relations::Interface do
       end
     end
   end
+
+
+  describe "embedded in" do
+    describe "metadata" do
+      subject { Address.relations.detect { |relation| relation.name == "person" } }
+
+      it "stores the relation on the class" do
+        subject.should_not be_nil
+      end
+
+      it "has correct type on relation" do
+        subject.relation_type.should == "embedded_in"
+      end
+
+      it "raises error if relation defined twice" do
+        expect { Address.embedded_in :person }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
+      end
+    end
+
+    describe "instance" do
+      subject { Address.new "id1", :street => "Asker" }
+      let(:person) { Person.new }
+      let(:proxy) { subject.send(:relation_proxy, "person") }
+
+      it "sets and gets the person" do
+        subject.person = person
+        subject.person.should eq person
+      end
+
+      it "adds itself to the collection within the target's class" do
+        subject.person = person
+        person.addresses.should include subject
+      end
+    end
+  end
 end
