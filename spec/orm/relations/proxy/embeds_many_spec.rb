@@ -119,6 +119,10 @@ describe TestEmbedsManyProxy do
           2.times { subject.send add_method, proxy_target }
           subject.proxy_target.length.should eq 1
         end
+
+        it "raises an error if there is a type mismatch" do
+          lambda { subject.send add_method, Person.new(:name => "Foo", :age => 2) }.should raise_error MassiveRecord::ORM::RelationTypeMismatch
+        end
       end
     end
   end

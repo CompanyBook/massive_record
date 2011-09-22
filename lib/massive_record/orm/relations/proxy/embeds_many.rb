@@ -27,6 +27,7 @@ module MassiveRecord
             if records.all? &:valid?
               records.each do |record|
                 unless include? record
+                  raise_if_type_mismatch(record)
                   proxy_target << record
                 end
               end
