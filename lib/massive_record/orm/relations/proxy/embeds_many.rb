@@ -2,6 +2,12 @@ module MassiveRecord
   module ORM
     module Relations
       class Proxy
+
+        # TODO
+        #   
+        #   - Validations / handle save if any embedded records becomes invalid.
+        #   - Update destroyed state on embedded records if they are moved to different collection.
+        #   - Timestamps
         class EmbedsMany < ProxyCollection
           def find(id)
             record =  if loaded? || proxy_owner.new_record?
@@ -124,7 +130,7 @@ module MassiveRecord
             end
 
             to_be_destroyed.each do |record|
-              targets_current_owner = record.send(metadata.inverse_of)
+              targets_current_owner = record.send(metadata.inverse_of).proxy_target
               if targets_current_owner.nil? || targets_current_owner == self
                 record.instance_variable_set(:@destroyed, true)
               end
