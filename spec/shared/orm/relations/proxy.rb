@@ -59,6 +59,7 @@ shared_examples_for "relation proxy" do
     end
 
     it "should reset the proxy" do
+      subject.should_receive(:can_find_proxy_target?).and_return false
       subject.should_receive :reset
       subject.reload
     end
