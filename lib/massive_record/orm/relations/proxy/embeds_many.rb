@@ -167,6 +167,11 @@ module MassiveRecord
               reloaded_data = proxy_owner.class.select(metadata.store_in).find(proxy_owner.id).raw_data[metadata.store_in]
               proxy_owner.update_raw_data_for_column_family(metadata.store_in, reloaded_data)
             end
+          rescue MassiveRecord::ORM::RecordNotFound
+            # When we try to load raw data we might end up getting nil back, even though
+            # a row exists with given id. The reason for this is that when only selecting
+            # one column family (family for embedded records) and that family is empty for
+            # a given row we'll end up getting nil back, resulting in a record not found error.
           end
 
 
