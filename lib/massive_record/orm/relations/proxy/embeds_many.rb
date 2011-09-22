@@ -212,7 +212,9 @@ module MassiveRecord
           end
 
           def instantiate_target_class(id, raw_data)
-            proxy_target_class.send(:instantiate, *proxy_target_class.transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data))
+            proxy_target_class.send(:instantiate, *proxy_target_class.transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data)).tap do |record|
+              record.send(metadata.inverse_of).replace(proxy_owner, false)
+            end
           end
         end
       end

@@ -357,6 +357,10 @@ describe TestEmbedsManyProxy do
       before { proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data}) }
 
       its(:load_proxy_target) { should include proxy_target, proxy_target_2, proxy_target_3 }
+
+      it "sets inverse of in loaded records" do
+        subject.load_proxy_target.all? { |r| r.person.should eq proxy_owner }.should be_true
+      end
     end
   end
 
