@@ -6,7 +6,6 @@ module MassiveRecord
         # TODO
         #   
         #   - Validations / handle save if any embedded records becomes invalid.
-        #   - Update destroyed state on embedded records if they are moved to different collection.
         #   - Timestamps
         class EmbedsMany < ProxyCollection
           def find(id)

@@ -37,4 +37,3 @@ module MassiveRecord
     end
   end
 end
-

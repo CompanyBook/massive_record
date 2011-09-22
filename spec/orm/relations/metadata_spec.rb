@@ -13,13 +13,14 @@ describe MassiveRecord::ORM::Relations::Metadata do
   it "should be setting values by initializer" do
     metadata = subject.class.new(:car, {
       :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info,
-      :polymorphic => true, :records_starts_from => :records_starts_from
+      :polymorphic => true, :records_starts_from => :records_starts_from, :inverse_of => :inverse_of
     })
     metadata.name.should == "car"
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
     metadata.store_in.should == "info"
     metadata.records_starts_from.should == :records_starts_from
+    metadata.inverse_of.should eq 'inverse_of'
     metadata.should be_polymorphic
   end
 
