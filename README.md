@@ -89,7 +89,7 @@ Tables also have:
 - Save / update methods
 - Auto-creation of table and column families on save if table does not exists.
 - Destroy records
-- Relations: See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
+- Relations: Both references to other tables and simple embedded records. See MassiveRecord::ORM::Relations::Interface ClassMethods for documentation
 - Observable. See MassiveRecord::ORM::Observer. If you know how to use ActiveRecord's observer you know how to use this one.
 - IdentityMap (when enabled)
 
@@ -101,6 +101,8 @@ Here are some examples setting up models:
       references_one :attachment, :polymorphic => true
       references_many :friends, :store_in => :info
       references_many :blog_posts, :records_starts_from => :posts_start_id
+
+      embeds_many :address
 
       default_scope select(:info)
 
@@ -146,6 +148,8 @@ Here are some examples setting up models:
     end
 
     class Address < MassiveRecord::ORM::Embedded
+      embedded_in :person
+
       field :street
       field :number, :integer
       field :nice_place, :boolean, :default => true

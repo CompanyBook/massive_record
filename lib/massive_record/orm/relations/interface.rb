@@ -131,9 +131,19 @@ module MassiveRecord
           # Embedded in is being used together with embeds_many on the other side
           # of such a relation.
           #
-          # class Addresses < MassiveRecord::ORM::Embedded
+          # class Address < MassiveRecord::ORM::Embedded
           #   embedded_in :person
           # end
+          #
+          # You can also pass in :polymorphic => true as an option. If you do so here is an example:
+          #
+          #   class Person < MassiveRecord::ORM::Table
+          #     embeds_many :addresses, :inverse_of => :addressable
+          #   end
+          #   
+          #   class Address < MassiveRecord::ORM::Embedded
+          #     embedded_in :addressable, :inverse_of => :addresses, :polymorphic => true
+          #   end
           #
           def embedded_in(name, *args)
             metadata = set_up_relation('embedded_in', name, *args)
