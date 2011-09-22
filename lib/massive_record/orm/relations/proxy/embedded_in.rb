@@ -12,7 +12,8 @@ module MassiveRecord
                 if proxy_target_was.nil?
                   proxy_target_is.send(metadata.inverse_of).push proxy_owner
                 elsif proxy_target_was != proxy_target_is
-                  proxy_target_was.send(metadata.inverse_of).delete proxy_owner
+                  proxy_target_was.send(metadata.inverse_of).delete(proxy_owner)
+                  proxy_target_was.save if proxy_target_was.persisted?
                   proxy_target_is.send(metadata.inverse_of).push proxy_owner
                 end
               end

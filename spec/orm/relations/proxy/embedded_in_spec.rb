@@ -36,11 +36,15 @@ describe TestEmbeddedInProxy do
 
       context "and new target is different than previos" do
         it "removes itself from old collection and inserts self into new" do
+          proxy_target.save!
+          proxy_target_2.save!
+
           subject.replace(proxy_target)
           subject.replace(proxy_target_2)
 
           proxy_target.addresses.should_not include proxy_owner
           proxy_target_2.addresses.should include proxy_owner
+          proxy_owner.should_not be_destroyed
         end
       end
     end
