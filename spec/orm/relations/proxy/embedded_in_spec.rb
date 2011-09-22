@@ -49,5 +49,13 @@ describe TestEmbeddedInProxy do
       end
     end
   end
+
+  describe "polymorphism" do
+    let(:test_class) { TestClass.new }
+
+    it "raises an error if invalid type is assigned" do
+      expect { proxy_owner.person = test_class }.to raise_error MassiveRecord::ORM::RelationTypeMismatch
+    end
+  end
 end
 

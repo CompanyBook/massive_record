@@ -1,5 +1,6 @@
 class Address < MassiveRecord::ORM::Embedded
   embedded_in :person
+  embedded_in :addressable, :inverse_of => :addresses, :polymorphic => true
 
   field :street
   field :number, :integer
