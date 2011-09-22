@@ -12,8 +12,8 @@ module MassiveRecord
       # references_one :employee, :foreign_key => "person_id", :class_name => "Person"
       #
       class Metadata
-        attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic
-        attr_accessor :find_with
+        attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic, :inverse_of
+        attr_accessor :find_with, :owner_class
         attr_reader :records_starts_from
         
         def initialize(name, options = {})
@@ -63,6 +63,10 @@ module MassiveRecord
 
         def class_name
           (@class_name || calculate_class_name).to_s
+        end
+
+        def inverse_of
+          (@inverse_of || calculate_inverse_of).to_s
         end
 
         def proxy_target_class
@@ -160,6 +164,11 @@ module MassiveRecord
 
         def calculate_class_name
           name.to_s.classify
+        end
+
+        def calculate_inverse_of
+          raise "Can't return inverse of without it being explicitly set or without an owner_class" unless owner_class
+          owner_class.to_s.demodulize.downcase.pluralize
         end
 
         def calculate_foreign_key

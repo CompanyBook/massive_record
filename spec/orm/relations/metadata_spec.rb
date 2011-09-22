@@ -4,7 +4,7 @@ require 'orm/models/person'
 describe MassiveRecord::ORM::Relations::Metadata do
   subject { MassiveRecord::ORM::Relations::Metadata.new(nil) }
 
-  %w(name foreign_key class_name relation_type find_with polymorphic records_starts_from).each do |attr|
+  %w(name foreign_key class_name relation_type find_with polymorphic records_starts_from inverse_of).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
   end
@@ -143,6 +143,36 @@ describe MassiveRecord::ORM::Relations::Metadata do
 
       its(:store_in) { should eq "addresses" }
       its(:persisting_foreign_key?) { should be_false }
+    end
+  end
+
+
+  describe "owner_class" do
+    it "is settable" do
+      subject.owner_class = Address
+    end
+
+    it "is readable" do
+      subject.owner_class = Address
+      subject.owner_class.should == Address
+    end
+  end
+
+  describe "#inverse_of" do
+    it "returns whatever it is set to" do
+      subject.inverse_of = :addresses
+      subject.inverse_of.should eq 'addresses'
+    end
+
+    it "calculates inverse of from the owner_class" do
+      subject.owner_class = Address
+      subject.inverse_of.should eq 'addresses'
+    end
+
+    it "raises an error if not set nor owner class" do
+      subject.inverse_of = nil
+      subject.owner_class = nil
+      expect { subject.inverse_of }.to raise_error "Can't return inverse of without it being explicitly set or without an owner_class"
     end
   end
 
