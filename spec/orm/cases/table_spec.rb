@@ -53,7 +53,7 @@ describe "Person which is a table" do
 
   it "should keep different column families per sub class" do
     Person.column_families.collect(&:name).should include "info", "base"
-    TestClass.column_families.collect(&:name).should == ["test_family"]
+    TestClass.column_families.collect(&:name).should include "test_family", "addresses"
   end
   
   it "should have a list of attributes created from the column family 'info'" do
