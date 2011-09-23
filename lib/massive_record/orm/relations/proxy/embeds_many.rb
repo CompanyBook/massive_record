@@ -2,11 +2,6 @@ module MassiveRecord
   module ORM
     module Relations
       class Proxy
-
-        # TODO
-        #   
-        #   - Validations / handle save if any embedded records becomes invalid.
-        #   - Timestamps
         class EmbedsMany < ProxyCollection
           def find(id)
             record =  if loaded? || proxy_owner.new_record?
