@@ -297,6 +297,7 @@ describe MassiveRecord::ORM::Relations::Interface do
         end
 
         it "adds itself to the collection within the target's class" do
+          person.stub(:valid?).and_return true
           subject.person = person
           person.addresses.should include subject
         end
