@@ -71,6 +71,23 @@ describe MassiveRecord::ORM::Embedded do
             person.should be_persisted
             subject.should be_persisted
           end
+
+          it "does nothing if validations fail on embedded" do
+            subject.street = nil
+            subject.save
+            subject.errors.should_not be_empty
+
+            person.should_not be_persisted
+            subject.should_not be_persisted
+          end
+
+          it "does nothing if validations fails on owner of collection embedded in" do
+            person.name = nil
+            subject.save
+
+            person.should_not be_persisted
+            subject.should_not be_persisted
+          end
         end
 
         context "colletion owner persisted" do
@@ -92,6 +109,22 @@ describe MassiveRecord::ORM::Embedded do
             subject.save
 
             person.should be_name_changed
+          end
+
+          it "does nothing if validations fail on embedded" do
+            subject.street = nil
+            subject.save
+            subject.errors.should_not be_empty
+
+            subject.should be_changed
+          end
+
+          it "save even if validations fails on owner of collection embedded in" do
+            person.name = nil
+            subject.street += "_NEW"
+            subject.save
+
+            subject.should_not be_changed
           end
         end
       end

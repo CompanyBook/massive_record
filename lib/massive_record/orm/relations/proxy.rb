@@ -100,6 +100,14 @@ module MassiveRecord
         end
       
 
+        def blank?
+          load_proxy_target.blank?
+        end
+
+        def is_a?(type)
+          load_proxy_target.is_a?(type)
+        end
+
         # Strange.. Without Rails, to_param goes through method_missing,
         #           With Rails it seems like the proxy answered to to_param, which
         #           kinda was not what I wanted.
