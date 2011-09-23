@@ -104,6 +104,11 @@ module MassiveRecord
         end
         alias embedded? embedded
 
+        def embedded_in
+          relation_type == "embedded_in"
+        end
+        alias embedded_in? embedded_in
+
 
         def new_relation_proxy(proxy_owner)
           proxy_class_name.constantize.new(:proxy_owner => proxy_owner, :metadata => self)

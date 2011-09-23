@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'orm/models/address'
 
 describe MassiveRecord::ORM::Embedded do
-  subject { Address.new(:street => "Asker", :number => 5) }
+  subject { Address.new("addresss-id", :street => "Asker", :number => 5) }
 
   it "should have known_attribute_names" do
     Address.should have(4).known_attribute_names
@@ -41,6 +41,38 @@ describe MassiveRecord::ORM::Embedded do
     ).each do |method|
       it "do respond to #{method}" do
         subject.should respond_to method
+      end
+    end
+  end
+
+
+  describe "persistence" do
+    let(:person) { Person.new "person-id", :name => "Thorbjorn", :age => "22" }
+
+    describe "#save" do
+      context "not embedded" do
+        before { subject.person = nil }
+
+        it "raises error" do
+          expect { subject.save }.to raise_error MassiveRecord::ORM::NotAssignedToEmbeddedCollection
+        end
+      end
+
+      context "embedded in a collection" do
+        context "collection owner not persisted" do
+          before { subject.person = person }
+
+          pending
+        end
+
+        context "colletion owner persisted" do
+          before do
+            person.save!
+            subject.person = person
+          end
+
+          pending
+        end
       end
     end
   end
