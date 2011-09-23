@@ -18,7 +18,7 @@ module MassiveRecord
 
             def update_only_embedded_record_in_owners
               embedded_in_proxies.each do |proxy|
-                update_only_record_in_embedded_collection(proxy)
+                update_embedded(proxy, Base.coder.dump(record.attributes_db_raw_data_hash))
               end
             end
           end

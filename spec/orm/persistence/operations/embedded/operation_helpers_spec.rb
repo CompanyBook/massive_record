@@ -17,6 +17,17 @@ module MassiveRecord
             let(:person) { Person.new "person-id", :name => "Thorbjorn", :age => "22" }
             let(:options) { {:this => 'hash', :has => 'options'} }
 
+
+            let(:proxy_for_person) { address.send(:relation_proxy, :person) }
+
+            let(:row) do
+              MassiveRecord::Wrapper::Row.new({
+                :id => person.id,
+                :table => person.class.table
+              })
+            end
+
+
             subject { TestEmbeddedOperationHelpers.new(address, options) }
 
             before { address.person = person }
@@ -44,38 +55,34 @@ module MassiveRecord
               end
             end
 
-            describe "#update_only_record_in_embedded_collection" do
-              let(:proxy_for_person) { address.send(:relation_proxy, :person) }
 
-              let(:row) do
-                MassiveRecord::Wrapper::Row.new({
-                  :id => person.id,
-                  :table => person.class.table
-                })
-              end
 
+            describe "update_embedded" do
               before { subject.stub(:row_for_record).and_return(row) }
 
               it "ask for record's row" do
                 subject.should_receive(:row_for_record).with(person).and_return(row)
-                subject.update_only_record_in_embedded_collection(proxy_for_person)
+                subject.update_embedded(proxy_for_person, "new_value")
               end
 
-              it "sets values on row" do
+              it "sets value on row" do
                 row.should_receive(:values=).with(
                   'addresses' => {
-                    address.id => Base.coder.dump(address.attributes_db_raw_data_hash)
+                    address.id => "new_value"
                   }
                 ) 
-                subject.update_only_record_in_embedded_collection(proxy_for_person)
+                subject.update_embedded(proxy_for_person, "new_value")
               end
 
               it "asks row to be saved" do
                 row.should_receive(:save)
-                subject.update_only_record_in_embedded_collection(proxy_for_person)
+                subject.update_embedded(proxy_for_person, "new_value")
               end
             end
           end
+
+
+
         end
       end
     end

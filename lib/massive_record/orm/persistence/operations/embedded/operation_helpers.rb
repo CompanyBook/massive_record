@@ -22,7 +22,24 @@ module MassiveRecord
               end
             end
 
+            def update_embedded(relation_proxy, value)
+              row = row_for_record(relation_proxy)
+              row.values = {
+                inverse_proxy_for(relation_proxy).metadata.store_in => {
+                  record.id => value
+                }
+              }
+              row.save
+            end
 
+
+
+
+
+
+            def inverse_proxy_for(proxy)
+              proxy.load_proxy_target.send(:relation_proxy, proxy.metadata.inverse_of)
+            end
 
 
             def row_for_record(record)
@@ -34,20 +51,6 @@ module MassiveRecord
               })
             end
 
-            def update_only_record_in_embedded_collection(relation_proxy_for_target)
-              inverse_of_proxy = relation_proxy_for_target.load_proxy_target.send(
-                :relation_proxy, relation_proxy_for_target.metadata.inverse_of
-              )
-              
-              row = row_for_record(relation_proxy_for_target)
-              row.values = {
-                inverse_of_proxy.metadata.store_in => {
-                  record.id => Base.coder.dump(record.attributes_db_raw_data_hash)
-                }
-              }
-
-              row.save
-            end
           end
         end
       end
