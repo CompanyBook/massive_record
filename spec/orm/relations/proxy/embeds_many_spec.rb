@@ -232,6 +232,10 @@ describe TestEmbedsManyProxy do
           subject.find(proxy_target.id).should eq proxy_target
         end
 
+        it "finds records which are not new records" do
+          subject.find(proxy_target.id).should be_persisted
+        end
+
         it "does not call load_proxy_target" do
           subject.should_not_receive :load_proxy_target
           subject.find(proxy_target.id)

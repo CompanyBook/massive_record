@@ -47,6 +47,9 @@ describe MassiveRecord::ORM::Embedded do
 
 
   describe "persistence" do
+    include SetUpHbaseConnectionBeforeAll 
+    include SetTableNamesToTestTable
+
     let(:person) { Person.new "person-id", :name => "Thorbjorn", :age => "22" }
 
     describe "#save" do
@@ -62,7 +65,12 @@ describe MassiveRecord::ORM::Embedded do
         context "collection owner not persisted" do
           before { subject.person = person }
 
-          pending
+          it "saves both embedded record and embedded in record" do
+            subject.save
+
+            person.should be_persisted
+            subject.should be_persisted
+          end
         end
 
         context "colletion owner persisted" do

@@ -1,30 +1,23 @@
+require 'massive_record/orm/persistence/operations/embedded/operation_helpers'
+
 module MassiveRecord
   module ORM
     module Persistence
       module Operations
         module Embedded
           class Insert
-            include Operations
+            include Operations, OperationHelpers
 
             def execute
               raise_error_if_embedded_in_proxy_targets_are_missing
-            end
 
-
-            private
-
-            def embedded_in_proxies
-              record.relation_proxies.select { |proxy| proxy.metadata.embedded_in? }
-            end
-
-            def raise_error_if_embedded_in_proxy_targets_are_missing
-              relations_not_assigned = embedded_in_proxies.collect do |proxy|
-                proxy.metadata.name if proxy.load_proxy_target.nil? 
-              end.compact
-
-              if relations_not_assigned.any?
-                raise MassiveRecord::ORM::NotAssignedToEmbeddedCollection.new(record, relations_not_assigned)
-              end
+              # NOTE
+              #
+              # When / if we allow for auto-save false when assigning
+              # an embedded record to an embeds many collection we might
+              # want to only update current insert in the targets, not a
+              # complete save of the parent.
+              embedded_in_proxy_targets.each(&:save)
             end
           end
         end
