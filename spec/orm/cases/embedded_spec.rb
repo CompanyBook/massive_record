@@ -79,7 +79,60 @@ describe MassiveRecord::ORM::Embedded do
             subject.person = person
           end
 
-          pending
+          it "persists address" do
+            subject.street = "new_address"
+            subject.save
+            person.reload.addresses.first.street.should eq "new_address"
+          end
+
+          it "will not save changes in owner when embedded is saved" do
+            subject.street += "_NEW"
+            person.name += "_NEW"
+
+            subject.save
+
+            person.should be_name_changed
+          end
+        end
+      end
+    end
+
+
+    describe "#destroy" do
+      context "not emedded" do
+        before { subject.person = nil }
+        
+        it "marks itself as destroyed" do
+          subject.destroy
+          subject.should be_destroyed
+        end
+      end
+
+      context "embedded" do
+        context "collection owner new record" do
+          before { subject.person = person }
+
+          it "marks itself as destroyed" do
+            subject.destroy
+            subject.should be_destroyed
+          end
+        end
+
+        context "collection owner persisted" do
+          before do
+            subject.person = person
+            person.save!
+          end
+
+          it "marks itself as destroyed" do
+            subject.destroy
+            subject.should be_destroyed
+          end
+
+          it "is actually removed from collection" do
+            subject.destroy
+            person.reload.addresses.should be_empty
+          end
         end
       end
     end
