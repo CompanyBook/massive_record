@@ -27,7 +27,7 @@ shared_examples_for "a model with timestamps" do
 
       sleep(1)
 
-      subject.update_attribute :name, subject.name + "NEW"
+      subject.update_attribute attribute_to_be_changed, subject[attribute_to_be_changed] + "NEW"
       subject.created_at.should == created_at_was
     end
 
@@ -97,7 +97,7 @@ shared_examples_for "a model without timestamps" do
       sleep(1)
 
       updated_at_was = subject.updated_at
-      subject.update_attribute :name, "Should Give Me New Updated At"
+      subject.update_attribute attribute_to_be_changed, "Should Give Me New Updated At"
 
       subject.updated_at.should_not eq updated_at_was
     end
@@ -106,7 +106,7 @@ shared_examples_for "a model without timestamps" do
       sleep(1)
 
       updated_at_was = subject.updated_at
-      subject.name = nil
+      subject[attribute_to_be_changed] = nil
 
       subject.should_not be_valid
 

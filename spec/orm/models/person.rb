@@ -21,6 +21,7 @@ class Person < MassiveRecord::ORM::Table
   references_many :friends, :class_name => "Person", :records_starts_from => :friends_records_starts_from_id
 
   embeds_many :addresses
+  embeds_many :addresses_with_timestamp, :class_name => "AddressWithTimestamp"
 
   validates_presence_of :name, :age
   validates_numericality_of :age, :greater_than_or_equal_to => 0
