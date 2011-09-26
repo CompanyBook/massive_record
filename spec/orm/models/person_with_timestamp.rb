@@ -8,7 +8,7 @@ class PersonWithTimestamp < MassiveRecord::ORM::Table
     field :status, :boolean, :default => false
     field :dictionary, :hash, :default => {}
 
-    field :created_at, :time
+    timestamps
   end
 
   private
