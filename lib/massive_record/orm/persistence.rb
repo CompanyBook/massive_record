@@ -72,7 +72,7 @@ module MassiveRecord
       end
 
       def destroy
-        @destroyed = (persisted? ? Operations.destroy(self).execute : true) and freeze
+        @destroyed = (persisted? ? do_destroy : true) and freeze
       end
       alias_method :delete, :destroy
 
@@ -151,6 +151,10 @@ module MassiveRecord
 
       def update(attribute_names_to_update = attributes_with_embedded)
         Operations.update(self, :attribute_names_to_update => attribute_names_to_update).execute
+      end
+
+      def do_destroy
+        Operations.destroy(self).execute
       end
 
       #
