@@ -370,104 +370,115 @@ describe TestEmbedsManyProxy do
 
 
 
-  describe "#proxy_targets_update_hash" do
-    before do
-      proxy_owner.save!
-    end
 
-    context "no changes" do
+  describe "#parent_will_be_saved!" do
+    describe "building of proxy_target_update_hash" do
       before do
-        subject << proxy_target
-        proxy_target.should_receive(:destroyed?).and_return false
-        proxy_target.should_receive(:new_record?).and_return false
-        proxy_target.should_receive(:changed?).and_return false
+        proxy_owner.save!
       end
 
-      its(:proxy_targets_update_hash) { should be_empty }
+      context "no changes" do
+        before do
+          subject << proxy_target
+          proxy_target.should_receive(:destroyed?).and_return false
+          proxy_target.should_receive(:new_record?).and_return false
+          proxy_target.should_receive(:changed?).and_return false
+
+          subject.parent_will_be_saved!
+        end
+
+        its(:proxy_targets_update_hash) { should be_empty }
+      end
+
+      context "insert" do
+        before do
+          subject << proxy_target
+          proxy_target.should_receive(:destroyed?).and_return false
+          proxy_target.should_receive(:new_record?).any_number_of_times.and_return true
+          proxy_target.should_not_receive(:changed?)
+
+          subject.parent_will_be_saved!
+        end
+
+        it "includes id for record to be inserted" do
+          subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+        end
+
+        it "includes attributes for record to be inserted" do
+          subject.proxy_targets_update_hash.values.should eq [MassiveRecord::ORM::Base.coder.dump(proxy_target.attributes_db_raw_data_hash)]
+        end
+      end
+
+      context "update" do
+        before do
+          subject << proxy_target
+          proxy_target.should_receive(:destroyed?).and_return false
+          proxy_target.should_receive(:new_record?).any_number_of_times.and_return false
+          proxy_target.should_receive(:changed?).and_return true
+
+          subject.parent_will_be_saved!
+        end
+
+        it "includes id for record to be updated" do
+          subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+        end
+
+        it "includes attributes for record to be updated" do
+          subject.proxy_targets_update_hash.values.should eq [MassiveRecord::ORM::Base.coder.dump(proxy_target.attributes_db_raw_data_hash)]
+        end
+      end
+
+      context "destroy" do
+        before do
+          subject << proxy_target
+        end
+
+        it "includes id for record to be updated" do
+          proxy_target.should_receive(:destroyed?).and_return true
+          subject.parent_will_be_saved!
+          subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+        end
+
+        it "includes attributes for record to be updated" do
+          proxy_target.should_receive(:destroyed?).and_return true
+          subject.parent_will_be_saved!
+          subject.proxy_targets_update_hash.values.should eq [nil]
+        end
+
+        it "includes records in the to_be_destroyed array" do
+          # Don't want it to actually trigger save as that will
+          # clear out the update hash..
+          proxy_owner.should_receive(:save).and_return true
+
+          subject.destroy(proxy_target)
+          subject.parent_will_be_saved!
+
+          subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+          subject.proxy_targets_update_hash.values.should eq [nil]
+        end
+      end
     end
 
-    context "insert" do
-      before do
-        subject << proxy_target
-        proxy_target.should_receive(:destroyed?).and_return false
-        proxy_target.should_receive(:new_record?).and_return true
-        proxy_target.should_not_receive(:changed?)
-      end
-
-      it "includes id for record to be inserted" do
-        subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
-      end
-
-      it "includes attributes for record to be inserted" do
-        subject.proxy_targets_update_hash.values.should eq [MassiveRecord::ORM::Base.coder.dump(proxy_target.attributes_db_raw_data_hash)]
-      end
-    end
-
-    context "update" do
-      before do
-        subject << proxy_target
-        proxy_target.should_receive(:destroyed?).and_return false
-        proxy_target.should_receive(:new_record?).and_return false
-        proxy_target.should_receive(:changed?).and_return true
-      end
-
-      it "includes id for record to be updated" do
-        subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
-      end
-
-      it "includes attributes for record to be updated" do
-        subject.proxy_targets_update_hash.values.should eq [MassiveRecord::ORM::Base.coder.dump(proxy_target.attributes_db_raw_data_hash)]
-      end
-    end
-
-    context "destroy" do
-      before do
-        subject << proxy_target
-        proxy_target.should_not_receive(:new_record?)
-        proxy_target.should_not_receive(:changed?)
-      end
-
-      it "includes id for record to be updated" do
-        proxy_target.should_receive(:destroyed?).and_return true
-        subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
-      end
-
-      it "includes attributes for record to be updated" do
-        proxy_target.should_receive(:destroyed?).and_return true
-        subject.proxy_targets_update_hash.values.should eq [nil]
-      end
-
-      it "includes records in the to_be_destroyed array" do
-        # Don't want it to actually trigger save as that will
-        # clear out the update hash..
-        proxy_owner.should_receive(:save).and_return true
 
 
-        subject.destroy(proxy_target)
 
-        subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
-        subject.proxy_targets_update_hash.values.should eq [nil]
-      end
-    end
-  end
 
-  describe "#parent_has_been_saved!" do
     it "marks new records as persisted" do
       subject << proxy_target
-      subject.parent_has_been_saved!
+      subject.parent_will_be_saved!
       proxy_target.should be_persisted
     end
 
     it "resets dirty state of records" do
       subject << proxy_target
       proxy_target.street += "_NEW"
-      subject.parent_has_been_saved!
+      subject.parent_will_be_saved!
       proxy_target.should_not be_changed
     end
 
     it "marks destroyed objects as destroyed" do
       subject.send(:to_be_destroyed) << proxy_target
-      subject.parent_has_been_saved!
+      subject.parent_will_be_saved!
       proxy_target.should be_destroyed
     end
 
@@ -475,13 +486,13 @@ describe TestEmbedsManyProxy do
       subject << proxy_target
       subject.send(:to_be_destroyed) << proxy_target
       proxy_target.person = Person.new
-      subject.parent_has_been_saved!
+      subject.parent_will_be_saved!
       proxy_target.should_not be_destroyed
     end
 
     it "clears to_be_destroyed array" do
       subject.send(:to_be_destroyed) << proxy_target
-      subject.parent_has_been_saved!
+      subject.parent_will_be_saved!
       subject.send(:to_be_destroyed).should be_empty
     end
   end
