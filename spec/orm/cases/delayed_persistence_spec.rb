@@ -4,13 +4,12 @@ module MassiveRecord
   module ORM
     module DelayedPersistence
       module DelayedPersistenceTestReceiver
-        attr_reader :create_called, :update_called, :do_destroy_called
+        attr_reader :create_or_update_called, :do_destroy_called
 
-        def initialize; @create_called = @update_called = @do_destroy_called = 0; end
+        def initialize; @create_or_update_called = @do_destroy_called = 0; end
 
         private
-        def create; @create_called += 1; end
-        def update(attrs = []); @update_called += 1; end
+        def create_or_update; @create_or_update_called += 1; end
         def do_destroy; @do_destroy_called += 1; end
       end
 
@@ -47,7 +46,7 @@ module MassiveRecord
 
               subject.delayed_persistence do
                 subject.send(action)
-                recorded_actions = subject.send(:delayed_persistence_stack)
+                recorded_actions = subject.send(:delayed_persistence_stack).dup
               end
 
               recorded_actions.should include action
@@ -63,13 +62,38 @@ module MassiveRecord
           end
 
           it "does not call any other actions than the one(s) called inside of the block" do
-              subject.delayed_persistence do
-                2.times { subject.send(:create) ; subject.send(:do_destroy) }
+            subject.delayed_persistence do
+              2.times { subject.send(:create_or_update) ; subject.send(:do_destroy) }
+            end
+
+            subject.create_or_update_called.should eq 1
+            subject.do_destroy_called.should eq 1
+          end
+        end
+
+        describe "#suppress_persistence" do
+          it "responds to it" do
+            subject.should be_respond_to :suppress_persistence
+          end
+
+          it "takes a block and executes it" do
+            done = false
+
+            subject.suppress_persistence do
+              done = true
+            end
+
+            done.should be_true
+          end
+
+          CAPTURES.each do |action|
+            it "suppresses call to #{action}" do
+              subject.suppress_persistence do
+                2.times { subject.send(action) }
               end
 
-              subject.create_called.should eq 1
-              subject.do_destroy_called.should eq 1
-              subject.update_called.should eq 0
+              subject.send("#{action}_called").should eq 0
+            end
           end
         end
       end

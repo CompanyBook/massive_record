@@ -3,32 +3,35 @@ module MassiveRecord
     module DelayedPersistence
       extend ActiveSupport::Concern
 
-      CAPTURES = %w(create update do_destroy)
+      CAPTURES = %w(create_or_update do_destroy)
 
       module InstanceMethods
+
         def delayed_persistence
-          @inside_of_delayed_persistence = true
+          @inside_of_manipulated_persistence = true
           yield
         ensure
-          @inside_of_delayed_persistence = false
+          @inside_of_manipulated_persistence = false
           commit_recored_delayed_persistence_actions
         end
 
+
+        def suppress_persistence
+          @inside_of_manipulated_persistence = true
+          yield
+        ensure
+          @inside_of_manipulated_persistence = false
+          delayed_persistence_stack.clear
+        end
 
         private
 
 
 
-        def create
-          delay_persistence_action? ? record_action(:create) : super
-        end
-        
-        def update(attrs = [])
-          delay_persistence_action? ? record_action(:update) : super
-        end
-
-        def do_destroy
-          delay_persistence_action? ? record_action(:do_destroy) : super
+        CAPTURES.each do |action|
+          define_method action do
+            manipulate_persistence_action? ? record_action(action) : super()
+          end
         end
 
 
@@ -46,12 +49,13 @@ module MassiveRecord
 
 
 
-        def delay_persistence_action?
-          !!@inside_of_delayed_persistence
+        def manipulate_persistence_action?
+          !!@inside_of_manipulated_persistence
         end
 
         def commit_recored_delayed_persistence_actions
           delayed_persistence_stack.uniq.each { |action| send(action) }
+          delayed_persistence_stack.clear
         end
       end
     end
