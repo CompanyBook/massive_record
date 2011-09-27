@@ -39,6 +39,8 @@ module MassiveRecord
           end
 
           describe "#attributes_to_row_values_hash" do
+            before { person.addresses.parent_will_be_saved! }
+
             it "should include the 'pts' field in the database which has 'points' as an alias" do
               subject.attributes_to_row_values_hash["base"].keys.should include("pts")
               subject.attributes_to_row_values_hash["base"].keys.should_not include("points")

@@ -138,19 +138,27 @@ module MassiveRecord
       def create_or_update
         raise ReadOnlyRecord if readonly?
 
-        (!!(new_record? ? create : update)).tap do |saved|
-          relation_proxies_for_embedded.select(&:changed?).each(&:parent_has_been_saved!) if saved
-        end
+        !!(new_record? ? create : update)
       end
 
       def create
+        embedded_relations = relation_proxies_for_embedded.select(&:changed?)
+        embedded_relations.each(&:parent_will_be_saved!)
+
         Operations.insert(self).execute.tap do |saved|
           @new_record = false if saved
         end
+
+        embedded_relations.each(&:parent_has_been_saved!)
       end
 
       def update(attribute_names_to_update = attributes_with_embedded)
+        embedded_relations = relation_proxies_for_embedded.select(&:changed?)
+        embedded_relations.each(&:parent_will_be_saved!)
+
         Operations.update(self, :attribute_names_to_update => attribute_names_to_update).execute
+
+        embedded_relations.each(&:parent_has_been_saved!)
       end
 
       def do_destroy
