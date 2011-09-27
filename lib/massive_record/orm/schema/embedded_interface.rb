@@ -32,6 +32,7 @@ module MassiveRecord
 
           def timestamps
             add_field :created_at, :time
+            add_field :updated_at, :time
           end
 
           #

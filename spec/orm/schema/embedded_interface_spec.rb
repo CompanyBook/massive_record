@@ -94,6 +94,10 @@ describe MassiveRecord::ORM::Schema::EmbeddedInterface do
     it "should have a created_at time field" do
       TestEmbeddedInterface.attributes_schema['created_at'].type.should == :time
     end
+
+    it "should have an updated_at time field" do
+      TestEmbeddedInterface.attributes_schema['updated_at'].type.should == :time
+    end
   end
 
 
