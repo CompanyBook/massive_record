@@ -497,6 +497,20 @@ describe TestEmbedsManyProxy do
     end
   end
 
+  describe "#parent_has_been_saved!" do
+    it "clears the proxy_target_update_hash" do
+      hash = {}
+      hash.should_receive :clear
+      subject.should_receive(:proxy_targets_update_hash).and_return(hash)
+      subject.parent_has_been_saved!
+    end
+
+    it "reloads raw data" do
+      subject.should_receive(:reload_raw_data)
+      subject.parent_has_been_saved!
+    end
+  end
+
   describe "#changed?" do
     before do
       subject << proxy_target

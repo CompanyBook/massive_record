@@ -107,7 +107,7 @@ module MassiveRecord
 
           # Hook to call when save is done through parent
           def parent_has_been_saved!
-            # reload_raw_data
+            reload_raw_data
             proxy_targets_update_hash.clear
           end
 
