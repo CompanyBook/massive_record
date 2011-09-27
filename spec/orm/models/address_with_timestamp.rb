@@ -1,5 +1,5 @@
 class AddressWithTimestamp < MassiveRecord::ORM::Embedded
-  embedded_in :person
+  embedded_in :person, :inverse_of => :addresses_with_timestamp
   embedded_in :addressable, :inverse_of => :addresses, :polymorphic => true
 
   field :street

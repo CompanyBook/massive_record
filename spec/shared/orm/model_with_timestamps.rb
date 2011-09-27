@@ -41,7 +41,7 @@ shared_examples_for "a model with timestamps" do
 
     it "raises error if created_at is not time" do
       described_class.attributes_schema['created_at'].type = :string
-      expect { described_class.create! }.to raise_error "created_at must be of type time"
+      expect { described_class.new.save(:validate => false) }.to raise_error "created_at must be of type time"
       described_class.attributes_schema['created_at'].type = :time
     end
   end
