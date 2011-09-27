@@ -246,6 +246,24 @@ module MassiveRecord
 
         private
 
+      def create
+        embedded_relations = relation_proxies_for_embedded.select(&:changed?)
+        embedded_relations.each(&:parent_will_be_saved!)
+
+        super
+
+        embedded_relations.each(&:parent_has_been_saved!)
+      end
+
+      def update(attribute_names_to_update = attributes_with_embedded)
+        embedded_relations = relation_proxies_for_embedded.select(&:changed?)
+        embedded_relations.each(&:parent_will_be_saved!)
+
+        super
+
+        embedded_relations.each(&:parent_has_been_saved!)
+      end
+
         def relation_proxy(name)
           name = name.to_s
 
