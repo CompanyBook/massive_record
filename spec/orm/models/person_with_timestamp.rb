@@ -11,6 +11,8 @@ class PersonWithTimestamp < MassiveRecord::ORM::Table
     timestamps
   end
 
+  validates_presence_of :name
+
   private
 
   def default_id

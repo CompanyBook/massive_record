@@ -45,31 +45,7 @@ shared_examples_for "a model with timestamps" do
       described_class.attributes_schema['created_at'].type = :time
     end
   end
-end
 
-
-
-
-
-shared_examples_for "a model without timestamps" do
-  include TimeZoneHelper
-
-  describe "#created_at" do
-    it "is instructed not to create it on create :-)" do
-      subject.should_not be_set_created_at_on_create
-    end
-
-    it "does not raise cant-set-error" do
-      expect { subject.created_at = Time.now }.to_not raise_error MassiveRecord::ORM::CantBeManuallyAssigned
-    end
-
-    it "does not include created_at in the list of known attributes" do
-      subject.send(:known_attribute_names_for_inspect).should_not include 'created_at'
-    end
-  end
-
-  # Might be a bit strange, but HBase gives you time stamps on cells
-  # regardless, so we'll always make it available to the client
   describe "#updated_at" do
     it "is nil on new records" do
       described_class.new.updated_at.should be_nil
@@ -125,6 +101,28 @@ shared_examples_for "a model without timestamps" do
           Person.new.updated_at.should be_nil
         end
       end
+    end
+  end
+end
+
+
+
+
+
+shared_examples_for "a model without timestamps" do
+  include TimeZoneHelper
+
+  describe "#created_at" do
+    it "is instructed not to create it on create :-)" do
+      subject.should_not be_set_created_at_on_create
+    end
+
+    it "does not raise cant-set-error" do
+      expect { subject.created_at = Time.now }.to_not raise_error MassiveRecord::ORM::CantBeManuallyAssigned
+    end
+
+    it "does not include created_at in the list of known attributes" do
+      subject.send(:known_attribute_names_for_inspect).should_not include 'created_at'
     end
   end
 end
