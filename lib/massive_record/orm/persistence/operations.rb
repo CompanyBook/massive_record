@@ -1,3 +1,5 @@
+require 'massive_record/orm/persistence/operations/suppress'
+
 require 'massive_record/orm/persistence/operations/insert'
 require 'massive_record/orm/persistence/operations/update'
 require 'massive_record/orm/persistence/operations/destroy'
@@ -27,6 +29,18 @@ module MassiveRecord
       #
       module Operations
         class << self
+          def suppress
+            @suppressed = true
+            yield
+          ensure
+            @suppressed = false
+          end
+
+          def suppressed?
+            !!@suppressed
+          end
+
+
           def insert(record, options = {})
             operator_for :insert, record, options
           end
@@ -46,11 +60,16 @@ module MassiveRecord
           private
           
           def operator_for(operation, record, options)
-            class_parts = [self]
-            class_parts << "Embedded" if record.kind_of? ORM::Embedded
-            class_parts << operation.to_s.classify
+            if suppressed?
+              klass = Suppress
+            else
+              class_parts = [self]
+              class_parts << "Embedded" if record.kind_of? ORM::Embedded
+              class_parts << operation.to_s.classify
 
-            klass = class_parts.join("::").constantize
+              klass = class_parts.join("::").constantize
+            end
+
             klass.new(record, options)
           end
         end

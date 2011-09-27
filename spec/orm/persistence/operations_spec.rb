@@ -20,6 +20,12 @@ describe MassiveRecord::ORM::Persistence::Operations do
             klass = "MassiveRecord::ORM::Persistence::Operations::#{method.to_s.classify}".constantize
             should be_instance_of klass
           end
+
+          it "is possible to suppress" do
+             MassiveRecord::ORM::Persistence::Operations.suppress do
+               subject.should be_instance_of MassiveRecord::ORM::Persistence::Operations::Suppress
+             end
+          end
         end
       end
     end
@@ -38,6 +44,12 @@ describe MassiveRecord::ORM::Persistence::Operations do
           it "is an instance of Persistence::Operations::#{method.to_s.classify}" do
             klass = "MassiveRecord::ORM::Persistence::Operations::Embedded::#{method.to_s.classify}".constantize
             should be_instance_of klass
+          end
+
+          it "is possible to suppress" do
+             MassiveRecord::ORM::Persistence::Operations.suppress do
+               subject.should be_instance_of MassiveRecord::ORM::Persistence::Operations::Suppress
+             end
           end
         end
       end
