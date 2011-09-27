@@ -58,7 +58,7 @@ module MassiveRecord
 
               it "asks the proxy for update hash and uses whatever it delivers" do
                 dummy_hash = {:foo => {:bar => :dummy}}
-                person.addresses.should_receive(:proxy_targets_update_hash).and_return(dummy_hash)
+                person.addresses.should_receive(:proxy_targets_update_hash).any_number_of_times.and_return(dummy_hash)
                 subject.attributes_to_row_values_hash["addresses"].should eq dummy_hash
               end
             end
