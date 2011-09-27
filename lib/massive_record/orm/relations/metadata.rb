@@ -175,9 +175,9 @@ module MassiveRecord
         def calculate_inverse_of
           raise "Can't return inverse of without it being explicitly set or without an owner_class" unless owner_class
           if represents_a_collection?
-            owner_class.to_s.demodulize.downcase.singularize
+            owner_class.to_s.demodulize.underscore.singularize
           else
-            owner_class.to_s.demodulize.downcase.pluralize
+            owner_class.to_s.demodulize.underscore.pluralize
           end
         end
 
