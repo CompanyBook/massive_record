@@ -3,11 +3,13 @@ require 'massive_record/orm/persistence/operations/suppress'
 require 'massive_record/orm/persistence/operations/insert'
 require 'massive_record/orm/persistence/operations/update'
 require 'massive_record/orm/persistence/operations/destroy'
+require 'massive_record/orm/persistence/operations/reload'
 require 'massive_record/orm/persistence/operations/atomic_operation'
 
 require 'massive_record/orm/persistence/operations/embedded/insert'
 require 'massive_record/orm/persistence/operations/embedded/update'
 require 'massive_record/orm/persistence/operations/embedded/destroy'
+require 'massive_record/orm/persistence/operations/embedded/reload'
 
 module MassiveRecord
   module ORM
@@ -55,6 +57,10 @@ module MassiveRecord
 
           def atomic_operation(record, options = {})
             operator_for :atomic_operation, record, options
+          end
+
+          def reload(record, options = {})
+            operator_for :reload, record, options
           end
 
           private

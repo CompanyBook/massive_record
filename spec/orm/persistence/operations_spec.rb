@@ -8,7 +8,7 @@ describe MassiveRecord::ORM::Persistence::Operations do
     context "table record" do
       let(:record) { TestClass.new }
 
-      [:insert, :update, :destroy, :atomic_operation].each do |method|
+      [:insert, :update, :destroy, :atomic_operation, :reload].each do |method|
         describe "##{method}" do
           subject { described_class.send(method, record, options) }
 
@@ -33,7 +33,7 @@ describe MassiveRecord::ORM::Persistence::Operations do
     context "embedded record" do
       let(:record) { Address.new }
 
-      [:insert, :update, :destroy].each do |method|
+      [:insert, :update, :destroy, :reload].each do |method|
         describe "##{method}" do
           subject { described_class.send(method, record, options) }
 
