@@ -68,7 +68,7 @@ module MassiveRecord
                                 raw_data.value
                               end
 
-            raw_data = Hash[raw_attributes.each do |attr, value|
+            raw_data = Hash[raw_attributes.collect do |attr, value|
               [attr, RawData.new(value: value, created_at: updated_at)]
             end]
 

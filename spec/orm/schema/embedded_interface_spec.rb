@@ -154,12 +154,12 @@ describe MassiveRecord::ORM::Schema::EmbeddedInterface do
   describe ".transpose_raw_data_to_record_attributes_and_raw_data" do
     let(:id) { "id" }
     let(:raw_data) do
-      {
+      MassiveRecord::ORM::RawData.new(value: {
         "street" => "Oslo",
         "number" => 3,
         "nice_place" => "false",
         "postal_code" => "1111"
-      }
+      })
     end
 
     it "returns attributes" do
@@ -169,11 +169,16 @@ describe MassiveRecord::ORM::Schema::EmbeddedInterface do
 
     it "returns raw data" do
       attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data id, raw_data
-      raw.should eq raw_data
+      raw.should eq Hash[raw_data.value.collect do |attr, value|
+        [attr, MassiveRecord::ORM::RawData.new(value: value, created_at: raw_data.created_at)]
+      end]
     end
 
     it "returns correct attributes from serialized db values hash" do
-      attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data id, MassiveRecord::ORM::Base.coder.dump(raw_data)
+      attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data(
+        id,
+        MassiveRecord::ORM::RawData.new(value: MassiveRecord::ORM::Base.coder.dump(raw_data.value))
+      )
       attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111"})
     end
   end
