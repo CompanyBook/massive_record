@@ -160,7 +160,7 @@ describe MassiveRecord::ORM::Schema::EmbeddedInterface do
 
     it "returns attributes" do
       attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data id, raw_data
-      attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111"})
+      attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111", "updated_at" => nil})
     end
 
     it "returns raw data" do
@@ -175,7 +175,7 @@ describe MassiveRecord::ORM::Schema::EmbeddedInterface do
         id,
         MassiveRecord::ORM::RawData.new(value: MassiveRecord::ORM::Base.coder.dump(raw_data.value))
       )
-      attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111"})
+      attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111", "updated_at" => nil})
     end
   end
 end
