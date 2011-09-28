@@ -32,7 +32,6 @@ module MassiveRecord
 
           def timestamps
             add_field :created_at, :time
-            add_field :updated_at, :time
           end
 
           #
@@ -60,8 +59,8 @@ module MassiveRecord
           #
           def transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data)
             attributes = {:id => id}
+            attributes['updated_at'] = raw_data.created_at
 
-            updated_at = raw_data.created_at
             raw_attributes =  if raw_data.value.is_a? String
                                 Base.coder.load(raw_data.value)
                               else
@@ -69,7 +68,7 @@ module MassiveRecord
                               end
 
             raw_data = Hash[raw_attributes.collect do |attr, value|
-              [attr, RawData.new(value: value, created_at: updated_at)]
+              [attr, RawData.new(value: value, created_at: raw_data.created_at)]
             end]
 
             attributes_schema.each do |attr_name, orm_field|

@@ -31,14 +31,14 @@ describe "timestamps" do
 
     describe AddressWithTimestamp do
       subject { AddressWithTimestamp.new "id1", :street => "Karl Johans gate 13" }
-      before { person.addresses_with_timestamp << subject }
+      before { person.addresses_with_timestamp << subject; subject.reload }
 
       it_should_behave_like "a model with timestamps"
     end
 
     describe Address do
       subject { Address.new "id1", :street => "Karl Johans gate 13" }
-      before { person.addresses << subject }
+      before { person.addresses << subject; subject.reload }
 
       it_should_behave_like "a model without timestamps"
     end
