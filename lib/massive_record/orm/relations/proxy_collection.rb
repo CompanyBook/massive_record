@@ -18,7 +18,7 @@ module MassiveRecord
           self.proxy_target = (proxy_target_before_load + proxy_target_after_load).uniq
         end
 
-        def reset
+        def reset(force = false)
           super
           @proxy_target = []
         end

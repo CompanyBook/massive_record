@@ -22,9 +22,10 @@ module MassiveRecord
             end
           end
 
-          def reset
+          def reset(force = false)
             # Does nothing.. if we are resetting this inside of an embedded setting
             # we will lose the knowledge about parent.
+            super if force
           end
 
 

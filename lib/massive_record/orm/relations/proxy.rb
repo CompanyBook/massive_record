@@ -58,13 +58,13 @@ module MassiveRecord
           load_proxy_target
         end
 
-        def reset
+        def reset(force = true)
           @loaded = @proxy_target = nil
         end
 
         def replace(proxy_target)
           if proxy_target.nil?
-            reset 
+            reset(true)
           else
             raise_if_type_mismatch(proxy_target)
             self.proxy_target = proxy_target
