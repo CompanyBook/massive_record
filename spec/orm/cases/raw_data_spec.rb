@@ -45,4 +45,14 @@ describe MassiveRecord::ORM::RawData do
       subject.inspect.should eq "<#{subject.class} #{subject.value.inspect}>"
     end
   end
+
+  
+  describe "equality" do
+    it "considered equal if created at and value are the same" do
+      cell = described_class.new_with_data_from(
+        MassiveRecord::Wrapper::Cell.new(value: value, created_at: created_at)
+      )
+      cell.should eq subject
+    end
+  end
 end

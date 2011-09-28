@@ -36,6 +36,17 @@ module MassiveRecord
         "<#{self.class} #{value.inspect}>"
       end
       delegate :to_s, :to => :value
+
+
+      def ==(other)
+        other.equal?(self) ||
+          other.instance_of?(self.class) && value == other.value && created_at == other.created_at
+      end
+      alias_method :eql?, :==
+
+      def hash
+        [id, created_at].hash
+      end
     end
   end
 end
