@@ -22,6 +22,11 @@ module MassiveRecord
             end
           end
 
+          def reset
+            # Does nothing.. if we are resetting this inside of an embedded setting
+            # we will lose the knowledge about parent.
+          end
+
 
           private
 

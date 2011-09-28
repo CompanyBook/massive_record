@@ -39,10 +39,14 @@ shared_examples_for "relation proxy" do
 
 
   describe "#reset" do
-    it "should not be loaded after reset" do
+    it "alters the loaded state" do
       subject.loaded!
       subject.reset
-      should_not be_loaded
+      if subject.metadata.embedded_in?
+        should be_loaded
+      else
+        should_not be_loaded
+      end
     end
 
     it "should reset the proxy_target" do
