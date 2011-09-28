@@ -9,15 +9,22 @@ module MassiveRecord
             end
             
             def embedded_in_proxy_targets
-              embedded_in_proxies.collect(&:load_proxy_target)
+              embedded_in_proxies.collect(&:load_proxy_target).compact
             end
 
             def raise_error_if_embedded_in_proxy_targets_are_missing
-              relations_not_assigned = embedded_in_proxies.collect do |proxy|
-                proxy.metadata.name if proxy.load_proxy_target.nil? 
-              end.compact
+              relations_not_assigned = []
+              relations_assigned = []
 
-              if relations_not_assigned.any?
+              embedded_in_proxies.each do |proxy|
+                if proxy.load_proxy_target.nil? 
+                  relations_not_assigned << proxy.metadata.name
+                else
+                  relations_assigned << proxy.metadata.name
+                end
+              end
+
+              if relations_assigned.empty?
                 raise MassiveRecord::ORM::NotAssignedToEmbeddedCollection.new(record, relations_not_assigned)
               end
             end
