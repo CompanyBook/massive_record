@@ -180,16 +180,20 @@ module MassiveRecord
         @new_record = false
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
-        @raw_data = Hash.new { |h,k| h[k] = {} }
-        @raw_data.update(coder['raw_data']) if coder.has_key? 'raw_data'
 
-        self.attributes_raw = coder['attributes']
+        reinit_with(coder)
         fill_attributes_with_default_values_where_nil_is_not_allowed
 
         _run_find_callbacks
         _run_initialize_callbacks
 
         self
+      end
+
+      def reinit_with(coder) # :nodoc:
+        @raw_data = Hash.new { |h,k| h[k] = {} }
+        @raw_data.update(coder['raw_data']) if coder.has_key? 'raw_data'
+        self.attributes_raw = coder['attributes']
       end
 
 
