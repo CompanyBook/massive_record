@@ -105,7 +105,7 @@ module MassiveRecord
         alias embedded? embedded
 
         def embedded_in
-          relation_type == "embedded_in"
+          relation_type == "embedded_in" || relation_type == "embedded_in_polymorphic"
         end
         alias embedded_in? embedded_in
 
