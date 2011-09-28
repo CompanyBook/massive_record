@@ -141,9 +141,13 @@ module MassiveRecord
         # table.get("my_id", :info, :name) # => "Bob"
         #
         def get(id, column_family_name, column_name)
-          get_cell(id, column_family_name, column_name).value
+          get_cell(id, column_family_name, column_name).try :value
         end
 
+
+        #
+        # Fast way of fetching one cell
+        #
         def get_cell(id, column_family_name, column_name)
           if cell = connection.get(name, id.dup.force_encoding(Encoding::BINARY), "#{column_family_name.to_s}:#{column_name.to_s}").first
             MassiveRecord::Wrapper::Cell.populate_from_tcell(cell)
