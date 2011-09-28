@@ -232,8 +232,8 @@ module MassiveRecord
 
           # Parse the schema to populate the instance attributes
           attributes_schema.each do |key, field|
-            value = raw_data.has_key?(field.column_family.name) ? raw_data[field.column_family.name][field.column] : nil
-            attributes[field.name] = value.nil? ? nil : field.decode(value)
+            data = raw_data.has_key?(field.column_family.name) ? raw_data[field.column_family.name][field.column] : nil
+            attributes[field.name] = data.nil? ? nil : field.decode(data.value)
           end
 
           [attributes, raw_data]
