@@ -11,25 +11,25 @@ module MassiveRecord
             class UnsupportedNumberOfEmbeddedIn < MassiveRecordError; end
 
             def execute
-              if record.persisted?
-                if embedded_in_proxies.compact.length == 1
-                  embeds_many_proxy_currently_embedded_in = inverse_proxy_for(embedded_in_proxies.first)
-                  embeds_many_proxy_currently_embedded_in.reload
-                  embeds_many_proxy_currently_embedded_in.find(record.id).tap do |reloaded_record|
-                    record.reinit_with({
-                      'attributes' => reloaded_record.attributes,
-                      'raw_data' => reloaded_record.raw_data
-                    })
-                  end
-                else
-                  raise UnsupportedNumberOfEmbeddedIn.new(<<-TXT
-                    Found '#{embedded_in_proxies.length}' embedded_in relations in #{klass}. We currently only support reload when embedded in '1' record
-                  TXT
-                  )
+              if record.persisted? && embeds_many_proxy_to_reload_from
+                embeds_many_proxy_to_reload_from = inverse_proxy_for(embedded_in_proxies.first)
+                embeds_many_proxy_to_reload_from.reload
+                embeds_many_proxy_to_reload_from.find(record.id).tap do |reloaded_record|
+                  record.reinit_with({
+                    'attributes' => reloaded_record.attributes,
+                    'raw_data' => reloaded_record.raw_data
+                  })
                 end
 
                 true
               end
+            end
+
+
+            private
+
+            def embeds_many_proxy_to_reload_from
+              @embeds_many_proxy_to_reload_from ||= embedded_in_proxies.select { |p| p.load_proxy_target.present? }.first
             end
           end
         end

@@ -33,9 +33,9 @@ describe MassiveRecord::ORM::Persistence::Operations::Embedded::Reload do
         subject.stub(:inverse_proxy_for).and_return(inverse_proxy)
       end
 
-      it "raises error if unsupported numbers of embedded in relations" do
-        subject.should_receive(:embedded_in_proxies).any_number_of_times.and_return [1, 2]
-        expect { subject.execute }.to raise_error MassiveRecord::ORM::Persistence::Operations::Embedded::Reload::UnsupportedNumberOfEmbeddedIn
+      it "just returns false if no not embedded in any proxies" do
+        subject.should_receive(:embedded_in_proxies).any_number_of_times.and_return []
+        subject.execute.should be_false
       end
 
       it "asks for inverse proxy" do
