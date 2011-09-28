@@ -226,7 +226,7 @@ module MassiveRecord
 
         def transpose_hbase_row_to_record_attributes_and_raw_data(row) # :nodoc:
           attributes = {:id => row.id}
-          raw_data = row.values_hash
+          raw_data = row.values_raw_data_hash
           
           autoload_column_families_and_fields_with(row.columns.keys)
 

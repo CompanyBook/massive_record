@@ -171,7 +171,9 @@ module MassiveRecord
           end
 
           def load_raw_data_for_id(id)
-            proxy_owner.class.table.get(proxy_owner.id, metadata.store_in, id)
+            if cell = proxy_owner.class.table.get_cell(proxy_owner.id, metadata.store_in, id)
+              RawData.new_with_data_from cell
+            end
           end
 
           # FIXME Common to all proxies representing multiple values

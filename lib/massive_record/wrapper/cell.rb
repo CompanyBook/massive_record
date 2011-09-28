@@ -10,7 +10,7 @@ module MassiveRecord
       #
       # Packs an integer as a 64-bit signed integer, native endian (int64_t)
       # Reverse it as the byte order in hbase are reversed
-      #
+      p #
       def self.integer_to_hex_string(int)
         [int].pack('q').reverse
       end
@@ -23,6 +23,13 @@ module MassiveRecord
         string.reverse.unpack("q*").first
       end
 
+
+      def self.populate_from_tcell(tcell)
+        new({
+          :value => tcell.value,
+          :created_at => Time.at(tcell.timestamp / 1000, (tcell.timestamp % 1000) * 1000)
+        })
+      end
 
 
       def initialize(opts = {})

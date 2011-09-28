@@ -60,11 +60,21 @@ module MassiveRecord
           #
           def transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data)
             attributes = {:id => id}
-            raw_data = Base.coder.load(raw_data) if raw_data.is_a? String
+
+            updated_at = raw_data.created_at
+            raw_attributes =  if raw_data.value.is_a? String
+                                Base.coder.load(raw_data.value)
+                              else
+                                raw_data.value
+                              end
+
+            raw_data = Hash[raw_attributes.each do |attr, value|
+              [attr, RawData.new(value: value, created_at: updated_at)]
+            end]
 
             attributes_schema.each do |attr_name, orm_field|
-              value = raw_data.has_key?(orm_field.column) ? raw_data[orm_field.column] : nil
-              attributes[attr_name] = value.nil? ? nil : orm_field.decode(raw_data[orm_field.column])
+              value = raw_attributes.has_key?(orm_field.column) ? raw_attributes[orm_field.column] : nil
+              attributes[attr_name] = value.nil? ? nil : orm_field.decode(raw_attributes[orm_field.column])
             end
 
             [attributes, raw_data]

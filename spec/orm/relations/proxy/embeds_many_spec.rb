@@ -14,9 +14,9 @@ describe TestEmbedsManyProxy do
 
   let(:raw_data) do
     {
-      proxy_target.id => proxy_target.attributes_db_raw_data_hash,
-      proxy_target_2.id => proxy_target_2.attributes_db_raw_data_hash,
-      proxy_target_3.id => proxy_target_3.attributes_db_raw_data_hash,
+      proxy_target.id => MassiveRecord::ORM::RawData.new(value: proxy_target.attributes_db_raw_data_hash, created_at: Time.now),
+      proxy_target_2.id => MassiveRecord::ORM::RawData.new(value: proxy_target_2.attributes_db_raw_data_hash, created_at: Time.now),
+      proxy_target_3.id => MassiveRecord::ORM::RawData.new(value: proxy_target_3.attributes_db_raw_data_hash, created_at: Time.now),
     }
   end
 
@@ -65,7 +65,7 @@ describe TestEmbedsManyProxy do
       proxy_owner.save!
       proxy_owner.raw_data[metadata.store_in] = {}
       subject.send(:reload_raw_data)
-      proxy_owner.raw_data[metadata.store_in].should eq({
+      Hash[proxy_owner.raw_data[metadata.store_in].collect { |k,v| [k, v.to_s] }].should eq({
         "address-1" => "{\"street\":\"Asker\",\"number\":1,\"nice_place\":\"true\",\"postal_code\":null}",
         "address-2" => "{\"street\":\"Asker\",\"number\":2,\"nice_place\":\"true\",\"postal_code\":null}"
       })
