@@ -28,7 +28,14 @@ module MassiveRecord
         end
 
         def write_attribute(attr_name, value)
-          @attributes[attr_name.to_s] = value
+          attr_name = attr_name.to_s
+          internal_write_method = "_#{attr_name}="
+
+          if respond_to? internal_write_method
+            send(internal_write_method, value)
+          else
+            @attributes[attr_name.to_s] = value
+          end
         end
 
         private
