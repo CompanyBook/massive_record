@@ -7,7 +7,11 @@ module MassiveRecord
       included do
         before_create :if => :set_created_at_on_create? do
           raise "created_at must be of type time" if attributes_schema['created_at'].type != :time
-          @attributes['created_at'] = @attributes['updated_at'] = Time.now
+          @attributes['created_at'] = Time.now
+        end
+
+        before_create do
+          @attributes['updated_at'] = @attributes['created_at'] || Time.now
         end
       end
 
@@ -51,6 +55,10 @@ module MassiveRecord
       private
 
       def update(*)
+        # Sets updated at to Time.now, even though the updated at is
+        # read from the cell's time stamp on relad. We do this after
+        # a successfully update to remove the need to do a query to
+        # the db again to get the updated at timestamp.
         @attributes['updated_at'] = Time.now if updated = super 
         updated
       end

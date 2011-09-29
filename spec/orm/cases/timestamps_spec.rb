@@ -12,13 +12,13 @@ describe "timestamps" do
     let(:attribute_to_be_changed) { 'name' }
 
     describe PersonWithTimestamp do
-      subject { PersonWithTimestamp.create!(:name => "John Doe", :email => "john@base.com", :age => "20").reload }
+      subject { PersonWithTimestamp.create!(:name => "John Doe", :email => "john@base.com", :age => "20") }
 
       it_should_behave_like "a model with timestamps"
     end
 
     describe Person do
-      subject { Person.create!(:name => "John Doe", :email => "john@base.com", :age => "20").reload }
+      subject { Person.create!(:name => "John Doe", :email => "john@base.com", :age => "20") }
 
       it_should_behave_like "a model without timestamps"
     end
@@ -27,18 +27,18 @@ describe "timestamps" do
 
   describe "on embedded classes" do
     let(:attribute_to_be_changed) { 'street' }
-    let(:person) { Person.create!(:name => "John Doe", :email => "john@base.com", :age => "20").reload }
+    let(:person) { Person.create!(:name => "John Doe", :email => "john@base.com", :age => "20") }
 
     describe AddressWithTimestamp do
       subject { AddressWithTimestamp.new "id1", :street => "Karl Johans gate 13" }
-      before { person.addresses_with_timestamp << subject; subject.reload }
+      before { person.addresses_with_timestamp << subject; subject }
 
       it_should_behave_like "a model with timestamps"
     end
 
     describe Address do
       subject { Address.new "id1", :street => "Karl Johans gate 13" }
-      before { person.addresses << subject; subject.reload }
+      before { person.addresses << subject; subject }
 
       it_should_behave_like "a model without timestamps"
     end
