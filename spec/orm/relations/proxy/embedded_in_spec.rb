@@ -48,6 +48,11 @@ describe TestEmbeddedInProxy do
         end
       end
     end
+
+    it "raises error if inverse of does not exist" do
+      metadata.should_receive(:inverse_of).any_number_of_times.and_return("something_which_does_not_exist")
+      expect { subject.replace(proxy_target) }.to raise_error MassiveRecord::ORM::RelationMissing
+    end
   end
 
   describe "polymorphism" do

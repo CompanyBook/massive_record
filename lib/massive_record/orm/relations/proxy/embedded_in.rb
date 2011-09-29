@@ -10,6 +10,15 @@ module MassiveRecord
             super(proxy_target).tap do |proxy_target_is|
               if update_inverse_relation
                 if proxy_target_is.present?
+                  unless proxy_target_is.respond_to? metadata.inverse_of
+                    raise RelationMissing.new(
+                      <<-TXT
+                        Expected '#{metadata.proxy_target_class}' to have an embedded
+                        relation defined with name '#{metadata.inverse_of}'.
+                      TXT
+                    )
+                  end
+
                   if proxy_target_was.nil?
                     proxy_target_is.send(metadata.inverse_of).push proxy_owner
                   elsif proxy_target_was != proxy_target_is

@@ -66,6 +66,11 @@ module MassiveRecord
     class RelationTypeMismatch < MassiveRecordError
     end
 
+    # Used if we are dependent on a relation, but it does not seem to exist. For instance,
+    # embedded_in is dependent of it's inverse in the owner object.
+    class RelationMissing < MassiveRecordError
+    end
+
     # Raised when an attribute is decoded from the database, but the type returned does not match what is expected
     class SerializationTypeMismatch < MassiveRecordError
     end
