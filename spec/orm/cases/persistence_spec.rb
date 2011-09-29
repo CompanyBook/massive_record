@@ -289,7 +289,7 @@ describe "persistence" do
 
         it "should include changed attributes for embedded objects" do
           MassiveRecord::ORM::Persistence::Operations.should_receive(:update).with(
-            @person, hash_including(:attribute_names_to_update => ["name", "addresses"])
+            @person, hash_including(:attribute_names_to_update => ["positive_as_default", "name", "addresses"])
           ).and_return(mock(Object, :execute => true))
 
           # Makes the reload raw data do nothing. Reason for this is as follows:
