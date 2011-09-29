@@ -1,5 +1,7 @@
 # v0.2.2 (git develop)
 
+- Give a string to a time attribute will now do a Time.zone.parse on the string to set it
+  with correct time zone.
 - MassiveRecord::ORM::Column is now named Embedded. You need to update your code!
   I guess in most cases not many have ever used Column, as its usage has been limited up until we implement the
   embedded relations.
