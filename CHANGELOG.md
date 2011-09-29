@@ -3,6 +3,8 @@
 - ORM records now responds to raw_data(). it will give you a nested hash corresponding to column families
   and cells with RawData objects as values. These RawData objects contains the raw value and meta data like
   timestamp on the cell from Hbase.
+- Give a string to a time attribute will now do a Time.zone.parse on the string to set it
+  with correct time zone.
 - MassiveRecord::ORM::Column is now named Embedded. You need to update your code!
   I guess in most cases not many have ever used Column, as its usage has been limited up until we implement the
   embedded relations.

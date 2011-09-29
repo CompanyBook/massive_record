@@ -279,7 +279,7 @@ describe "persistence" do
 
         it "should only include changed attributes" do
           MassiveRecord::ORM::Persistence::Operations.should_receive(:update).with(
-            @person, hash_including(:attribute_names_to_update => ["name"])
+            @person, hash_including(:attribute_names_to_update => ["positive_as_default", "name"])
           ).and_return(mock(Object, :execute => true))
 
 

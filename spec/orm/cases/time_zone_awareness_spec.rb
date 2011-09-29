@@ -153,5 +153,32 @@ describe "Time zone awareness" do
         cell.value.should eq MassiveRecord::ORM::Base.coder.dump(Time.zone.parse(time_as_string).utc)
       end
     end
+
+    describe "write string representation pf time" do
+      it "it writes string in current time zone" do
+        in_time_zone tz_us do
+          subject.tested_at = time_as_string
+          subject.save!
+
+          subject.reload.tested_at.to_s.should eq Time.zone.parse(time_as_string).to_s
+        end
+      end
+
+      it "handles crappy strings" do
+        in_time_zone tz_us do
+          subject.tested_at = "rubbish"
+          subject.tested_at.should be_nil
+        end
+      end
+
+      it "write_attribute writes in current time zone" do
+        in_time_zone tz_us do
+          subject.write_attribute :tested_at, time_as_string
+          subject.save!
+
+          subject.reload.tested_at.to_s.should eq Time.zone.parse(time_as_string).to_s
+        end
+      end
+    end
   end
 end

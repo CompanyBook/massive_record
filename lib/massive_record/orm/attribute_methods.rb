@@ -84,7 +84,11 @@ module MassiveRecord
       end
 
       def fill_attributes_with_default_values_where_nil_is_not_allowed
-        attributes_schema.reject { |attr_name, field| field.allow_nil? || self[attr_name].present? }.each do |attr_name, field|
+        attributes_to_fill = attributes_schema.reject do |attr_name, field|
+          field.allow_nil? || self[attr_name].present? || (field.type == :boolean && self[attr_name] == false)
+        end
+
+        attributes_to_fill.each do |attr_name, field|
           self[attr_name] = field.default
         end
       end
