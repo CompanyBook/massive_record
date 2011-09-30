@@ -109,7 +109,7 @@ describe TestEmbedsManyProxy do
           proxy_target.should be_new_record
         end
 
-        it "does not save proxy owner if it is a new record" do
+        it "saves proxy target if it is a new record" do
           proxy_owner.save
           subject.send add_method, proxy_target
           proxy_target.should be_persisted
