@@ -3,6 +3,7 @@ require 'spec_helper'
 describe "dirty" do
   describe "dry run" do
     include MockMassiveRecordConnection
+    include TimeZoneHelper
 
     before do
       @person = Person.new '1', :name => "Alice", :age => 20, :email => "foo@bar.com"
@@ -25,6 +26,14 @@ describe "dirty" do
     it "should notice changes in boolean values from false to true" do
       @person.status = !@person.status
       @person.should be_status_changed
+    end
+
+    it "notices changes in time attributes" do
+      in_time_zone "utc" do
+        test = TestClass.new
+        test.tested_at = Time.now
+        test.should be_tested_at_changed
+      end
     end
 
     it "should notice changes in boolean values from true to false" do

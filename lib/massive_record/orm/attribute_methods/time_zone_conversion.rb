@@ -71,6 +71,7 @@ module MassiveRecord
                 generated_attribute_methods.module_eval <<-RUBY, __FILE__, __LINE__
                   def #{internal_write_method}(time)
                     time = Time.zone.parse(time) if time.is_a? String
+                    #{attr_name}_will_change! if will_change_attribute? #{attr_name}, time
                     @attributes['#{attr_name}'] = time
                   end
                   alias #{attr_name}= #{internal_write_method}
@@ -78,6 +79,7 @@ module MassiveRecord
               else
                 generated_attribute_methods.send(:define_method, internal_write_method) do |time|
                   time = Time.zone.parse(time) if time.is_a? String
+                  send("#{attr_name}_will_change!") if will_change_attribute? attr_name, time
                   @attributes[attr_name] = time
                 end
                 alias_method "#{attr_name}=", internal_write_method
