@@ -24,7 +24,7 @@ module MassiveRecord
           def <<(*records)
             records.flatten!
 
-            if records.all? &:valid?
+            if proxy_owner.new_record? || records.all?(&:valid?)
               records.each do |record|
                 unless include? record
                   raise_if_type_mismatch(record)

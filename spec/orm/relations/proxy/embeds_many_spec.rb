@@ -109,6 +109,12 @@ describe TestEmbedsManyProxy do
           proxy_target.should be_new_record
         end
 
+        it "is possible to add invalid record if parent is not persisted" do
+          proxy_owner.should_receive(:new_record?).any_number_of_times.and_return(true)
+          subject.send add_method, proxy_target
+          subject.should include proxy_target
+        end
+
         it "saves proxy target if it is a new record" do
           proxy_owner.save
           subject.send add_method, proxy_target
