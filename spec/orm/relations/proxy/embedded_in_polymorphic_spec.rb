@@ -17,7 +17,7 @@ describe TestEmbeddedInPolymorphicProxy do
   describe "generic behaviour" do
     before do 
       # Little hack just to make one generic relation proxy test pass..
-      metadata.stub(:proxy_target_class).and_return Address
+      metadata.stub(:proxy_target_class).and_return TestClass
     end
 
     it_should_behave_like "relation proxy"
