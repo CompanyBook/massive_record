@@ -288,7 +288,7 @@ describe MassiveRecord::ORM::Relations::Interface do
 
       describe "instance" do
         subject { Address.new "id1", :street => "Asker" }
-        let(:person) { Person.new }
+        let(:person) { Person.new "person-id-1", :name => "Test", :age => 29 }
         let(:proxy) { subject.send(:relation_proxy, "person") }
 
         it "sets and gets the person" do
@@ -300,6 +300,12 @@ describe MassiveRecord::ORM::Relations::Interface do
           person.stub(:valid?).and_return true
           subject.person = person
           person.addresses.should include subject
+        end
+
+        it "assigns embedded in attributes with initialize" do
+          address = Address.new "id1", :person => person, :street => "Asker"
+          address.person.should eq person
+          person.addresses.should include address
         end
       end
     end

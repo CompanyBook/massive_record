@@ -315,11 +315,11 @@ module MassiveRecord
     Base.class_eval do
       include Config
       include Persistence
-      include Relations::Interface
       include Finders
       include IdentityMap
       extend  RescueMissingTableOnFind
       include AttributeMethods
+      include Relations::Interface
       include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::TimeZoneConversion
       include AttributeMethods::Dirty

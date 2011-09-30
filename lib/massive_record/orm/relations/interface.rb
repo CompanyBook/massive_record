@@ -234,6 +234,22 @@ module MassiveRecord
           super
         end
 
+        def attributes=(attributes)
+          attributes_for_relations = {}
+
+          if relations && attributes.is_a?(Hash)
+            attributes.stringify_keys!
+            relation_names = relations.collect(&:name)
+
+            attributes.delete_if do |attr_name, value|
+              attributes_for_relations[attr_name] = value if relation_names.include? attr_name
+            end
+          end
+
+          super(attributes)
+          super(attributes_for_relations)
+        end
+
 
         def relation_proxies
           (relations || []).map { |metadata| relation_proxy(metadata.name) }
