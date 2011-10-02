@@ -87,12 +87,6 @@ describe TestEmbedsManyProxy do
           subject.proxy_target.should include proxy_target
         end
 
-        it "does not accept invalid records" do
-          proxy_target.should_receive(:valid?).and_return false
-          subject.send(add_method, proxy_target).should be_false
-          subject.should be_empty
-        end
-
         it "returns self so you can chain calls" do
           subject.send(add_method, proxy_target).send(add_method, proxy_target_2)
           subject.proxy_target.should include proxy_target, proxy_target_2
@@ -114,6 +108,14 @@ describe TestEmbedsManyProxy do
           subject.send add_method, proxy_target
           subject.should include proxy_target
         end
+
+        it "does not accept invalid records" do
+          proxy_owner.should_receive(:new_record?).any_number_of_times.and_return(false)
+          proxy_target.should_receive(:valid?).and_return false
+          subject.send(add_method, proxy_target).should be_false
+          subject.should be_empty
+        end
+
 
         it "saves proxy target if it is a new record" do
           proxy_owner.save
