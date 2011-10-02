@@ -1,5 +1,9 @@
 # v0.2.2 (git develop)
 
+- IdFactory is now configurable per class. Some classes may use IdFactory::AtomicIncrementation,
+  others might use IdFactory::Timestamp. By default we are using AtomicIncrementation.
+  It is configurable via Person.id_factory = MassiveRecord::ORM::IdFactory::AtomicIncrementation
+- Added an IdFactory which uses Time as its generator, instead of atomic incrementation of a value.
 - Give a string to a time attribute will now do a Time.zone.parse on the string to set it
   with correct time zone.
 - MassiveRecord::ORM::Column is now named Embedded. You need to update your code!
