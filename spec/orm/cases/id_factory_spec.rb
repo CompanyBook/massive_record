@@ -1,11 +1,11 @@
 require 'spec_helper'
 require 'orm/models/person'
 
-describe "id factory" do
-  subject { MassiveRecord::ORM::IdFactory.instance }
+describe MassiveRecord::ORM::IdFactory::AtomicIncrementation do
+  subject { MassiveRecord::ORM::IdFactory::AtomicIncrementation.instance }
 
   it "should be a singleton" do
-    MassiveRecord::ORM::IdFactory.included_modules.should include(Singleton)
+    MassiveRecord::ORM::IdFactory::AtomicIncrementation.included_modules.should include(Singleton)
   end
 
   describe "#next_for" do
@@ -34,7 +34,7 @@ describe "id factory" do
 
       it "should have class method next_for and delegate it to it's instance" do
         subject.should_receive(:next_for).with("cars")
-        MassiveRecord::ORM::IdFactory.next_for("cars")
+        MassiveRecord::ORM::IdFactory::AtomicIncrementation.next_for("cars")
       end
     end
 
@@ -45,7 +45,7 @@ describe "id factory" do
       include SetTableNamesToTestTable
 
       after do
-        MassiveRecord::ORM::IdFactory.destroy_all
+        MassiveRecord::ORM::IdFactory::AtomicIncrementation.destroy_all
       end
 
       it "should increment start a new sequence on 1" do
@@ -67,7 +67,7 @@ describe "id factory" do
       it "autoload ids as integers" do
         subject.next_for(Person).should eq 1
 
-        family_for_person = subject.class.column_families.family_by_name(MassiveRecord::ORM::IdFactory::COLUMN_FAMILY_FOR_TABLES)
+        family_for_person = subject.class.column_families.family_by_name(MassiveRecord::ORM::IdFactory::AtomicIncrementation::COLUMN_FAMILY_FOR_TABLES)
         field_for_person = family_for_person.fields.delete_if { |f| f.name == Person.table_name }
 
         subject.reload
@@ -83,9 +83,9 @@ describe "id factory" do
           subject.next_for(Person)
 
           # Enter incompatible data, number as string.
-          MassiveRecord::ORM::IdFactory.table.first.tap do |row|
+          MassiveRecord::ORM::IdFactory::AtomicIncrementation.table.first.tap do |row|
             row.update_column(
-              MassiveRecord::ORM::IdFactory::COLUMN_FAMILY_FOR_TABLES,
+              MassiveRecord::ORM::IdFactory::AtomicIncrementation::COLUMN_FAMILY_FOR_TABLES,
               Person.table_name,
               MassiveRecord::ORM::Base.coder.dump(1)
             )

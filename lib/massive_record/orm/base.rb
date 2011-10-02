@@ -297,7 +297,7 @@ module MassiveRecord
 
 
       def next_id
-        IdFactory.next_for(self.class).to_s
+        IdFactory::AtomicIncrementation.next_for(self.class).to_s
       end
     end
 

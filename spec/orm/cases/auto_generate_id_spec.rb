@@ -45,7 +45,7 @@ describe "auto setting of ids" do
         end
       end
 
-      MassiveRecord::ORM::IdFactory.should_receive(:next_for).with(Person).and_return(1)
+      MassiveRecord::ORM::IdFactory::AtomicIncrementation.should_receive(:next_for).with(Person).and_return(1)
       @person.id.should == "1"
 
       Person.class_eval { undef_method :default_id }
