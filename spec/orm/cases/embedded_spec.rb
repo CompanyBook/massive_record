@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'orm/models/address'
 
 describe MassiveRecord::ORM::Embedded do
-  subject { Address.new("addresss-id", :street => "Asker", :number => 5) }
+  subject { Address.new(:street => "Asker", :number => 5) }
 
   it "should have known_attribute_names" do
     Address.should have(4).known_attribute_names
@@ -65,6 +65,11 @@ describe MassiveRecord::ORM::Embedded do
         context "collection owner not persisted" do
           before { subject.person = person }
 
+          it "gets assigned an id" do
+            subject.save
+            subject.id.should_not be_blank
+          end
+
           it "saves both embedded record and embedded in record" do
             subject.save
 
@@ -94,6 +99,10 @@ describe MassiveRecord::ORM::Embedded do
           before do
             person.save!
             subject.person = person
+          end
+
+          it "gets assigned an id" do
+            subject.id.should_not be_blank
           end
 
           it "persists address" do
