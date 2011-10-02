@@ -78,8 +78,21 @@ module MassiveRecord
       class_attribute :check_record_uniqueness_on_create, :instance_writer => false
       self.check_record_uniqueness_on_create = false
 
-      class_attribute :auto_increment_id, :instance_writer => false
-      self.auto_increment_id = true
+
+      #
+      # Default id and id facyory settings
+      # Should we set automatically the id, and which factory should we ask?
+      #
+      # The default id factory is set when massive record is fully loaded, as
+      # it uses MassiveRecord itself to communicate with the database.
+      # Take a look inside of orm/id_factory.rb; we are utilizing the on_load hook.
+      #
+      class_attribute :id_factory, :instance_writer => false
+      class_attribute :set_id_from_factory_before_create, :instance_writer => false
+      self.set_id_from_factory_before_create = true
+
+
+
      
       class << self
         def table_name
@@ -297,7 +310,7 @@ module MassiveRecord
 
 
       def next_id
-        IdFactory::AtomicIncrementation.next_for(self.class).to_s
+        id_factory.next_for(self.class).to_s
       end
     end
 

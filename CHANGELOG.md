@@ -44,7 +44,7 @@
 # v0.2.1 (git master)
 
 - Models without any default_id will now by default get an id via next_id(). You can turn it off
-  via the setting auto_increment_id on ORM::Base or on the Model class itself.
+  via the setting set_id_from_factory_before_create on ORM::Base or on the Model class itself.
 - record.reload now resets relations.
 - If you have a persisted record and you set one attribute to nil that attribute will be
   deleted from HBase to represent the nil-value. The fact that the schema of that record
