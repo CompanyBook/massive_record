@@ -46,4 +46,5 @@ require 'massive_record/orm/id_factory/timestamp'
 
 ActiveSupport.on_load(:massive_record) do
   MassiveRecord::ORM::Base.id_factory = MassiveRecord::ORM::IdFactory::AtomicIncrementation
+  MassiveRecord::ORM::Embedded.id_factory = MassiveRecord::ORM::IdFactory::Timestamp
 end
