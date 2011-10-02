@@ -1,5 +1,3 @@
-require 'singleton'
-
 module MassiveRecord
   module ORM
     module IdFactory
@@ -20,7 +18,7 @@ module MassiveRecord
       #   values is integers (if the adapter supports it).
       #
       class AtomicIncrementation < Table
-        include Singleton
+        include IdFactory
 
         COLUMN_FAMILY_FOR_TABLES = :tables
         ID = "id_factory"
@@ -52,24 +50,6 @@ module MassiveRecord
 
           @instance = new unless @instance
           @instance
-        end
-
-        #
-        # Delegates to the instance, just a shout cut.
-        #
-        def self.next_for(table)
-          instance.next_for(table)
-        end
-
-
-
-        #
-        # Returns a new and unique id for a given table name
-        # Table can a symbol, string or an object responding to table_name
-        #
-        def next_for(table)
-          table = table.respond_to?(:table_name) ? table.table_name : table.to_s
-          next_id :table => table
         end
 
 
