@@ -4,7 +4,7 @@ module MassiveRecord
       extend ActiveSupport::Concern
 
       included do
-        before_create :ensure_record_has_id, :if => :auto_increment_id
+        before_create :ensure_record_has_id, :if => :set_id_from_factory_before_create
       end
 
 
