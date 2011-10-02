@@ -8,6 +8,10 @@ describe MassiveRecord::ORM::IdFactory::AtomicIncrementation do
     MassiveRecord::ORM::IdFactory::AtomicIncrementation.included_modules.should include(Singleton)
   end
 
+  it "has table name equal to id_factories" do
+    MassiveRecord::ORM::IdFactory::AtomicIncrementation.table_name.should eq "id_factories"
+  end
+
   describe "#next_for" do
     describe "dry" do
       include MockMassiveRecordConnection
