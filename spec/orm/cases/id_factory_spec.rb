@@ -64,6 +64,16 @@ describe "id factory" do
         subject.next_for("cars").should == 1
       end
 
+      it "autoload ids as integers" do
+        subject.next_for(Person).should eq 1
+
+        family_for_person = subject.class.column_families.family_by_name(MassiveRecord::ORM::IdFactory::COLUMN_FAMILY_FOR_TABLES)
+        field_for_person = family_for_person.fields.delete_if { |f| f.name == Person.table_name }
+
+        subject.reload
+        subject.attributes_schema[Person.table_name].type.should eq :integer
+      end
+
 
       describe "old string representation of integers" do
         it "increments correctly when value is '1'" do

@@ -25,7 +25,7 @@ module MassiveRecord
       ID = "id_factory"
 
       column_family COLUMN_FAMILY_FOR_TABLES do
-        autoload_fields
+        autoload_fields :type => :integer
       end
 
       #
