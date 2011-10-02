@@ -42,3 +42,4 @@ module MassiveRecord
 end
 
 require 'massive_record/orm/id_factory/atomic_incrementation'
+require 'massive_record/orm/id_factory/timestamp'

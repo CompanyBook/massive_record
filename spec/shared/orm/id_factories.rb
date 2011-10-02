@@ -31,7 +31,7 @@ shared_examples_for 'an id factory' do
         ids << subject.next_for(Person)
       end
 
-      ids.uniq.should eq ids
+      ids.should eq ids.uniq
     end
   end
 
