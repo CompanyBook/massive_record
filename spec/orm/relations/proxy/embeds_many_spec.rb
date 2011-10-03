@@ -51,6 +51,17 @@ describe TestEmbedsManyProxy do
       it "includes raw data from database" do
         subject.proxy_targets_raw.should eq raw_data_transformed_ids
       end
+
+      it "ignores values which keys does not seem to be parsable" do
+        raw_data_with_name = proxy_owner.instance_variable_get(:@raw_data)['addresses'].merge({'name' => 'Thorbjorn'})
+
+        proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data_with_name})
+        subject.proxy_targets_raw.should eq raw_data_transformed_ids
+      end
+
+      it "ignores values which kees seems to belong to other collections" do
+        pending
+      end
     end
   end
 

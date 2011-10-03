@@ -68,8 +68,11 @@ module MassiveRecord
           #
           def proxy_targets_raw # :nodoc:
             Hash[proxy_owner.raw_data[metadata.store_in].collect do |database_id, value|
-              [Embedded.parse_database_id(database_id)[1], value]
-            end]
+              begin
+                [Embedded.parse_database_id(database_id)[1], value]
+              rescue InvalidEmbeddedDatabaseId
+              end
+            end.compact]
           end
 
 
