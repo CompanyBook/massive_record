@@ -224,45 +224,103 @@ describe MassiveRecord::ORM::Relations::Interface do
 
 
   describe "embeds many" do
-    describe "relation's meta data" do
-      subject { Person.relations.detect { |relation| relation.name == "addresses" } }
+    context "inside of it's own column family" do
+      describe "relation's meta data" do
+        subject { Person.relations.detect { |relation| relation.name == "addresses" } }
 
-      it "stores the relation on the class" do
-        Person.relations.detect { |relation| relation.name == "addresses" }.should_not be_nil
+        it "stores the relation on the class" do
+          Person.relations.detect { |relation| relation.name == "addresses" }.should_not be_nil
+        end
+
+        it "has correct type on relation" do
+          subject.relation_type.should == "embeds_many"
+        end
+
+        it "raises error if relation defined twice" do
+          expect { Person.embeds_many :addresses }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
+        end
       end
 
-      it "has correct type on relation" do
-        subject.relation_type.should == "embeds_many"
-      end
+      describe "instance" do
+        subject { Person.new }
+        let(:address) { Address.new "id1", :street => "Asker" }
+        let(:proxy) { subject.send(:relation_proxy, "addresses") }
 
-      it "raises error if relation defined twice" do
-        expect { Person.embeds_many :addresses }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
+        it { should respond_to :addresses }
+
+        it "should be empty when no addresses has been added" do
+          subject.addresses.should be_empty
+        end
+
+        it "has a known column family for the embedded records" do
+          subject.column_families.collect(&:name).should include "addresses"
+        end
+
+        it "is assignable" do
+          subject.addresses = [address]
+          subject.addresses.should == [address]
+        end
+
+        it "is assignable in initializer" do
+          person = Person.new :addresses => [address]
+          person.addresses.should == [address]
+        end
       end
     end
 
-    describe "instance" do
-      subject { Person.new }
-      let(:address) { Address.new "id1", :street => "Asker" }
-      let(:proxy) { subject.send(:relation_proxy, "addresses") }
+    context "inside of a shared column family" do
+      describe "relation's meta data" do
+        subject { Person.relations.detect { |relation| relation.name == "cars" } }
 
-      it { should respond_to :addresses }
+        it "stores the relation on the class" do
+          Person.relations.detect { |relation| relation.name == "cars" }.should_not be_nil
+        end
 
-      it "should be empty when no addresses has been added" do
-        subject.addresses.should be_empty
+        it "has correct type on relation" do
+          subject.relation_type.should == "embeds_many"
+        end
+
+        it "raises error if relation defined twice" do
+          expect { Person.embeds_many :cars }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
+        end
       end
 
-      it "has a known column family for the embedded records" do
-        subject.column_families.collect(&:name).should include "addresses"
-      end
+      describe "instance" do
+        subject { Person.new :name => "Thorbjorn", :email => "thhermansen@skalar.no", :age => 30 }
+        let(:car) { Car.new :color => "blue" }
+        let(:proxy) { subject.send(:relation_proxy, "cars") }
 
-      it "is ssignable" do
-        subject.addresses = [address]
-        subject.addresses.should == [address]
-      end
+        it { should respond_to :cars }
 
-      it "is assignable in initializer" do
-        person = Person.new :addresses => [address]
-        person.addresses.should == [address]
+        it "should be empty when no cars has been added" do
+          subject.cars.should be_empty
+        end
+
+        it "has a known column family for the embedded records" do
+          subject.column_families.collect(&:name).should include "info"
+        end
+
+        it "is assignable" do
+          subject.cars = [car]
+          subject.cars.should == [car]
+        end
+
+        it "is assignable in initializer" do
+          person = Person.new :cars => [car]
+          person.cars.should == [car]
+        end
+
+        it "is persistable" do
+          subject.cars << car
+          subject.save!
+          from_database = Person.find subject.id
+
+          from_database.name.should eq subject.name
+          from_database.email.should eq subject.email
+          from_database.age.should eq subject.age
+
+          from_database.cars.should eq subject.cars
+        end
       end
     end
   end

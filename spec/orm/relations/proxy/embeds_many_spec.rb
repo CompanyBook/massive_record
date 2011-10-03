@@ -14,10 +14,16 @@ describe TestEmbedsManyProxy do
 
   let(:raw_data) do
     {
-      proxy_target.id => MassiveRecord::ORM::RawData.new(value: proxy_target.attributes_db_raw_data_hash, created_at: Time.now),
-      proxy_target_2.id => MassiveRecord::ORM::RawData.new(value: proxy_target_2.attributes_db_raw_data_hash, created_at: Time.now),
-      proxy_target_3.id => MassiveRecord::ORM::RawData.new(value: proxy_target_3.attributes_db_raw_data_hash, created_at: Time.now),
+      proxy_target.database_id => MassiveRecord::ORM::RawData.new(value: proxy_target.attributes_db_raw_data_hash, created_at: Time.now),
+      proxy_target_2.database_id => MassiveRecord::ORM::RawData.new(value: proxy_target_2.attributes_db_raw_data_hash, created_at: Time.now),
+      proxy_target_3.database_id => MassiveRecord::ORM::RawData.new(value: proxy_target_3.attributes_db_raw_data_hash, created_at: Time.now),
     }
+  end
+
+  let(:raw_data_transformed_ids) do
+    Hash[raw_data.collect do |database_id, value|
+      [MassiveRecord::ORM::Embedded.parse_database_id(database_id)[1], value]
+    end]
   end
 
 
@@ -43,7 +49,23 @@ describe TestEmbedsManyProxy do
       end
 
       it "includes raw data from database" do
-        subject.proxy_targets_raw.should eq raw_data
+        subject.proxy_targets_raw.should eq raw_data_transformed_ids
+      end
+
+      it "ignores values which keys does not seem to be parsable" do
+        raw_data_with_name = proxy_owner.instance_variable_get(:@raw_data)['addresses'].merge({'name' => 'Thorbjorn'})
+
+        proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data_with_name})
+        subject.proxy_targets_raw.should eq raw_data_transformed_ids
+      end
+
+      it "ignores values which kees seems to belong to other collections" do
+        raw_data_with_car = proxy_owner.instance_variable_get(:@raw_data)['addresses'].merge(
+          {'car-|-123' => MassiveRecord::ORM::RawData.new(value: Car.new.attributes_db_raw_data_hash, created_at: Time.now)
+        })
+
+        proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data_with_car})
+        subject.proxy_targets_raw.should eq raw_data_transformed_ids
       end
     end
   end
@@ -66,8 +88,8 @@ describe TestEmbedsManyProxy do
       proxy_owner.raw_data[metadata.store_in] = {}
       subject.send(:reload_raw_data)
       Hash[proxy_owner.raw_data[metadata.store_in].collect { |k,v| [k, v.to_s] }].should eq({
-        "address-1" => "{\"street\":\"Asker\",\"number\":1,\"nice_place\":\"true\",\"postal_code\":null}",
-        "address-2" => "{\"street\":\"Asker\",\"number\":2,\"nice_place\":\"true\",\"postal_code\":null}"
+        "address-|-address-1" => "{\"street\":\"Asker\",\"number\":1,\"nice_place\":\"true\",\"postal_code\":null}",
+        "address-|-address-2" => "{\"street\":\"Asker\",\"number\":2,\"nice_place\":\"true\",\"postal_code\":null}"
       })
     end
 
@@ -409,7 +431,7 @@ describe TestEmbedsManyProxy do
         end
 
         it "includes id for record to be inserted" do
-          subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+          subject.proxy_targets_update_hash.keys.should eq [proxy_target.database_id]
         end
 
         it "includes attributes for record to be inserted" do
@@ -428,7 +450,7 @@ describe TestEmbedsManyProxy do
         end
 
         it "includes id for record to be updated" do
-          subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+          subject.proxy_targets_update_hash.keys.should eq [proxy_target.database_id]
         end
 
         it "includes attributes for record to be updated" do
@@ -444,7 +466,7 @@ describe TestEmbedsManyProxy do
         it "includes id for record to be updated" do
           proxy_target.should_receive(:destroyed?).and_return true
           subject.parent_will_be_saved!
-          subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+          subject.proxy_targets_update_hash.keys.should eq [proxy_target.database_id]
         end
 
         it "includes attributes for record to be updated" do
@@ -461,7 +483,7 @@ describe TestEmbedsManyProxy do
           subject.destroy(proxy_target)
           subject.parent_will_be_saved!
 
-          subject.proxy_targets_update_hash.keys.should eq [proxy_target.id]
+          subject.proxy_targets_update_hash.keys.should eq [proxy_target.database_id]
           subject.proxy_targets_update_hash.values.should eq [nil]
         end
       end

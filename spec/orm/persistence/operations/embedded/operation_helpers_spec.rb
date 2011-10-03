@@ -68,7 +68,7 @@ module MassiveRecord
               it "sets value on row" do
                 row.should_receive(:values=).with(
                   'addresses' => {
-                    address.id => "new_value"
+                    address.database_id => "new_value"
                   }
                 ) 
                 subject.update_embedded(proxy_for_person, "new_value")

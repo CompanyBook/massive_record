@@ -14,7 +14,7 @@ module MassiveRecord
         describe TableOperationHelpers do
           include MockMassiveRecordConnection
 
-          let(:person) { Person.new("id-1") }
+          let(:person) { Person.new("id-1", :name => "Thorbjorn", :age => 30) }
           let(:address) { Address.new "address-1", :street => "Asker", :number => 1 }
           let(:options) { {:this => 'hash', :has => 'options'} }
           
@@ -60,6 +60,13 @@ module MassiveRecord
                 dummy_hash = {:foo => {:bar => :dummy}}
                 person.addresses.should_receive(:proxy_targets_update_hash).any_number_of_times.and_return(dummy_hash)
                 subject.attributes_to_row_values_hash["addresses"].should eq dummy_hash
+              end
+
+              it "merges embedded collections in to existing column families" do
+                attributes_from_person = subject.attributes_to_row_values_hash["info"]
+                attributes_from_cars = {:foo => {:bar => :dummy}}
+                person.cars.should_receive(:proxy_targets_update_hash).any_number_of_times.and_return(attributes_from_cars)
+                subject.attributes_to_row_values_hash["info"].should eq attributes_from_person.merge(attributes_from_cars)
               end
             end
           end

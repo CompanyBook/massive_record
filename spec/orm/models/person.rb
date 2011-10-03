@@ -23,6 +23,7 @@ class Person < MassiveRecord::ORM::Table
 
   embeds_many :addresses
   embeds_many :addresses_with_timestamp, :class_name => "AddressWithTimestamp"
+  embeds_many :cars, :store_in => :info
 
   validates_presence_of :name, :age
   validates_numericality_of :age, :greater_than_or_equal_to => 0

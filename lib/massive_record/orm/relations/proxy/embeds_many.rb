@@ -65,9 +65,17 @@ module MassiveRecord
 
           #
           # Returns the raw hash of attributes for embedded objects
+          # It filters away database_ids (keys in a column family)
+          # which it does not recognize.
           #
           def proxy_targets_raw # :nodoc:
-            proxy_owner.raw_data[metadata.store_in]
+            Hash[proxy_owner.raw_data[metadata.store_in].collect do |database_id, value|
+              begin
+                base_class, id = Embedded.parse_database_id(database_id)
+                [id, value] if base_class == proxy_target_class.base_class.to_s.underscore
+              rescue InvalidEmbeddedDatabaseId
+              end
+            end.compact]
           end
 
 
@@ -87,10 +95,10 @@ module MassiveRecord
             MassiveRecord::ORM::Persistence::Operations.suppress do
               proxy_target.each do |record|
                 if record.destroyed?
-                  proxy_targets_update_hash[record.id] = nil
+                  proxy_targets_update_hash[record.database_id] = nil
                 elsif record.new_record? || record.changed?
                   record.save 
-                  proxy_targets_update_hash[record.id] = Base.coder.dump(record.attributes_db_raw_data_hash)
+                  proxy_targets_update_hash[record.database_id] = Base.coder.dump(record.attributes_db_raw_data_hash)
                 end
               end
 
@@ -98,7 +106,7 @@ module MassiveRecord
                 targets_current_owner = record.send(metadata.inverse_of).proxy_target
                 if targets_current_owner.nil? || targets_current_owner == proxy_owner
                   record.destroy
-                  proxy_targets_update_hash[record.id] = nil
+                  proxy_targets_update_hash[record.database_id] = nil
                 end
               end
               to_be_destroyed.clear
@@ -171,7 +179,8 @@ module MassiveRecord
           end
 
           def load_raw_data_for_id(id)
-            if cell = proxy_owner.class.table.get_cell(proxy_owner.id, metadata.store_in, id)
+            database_id = Embedded.database_id(proxy_target_class, id)
+            if cell = proxy_owner.class.table.get_cell(proxy_owner.id, metadata.store_in, database_id)
               RawData.new_with_data_from cell
             end
           end

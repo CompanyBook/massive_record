@@ -83,5 +83,8 @@ module MassiveRecord
         super("#{record.inspect} needs to be embedded in collection before save. Embedded-in-attribute(s) missing assignment(s): #{embedded_in_missing_values.join(', ')}")
       end
     end
+
+    class InvalidEmbeddedDatabaseId < MassiveRecordError
+    end
   end
 end
