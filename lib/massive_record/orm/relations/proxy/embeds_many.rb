@@ -65,11 +65,14 @@ module MassiveRecord
 
           #
           # Returns the raw hash of attributes for embedded objects
+          # It filters away database_ids (keys in a column family)
+          # which it does not recognize.
           #
           def proxy_targets_raw # :nodoc:
             Hash[proxy_owner.raw_data[metadata.store_in].collect do |database_id, value|
               begin
-                [Embedded.parse_database_id(database_id)[1], value]
+                base_class, id = Embedded.parse_database_id(database_id)
+                [id, value] if base_class == proxy_target_class.base_class.to_s.underscore
               rescue InvalidEmbeddedDatabaseId
               end
             end.compact]

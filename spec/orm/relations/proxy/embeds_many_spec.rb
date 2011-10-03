@@ -60,7 +60,12 @@ describe TestEmbedsManyProxy do
       end
 
       it "ignores values which kees seems to belong to other collections" do
-        pending
+        raw_data_with_car = proxy_owner.instance_variable_get(:@raw_data)['addresses'].merge(
+          {'car-|-123' => MassiveRecord::ORM::RawData.new(value: Car.new.attributes_db_raw_data_hash, created_at: Time.now)
+        })
+
+        proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data_with_car})
+        subject.proxy_targets_raw.should eq raw_data_transformed_ids
       end
     end
   end
