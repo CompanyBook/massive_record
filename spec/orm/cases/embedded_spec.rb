@@ -3,6 +3,7 @@ require 'orm/models/address'
 
 describe MassiveRecord::ORM::Embedded do
   subject { Address.new(:street => "Asker", :number => 5) }
+  let(:person) { Person.new "person-id", :name => "Thorbjorn", :age => "22" }
 
   it "should have known_attribute_names" do
     Address.should have(4).known_attribute_names
@@ -49,8 +50,6 @@ describe MassiveRecord::ORM::Embedded do
   describe "persistence" do
     include SetUpHbaseConnectionBeforeAll 
     include SetTableNamesToTestTable
-
-    let(:person) { Person.new "person-id", :name => "Thorbjorn", :age => "22" }
 
     describe "#save" do
       context "not embedded" do
@@ -175,6 +174,64 @@ describe MassiveRecord::ORM::Embedded do
             subject.destroy
             person.reload.addresses.should be_empty
           end
+        end
+      end
+    end
+  end
+
+  describe "id" do
+    include SetUpHbaseConnectionBeforeAll 
+    include SetTableNamesToTestTable
+
+    describe "assignment on first save" do
+      it "has no id when first instantiated" do
+        subject.id.should be_nil
+      end
+
+      it "gets an id on explicit save" do
+        subject.person = person
+        subject.save
+        subject.id.should_not be_nil
+      end
+
+      it "gets an id when saved through persisted parent" do
+        person.save
+        person.addresses << subject
+        subject.id.should_not be_nil
+      end
+    end
+
+    describe "#database_id" do
+      let(:base_class) { Address.base_class.to_s.underscore }
+
+      describe "reader" do
+        it "has non when first instantiated" do
+          subject.database_id.should be_nil
+        end
+
+        it "gets one on explicit save" do
+          subject.person = person
+          subject.save
+          subject.database_id.should eq [base_class, subject.id].join('-|-')
+        end
+
+        it "gets one when saved through persisted parent" do
+          person.save
+          person.addresses << subject
+          subject.database_id.should eq [base_class, subject.id].join('-|-')
+        end
+      end
+
+      describe "writer" do
+        it "splits base_class and id and assigns id to id" do
+          subject.database_id = "address-|-166"
+          subject.id.should eq "166"
+        end
+
+        it "raises an error if database id could not be parsed" do
+          expect {
+            subject.database_id = "address-|166"
+          }.to raise_error MassiveRecord::ORM::InvalidEmbeddedDatabaseId
         end
       end
     end
