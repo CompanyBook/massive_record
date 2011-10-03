@@ -102,14 +102,22 @@ module MassiveRecord
           # end
           #
           #
-          # The embeds many association should have one column family per association. embeds_many :addresses
-          # will by default be stored in the addresses column family.
+          # The embeds many association gets one column family per association. embeds_many :addresses
+          # will by default be stored in the addresses column family. You can however do this:
+          # embeds_many :addresses, :store_in => :base to manipulate the column family it is stored within.
+          #
+          # Embedded records gets a composite key consisting of base_class and the record's id. This is how
+          # it is possible to mix embedded collection in to one column family / existing family with "normal" attributes.
+          # Please mind however, doing such a mixing might get you into trouble if you have attribute names which looks
+          # like an embedded address key. Companybook wanted this option, as they said haveing multiple column family might
+          # slow down Hbase.
+          #
           # Attributes will be serialized by the Base.coder, by default will be JSON, but it really can be anything.
           # The way records are stored inside of a column family will be:
           #
           # | key         |   attributes                                        |
           # ---------------------------------------------------------------------
-          # | "addr-id1"  | { :street => "Askerveien", :number => "12", etc... }
+          # | "address-|-id1"  | { :street => "Askerveien", :number => "12", etc... }
           #
           #
           #

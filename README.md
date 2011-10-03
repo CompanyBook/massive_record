@@ -102,7 +102,7 @@ Here are some examples setting up models:
       references_many :friends, :store_in => :info
       references_many :blog_posts, :records_starts_from => :posts_start_id
 
-      embeds_many :address
+      embeds_many :addresses
 
       default_scope select(:info)
 

@@ -1,5 +1,6 @@
 # v0.2.2 (git develop)
 
+- Added support for embeds_many and embedded_in.
 - IdFactory is now configurable per class. Some classes may use IdFactory::AtomicIncrementation,
   others might use IdFactory::Timestamp. By default we are using AtomicIncrementation.
   It is configurable via Person.id_factory = MassiveRecord::ORM::IdFactory::AtomicIncrementation
