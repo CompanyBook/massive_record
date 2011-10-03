@@ -17,7 +17,7 @@ module MassiveRecord
               # an embedded record to an embeds many collection we might
               # want to only update current insert in the targets, not a
               # complete save of the parent.
-              embedded_in_proxy_targets.each(&:save)
+              embedded_in_proxy_targets.collect(&:save).any?
             end
           end
         end

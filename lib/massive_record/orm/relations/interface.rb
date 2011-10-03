@@ -205,6 +205,8 @@ module MassiveRecord
 
 
           def create_embeds_many_accessors(metadata)
+            validates_associated metadata.name
+
             redefine_method(metadata.name) do
               relation_proxy(metadata.name)
             end
@@ -215,8 +217,6 @@ module MassiveRecord
           end
 
           def create_embedded_in_accessors(metadata)
-            validates_associated metadata.name, :on => :create
-
             redefine_method(metadata.name) do
               relation_proxy(metadata.name)
             end

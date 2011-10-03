@@ -242,8 +242,8 @@ describe MassiveRecord::ORM::Relations::Interface do
       end
 
       describe "instance" do
-        subject { Person.new }
-        let(:address) { Address.new "id1", :street => "Asker" }
+        subject { Person.new :name => "Thorbjorn", :email => "thhermansen@skalar.no", :age => 30 }
+        let(:address) { Address.new :street => "Asker" }
         let(:proxy) { subject.send(:relation_proxy, "addresses") }
 
         it { should respond_to :addresses }
@@ -264,6 +264,13 @@ describe MassiveRecord::ORM::Relations::Interface do
         it "is assignable in initializer" do
           person = Person.new :addresses => [address]
           person.addresses.should == [address]
+        end
+
+        it "parent is invalid when one of embedded records is" do
+          subject.addresses << address
+          subject.save!
+          address.street = nil
+          subject.should_not be_valid
         end
       end
     end

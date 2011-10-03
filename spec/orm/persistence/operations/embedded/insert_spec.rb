@@ -30,8 +30,13 @@ describe MassiveRecord::ORM::Persistence::Operations::Embedded::Insert do
         before { record.person = person }
 
         it "calls save on embedded owner when it is a new record" do
-          person.should_receive(:save)
+          person.should_receive(:save).and_return true
           subject.execute
+        end
+
+        it "returns false if none of the embedded_in_proxy_targets returned true" do
+          person.should_receive(:save).and_return false
+          subject.execute.should be_false
         end
 
         it "is changed when reloading" do

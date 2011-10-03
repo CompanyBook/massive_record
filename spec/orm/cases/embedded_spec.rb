@@ -85,12 +85,18 @@ describe MassiveRecord::ORM::Embedded do
             subject.should_not be_persisted
           end
 
-          it "does nothing if validations fails on owner of collection embedded in" do
-            person.name = nil
-            subject.save
+          describe "validations fails on owner" do
+            before { person.name = nil }
 
-            person.should_not be_persisted
-            subject.should_not be_persisted
+            it "does not persist owner" do
+              subject.save
+              person.should_not be_persisted
+            end
+
+            it "does not mark embedded as persisted" do
+              subject.save
+              subject.should_not be_persisted
+            end
           end
         end
 
