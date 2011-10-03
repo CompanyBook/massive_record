@@ -33,7 +33,7 @@ module MassiveRecord
               row = row_for_record(relation_proxy)
               row.values = {
                 inverse_proxy_for(relation_proxy).metadata.store_in => {
-                  record.id => value
+                  record.database_id => value
                 }
               }
               row.save

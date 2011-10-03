@@ -11,6 +11,23 @@ module MassiveRecord
       end
 
 
+      def self.parse_database_id(database_id)
+        if splitted = database_id.split('-|-') and splitted.length == 2
+          splitted
+        else
+          fail InvalidEmbeddedDatabaseId.new(
+            <<-TXT
+              Expected database id '#{database_id}' to be on a format like
+              base_class_here-|-record_id_here
+            TXT
+          )
+        end
+      end
+
+      def self.database_id(klass, id)
+        [klass.base_class.to_s.underscore, id].join('-|-')
+      end
+
       #
       # Database id is base_class plus the record's id.
       # It is given, as we might want to embed records in an existing
@@ -30,7 +47,7 @@ module MassiveRecord
       #
       def database_id # :nodoc:
         if id
-          [self.class.base_class.to_s.underscore, id].join('-|-')
+          self.class.database_id(self.class, id)
         end
       end
 
@@ -39,16 +56,7 @@ module MassiveRecord
       # Should not have the need to be used in other situations.
       #
       def database_id=(database_id) # :nodoc:
-        if splitted = database_id.split('-|-') and splitted.length == 2
-          self.id = splitted[1]
-        else
-          fail InvalidEmbeddedDatabaseId.new(
-            <<-TXT
-              Expected database id '#{database_id}' to be on a format like
-              base_class_here-|-record_id_here
-            TXT
-          )
-        end
+        self.id = self.class.parse_database_id(database_id)[1]
       end
     end
   end
