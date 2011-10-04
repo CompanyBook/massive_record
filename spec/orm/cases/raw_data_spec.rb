@@ -42,7 +42,7 @@ describe MassiveRecord::ORM::RawData do
 
   describe "#inspect" do
     it "represents itself with it's value" do
-      subject.inspect.should eq "<#{subject.class} #{subject.value.inspect}>"
+      subject.to_s.should eq value
     end
   end
 

@@ -30,12 +30,7 @@ module MassiveRecord
         @created_at = attributes[:created_at]
       end
 
-
-
-      def inspect
-        "<#{self.class} #{value.inspect}>"
-      end
-      delegate :to_s, :to => :value
+      delegate :inspect, :to_s, :to => :value
 
 
       def ==(other)
