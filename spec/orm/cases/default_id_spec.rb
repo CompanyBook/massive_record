@@ -46,4 +46,12 @@ describe ModelWithoutDefaultId do
       expect { subject.save }.to raise_error MassiveRecord::ORM::IdMissing
     end
   end
+
+  it "is AtomicIncrementation on ORM::Table" do
+    Person.id_factory.instance.should be_instance_of MassiveRecord::ORM::IdFactory::AtomicIncrementation
+  end
+
+  it "is Timestamp on ORM::Embedded" do
+    Address.id_factory.instance.should be_instance_of MassiveRecord::ORM::IdFactory::Timestamp
+  end
 end

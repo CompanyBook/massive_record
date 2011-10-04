@@ -133,4 +133,49 @@ describe MassiveRecord::ORM::Schema::EmbeddedInterface do
       test_interface.add_field :age, :integer, :default => 1
     end
   end
+
+  describe "#attributes_db_raw_data_hash" do
+    subject { Address.new("id", :street => "Asker", :number => 2, :nice_place => true, :zip => '1384') }
+
+    it "returns hash with correct key-value pairs" do
+      subject.attributes_db_raw_data_hash.should eq({
+        "street" => "Asker",
+        "number" => 2,
+        "nice_place" => "true",
+        "postal_code" => "1384"
+      })
+    end
+  end
+
+  describe ".transpose_raw_data_to_record_attributes_and_raw_data" do
+    let(:id) { "id" }
+    let(:raw_data) do
+      MassiveRecord::ORM::RawData.new(value: {
+        "street" => "Oslo",
+        "number" => 3,
+        "nice_place" => "false",
+        "postal_code" => "1111"
+      })
+    end
+
+    it "returns attributes" do
+      attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data id, raw_data
+      attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111", "updated_at" => nil})
+    end
+
+    it "returns raw data" do
+      attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data id, raw_data
+      raw.should eq Hash[raw_data.value.collect do |attr, value|
+        [attr, MassiveRecord::ORM::RawData.new(value: value, created_at: raw_data.created_at)]
+      end]
+    end
+
+    it "returns correct attributes from serialized db values hash" do
+      attributes, raw = Address.transpose_raw_data_to_record_attributes_and_raw_data(
+        id,
+        MassiveRecord::ORM::RawData.new(value: MassiveRecord::ORM::Base.coder.dump(raw_data.value))
+      )
+      attributes.should eq({:id=>"id", "street"=>"Oslo", "number"=>3, "nice_place"=>false, "zip"=>"1111", "updated_at" => nil})
+    end
+  end
 end

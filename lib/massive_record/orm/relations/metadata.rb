@@ -12,8 +12,8 @@ module MassiveRecord
       # references_one :employee, :foreign_key => "person_id", :class_name => "Person"
       #
       class Metadata
-        attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic
-        attr_accessor :find_with
+        attr_writer :foreign_key, :store_in, :class_name, :name, :relation_type, :polymorphic, :inverse_of
+        attr_accessor :find_with, :owner_class
         attr_reader :records_starts_from
         
         def initialize(name, options = {})
@@ -29,6 +29,7 @@ module MassiveRecord
           self.find_with = options[:find_with]
           self.records_starts_from = options[:records_starts_from] if options[:records_starts_from]
           self.polymorphic = options[:polymorphic]
+          self.inverse_of = options[:inverse_of]
         end
 
 
@@ -65,12 +66,17 @@ module MassiveRecord
           (@class_name || calculate_class_name).to_s
         end
 
+        def inverse_of
+          (@inverse_of || calculate_inverse_of).to_s
+        end
+
         def proxy_target_class
           class_name.constantize
         end
 
         def store_in
-          @store_in.to_s if @store_in
+          return @store_in.to_s if @store_in
+          @store_in = name if embedded?
         end
 
         def store_foreign_key_in
@@ -84,17 +90,24 @@ module MassiveRecord
         end
 
         def persisting_foreign_key?
-          !!store_in && !records_starts_from
+          !embedded? && !!store_in && !records_starts_from
         end
 
 
         def polymorphic
           !!@polymorphic
         end
+        alias polymorphic? polymorphic
 
-        def polymorphic?
-          polymorphic
+        def embedded
+          relation_type == "embeds_many"
         end
+        alias embedded? embedded
+
+        def embedded_in
+          relation_type == "embedded_in" || relation_type == "embedded_in_polymorphic"
+        end
+        alias embedded_in? embedded_in
 
 
         def new_relation_proxy(proxy_owner)
@@ -114,7 +127,7 @@ module MassiveRecord
 
 
         def represents_a_collection?
-          relation_type == 'references_many'
+          %w(references_many embeds_many).include? relation_type
         end
 
         #
@@ -157,6 +170,15 @@ module MassiveRecord
 
         def calculate_class_name
           name.to_s.classify
+        end
+
+        def calculate_inverse_of
+          raise "Can't return inverse of without it being explicitly set or without an owner_class" unless owner_class
+          if represents_a_collection?
+            owner_class.to_s.demodulize.underscore.singularize
+          else
+            owner_class.to_s.demodulize.underscore.pluralize
+          end
         end
 
         def calculate_foreign_key

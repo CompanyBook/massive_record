@@ -30,6 +30,11 @@ describe MassiveRecord::ORM::Schema::TableInterface do
     TestInterface.column_families.collect(&:name).should include("misc")
   end
 
+  it "adds a column family" do
+    TestInterface.add_column_family(:foo)
+    TestInterface.column_families.collect(&:name).should include("foo")
+  end
+
   it "should be possible to add fields to a column families" do
     class TestInterface
       column_family :info do

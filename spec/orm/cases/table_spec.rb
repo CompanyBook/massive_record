@@ -53,7 +53,7 @@ describe "Person which is a table" do
 
   it "should keep different column families per sub class" do
     Person.column_families.collect(&:name).should include "info", "base"
-    TestClass.column_families.collect(&:name).should == ["test_family"]
+    TestClass.column_families.collect(&:name).should include "test_family", "addresses"
   end
   
   it "should have a list of attributes created from the column family 'info'" do
@@ -73,9 +73,9 @@ describe "Person which is a table" do
   end
 
   it "should decode/encode empty hashes correctly" do
-    @person.addresses = {}
+    @person.dictionary = {}
     @person.save! :validate => false
     @person.reload
-    @person.addresses.should be_instance_of Hash
+    @person.dictionary.should be_instance_of Hash
   end
 end

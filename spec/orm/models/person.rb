@@ -5,7 +5,7 @@ class Person < MassiveRecord::ORM::Table
     field :age, :integer
     field :carma, :float
     field :date_of_birth, :date
-    field :addresses, :hash, :default => {}
+    field :dictionary, :hash, :default => {}
     field :type
   end
 
@@ -20,6 +20,10 @@ class Person < MassiveRecord::ORM::Table
   references_one :boss, :class_name => "PersonWithTimestamp", :store_in => :info
   references_many :test_classes, :store_in => :info
   references_many :friends, :class_name => "Person", :records_starts_from => :friends_records_starts_from_id
+
+  embeds_many :addresses
+  embeds_many :addresses_with_timestamp, :class_name => "AddressWithTimestamp"
+  embeds_many :cars, :store_in => :info
 
   validates_presence_of :name, :age
   validates_numericality_of :age, :greater_than_or_equal_to => 0

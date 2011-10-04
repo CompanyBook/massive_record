@@ -14,34 +14,60 @@ module MassiveRecord
         describe TableOperationHelpers do
           include MockMassiveRecordConnection
 
-          let(:record) { Person.new("id-1") }
+          let(:person) { Person.new("id-1", :name => "Thorbjorn", :age => 30) }
+          let(:address) { Address.new "address-1", :street => "Asker", :number => 1 }
           let(:options) { {:this => 'hash', :has => 'options'} }
           
-          subject { TestTableOperationHelpers.new(record, options) }
+          subject { TestTableOperationHelpers.new(person, options) }
+
+          before do
+            person.addresses << address
+          end
 
           
           describe "#row_for_record" do
-            it "raises an error if id for record is blank" do
-              record.id = nil
+            it "raises an error if id for person is blank" do
+              person.id = nil
               expect { subject.row_for_record }.to raise_error MassiveRecord::ORM::IdMissing
             end
 
             it "returns a row with id and table set" do
               row = subject.row_for_record
-              row.id.should eq record.id
-              row.table.should eq record.class.table
+              row.id.should eq person.id
+              row.table.should eq person.class.table
             end
           end
 
           describe "#attributes_to_row_values_hash" do
+            before { person.addresses.parent_will_be_saved! }
+
             it "should include the 'pts' field in the database which has 'points' as an alias" do
               subject.attributes_to_row_values_hash["base"].keys.should include("pts")
               subject.attributes_to_row_values_hash["base"].keys.should_not include("points")
             end
 
             it "should include integer value, even if it is set as string" do
-              record.age = "20"
+              person.age = "20"
               subject.attributes_to_row_values_hash["info"]["age"].should == 20
+            end
+
+            describe "embedded attributes" do
+              it "includes the column family for the embedded relation" do
+                subject.attributes_to_row_values_hash.keys.should include "addresses"
+              end
+
+              it "asks the proxy for update hash and uses whatever it delivers" do
+                dummy_hash = {:foo => {:bar => :dummy}}
+                person.addresses.should_receive(:proxy_targets_update_hash).any_number_of_times.and_return(dummy_hash)
+                subject.attributes_to_row_values_hash["addresses"].should eq dummy_hash
+              end
+
+              it "merges embedded collections in to existing column families" do
+                attributes_from_person = subject.attributes_to_row_values_hash["info"]
+                attributes_from_cars = {:foo => {:bar => :dummy}}
+                person.cars.should_receive(:proxy_targets_update_hash).any_number_of_times.and_return(attributes_from_cars)
+                subject.attributes_to_row_values_hash["info"].should eq attributes_from_person.merge(attributes_from_cars)
+              end
             end
           end
 

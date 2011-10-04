@@ -67,7 +67,7 @@ describe "finders" do
     it "persists the raw values from table" do
       @mocked_table.should_receive(:find).with("ID1", anything).and_return(@row)
       person = Person.find("ID1")
-      person.raw_data.should eq @row.values_hash
+      person.raw_data.should eq @row.values_raw_data_hash
     end
     
     it "should ask the table to fetch rows from a list of ids given as array" do
@@ -217,6 +217,21 @@ describe "finders" do
 
     it "should return what it finds if asked to" do
       lambda { Person.find(["ID1", "not exists"], :skip_expected_result_check => true) }.should_not raise_error MassiveRecord::ORM::RecordNotFound
+    end
+
+
+    describe "embedded records" do
+      subject { Person.find("ID1") }
+      let(:address) { Address.new "address-1", :street => "Asker", :number => 1 }
+
+      before do
+        subject.addresses << address
+        subject.reload
+      end
+
+      it "is able to load embeds many relations" do
+        subject.addresses.should eq [address]
+      end
     end
   end
   

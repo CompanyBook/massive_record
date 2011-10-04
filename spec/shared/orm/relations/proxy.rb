@@ -39,10 +39,14 @@ shared_examples_for "relation proxy" do
 
 
   describe "#reset" do
-    it "should not be loaded after reset" do
+    it "alters the loaded state" do
       subject.loaded!
       subject.reset
-      should_not be_loaded
+      if subject.metadata.embedded_in?
+        should be_loaded
+      else
+        should_not be_loaded
+      end
     end
 
     it "should reset the proxy_target" do
@@ -59,6 +63,7 @@ shared_examples_for "relation proxy" do
     end
 
     it "should reset the proxy" do
+      subject.should_receive(:can_find_proxy_target?).and_return false
       subject.should_receive :reset
       subject.reload
     end
@@ -121,6 +126,8 @@ shared_examples_for "relation proxy" do
     let(:new_proxy_target) { subject.represents_a_collection? ? [subject.proxy_target_class.new] : subject.proxy_target_class.new }
 
     before do
+      new_proxy_target.each { |target| target.stub(:valid?).and_return true } if new_proxy_target.is_a? Array
+      old_proxy_target.each { |target| target.stub(:valid?).and_return true } if new_proxy_target.is_a? Array
       subject.proxy_target = old_proxy_target
     end
 

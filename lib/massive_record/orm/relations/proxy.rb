@@ -58,13 +58,13 @@ module MassiveRecord
           load_proxy_target
         end
 
-        def reset
+        def reset(force = true)
           @loaded = @proxy_target = nil
         end
 
         def replace(proxy_target)
           if proxy_target.nil?
-            reset 
+            reset(true)
           else
             raise_if_type_mismatch(proxy_target)
             self.proxy_target = proxy_target
@@ -88,9 +88,6 @@ module MassiveRecord
           @loaded = true
         end
 
-
-
-
         def respond_to?(*args)
           super || (load_proxy_target && proxy_target.respond_to?(*args))
         end
@@ -102,6 +99,14 @@ module MassiveRecord
           raise e, e.message.sub(/ for #<.*$/, " via proxy for #{proxy_target}")
         end
       
+
+        def blank?
+          load_proxy_target.blank?
+        end
+
+        def is_a?(type)
+          load_proxy_target.is_a?(type)
+        end
 
         # Strange.. Without Rails, to_param goes through method_missing,
         #           With Rails it seems like the proxy answered to to_param, which

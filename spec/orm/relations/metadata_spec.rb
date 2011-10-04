@@ -4,19 +4,23 @@ require 'orm/models/person'
 describe MassiveRecord::ORM::Relations::Metadata do
   subject { MassiveRecord::ORM::Relations::Metadata.new(nil) }
 
-  %w(name foreign_key class_name relation_type find_with polymorphic records_starts_from).each do |attr|
+  %w(name foreign_key class_name relation_type find_with polymorphic records_starts_from inverse_of).each do |attr|
     it { should respond_to attr }
     it { should respond_to attr+"=" }
   end
 
 
   it "should be setting values by initializer" do
-    metadata = subject.class.new :car, :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info, :polymorphic => true, :records_starts_from => :records_starts_from
+    metadata = subject.class.new(:car, {
+      :foreign_key => :my_car_id, :class_name => "Vehicle", :store_in => :info,
+      :polymorphic => true, :records_starts_from => :records_starts_from, :inverse_of => :inverse_of
+    })
     metadata.name.should == "car"
     metadata.foreign_key.should == "my_car_id"
     metadata.class_name.should == "Vehicle"
     metadata.store_in.should == "info"
     metadata.records_starts_from.should == :records_starts_from
+    metadata.inverse_of.should eq 'inverse_of'
     metadata.should be_polymorphic
   end
 
@@ -91,26 +95,99 @@ describe MassiveRecord::ORM::Relations::Metadata do
     end
   end
 
+  describe "#embedded?" do
+    %w(references_one references_one_polymorphic, references_many).each do |type|
+      context type do
+        before { subject.relation_type = type }
 
+        its(:embedded?) { should be_false }
+      end
+    end
 
-  describe "#store_in" do
-    its(:store_in) { should be_nil }
+    %w(embeds_many).each do |type|
+      context type do
+        before { subject.relation_type = type }
 
-    it "should be able to set column family to store foreign key in" do
-      subject.store_in = :info
-      subject.store_in.should == "info"
+        its(:embedded?) { should be_true }
+      end
     end
   end
 
-  it "should know its persisting foreign key if foreign key stored in has been set" do
-    subject.store_in = :info
-    should be_persisting_foreign_key
+  describe "#store_in" do
+    context "references" do
+      before { subject.relation_type = :references_many }
+
+      its(:store_in) { should be_nil }
+
+      it "should be able to set column family to store foreign key in" do
+        subject.store_in = :info
+        subject.store_in.should == "info"
+      end
+
+      it "should know its persisting foreign key if foreign key stored in has been set" do
+        subject.store_in = :info
+        should be_persisting_foreign_key
+      end
+
+      it "should not be storing the foreign key if records_starts_from is defined" do
+        subject.store_in = :info
+        subject.records_starts_from = :method_which_returns_a_starting_point
+        should_not be_persisting_foreign_key
+      end
+    end
+
+    context "embedded" do
+      before do
+        subject.name = :addresses
+        subject.relation_type = :embeds_many
+      end
+
+      its(:store_in) { should eq "addresses" }
+      its(:persisting_foreign_key?) { should be_false }
+    end
   end
 
-  it "should not be storing the foreign key if records_starts_from is defined" do
-    subject.store_in = :info
-    subject.records_starts_from = :method_which_returns_a_starting_point
-    should_not be_persisting_foreign_key
+
+  describe "owner_class" do
+    it "is settable" do
+      subject.owner_class = Address
+    end
+
+    it "is readable" do
+      subject.owner_class = Address
+      subject.owner_class.should == Address
+    end
+  end
+
+  describe "#inverse_of" do
+    it "returns whatever it is set to" do
+      subject.inverse_of = :addresses
+      subject.inverse_of.should eq 'addresses'
+    end
+
+    it "calculates inverse of from the owner_class for embedded_in" do
+      subject.relation_type = :embedded_in
+      subject.owner_class = Address
+      subject.inverse_of.should eq 'addresses'
+    end
+
+    it "calculates inverse of from the owner_class for embedded_in" do
+      subject.relation_type = :embedded_in
+      subject.owner_class = AddressWithTimestamp
+      subject.inverse_of.should eq 'address_with_timestamps'
+    end
+
+    it "calculates inverse of from the owner_class for embeds_many" do
+      subject.relation_type = :embeds_many
+      subject.owner_class = Person
+      subject.inverse_of.should eq 'person'
+    end
+
+    it "raises an error if not set nor owner class" do
+      subject.inverse_of = nil
+      subject.owner_class = nil
+      expect { subject.inverse_of }.to raise_error "Can't return inverse of without it being explicitly set or without an owner_class"
+    end
   end
 
 

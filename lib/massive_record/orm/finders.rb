@@ -226,14 +226,14 @@ module MassiveRecord
 
         def transpose_hbase_row_to_record_attributes_and_raw_data(row) # :nodoc:
           attributes = {:id => row.id}
-          raw_data = row.values_hash
+          raw_data = row.values_raw_data_hash
           
           autoload_column_families_and_fields_with(row.columns.keys)
 
           # Parse the schema to populate the instance attributes
           attributes_schema.each do |key, field|
-            value = raw_data.has_key?(field.column_family.name) ? raw_data[field.column_family.name][field.column] : nil
-            attributes[field.name] = value.nil? ? nil : field.decode(value)
+            data = raw_data.has_key?(field.column_family.name) ? raw_data[field.column_family.name][field.column] : nil
+            attributes[field.name] = data.nil? ? nil : field.decode(data.value)
           end
 
           [attributes, raw_data]

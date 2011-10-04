@@ -9,6 +9,10 @@ module MassiveRecord
           raise "created_at must be of type time" if attributes_schema['created_at'].type != :time
           @attributes['created_at'] = Time.now
         end
+
+        before_create do
+          @attributes['updated_at'] = @attributes['created_at'] || Time.now
+        end
       end
 
 
@@ -32,6 +36,10 @@ module MassiveRecord
         self.class.time_zone_aware_attributes ? self['updated_at'].try(:in_time_zone) : self['updated_at']
       end
 
+      def updated_at=(time)
+        write_attribute :updated_at, time
+      end
+
       def write_attribute(attr_name, value)
         attr_name = attr_name.to_s
 
@@ -47,9 +55,10 @@ module MassiveRecord
       private
 
       def update(*)
-        # Not 100% accurat, as we might should re-read the saved row from
-        # the database to fetch exactly the correct updated at time, but
-        # it should do for now as it takes an extra query to check the time stamp.
+        # Sets updated at to Time.now, even though the updated at is
+        # read from the cell's time stamp on relad. We do this after
+        # a successfully update to remove the need to do a query to
+        # the db again to get the updated at timestamp.
         @attributes['updated_at'] = Time.now if updated = super 
         updated
       end

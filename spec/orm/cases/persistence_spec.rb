@@ -85,6 +85,13 @@ describe "persistence" do
       @person.name.should == original_name
     end
 
+    it "should reload the raw data" do
+      @person.name += "_NEW"
+      @person.save!
+      @person.reload
+      @person.raw_data.should eq Person.find("ID1").raw_data
+    end
+
     it "should not be considered changed after reload" do
       original_name = @person.name
       @person.name = original_name + original_name
@@ -219,6 +226,15 @@ describe "persistence" do
             person_from_db.should == person
             person_from_db.name.should == "Thorbjorn"
           end
+
+          it "creates persists embedded documents" do
+            person = Person.new "new_id", :name => "Thorbjorn", :age => "22"
+            address = Address.new "address-1", :street => "Asker", :number => 1
+            person.addresses << address
+            person.save!
+            person_from_db = Person.find(person.id)
+            person_from_db.addresses.should eq [address]
+          end
         end
 
         it "raises an error if id already exists" do
@@ -271,6 +287,25 @@ describe "persistence" do
           @person.save
         end
 
+        it "should include changed attributes for embedded objects" do
+          MassiveRecord::ORM::Persistence::Operations.should_receive(:update).with(
+            @person, hash_including(:attribute_names_to_update => ["positive_as_default", "name", "addresses"])
+          ).and_return(mock(Object, :execute => true))
+
+          # Makes the reload raw data do nothing. Reason for this is as follows:
+          # We are stubbing out the update operaitons, thus no address are being
+          # inserted to the database for this person.
+          #
+          # The reload_raw_data does a find with select on addresses column family only.
+          # When that is being done, and no data is found it will return nil back (Thrift
+          # api does this). This will in turn result in a record not found error, which is
+          # kinda not what we want.
+          @person.addresses.should_receive(:reload_raw_data).any_number_of_times
+
+          @person.name = @new_name
+          @person.addresses << Address.new("id1", :street => "foo")
+        end
+
         it "should persist the changes" do
           @person.name = @new_name
           @person.save
@@ -278,10 +313,29 @@ describe "persistence" do
           Person.find(@person.id).name.should == @new_name
         end
 
+        it "persists changes in embedded documents" do
+          address = Address.new "address-1", :street => "Asker", :number => 1
+          @person.addresses << address
+          @person.save!
+
+          @person_from_db = Person.find(@person.id)
+          @person_from_db.addresses[0].street = "Heggedal"
+          @person_from_db.save!
+
+          @person_from_db = Person.find(@person.id)
+          @person_from_db.addresses[0].street.should eq "Heggedal"
+        end
+
         it "should not have any changes after save" do
           @person.name = @new_name
           @person.save
-          @person.should_not be_changed # ..as it has been stored..
+          @person.should_not be_changed
+        end
+
+        it "has no changes after an embedded object is added and saved" do
+          @person.addresses << Address.new("address-1", :street => "Asker", :number => 1)
+          @person.save
+          @person.should_not be_changed
         end
 
         it "should raise error if column familiy needed does not exist" do
@@ -632,12 +686,12 @@ describe "persistence" do
         :name => "Thorbjorn",
         :age => 22,
         :points => 1,
-        :addresses => {'home' => 'Here'},
+        :dictionary => {'home' => 'Here'},
         :status => true
       })
     end
 
-    %w(points addresses status).each do |attr|
+    %w(points dictionary status).each do |attr|
       it "removes the cell from hbase when #{attr} is set to nil" do
         subject[attr] = nil
         subject.save!

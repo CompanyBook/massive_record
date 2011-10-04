@@ -62,6 +62,15 @@ module MassiveRecord
           end
         end
 
+        def values_raw_data_hash
+          Hash.new { |hash, key| hash[key] = {} }.tap do |hash|
+            @columns.each do |key, column|
+              column_family, name = key.split(':')
+              hash[column_family][name] = MassiveRecord::ORM::RawData.new_with_data_from column
+            end
+          end
+        end
+
         def values=(data)
           @values = {}
           update_columns(data)
@@ -124,10 +133,7 @@ module MassiveRecord
           row.column_families = column_families
 
           result.columns.each do |name, value|
-            row.columns[name] =  MassiveRecord::Wrapper::Cell.new({
-              :value      => value.value,
-              :created_at => Time.at(value.timestamp / 1000, (value.timestamp % 1000) * 1000)
-            })
+            row.columns[name] =  MassiveRecord::Wrapper::Cell.populate_from_tcell(value)
           end
       
           row

@@ -82,6 +82,10 @@ module MassiveRecord
               values[orm_field.column_family.name][orm_field.column] = orm_field.encode(record[attr_name])
             end
 
+            record.relation_proxies_for_embedded.select { |p| p.proxy_targets_update_hash.any? }.each do |proxy_with_changes|
+              values[proxy_with_changes.metadata.store_in].merge!(proxy_with_changes.proxy_targets_update_hash)
+            end
+
             values
           end
 

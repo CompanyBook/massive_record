@@ -23,6 +23,7 @@ require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
 require 'massive_record/orm/single_table_inheritance'
 require 'massive_record/orm/validations'
+require 'massive_record/orm/validations/associated'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
@@ -162,7 +163,7 @@ module MassiveRecord
         @new_record = true
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
-        @raw_data = {}
+        @raw_data = Hash.new { |h,k| h[k] = {} }
 
         self.attributes_raw = attributes_from_field_definition.merge('id' => id)
         self.attributes = attributes
@@ -192,15 +193,20 @@ module MassiveRecord
         @new_record = false
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
-        @raw_data = coder['raw_data'] || {}
 
-        self.attributes_raw = coder['attributes']
+        reinit_with(coder)
         fill_attributes_with_default_values_where_nil_is_not_allowed
 
         _run_find_callbacks
         _run_initialize_callbacks
 
         self
+      end
+
+      def reinit_with(coder) # :nodoc:
+        @raw_data = Hash.new { |h,k| h[k] = {} }
+        @raw_data.update(coder['raw_data']) if coder.has_key? 'raw_data'
+        self.attributes_raw = coder['attributes']
       end
 
 
@@ -281,6 +287,10 @@ module MassiveRecord
       def raw_data
         @raw_data.dup
       end
+
+      def update_raw_data_for_column_family(column_family, new_values) # :nodoc:
+        @raw_data[column_family] = new_values
+      end
       
 
       private
@@ -318,11 +328,11 @@ module MassiveRecord
     Base.class_eval do
       include Config
       include Persistence
-      include Relations::Interface
       include Finders
       include IdentityMap
       extend  RescueMissingTableOnFind
       include AttributeMethods
+      include Relations::Interface
       include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::TimeZoneConversion
       include AttributeMethods::Dirty
