@@ -22,25 +22,21 @@ module MassiveRecord
           # Adding record(s) to the collection.
           #
           def <<(*records)
-            records.flatten!
-
-            if proxy_owner.new_record? || records.all?(&:valid?)
-              records.each do |record|
-                unless include? record
-                  raise_if_type_mismatch(record)
-                  proxy_target << record
-                  record.send(metadata.inverse_of).replace(proxy_owner, false)
-                end
+            records.flatten.each do |record|
+              unless include? record
+                raise_if_type_mismatch(record)
+                proxy_target << record
+                record.send(metadata.inverse_of).replace(proxy_owner, false)
               end
-
-              if proxy_owner.persisted?
-                proxy_owner.save
-              else
-                proxy_target.sort_by! &:id
-              end
-
-              self
             end
+
+            if proxy_owner.persisted?
+              proxy_owner.save
+            else
+              proxy_target.sort_by! &:id
+            end
+
+            self
           end
           alias_method :push, :<<
           alias_method :concat, :<<

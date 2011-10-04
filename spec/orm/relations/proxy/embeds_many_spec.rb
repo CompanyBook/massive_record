@@ -126,16 +126,16 @@ describe TestEmbedsManyProxy do
         end
 
         it "is possible to add invalid record if parent is not persisted" do
-          proxy_owner.should_receive(:new_record?).any_number_of_times.and_return(true)
           subject.send add_method, proxy_target
           subject.should include proxy_target
         end
 
-        it "does not accept invalid records" do
-          proxy_owner.should_receive(:new_record?).any_number_of_times.and_return(false)
+        it "accepts invalid records, but does not save them" do
+          proxy_owner.save
           proxy_target.should_receive(:valid?).and_return false
-          subject.send(add_method, proxy_target).should be_false
-          subject.should be_empty
+          subject.send add_method, proxy_target
+          subject.should include proxy_target
+          proxy_target.should be_new_record
         end
 
 
