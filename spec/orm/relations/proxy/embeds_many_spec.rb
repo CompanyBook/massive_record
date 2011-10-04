@@ -61,7 +61,7 @@ describe TestEmbedsManyProxy do
 
       it "ignores values which kees seems to belong to other collections" do
         raw_data_with_car = proxy_owner.instance_variable_get(:@raw_data)['addresses'].merge(
-          {'car-|-123' => MassiveRecord::ORM::RawData.new(value: Car.new.attributes_db_raw_data_hash, created_at: Time.now)
+          {"car#{MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR}123" => MassiveRecord::ORM::RawData.new(value: Car.new.attributes_db_raw_data_hash, created_at: Time.now)
         })
 
         proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data_with_car})
@@ -88,8 +88,8 @@ describe TestEmbedsManyProxy do
       proxy_owner.raw_data[metadata.store_in] = {}
       subject.send(:reload_raw_data)
       Hash[proxy_owner.raw_data[metadata.store_in].collect { |k,v| [k, v.to_s] }].should eq({
-        "address-|-address-1" => "{\"street\":\"Asker\",\"number\":1,\"nice_place\":\"true\",\"postal_code\":null}",
-        "address-|-address-2" => "{\"street\":\"Asker\",\"number\":2,\"nice_place\":\"true\",\"postal_code\":null}"
+        "address#{MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR}address-1" => "{\"street\":\"Asker\",\"number\":1,\"nice_place\":\"true\",\"postal_code\":null}",
+        "address#{MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR}address-2" => "{\"street\":\"Asker\",\"number\":2,\"nice_place\":\"true\",\"postal_code\":null}"
       })
     end
 
