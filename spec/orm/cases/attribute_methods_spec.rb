@@ -106,5 +106,49 @@ describe "attribute methods" do
     it "should raise an error if we encounter an unkown attribute" do
       lambda { subject.attributes = {:unkown => "foo"} }.should raise_error MassiveRecord::ORM::UnknownAttributeError
     end
+
+    describe "multiparameter" do
+      describe "date" do
+        let(:date) { Date.new 1981, 8, 20 }
+        let(:params) do
+          {
+            "date_of_birth(1i)" => date.year.to_s,
+            "date_of_birth(2i)" => date.month.to_s,
+            "date_of_birth(3i)" => date.day.to_s
+          }
+        end
+
+        it "parses a complete multiparameter" do
+          subject.attributes = params
+          subject.date_of_birth.should eq date
+        end
+
+        it "parses when year is missing" do
+          params["date_of_birth(1i)"] = ""
+          subject.attributes = params
+          subject.date_of_birth.should eq Date.new(1, date.month, date.day)
+        end
+
+        it "parses when month is missing" do
+          params["date_of_birth(2i)"] = ""
+          subject.attributes = params
+          subject.date_of_birth.should eq Date.new(date.year, 1, date.day)
+        end
+
+        it "parses when day is missing" do
+          params["date_of_birth(3i)"] = ""
+          subject.attributes = params
+          subject.date_of_birth.should eq Date.new(date.year, date.month, 1)
+        end
+
+        it "sets to nil if all are blank" do
+          params["date_of_birth(1i)"] = ""
+          params["date_of_birth(2i)"] = ""
+          params["date_of_birth(3i)"] = ""
+          subject.attributes = params
+          subject.date_of_birth.should be_nil
+        end
+      end
+    end
   end
 end
