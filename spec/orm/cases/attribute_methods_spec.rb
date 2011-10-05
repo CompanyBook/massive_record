@@ -150,6 +150,12 @@ describe "attribute methods" do
           subject.attributes = params
           subject.date_of_birth.should be_nil
         end
+
+        it "sets to nil if any of the values are on wrong format" do
+          params["date_of_birth(3i)"] = "foobar"
+          subject.attributes = params
+          subject.date_of_birth.should be_nil
+        end
       end
 
       describe "time" do
@@ -226,6 +232,12 @@ describe "attribute methods" do
           params["last_signed_in_at(6i)"] = ""
           subject.attributes = params
           subject.last_signed_in_at.should eq nil
+        end
+
+        it "sets to nil if any of the values are on wrong format" do
+          params["last_signed_in_at(3i)"] = "foobar"
+          subject.attributes = params
+          subject.last_signed_in_at.should be_nil
         end
       end
     end

@@ -113,15 +113,19 @@ module MassiveRecord
       def assign_multiparameter_attributes(attribute_pairs)
         convert_multiparameter_pairs_to_hash_with_initializer_arguments(attribute_pairs).each do |attr_name, initialize_values|
           if field = attributes_schema[attr_name]
-            value = if initialize_values.any?
-                      case field.type
-                      when :date
-                        initialize_values.collect! { |v| v.nil? ? 1 : v }
-                        Date.new(*initialize_values)
-                      when :time
-                        initialize_values.collect! { |v| v.nil? ? 0 : v }
-                        Time.new(*initialize_values)
+            value = begin
+                      if initialize_values.any?
+                        case field.type
+                        when :date
+                          initialize_values.collect! { |v| v.nil? ? 1 : v }
+                          Date.new(*initialize_values)
+                        when :time
+                          initialize_values.collect! { |v| v.nil? ? 0 : v }
+                          Time.new(*initialize_values)
+                        end
                       end
+                    rescue ArgumentError
+                      nil
                     end
 
             self[attr_name] = value

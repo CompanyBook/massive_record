@@ -3,6 +3,8 @@
 
 # v0.2.2.rc1 (git master)
 
+- Mass assignment of attributes now support multi parameter so we should be able to support form helpers
+  for date and time.
 - Added support for embeds_many and embedded_in.
 - IdFactory is now configurable per class. Some classes may use IdFactory::AtomicIncrementation,
   others might use IdFactory::Timestamp. By default we are using AtomicIncrementation.
