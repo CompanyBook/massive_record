@@ -151,6 +151,14 @@ describe "attribute methods" do
           subject.date_of_birth.should be_nil
         end
 
+        it "ignores the overflow of arguments" do
+          params["date_of_birth(4i)"] = "1"
+          params["date_of_birth(5i)"] = "2"
+          params["date_of_birth(6i)"] = "3"
+          subject.attributes = params
+          subject.date_of_birth.should eq date
+        end
+
         it "sets to nil if any of the values are on wrong format" do
           params["date_of_birth(3i)"] = "foobar"
           subject.attributes = params
@@ -238,6 +246,13 @@ describe "attribute methods" do
           params["last_signed_in_at(3i)"] = "foobar"
           subject.attributes = params
           subject.last_signed_in_at.should be_nil
+        end
+
+        it "ignores the overflow of arguments" do
+          params["last_signed_in_at(7i)"] = "1"
+          params["last_signed_in_at(8i)"] = "2"
+          subject.attributes = params
+          subject.last_signed_in_at.should eq time
         end
       end
     end

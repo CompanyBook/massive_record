@@ -117,9 +117,11 @@ module MassiveRecord
                       if initialize_values.any?
                         case field.type
                         when :date
+                          initialize_values = initialize_values[0, 3]
                           initialize_values.collect! { |v| v.nil? ? 1 : v }
                           Date.new(*initialize_values)
                         when :time
+                          initialize_values = initialize_values[0, 6]
                           initialize_values.collect! { |v| v.nil? ? 0 : v }
                           Time.new(*initialize_values)
                         end
