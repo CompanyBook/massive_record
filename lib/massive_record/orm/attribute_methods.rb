@@ -118,6 +118,9 @@ module MassiveRecord
                       when :date
                         initialize_values.collect! { |v| v.nil? ? 1 : v }
                         Date.new(*initialize_values)
+                      when :time
+                        initialize_values.collect! { |v| v.nil? ? 0 : v }
+                        Time.new(*initialize_values)
                       end
                     end
 

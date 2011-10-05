@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'orm/models/person'
 
 describe "attribute methods" do
+  include TimeZoneHelper
+
   subject { Person.new "5", :name => "John", :age => "15" }
 
   it "should define reader method" do
@@ -147,6 +149,83 @@ describe "attribute methods" do
           params["date_of_birth(3i)"] = ""
           subject.attributes = params
           subject.date_of_birth.should be_nil
+        end
+      end
+
+      describe "time" do
+        let(:time) { Time.new 2011, 8, 20, 17, 30, 0 }
+        let(:tz_europe) { "Europe/Stockholm" }
+        let(:tz_us) { "Pacific Time (US & Canada)" }
+
+        let(:params) do
+          {
+            "last_signed_in_at(1i)" => time.year.to_s,
+            "last_signed_in_at(2i)" => time.month.to_s,
+            "last_signed_in_at(3i)" => time.day.to_s,
+            "last_signed_in_at(4i)" => time.hour.to_s,
+            "last_signed_in_at(5i)" => time.min.to_s,
+            "last_signed_in_at(6i)" => time.sec.to_s
+          }
+        end
+
+        it "parses complete multiparameter" do
+          subject.attributes = params
+          subject.last_signed_in_at.should eq time
+        end
+
+        it "parses complete multiparameter with time zone" do
+          in_time_zone tz_us do
+            subject.attributes = params
+            subject.last_signed_in_at.should eq time.in_time_zone(tz_us)
+          end
+        end
+
+        it "parses an old time" do
+          year = 1835
+          params["last_signed_in_at(1i)"] = year.to_s
+          subject.attributes = params
+          subject.last_signed_in_at.should eq Time.new(
+            year, time.month, time.day,
+            time.hour, time.min, time.sec
+          )
+        end
+
+        it "parses when year is missing" do
+          params["last_signed_in_at(1i)"] = ""
+          subject.attributes = params
+          subject.last_signed_in_at.should eq Time.new(
+            0, time.month, time.day,
+            time.hour, time.min, time.sec
+          )
+        end
+
+        it "parses when hour is missing" do
+          params["last_signed_in_at(4i)"] = ""
+          subject.attributes = params
+          subject.last_signed_in_at.should eq Time.new(
+            time.year, time.month, time.day,
+            0, time.min, time.sec
+          )
+        end
+
+        it "parses when seconds is missing" do
+          params["last_signed_in_at(6i)"] = ""
+          subject.attributes = params
+          subject.last_signed_in_at.should eq Time.new(
+            time.year, time.month, time.day,
+            time.hour, time.min, 0
+          )
+        end
+
+        it "sets to nil if all are blank" do
+          params["last_signed_in_at(1i)"] = ""
+          params["last_signed_in_at(2i)"] = ""
+          params["last_signed_in_at(3i)"] = ""
+          params["last_signed_in_at(4i)"] = ""
+          params["last_signed_in_at(5i)"] = ""
+          params["last_signed_in_at(6i)"] = ""
+          subject.attributes = params
+          subject.last_signed_in_at.should eq nil
         end
       end
     end
