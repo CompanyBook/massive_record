@@ -187,6 +187,7 @@ module MassiveRecord
           end
 
           def delete_or_destroy(*records, method)
+            records.flatten!
             self.proxy_target -= records
             to_be_destroyed.concat(records).uniq!
             proxy_owner.save if proxy_owner.persisted? && method == :destroy
