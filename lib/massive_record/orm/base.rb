@@ -222,6 +222,7 @@ module MassiveRecord
 
       def freeze
         @attributes.freeze
+        self
       end
 
       def frozen?

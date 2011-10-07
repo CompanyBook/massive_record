@@ -382,6 +382,10 @@ describe "persistence" do
         person.should be_destroyed
       end
 
+      it "returns destroyed record" do
+        person.destroy.should eq person
+      end
+
       it "should be frozen after destroy" do
         person.destroy
         person.should be_frozen
