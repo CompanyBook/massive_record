@@ -576,9 +576,8 @@ describe TestEmbedsManyProxy do
 
   describe "#changes" do
     before do
+      proxy_owner.save!
       subject << proxy_target
-      proxy_target.stub(:destroyed?).and_return false
-      proxy_target.stub(:new_record?).and_return false
     end
 
     it "has no changes when no changes has been made" do

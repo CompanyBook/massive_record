@@ -165,10 +165,11 @@ module MassiveRecord
         @relation_proxy_cache = {}
         @raw_data = Hash.new { |h,k| h[k] = {} }
 
+        clear_dirty_states!
+
         self.attributes_raw = attributes_from_field_definition.merge('id' => id)
         self.attributes = attributes
 
-        clear_dirty_states!
 
         _run_initialize_callbacks
       end
