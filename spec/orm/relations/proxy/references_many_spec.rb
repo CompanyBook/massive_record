@@ -455,6 +455,11 @@ describe TestReferencesManyProxy do
         proxy_target_2.should_receive(:destroy)
         subject.destroy_all
       end
+
+      it "returns destroyed records" do
+        removed = subject.destroy_all
+        removed.should include proxy_target, proxy_target_2
+      end
     end
 
     describe "with delete_all" do
@@ -487,6 +492,11 @@ describe TestReferencesManyProxy do
         proxy_target.should_not_receive(:destroy)
         proxy_target_2.should_not_receive(:destroy)
         subject.delete_all
+      end
+
+      it "returns deleted records" do
+        removed = subject.delete_all
+        removed.should include proxy_target, proxy_target_2
       end
     end
   end
