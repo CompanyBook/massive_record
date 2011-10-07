@@ -3,6 +3,8 @@
 
 # v0.2.2.rc1 (git master)
 
+- Changes are better detected on new records. user = User.new :email => "me@gmail.com"; user.email_changed?
+  returns true.
 - Mass assignment of attributes now support multi parameter so we should be able to support form helpers
   for date and time.
 - Added support for embeds_many and embedded_in.
