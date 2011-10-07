@@ -62,9 +62,10 @@ module MassiveRecord
         # Destroys all records
         #
         def destroy_all
-          destroy(load_proxy_target)
-          reset
-          loaded!
+          destroy(load_proxy_target).tap do
+            reset
+            loaded!
+          end
         end
 
         #
@@ -72,9 +73,10 @@ module MassiveRecord
         # Does not destroy the records
         #
         def delete_all
-          delete(load_proxy_target)
-          reset
-          loaded!
+          delete(load_proxy_target).tap do
+            reset
+            loaded!
+          end
         end
       end
     end

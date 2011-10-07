@@ -178,11 +178,6 @@ describe TestEmbedsManyProxy do
       subject.should_not include proxy_target, proxy_target_2
     end
 
-    it "destroys all records" do
-      subject.destroy_all
-      subject.should_not include proxy_target, proxy_target_2
-    end
-
     it "is destroyed from the database as well" do
       subject.destroy(proxy_target)
       subject.reload
@@ -201,6 +196,24 @@ describe TestEmbedsManyProxy do
     end
   end
 
+  describe "#destroy_all" do
+    before do
+      subject << proxy_target << proxy_target_2 << proxy_target_3
+      proxy_owner.save!
+    end
+
+    it "destroys all records" do
+      subject.destroy_all
+      subject.should_not include proxy_target, proxy_target_2, proxy_target_3
+    end
+
+    it "returns all destroyed records" do
+      removed = subject.destroy_all
+      removed.should include proxy_target, proxy_target_2, proxy_target_3
+      removed.each { |r| r.should be_destroyed }
+    end
+  end
+
   describe "#delete" do
     before do
       subject << proxy_target
@@ -216,11 +229,6 @@ describe TestEmbedsManyProxy do
 
     it "deletes multiple records from collection" do
       subject.delete(proxy_target, proxy_target_2)
-      subject.should_not include proxy_target, proxy_target_2
-    end
-
-    it "deletes all records" do
-      subject.delete_all
       subject.should_not include proxy_target, proxy_target_2
     end
 
@@ -246,6 +254,24 @@ describe TestEmbedsManyProxy do
       subject.delete(proxy_target)
       proxy_owner.save
       proxy_target.should be_destroyed
+    end
+  end
+
+  describe "#delete_all" do
+    before do
+      subject << proxy_target << proxy_target_2 << proxy_target_3
+      proxy_owner.save!
+    end
+
+    it "deletes all records" do
+      subject.delete_all
+      subject.should_not include proxy_target, proxy_target_2, proxy_target_3
+    end
+
+    it "returns all removed records" do
+      removed = subject.delete_all
+      removed.should include proxy_target, proxy_target_2, proxy_target_3
+      removed.each { |r| r.should_not be_destroyed }
     end
   end
 
