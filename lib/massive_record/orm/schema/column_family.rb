@@ -5,7 +5,7 @@ module MassiveRecord
         include ActiveModel::Validations
 
         attr_accessor :column_families, :autoload_fields
-        attr_reader :name, :fields
+        attr_reader :name, :fields, :options_for_autoload_created_fields
 
 
         validates_presence_of :name
@@ -91,8 +91,9 @@ module MassiveRecord
         end
 
         # Internal DSL method
-        def autoload_fields
+        def autoload_fields(field_args = {})
           @autoload_fields = true
+          @options_for_autoload_created_fields = field_args
         end
 
         def autoload

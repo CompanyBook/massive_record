@@ -20,6 +20,15 @@ describe "persistence" do
       model.should be_persisted
     end
 
+    it "is still a new record if saved to database failed" do
+      operation = mock(Object, :execute => false)
+      MassiveRecord::ORM::Persistence::Operations.should_receive(:insert).and_return(operation)
+
+      model = TestClass.new "id1"
+      model.save
+      model.should_not be_persisted
+    end
+
     it "should be destroyed when destroyed" do
       model = TestClass.new "id1"
       model.save
@@ -32,6 +41,17 @@ describe "persistence" do
       model.save
       model.destroy
       model.should_not be_persisted
+    end
+
+    it "should not be marked as destroyed if operation failed" do
+      operation = mock(Object, :execute => false)
+      MassiveRecord::ORM::Persistence::Operations.should_receive(:destroy).and_return(operation)
+
+      model = TestClass.new "id1"
+      model.save
+      model.destroy
+      model.should_not be_destroyed
+      model.should_not be_frozen
     end
 
     it "should be possible to create new objects" do
@@ -65,6 +85,13 @@ describe "persistence" do
       @person.name.should == original_name
     end
 
+    it "should reload the raw data" do
+      @person.name += "_NEW"
+      @person.save!
+      @person.reload
+      @person.raw_data.should eq Person.find("ID1").raw_data
+    end
+
     it "should not be considered changed after reload" do
       original_name = @person.name
       @person.name = original_name + original_name
@@ -81,40 +108,7 @@ describe "persistence" do
       Person.new.reload
     end
   end
-
-
-  describe "#row_for_record" do
-    include MockMassiveRecordConnection
-
-    it "should raise error if id is not set" do
-      lambda { Person.new.send(:row_for_record) }.should raise_error MassiveRecord::ORM::IdMissing
-    end
-
-    it "should return a row with id set" do
-      Person.new("foo").send(:row_for_record).id.should == "foo"
-    end
-
-    it "should return a row with table set" do
-      Person.new("foo").send(:row_for_record).table.should == Person.table
-    end
-  end
   
-  describe "#attributes_to_row_values_hash" do
-    before do
-      @person = Person.new("new_id", :name => "Vincent", :points => 15)
-    end
-    
-    it "should include the 'pts' field in the database which has 'points' as an alias" do
-      @person.send(:attributes_to_row_values_hash)["base"].keys.should include("pts")
-      @person.send(:attributes_to_row_values_hash)["base"].keys.should_not include("points")
-    end
-
-    it "should include integer value, even if it is set as string" do
-      @person.age = "20"
-      @person.send(:attributes_to_row_values_hash)["info"]["age"].should == 20
-    end
-  end
-
 
   describe "update attribute" do
     describe "dry run" do
@@ -168,7 +162,7 @@ describe "persistence" do
 
       it "should delegate save to update if its a persisted record" do
         person = Person.new '14', :name => "Bob", :age => 33
-        person.should_receive(:new_record?).and_return(false)
+        person.should_receive(:new_record?).any_number_of_times.and_return(false)
         person.should_receive(:update)
         person.save
       end
@@ -232,6 +226,15 @@ describe "persistence" do
             person_from_db.should == person
             person_from_db.name.should == "Thorbjorn"
           end
+
+          it "creates persists embedded documents" do
+            person = Person.new "new_id", :name => "Thorbjorn", :age => "22"
+            address = Address.new "address-1", :street => "Asker", :number => 1
+            person.addresses << address
+            person.save!
+            person_from_db = Person.find(person.id)
+            person_from_db.addresses.should eq [address]
+          end
         end
 
         it "raises an error if id already exists" do
@@ -275,12 +278,32 @@ describe "persistence" do
         end
 
         it "should only include changed attributes" do
-          row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
-          row.should_receive(:values=).with({"info" => {"name" => @new_name}})
-          @person.should_receive(:row_for_record).and_return(row)
+          MassiveRecord::ORM::Persistence::Operations.should_receive(:update).with(
+            @person, hash_including(:attribute_names_to_update => ["positive_as_default", "name"])
+          ).and_return(mock(Object, :execute => true))
+
 
           @person.name = @new_name
           @person.save
+        end
+
+        it "should include changed attributes for embedded objects" do
+          MassiveRecord::ORM::Persistence::Operations.should_receive(:update).with(
+            @person, hash_including(:attribute_names_to_update => ["positive_as_default", "name", "addresses"])
+          ).and_return(mock(Object, :execute => true))
+
+          # Makes the reload raw data do nothing. Reason for this is as follows:
+          # We are stubbing out the update operaitons, thus no address are being
+          # inserted to the database for this person.
+          #
+          # The reload_raw_data does a find with select on addresses column family only.
+          # When that is being done, and no data is found it will return nil back (Thrift
+          # api does this). This will in turn result in a record not found error, which is
+          # kinda not what we want.
+          @person.addresses.should_receive(:reload_raw_data).any_number_of_times
+
+          @person.name = @new_name
+          @person.addresses << Address.new("id1", :street => "foo")
         end
 
         it "should persist the changes" do
@@ -290,10 +313,29 @@ describe "persistence" do
           Person.find(@person.id).name.should == @new_name
         end
 
+        it "persists changes in embedded documents" do
+          address = Address.new "address-1", :street => "Asker", :number => 1
+          @person.addresses << address
+          @person.save!
+
+          @person_from_db = Person.find(@person.id)
+          @person_from_db.addresses[0].street = "Heggedal"
+          @person_from_db.save!
+
+          @person_from_db = Person.find(@person.id)
+          @person_from_db.addresses[0].street.should eq "Heggedal"
+        end
+
         it "should not have any changes after save" do
           @person.name = @new_name
           @person.save
-          @person.should_not be_changed # ..as it has been stored..
+          @person.should_not be_changed
+        end
+
+        it "has no changes after an embedded object is added and saved" do
+          @person.addresses << Address.new("address-1", :street => "Asker", :number => 1)
+          @person.save
+          @person.should_not be_changed
         end
 
         it "should raise error if column familiy needed does not exist" do
@@ -303,9 +345,7 @@ describe "persistence" do
             end
           end
 
-          @person = Person.find(@person.id)
-          @person.new = "new"
-          lambda { @person.save }.should raise_error MassiveRecord::ORM::ColumnFamiliesMissingError
+          expect { @person = Person.find(@person.id) }.to raise_error MassiveRecord::ORM::ColumnFamiliesMissingError
 
           # Clen up the inserted column family above
           # TODO  Might want to wrap this inside of the column families object?
@@ -322,40 +362,44 @@ describe "persistence" do
     describe "dry run" do
       include MockMassiveRecordConnection
 
+      let(:person) { Person.new "id1" }
+      let(:operation) { MassiveRecord::ORM::Persistence::Operations::Destroy.new(person) }
+
       before do
-        @person = Person.new "id1"
-        @person.stub!(:new_record?).and_return(false)
-        @row = MassiveRecord::Wrapper::Row.new({:id => @person.id, :table => @person.class.table})
-        @person.should_receive(:row_for_record).and_return(@row)
+        person.stub(:new_record?).and_return(false)
+        MassiveRecord::ORM::Persistence::Operations.stub(:destroy).and_return operation
       end
 
 
       it "should not be destroyed if wrapper returns false" do
-        @row.should_receive(:destroy).and_return(false)
-        @person.destroy
-        @person.should_not be_destroyed
+        operation.should_receive(:execute).and_return false
+        person.destroy
+        person.should_not be_destroyed
       end
 
       it "should be destroyed if wrapper returns true" do
-        @row.should_receive(:destroy).and_return(true)
-        @person.destroy
-        @person.should be_destroyed
+        person.destroy
+        person.should be_destroyed
+      end
+
+      it "returns destroyed record" do
+        person.destroy.should eq person
       end
 
       it "should be frozen after destroy" do
-        @person.destroy
-        @person.should be_frozen
+        person.destroy
+        person.should be_frozen
       end
 
       it "should be frozen after delete" do
-        @person.delete
-        @person.should be_frozen
+        person.delete
+        person.should be_frozen
       end
       
       it "should not be frozen if wrapper returns false" do
-        @row.should_receive(:destroy).and_return(false)
-        @person.destroy
-        @person.should_not be_frozen
+        operation.should_receive(:execute).and_return false
+        person.destroy
+        person.should_not be_frozen
       end
     end
 
@@ -461,6 +505,10 @@ describe "persistence" do
 
 
       describe "atomic increments" do
+        it "raises error if called on non integer fields" do
+          lambda { @person.atomic_increment!(:name) }.should raise_error MassiveRecord::ORM::NotNumericalFieldError
+        end
+
         it "should be able to do atomic increments on existing objects" do
           @person.atomic_increment!(:age).should == 30
           @person.age.should == 30
@@ -494,6 +542,49 @@ describe "persistence" do
           end
 
           person.atomic_increment!(:age).should eq 2
+
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_ensure
+        end
+      end
+
+      describe "atomic decrements" do
+        it "raises error if called on non integer fields" do
+          lambda { @person.atomic_decrement!(:name) }.should raise_error MassiveRecord::ORM::NotNumericalFieldError
+        end
+
+        it "should be able to do atomic decrements on existing objects" do
+          @person.atomic_decrement!(:age).should == 28
+          @person.age.should == 28
+          @person.reload
+          @person.age.should == 28
+        end
+
+        it "is a persisted record after decrementation" do
+          person = Person.new('id2')
+          person.atomic_decrement!(:age).should eq -1
+          person.should be_persisted
+        end
+
+        it "decrementss correctly when value is '1'" do
+          old_ensure = MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings
+          MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = true
+
+          person = Person.new('id2')
+          person.atomic_increment!(:age).should eq 1
+
+          atomic_field = Person.attributes_schema['age']
+
+          # Enter incompatible data, number as string.
+          Person.table.find("id2").tap do |row|
+            row.update_column(
+              atomic_field.column_family.name,
+              atomic_field.name,
+              MassiveRecord::ORM::Base.coder.dump(1)
+            )
+            row.save
+          end
+
+          person.atomic_decrement!(:age).should eq 0
 
           MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_ensure
         end
@@ -599,12 +690,12 @@ describe "persistence" do
         :name => "Thorbjorn",
         :age => 22,
         :points => 1,
-        :addresses => {'home' => 'Here'},
+        :dictionary => {'home' => 'Here'},
         :status => true
       })
     end
 
-    %w(points addresses status).each do |attr|
+    %w(points dictionary status).each do |attr|
       it "removes the cell from hbase when #{attr} is set to nil" do
         subject[attr] = nil
         subject.save!

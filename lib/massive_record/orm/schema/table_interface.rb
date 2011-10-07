@@ -28,8 +28,15 @@ module MassiveRecord
           #
           #
           def column_family(name, &block)
+            add_column_family(name).instance_eval(&block)
+          end
+
+          #
+          # Adds a column family to your class
+          #
+          def add_column_family(name)
             ensure_column_families_exists
-            column_families.family_by_name_or_new(name).instance_eval(&block)
+            column_families.family_by_name_or_new(name)
           end
 
           #
@@ -54,15 +61,25 @@ module MassiveRecord
           # It should be on a unique and complete form like ["info:name", "info:phone"]
           #
           def autoload_column_families_and_fields_with(column_names)
+            ensure_column_families_exists
+
             column_names.each do |column_family_and_column_name|
               family_name, column_name = column_family_and_column_name.split(":")
               
               if family = column_families.family_by_name(family_name) and family.autoload_fields?
-                family.add? Field.new(:name => column_name)
+                family.add?(Field.new(
+                  family.options_for_autoload_created_fields.merge(:name => column_name)
+                ))
               end
             end
           end
 
+          #
+          # Makes it a bit more convenient to get all the column family names
+          #
+          def known_column_family_names
+            (column_families || []).collect &:name
+          end
 
 
 

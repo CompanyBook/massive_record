@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 require 'orm/models/test_class'
 require 'orm/models/person'
@@ -27,21 +28,46 @@ describe "finders" do
       lambda { Person.find(nil) }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
 
-    it "should raise an error if conditions are given to first" do
-      lambda { Person.first(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+    describe "conditions" do
+      it "should raise an error if conditions are given to first" do
+        lambda { Person.first(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
+
+      it "should raise an error if conditions are given to all" do
+        lambda { Person.all(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
+
+      it "should raise an error if conditions are given to find" do
+        lambda { Person.find(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      end
     end
 
-    it "should raise an error if conditions are given to all" do
-      lambda { Person.all(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
-    end
+    describe "default select" do
+      it "applies all the known column families to finder options as a default on all()" do
+        @mocked_table.should_receive(:all).with(hash_including(:select => Person.known_column_family_names)).and_return []
+        Person.all
+      end
 
-    it "should raise an error if conditions are given to find" do
-      lambda { Person.find(:conditions => "foo = 'bar'") }.should raise_error ArgumentError
+      it "applies all the known column families to finder options as a default on first()" do
+        @mocked_table.should_receive(:all).with(hash_including(:select => Person.known_column_family_names)).and_return []
+        Person.first
+      end
+
+      it "applies all the known column families to finder options as a default on first()" do
+        @mocked_table.should_receive(:find).with("ID1", hash_including(:select => Person.known_column_family_names)).and_return(@row)
+        Person.find("ID1")
+      end
     end
 
     it "should ask the table to look up by it's id" do
       @mocked_table.should_receive(:find).with("ID1", anything).and_return(@row)
       Person.find("ID1")
+    end
+
+    it "persists the raw values from table" do
+      @mocked_table.should_receive(:find).with("ID1", anything).and_return(@row)
+      person = Person.find("ID1")
+      person.raw_data.should eq @row.values_raw_data_hash
     end
     
     it "should ask the table to fetch rows from a list of ids given as array" do
@@ -67,9 +93,9 @@ describe "finders" do
       lambda { Person.find("ID1", "ID2") }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
     
-    it "should call table's first on find(:first)" do
-      @mocked_table.should_receive(:first).and_return(@row)
-      Person.find(:first)
+    it "should call table's all with limit 1 on find(:first)" do
+      @mocked_table.should_receive(:all).with(hash_including(:limit => 1)).and_return([@row])
+      Person.find(:first).should be_instance_of Person
     end
 
     it "should call table's all on find(:all)" do
@@ -164,6 +190,12 @@ describe "finders" do
       @person.age.should == 20
     end
 
+    it "should maintain encoding of ids" do
+      id = "thorbjørn"
+      person = Person.create! id, :name => "Thorbjørn", :age => 20
+      Person.find(id).should eq person
+    end
+
     it "should find first person" do
       Person.first.should == @person
     end
@@ -185,6 +217,21 @@ describe "finders" do
 
     it "should return what it finds if asked to" do
       lambda { Person.find(["ID1", "not exists"], :skip_expected_result_check => true) }.should_not raise_error MassiveRecord::ORM::RecordNotFound
+    end
+
+
+    describe "embedded records" do
+      subject { Person.find("ID1") }
+      let(:address) { Address.new "address-1", :street => "Asker", :number => 1 }
+
+      before do
+        subject.addresses << address
+        subject.reload
+      end
+
+      it "is able to load embeds many relations" do
+        subject.addresses.should eq [address]
+      end
     end
   end
   

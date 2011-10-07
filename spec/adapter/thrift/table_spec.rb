@@ -297,20 +297,20 @@ describe "A table" do
       group_number.should == 5
     end
   
-    it "should find 1 row using the :start option" do
-      @table.all(:start => "A1").size.should == 1
+    it "should find 1 row using the :starts_with option" do
+      @table.all(:starts_with => "A1").size.should == 1
     end
   
-    it "should find 5 rows using the :start option" do
-      @table.all(:start => "A").size.should == 5
+    it "should find 5 rows using the :starts_with option" do
+      @table.all(:starts_with => "A").size.should == 5
     end
   
     it "should find 9 rows using the :offset option" do
       @table.all(:offset => "A2").size.should == 9
     end
     
-    it "should find 4 rows using both :offset and :start options" do
-      @table.all(:offset => "A2", :start => "A").size.should == 4
+    it "should find 4 rows using both :offset and :starts_with options" do
+      @table.all(:offset => "A2", :starts_with => "A").size.should == 4
     end
   end
 end

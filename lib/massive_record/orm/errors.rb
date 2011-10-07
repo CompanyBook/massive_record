@@ -66,8 +66,25 @@ module MassiveRecord
     class RelationTypeMismatch < MassiveRecordError
     end
 
+    # Used if we are dependent on a relation, but it does not seem to exist. For instance,
+    # embedded_in is dependent of it's inverse in the owner object.
+    class RelationMissing < MassiveRecordError
+    end
+
     # Raised when an attribute is decoded from the database, but the type returned does not match what is expected
     class SerializationTypeMismatch < MassiveRecordError
+    end
+
+    # Raised when an ORM::Embedded is asked to save itself without being assigned a collection to be embedded in
+    class NotAssignedToEmbeddedCollection < MassiveRecordError
+      attr_reader :embedded_in_missing_values
+      def initialize(record, embedded_in_missing_values)
+        @embedded_in_missing_values = embedded_in_missing_values
+        super("#{record.inspect} needs to be embedded in collection before save. Embedded-in-attribute(s) missing assignment(s): #{embedded_in_missing_values.join(', ')}")
+      end
+    end
+
+    class InvalidEmbeddedDatabaseId < MassiveRecordError
     end
   end
 end

@@ -21,8 +21,8 @@ describe MassiveRecord::ORM::Finders::Scope do
     (MassiveRecord::ORM::Finders::Scope::MULTI_VALUE_METHODS + MassiveRecord::ORM::Finders::Scope::SINGLE_VALUE_METHODS).each do |method|
       it { should respond_to(method) }
 
-      it "should return self after #{method}()" do
-        subject.send(method, nil).should == subject
+      it "should return an instance of self #{method}()" do
+        subject.send(method, nil).should be_instance_of described_class
       end
     end
 
@@ -31,33 +31,27 @@ describe MassiveRecord::ORM::Finders::Scope do
     describe "multi value methods" do
       describe "select" do
         it "should not add nil values" do
-          subject.select(nil)
-          subject.select_values.should be_empty
+          subject.select(nil).select_values.should be_empty
         end
 
         it "should add incomming value to list" do
-          subject.select(:info)
-          subject.select_values.should include 'info'
+          subject.select(:info).select_values.should include 'info'
         end
 
         it "should be adding values if called twice" do
-          subject.select(:info).select(:base)
-          subject.select_values.should include 'info', 'base'
+          subject.select(:info).select(:base).select_values.should include 'info', 'base'
         end
 
         it "should add multiple arguments" do
-          subject.select(:info, :base)
-          subject.select_values.should include 'info', 'base'
+          subject.select(:info, :base).select_values.should include 'info', 'base'
         end
 
         it "should add multiple values given as array" do
-          subject.select([:info, :base])
-          subject.select_values.should include 'info', 'base'
+          subject.select([:info, :base]).select_values.should include 'info', 'base'
         end
 
         it "should not add same value twice" do
-          subject.select(:info).select('info')
-          subject.select_values.should == ['info']
+          subject.select(:info).select('info').select_values.should == ['info']
         end
       end
     end
@@ -67,13 +61,31 @@ describe MassiveRecord::ORM::Finders::Scope do
     describe "singel value methods" do
       describe "limit" do
         it "should set a limit" do
-          subject.limit(5)
-          subject.limit_value.should == 5
+          subject.limit(5).limit_value.should == 5
         end
 
         it "should be set to the last value set" do
-          subject.limit(1).limit(5)
-          subject.limit_value.should == 5
+          subject.limit(1).limit(5).limit_value.should == 5
+        end
+      end
+
+      describe "starts_with" do
+        it "should set a starts_with" do
+          subject.starts_with(5).starts_with_value.should == 5
+        end
+
+        it "should be set to the last value set" do
+          subject.starts_with(1).starts_with(5).starts_with_value.should == 5
+        end
+      end
+
+      describe "offset" do
+        it "should set a offset" do
+          subject.offset(5).offset_value.should == 5
+        end
+
+        it "should be set to the last value set" do
+          subject.offset(1).offset(5).offset_value.should == 5
         end
       end
     end
@@ -92,6 +104,14 @@ describe MassiveRecord::ORM::Finders::Scope do
     it "should include selection when asked for it" do
       subject.select(:info).send(:find_options).should include :select => ['info']
     end
+
+    it "includes a starts_with when asked for it" do
+      subject.starts_with("id-something").send(:find_options).should include :starts_with => "id-something"
+    end
+
+    it "includes an offset when asked for it" do
+      subject.offset("id-something").send(:find_options).should include :offset => "id-something"
+    end
   end
 
 
@@ -104,12 +124,30 @@ describe MassiveRecord::ORM::Finders::Scope do
     end
   end
 
-
   describe "#reset" do
-    it "should reset loaded status" do
+    it "resets the loaded status" do
       subject.loaded = true
       subject.reset
       should_not be_loaded
+    end
+
+    it "resets the loaded records" do
+      records = [:foo]
+      subject.instance_variable_set(:@records, records)
+      subject.reset
+      subject.instance_variable_get(:@records).should be_empty
+    end
+  end
+
+  describe "a clone" do
+    it "resets the state after being cloned" do
+      records = [:foo]
+      subject.instance_variable_set(:@records, records)
+      subject.loaded = true
+
+      cloned = subject.clone
+      cloned.should_not be_loaded
+      cloned.instance_variable_get(:@records).should be_empty
     end
   end
 
@@ -123,7 +161,7 @@ describe MassiveRecord::ORM::Finders::Scope do
     end
 
 
-    [:to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?].each do |method|
+    [:to_xml, :to_yaml, :length, :size, :collect, :map, :each, :all?, :include?].each do |method|
       it "should delegate #{method} to to_a" do
         records = []
         records.should_receive(method)
@@ -157,6 +195,15 @@ describe MassiveRecord::ORM::Finders::Scope do
       subject.should_receive(:klass).and_return(klass)
       subject.select(:foo).find(1)
     end
+
+    it "should include finder options" do
+      extra_options = {:select => ["foo"], :conditions => 'should_be_passed_on_to_finder'}
+      klass = mock(Object)
+      klass.should_receive(:do_find).with("ID", hash_including(extra_options)).and_return([])
+      subject.instance_variable_set(:@klass, klass)
+      
+      subject.find("ID", extra_options)
+    end
   end
 
 
@@ -176,7 +223,7 @@ describe MassiveRecord::ORM::Finders::Scope do
 
       klass = mock(Object)
       klass.should_receive(:do_find).with(anything, hash_including(extra_options)).and_return([])
-      subject.should_receive(:klass).and_return(klass)
+      subject.instance_variable_set(:@klass, klass)
 
       subject.first(extra_options)
     end
@@ -194,7 +241,7 @@ describe MassiveRecord::ORM::Finders::Scope do
 
       klass = mock(Object)
       klass.should_receive(:do_find).with(anything, extra_options)
-      subject.should_receive(:klass).and_return(klass)
+      subject.instance_variable_set(:@klass, klass)
 
       subject.all(extra_options)
     end
@@ -219,10 +266,12 @@ describe MassiveRecord::ORM::Finders::Scope do
     describe "with a person" do
       let(:person_1) { Person.create "ID1", :name => "Person1", :email => "one@person.com", :age => 11, :points => 111, :status => true }
       let(:person_2) { Person.create "ID2", :name => "Person2", :email => "two@person.com", :age => 22, :points => 222, :status => false }
+      let(:person_3) { Person.create "other", :name => "Person3", :email => "three@person.com", :age => 33, :points => 333, :status => true }
 
       before do
         person_1.save!
         person_2.save!
+        person_3.save!
       end
 
       (MassiveRecord::ORM::Finders::Scope::MULTI_VALUE_METHODS + MassiveRecord::ORM::Finders::Scope::SINGLE_VALUE_METHODS).each do |method|
@@ -244,15 +293,33 @@ describe MassiveRecord::ORM::Finders::Scope do
         person_from_db.status.should be_nil
       end
 
+      it "applying scope on a loaded scope returns a cloned and reset scope" do
+        scope = Person.limit(2)
+        scope.all.should eq [person_1, person_2]
+        scope.should be_loaded
+
+        new_scope = scope.offset("ID2")
+        new_scope.should_not be_loaded
+        new_scope.all.should eq [person_2, person_3]
+      end
+
       it "should not return read only objects when select is used" do
         person = Person.select(:info).first
         person.should_not be_readonly
       end
 
+      it "ensures records starts with string" do
+        Person.starts_with("ID").should == [person_1, person_2]
+      end
+
+      it "sets an offset point to begin read rows from" do
+        Person.offset("ID2").should == [person_2, person_3]
+      end
+
       it "should be possible to iterate over a collection with each" do
         result = []
 
-        Person.limit(5).each do |person|
+        Person.starts_with("ID").limit(2).each do |person|
           result << person.name
         end
 
@@ -260,7 +327,7 @@ describe MassiveRecord::ORM::Finders::Scope do
       end
 
       it "should be possible to collect" do
-        Person.select(:info).collect(&:name).should == ["Person1", "Person2"]
+        Person.select(:info).collect(&:name).should == ["Person1", "Person2", "Person3"]
       end
 
       it "should be possible to checkc if it includes something" do
@@ -272,13 +339,13 @@ describe MassiveRecord::ORM::Finders::Scope do
 
   describe "#apply_finder_options" do
     it "should apply limit correctly" do
-      subject.should_receive(:limit).with(30)
-      subject.send :apply_finder_options, :limit => 30
+      scope = subject.send :apply_finder_options, :limit => 30
+      scope.limit_value.should eq 30
     end
 
     it "should apply select correctly" do
-      subject.should_receive(:select).with(:foo)
-      subject.send :apply_finder_options, :select => :foo
+      scope = subject.send :apply_finder_options, :select => :foo
+      scope.select_values.should include 'foo'
     end
 
     it "should raise unknown scope error if options is unkown" do

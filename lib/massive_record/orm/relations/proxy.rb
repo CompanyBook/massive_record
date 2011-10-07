@@ -46,8 +46,8 @@ module MassiveRecord
         # Returns the proxy_target. Loads it, if it's not there.
         # Returns nil if for some reason proxy_target could not be found.
         #
-        def load_proxy_target
-          self.proxy_target = find_proxy_target_or_find_with_proc if find_proxy_target?
+        def load_proxy_target(options = {})
+          self.proxy_target = find_proxy_target_or_find_with_proc(options) if find_proxy_target?
           proxy_target
         rescue RecordNotFound
           reset
@@ -58,13 +58,13 @@ module MassiveRecord
           load_proxy_target
         end
 
-        def reset
+        def reset(force = true)
           @loaded = @proxy_target = nil
         end
 
         def replace(proxy_target)
           if proxy_target.nil?
-            reset 
+            reset(true)
           else
             raise_if_type_mismatch(proxy_target)
             self.proxy_target = proxy_target
@@ -88,9 +88,6 @@ module MassiveRecord
           @loaded = true
         end
 
-
-
-
         def respond_to?(*args)
           super || (load_proxy_target && proxy_target.respond_to?(*args))
         end
@@ -103,6 +100,14 @@ module MassiveRecord
         end
       
 
+        def blank?
+          load_proxy_target.blank?
+        end
+
+        def is_a?(type)
+          load_proxy_target.is_a?(type)
+        end
+
         # Strange.. Without Rails, to_param goes through method_missing,
         #           With Rails it seems like the proxy answered to to_param, which
         #           kinda was not what I wanted.
@@ -113,8 +118,8 @@ module MassiveRecord
 
         protected
 
-        def find_proxy_target_or_find_with_proc
-          find_with_proc? ? find_proxy_target_with_proc : find_proxy_target
+        def find_proxy_target_or_find_with_proc(options = {})
+          find_with_proc? ? find_proxy_target_with_proc(options) : find_proxy_target(options)
         end
 
         #
@@ -123,7 +128,7 @@ module MassiveRecord
         # data contains a find_with proc; in that case find_proxy_target_with_proc
         # is used instead
         #
-        def find_proxy_target
+        def find_proxy_target(options = {})
         end
         
         #
@@ -132,8 +137,8 @@ module MassiveRecord
         # references_many proxy ensures that the result of proc
         # is put inside of an array.
         #
-        def find_proxy_target_with_proc(options = {})
-          metadata.find_with.call(proxy_owner, options)
+        def find_proxy_target_with_proc(options = {}, &block)
+          metadata.find_with.call(proxy_owner, options, &block)
         end
 
         #

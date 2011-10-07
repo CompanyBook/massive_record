@@ -1,5 +1,6 @@
 class TestClass < MassiveRecord::ORM::Table
   
+  embeds_many :addresses, :inverse_of => :addressable
   references_one :attachable, :polymorphic => true, :store_in => :test_family
 
   column_family :test_family do

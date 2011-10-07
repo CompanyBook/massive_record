@@ -3,7 +3,7 @@ require 'massive_record/orm/schema/common_interface'
 module MassiveRecord
   module ORM
     module Schema
-      module ColumnInterface
+      module EmbeddedInterface
         extend ActiveSupport::Concern
 
         included do
@@ -17,7 +17,7 @@ module MassiveRecord
           #
           # DSL method exposed into class. Makes it possible to do:
           #
-          # class Person < MassiveRecord::ORM::Column
+          # class Person < MassiveRecord::ORM::Embedded
           #  field :name
           #  field :age, :integer, :default => 0
           #  field :points, :integer, :column => :number_of_points
@@ -52,6 +52,32 @@ module MassiveRecord
           end
 
 
+          #
+          # Returns attributes in embedded object from raw data. Raw
+          # data's keys might different from a field name, if :column
+          # option has been used.
+          #
+          def transpose_raw_data_to_record_attributes_and_raw_data(id, raw_data)
+            attributes = {:id => id}
+            attributes['updated_at'] = raw_data.created_at
+
+            raw_attributes =  if raw_data.value.is_a? String
+                                Base.coder.load(raw_data.value)
+                              else
+                                raw_data.value
+                              end
+
+            raw_data = Hash[raw_attributes.collect do |attr, value|
+              [attr, RawData.new(value: value, created_at: raw_data.created_at)]
+            end]
+
+            attributes_schema.each do |attr_name, orm_field|
+              value = raw_attributes.has_key?(orm_field.column) ? raw_attributes[orm_field.column] : nil
+              attributes[attr_name] = value.nil? ? nil : orm_field.decode(raw_attributes[orm_field.column])
+            end
+
+            [attributes, raw_data]
+          end
 
 
           private
@@ -77,10 +103,13 @@ module MassiveRecord
           send(method, new_field.default) if respond_to? method
         end
         
+
         #
-        # TODO : Need to be cleaned up after we implement the has_many method
+        # Returns attributes as a hash which has correct keys
+        # based on it's field definition. For instance, you can
+        # have a class with a field :attr_name, :column => :stored_as_this
         #
-        def attributes_to_row_values_hash(only_attr_names = [])
+        def attributes_db_raw_data_hash(only_attr_names = [])
           values = Hash.new
 
           attributes_schema.each do |attr_name, orm_field|
@@ -89,6 +118,11 @@ module MassiveRecord
           end
 
           values
+        end
+
+        def attributes_to_row_values_hash(only_attr_names = [])
+          ActiveSupport::Deprecation.warn("attributes_to_row_values_hash is deprecated. Please use attributes_db_raw_data_hash")
+          attributes_db_raw_data_hash(only_attr_names)
         end
       end
     end

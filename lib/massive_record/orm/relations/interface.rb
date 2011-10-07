@@ -92,6 +92,74 @@ module MassiveRecord
             create_references_many_accessors(metadata)
           end
 
+
+
+          #
+          # Used to defined a relationship to other models where the other models are embedded inside of owner record.
+          #
+          # class Person < MassiveRecord::ORM::Table
+          #   embeds_many :addresses
+          # end
+          #
+          #
+          # The embeds many association gets one column family per association. embeds_many :addresses
+          # will by default be stored in the addresses column family. You can however do this:
+          # embeds_many :addresses, :store_in => :base to manipulate the column family it is stored within.
+          #
+          # Embedded records gets a composite key consisting of base_class and the record's id. This is how
+          # it is possible to mix embedded collection in to one column family / existing family with "normal" attributes.
+          # Please mind however, doing such a mixing might get you into trouble if you have attribute names which looks
+          # like an embedded address key. Companybook wanted this option, as they said haveing multiple column family might
+          # slow down Hbase.
+          #
+          # Attributes will be serialized by the Base.coder, by default will be JSON, but it really can be anything.
+          # The way records are stored inside of a column family will be:
+          #
+          # | key           | attributes                                        |
+          # ---------------------------------------------------------------------
+          # | "address|id1" | { :street => "Askerveien", :number => "12", etc... }
+          #
+          #
+          #
+          # Options, all optional:
+          #
+          #   <tt>class_name</tt>::            Class name is calculated from name, but can be overridden here.
+          #   <tt>store_in</tt>::              Send in the column family to store foreign key in. If none given,
+          #
+          def embeds_many(name, *args)
+            metadata = set_up_relation('embeds_many', name, *args)
+            metadata.owner_class = self
+            add_column_family(metadata.store_in)
+            create_embeds_many_accessors(metadata)
+          end
+
+
+
+          #
+          # Embedded in is being used together with embeds_many on the other side
+          # of such a relation.
+          #
+          # class Address < MassiveRecord::ORM::Embedded
+          #   embedded_in :person
+          # end
+          #
+          # You can also pass in :polymorphic => true as an option. If you do so here is an example:
+          #
+          #   class Person < MassiveRecord::ORM::Table
+          #     embeds_many :addresses, :inverse_of => :addressable
+          #   end
+          #   
+          #   class Address < MassiveRecord::ORM::Embedded
+          #     embedded_in :addressable, :inverse_of => :addresses, :polymorphic => true
+          #   end
+          #
+          def embedded_in(name, *args)
+            metadata = set_up_relation('embedded_in', name, *args)
+            metadata.owner_class = self
+            create_embedded_in_accessors(metadata)
+          end
+
+
           private
 
           def set_up_relation(type, name, *args)
@@ -142,6 +210,29 @@ module MassiveRecord
               add_field_to_column_family(metadata.store_in, metadata.foreign_key, :type => :array, :allow_nil => false)
             end
           end
+
+
+          def create_embeds_many_accessors(metadata)
+            validates_associated metadata.name
+
+            redefine_method(metadata.name) do
+              relation_proxy(metadata.name)
+            end
+
+            redefine_method(metadata.name+'=') do |records|
+              relation_proxy(metadata.name).replace(records)
+            end
+          end
+
+          def create_embedded_in_accessors(metadata)
+            redefine_method(metadata.name) do
+              relation_proxy(metadata.name)
+            end
+
+            redefine_method(metadata.name+'=') do |record|
+              relation_proxy(metadata.name).replace(record)
+            end
+          end
         end
 
 
@@ -151,8 +242,51 @@ module MassiveRecord
           super
         end
 
+        def attributes=(attributes)
+          attributes_for_relations = {}
+
+          if relations && attributes.is_a?(Hash)
+            attributes.stringify_keys!
+            relation_names = relations.collect(&:name)
+
+            attributes.delete_if do |attr_name, value|
+              attributes_for_relations[attr_name] = value if relation_names.include? attr_name
+            end
+          end
+
+          super(attributes)
+          super(attributes_for_relations)
+        end
+
+
+        def relation_proxies
+          (relations || []).map { |metadata| relation_proxy(metadata.name) }
+        end
+
+        def relation_proxies_for_embedded
+          (relations || []).select(&:embedded?).map { |metadata| relation_proxy(metadata.name) }
+        end
+
 
         private
+
+        def create
+          embedded_relations = relation_proxies_for_embedded.select(&:changed?)
+          embedded_relations.each(&:parent_will_be_saved!)
+
+          super
+
+          embedded_relations.each(&:parent_has_been_saved!)
+        end
+
+        def update(attribute_names_to_update = attributes_with_embedded)
+          embedded_relations = relation_proxies_for_embedded.select(&:changed?)
+          embedded_relations.each(&:parent_will_be_saved!)
+
+          super
+
+          embedded_relations.each(&:parent_has_been_saved!)
+        end
 
         def relation_proxy(name)
           name = name.to_s

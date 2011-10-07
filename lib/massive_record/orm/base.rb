@@ -18,15 +18,19 @@ require 'massive_record/orm/finders/rescue_missing_table_on_find'
 require 'massive_record/orm/attribute_methods'
 require 'massive_record/orm/attribute_methods/time_zone_conversion'
 require 'massive_record/orm/attribute_methods/write'
+require 'massive_record/orm/attribute_methods/cast_numbers_on_write'
 require 'massive_record/orm/attribute_methods/read'
 require 'massive_record/orm/attribute_methods/dirty'
 require 'massive_record/orm/single_table_inheritance'
 require 'massive_record/orm/validations'
+require 'massive_record/orm/validations/associated'
 require 'massive_record/orm/callbacks'
 require 'massive_record/orm/timestamps'
 require 'massive_record/orm/persistence'
 require 'massive_record/orm/default_id'
 require 'massive_record/orm/query_instrumentation'
+require 'massive_record/orm/observer'
+require 'massive_record/orm/identity_map'
 
 
 module MassiveRecord
@@ -75,8 +79,21 @@ module MassiveRecord
       class_attribute :check_record_uniqueness_on_create, :instance_writer => false
       self.check_record_uniqueness_on_create = false
 
-      class_attribute :auto_increment_id, :instance_writer => false
-      self.auto_increment_id = true
+
+      #
+      # Default id and id facyory settings
+      # Should we set automatically the id, and which factory should we ask?
+      #
+      # The default id factory is set when massive record is fully loaded, as
+      # it uses MassiveRecord itself to communicate with the database.
+      # Take a look inside of orm/id_factory.rb; we are utilizing the on_load hook.
+      #
+      class_attribute :id_factory, :instance_writer => false
+      class_attribute :set_id_from_factory_before_create, :instance_writer => false
+      self.set_id_from_factory_before_create = true
+
+
+
      
       class << self
         def table_name
@@ -146,11 +163,13 @@ module MassiveRecord
         @new_record = true
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
+        @raw_data = Hash.new { |h,k| h[k] = {} }
+
+        clear_dirty_states!
 
         self.attributes_raw = attributes_from_field_definition.merge('id' => id)
         self.attributes = attributes
 
-        clear_dirty_states!
 
         _run_initialize_callbacks
       end
@@ -176,13 +195,19 @@ module MassiveRecord
         @destroyed = @readonly = false
         @relation_proxy_cache = {}
 
-        self.attributes_raw = coder['attributes']
+        reinit_with(coder)
         fill_attributes_with_default_values_where_nil_is_not_allowed
 
         _run_find_callbacks
         _run_initialize_callbacks
 
         self
+      end
+
+      def reinit_with(coder) # :nodoc:
+        @raw_data = Hash.new { |h,k| h[k] = {} }
+        @raw_data.update(coder['raw_data']) if coder.has_key? 'raw_data'
+        self.attributes_raw = coder['attributes']
       end
 
 
@@ -197,6 +222,7 @@ module MassiveRecord
 
       def freeze
         @attributes.freeze
+        self
       end
 
       def frozen?
@@ -242,6 +268,31 @@ module MassiveRecord
         object.init_with('attributes' => attributes.select{|k| !['id', 'created_at', 'updated_at'].include?(k)})
         object
       end
+
+
+      #
+      # The raw data is raw values returned by the adapter.
+      # It is a nested hash like:
+      #
+      # {
+      #   'family' => {
+      #     'attr1' => 'value'
+      #     'attr2' => 'value'
+      #   },
+      #
+      #   'addresses' => {
+      #     'address-1' => {'serialized' => 'attributes', 'for' => 'address-2'}
+      #   }
+      #   ...
+      # }
+      #
+      def raw_data
+        @raw_data.dup
+      end
+
+      def update_raw_data_for_column_family(column_family, new_values) # :nodoc:
+        @raw_data[column_family] = new_values
+      end
       
 
       private
@@ -271,7 +322,7 @@ module MassiveRecord
 
 
       def next_id
-        IdFactory.next_for(self.class).to_s
+        id_factory.next_for(self.class).to_s
       end
     end
 
@@ -279,19 +330,21 @@ module MassiveRecord
     Base.class_eval do
       include Config
       include Persistence
-      include Relations::Interface
       include Finders
+      include IdentityMap
       extend  RescueMissingTableOnFind
       include AttributeMethods
+      include Relations::Interface
       include AttributeMethods::Write, AttributeMethods::Read
       include AttributeMethods::TimeZoneConversion
       include AttributeMethods::Dirty
+      include AttributeMethods::CastNumbersOnWrite
       include Validations
-      include Callbacks
+      include Callbacks, ActiveModel::Observing
       include Timestamps
       include SingleTableInheritance
       include DefaultId
-      include QueryInstrumentation
+      include QueryInstrumentation::Table
 
 
       alias [] read_attribute
@@ -302,6 +355,7 @@ end
 
 require 'massive_record/orm/table'
 require 'massive_record/orm/column'
+require 'massive_record/orm/embedded'
 require 'massive_record/orm/id_factory'
 require 'massive_record/orm/log_subscriber'
 

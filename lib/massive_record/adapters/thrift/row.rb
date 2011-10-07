@@ -41,6 +41,36 @@ module MassiveRecord
           @columns.inject({"id" => id}) {|h, (column_name, cell)| h[column_name] = cell.value; h}
         end
 
+        # Returns values as a nested hash.
+        #
+        # {
+        #   'family' => {
+        #     'attr1' => 'value'
+        #     'attr2' => 'value'
+        #   },
+        #   ...
+        # }
+        #
+        # I think maybe that values should return this instead, as it is what the
+        # values= expects to receive.
+        def values_hash
+          Hash.new { |hash, key| hash[key] = {} }.tap do |hash|
+            @columns.each do |key, column|
+              column_family, name = key.split(':')
+              hash[column_family][name] = column.value
+            end
+          end
+        end
+
+        def values_raw_data_hash
+          Hash.new { |hash, key| hash[key] = {} }.tap do |hash|
+            @columns.each do |key, column|
+              column_family, name = key.split(':')
+              hash[column_family][name] = MassiveRecord::ORM::RawData.new_with_data_from column
+            end
+          end
+        end
+
         def values=(data)
           @values = {}
           update_columns(data)
@@ -86,6 +116,10 @@ module MassiveRecord
         def atomic_increment(column_name, by = 1)
           @table.client.atomicIncrement(@table.name, id.to_s, column_name, by) 
         end
+
+        def atomic_decrement(column_name, by = 1)
+          atomic_increment(column_name, -by)
+        end
         
         def read_atomic_integer_value(column_name)
           atomic_increment(column_name, 0)
@@ -99,10 +133,7 @@ module MassiveRecord
           row.column_families = column_families
 
           result.columns.each do |name, value|
-            row.columns[name] =  MassiveRecord::Wrapper::Cell.new({
-              :value      => value.value,
-              :created_at => Time.at(value.timestamp / 1000, (value.timestamp % 1000) * 1000)
-            })
+            row.columns[name] =  MassiveRecord::Wrapper::Cell.populate_from_tcell(value)
           end
       
           row

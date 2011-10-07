@@ -221,4 +221,192 @@ describe MassiveRecord::ORM::Relations::Interface do
       end
     end
   end
+
+
+  describe "embeds many" do
+    context "inside of it's own column family" do
+      describe "relation's meta data" do
+        subject { Person.relations.detect { |relation| relation.name == "addresses" } }
+
+        it "stores the relation on the class" do
+          Person.relations.detect { |relation| relation.name == "addresses" }.should_not be_nil
+        end
+
+        it "has correct type on relation" do
+          subject.relation_type.should == "embeds_many"
+        end
+
+        it "raises error if relation defined twice" do
+          expect { Person.embeds_many :addresses }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
+        end
+      end
+
+      describe "instance" do
+        subject { Person.new :name => "Thorbjorn", :email => "thhermansen@skalar.no", :age => 30 }
+        let(:address) { Address.new :street => "Asker" }
+        let(:proxy) { subject.send(:relation_proxy, "addresses") }
+
+        it { should respond_to :addresses }
+
+        it "should be empty when no addresses has been added" do
+          subject.addresses.should be_empty
+        end
+
+        it "has a known column family for the embedded records" do
+          subject.column_families.collect(&:name).should include "addresses"
+        end
+
+        it "is assignable" do
+          subject.addresses = [address]
+          subject.addresses.should == [address]
+        end
+
+        it "is assignable in initializer" do
+          person = Person.new :addresses => [address]
+          person.addresses.should == [address]
+        end
+
+        it "parent is invalid when one of embedded records is" do
+          subject.addresses << address
+          subject.save!
+          address.street = nil
+          subject.should_not be_valid
+        end
+      end
+    end
+
+    context "inside of a shared column family" do
+      describe "relation's meta data" do
+        subject { Person.relations.detect { |relation| relation.name == "cars" } }
+
+        it "stores the relation on the class" do
+          Person.relations.detect { |relation| relation.name == "cars" }.should_not be_nil
+        end
+
+        it "has correct type on relation" do
+          subject.relation_type.should == "embeds_many"
+        end
+
+        it "raises error if relation defined twice" do
+          expect { Person.embeds_many :cars }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
+        end
+      end
+
+      describe "instance" do
+        subject { Person.new :name => "Thorbjorn", :email => "thhermansen@skalar.no", :age => 30 }
+        let(:car) { Car.new :color => "blue" }
+        let(:proxy) { subject.send(:relation_proxy, "cars") }
+
+        it { should respond_to :cars }
+
+        it "should be empty when no cars has been added" do
+          subject.cars.should be_empty
+        end
+
+        it "has a known column family for the embedded records" do
+          subject.column_families.collect(&:name).should include "info"
+        end
+
+        it "is assignable" do
+          subject.cars = [car]
+          subject.cars.should == [car]
+        end
+
+        it "is assignable in initializer" do
+          person = Person.new :cars => [car]
+          person.cars.should == [car]
+        end
+
+        it "is persistable" do
+          subject.cars << car
+          subject.save!
+          from_database = Person.find subject.id
+
+          from_database.name.should eq subject.name
+          from_database.email.should eq subject.email
+          from_database.age.should eq subject.age
+
+          from_database.cars.should eq subject.cars
+        end
+      end
+    end
+  end
+
+
+  describe "embedded in" do
+    describe "non polymorphism" do
+      describe "metadata" do
+        subject { Address.relations.detect { |relation| relation.name == "person" } }
+
+        it "stores the relation on the class" do
+          subject.should_not be_nil
+        end
+
+        it "has correct type on relation" do
+          subject.relation_type.should == "embedded_in"
+        end
+
+        it "raises error if relation defined twice" do
+          expect { Address.embedded_in :person }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
+        end
+      end
+
+      describe "instance" do
+        subject { Address.new "id1", :street => "Asker" }
+        let(:person) { Person.new "person-id-1", :name => "Test", :age => 29 }
+        let(:proxy) { subject.send(:relation_proxy, "person") }
+
+        it "sets and gets the person" do
+          subject.person = person
+          subject.person.should eq person
+        end
+
+        it "adds itself to the collection within the target's class" do
+          person.stub(:valid?).and_return true
+          subject.person = person
+          person.addresses.should include subject
+        end
+
+        it "assigns embedded in attributes with initialize" do
+          address = Address.new "id1", :person => person, :street => "Asker"
+          address.person.should eq person
+          person.addresses.should include address
+        end
+      end
+    end
+
+    describe "polymorphism" do
+      describe "metadata" do
+        subject { Address.relations.detect { |relation| relation.name == "addressable" } }
+
+        it "stores the relation on the class" do
+          subject.should_not be_nil
+        end
+
+        it "has correct type on relation" do
+          subject.relation_type.should == "embedded_in_polymorphic"
+        end
+
+        it "raises error if relation defined twice" do
+          expect { Address.embedded_in :addressable }.to raise_error MassiveRecord::ORM::RelationAlreadyDefined
+        end
+      end
+
+      describe "instance" do
+        subject { Address.new "id1", :street => "Asker" }
+        let(:test_class) { TestClass.new }
+        let(:proxy) { subject.send(:relation_proxy, "addressable") }
+
+        it "sets and gets the test class" do
+          subject.addressable = test_class
+          subject.addressable.should eq test_class
+        end
+
+        it "adds itself to the collection within the target's class" do
+          subject.addressable = test_class
+          test_class.addresses.should include subject
+        end
+      end
+    end
+  end
 end

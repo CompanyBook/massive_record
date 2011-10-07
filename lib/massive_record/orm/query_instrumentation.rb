@@ -1,62 +1,39 @@
 module MassiveRecord
   module ORM
     module QueryInstrumentation
-      extend ActiveSupport::Concern
+      module Table
+        extend ActiveSupport::Concern
 
-      module ClassMethods
-        #
-        # do_find is the method which *all* find operations goes
-        # through. For instrumentation on the query only see
-        # hbase_query_all_first /hbase_query_find
-        #
-        def do_find(*args)
-          ActiveSupport::Notifications.instrument("load.massive_record", {
-            :name => [model_name, 'load'].join(' '),
-            :description => "",
-            :options => args
-          }) do
-            super
-          end
-        end
+        module ClassMethods
+          %w(find_one find_some find_all).each do |method_to_instrument|
+            module_eval <<-RUBY, __FILE__, __LINE__
 
+              def #{method_to_instrument}(*args)
+                ActiveSupport::Notifications.instrument("load.massive_record", {
+                  :name => [model_name, 'load'].join(' '),
+                  :description => "#{method_to_instrument}",
+                  :options => args
+                }) do
+                  super
+                end
+              end
 
-
-
-        private
-
-        def hbase_query_all_first(type, *args)
-          ActiveSupport::Notifications.instrument("find_query.massive_record", {
-            :name => [model_name, 'query'].join(' '),
-            :description => type,
-            :options => args
-          }) do
-            super
-          end
-        end
-
-        def hbase_query_find(what_to_find, options)
-          ActiveSupport::Notifications.instrument("find_query.massive_record", {
-            :name => [model_name, 'query'].join(' '),
-            :description => "find id(s): #{what_to_find}",
-            :options => options
-          }) do
-            super
+            RUBY
           end
         end
       end
 
+      module Operations
+        def store_record_to_database(action, attribute_names_to_update = [])
+          description = action + " id: #{record.id},"
+          description += " attributes: #{attribute_names_to_update.join(', ')}" if attribute_names_to_update.any?
 
-      private
-
-      def store_record_to_database(action, attribute_names_to_update = [])
-        description = action + " id: #{id},"
-        description += " attributes: #{attribute_names_to_update.join(', ')}" if attribute_names_to_update.any?
-
-        ActiveSupport::Notifications.instrument("query.massive_record", {
-          :name => [self.class.model_name, 'save'].join(' '),
-          :description => description
-        }) do
-          super
+          ActiveSupport::Notifications.instrument("query.massive_record", {
+            :name => [klass.model_name, 'save'].join(' '),
+            :description => description
+          }) do
+            super
+          end
         end
       end
     end

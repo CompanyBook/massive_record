@@ -51,5 +51,21 @@ describe MassiveRecord::Wrapper::Row do
       subject.atomic_increment(atomic_inc_attr_name)
       subject.read_atomic_integer_value(atomic_inc_attr_name).should eq 1
     end
+
+    it "returns -1 after one decrementation of 1" do
+      subject.atomic_decrement(atomic_inc_attr_name).should eq -1
+      subject.read_atomic_integer_value(atomic_inc_attr_name).should eq -1
+    end
+  end
+
+
+  describe "#atomic_decrement" do
+    it "decrements to -1 when called on a new value" do
+      subject.atomic_decrement(atomic_inc_attr_name).should eq -1
+    end
+
+    it "decrements by 2 when asked to do so" do
+      subject.atomic_decrement(atomic_inc_attr_name, 2).should eq -2
+    end
   end
 end

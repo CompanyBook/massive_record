@@ -5,6 +5,27 @@ module MassiveRecord
         
         attr_accessor :connection, :name, :column_families
     
+        #
+        # TODO
+        # Helper method to inform about changed options. Remove this in next version..
+        # Also note that this method is used other places to wrap same functionality.
+        #
+        def self.warn_and_change_deprecated_finder_options(options)
+          deprecations = {
+            :start => :starts_with
+          }
+
+          deprecations.each do |deprecated, current|
+            if options.has_key? deprecated
+              # TODO remove this for next version
+              ActiveSupport::Deprecation.warn("finder option '#{deprecated}' is deprecated. Please use: '#{current}'")
+              options[current] = options.delete deprecated
+            end
+          end
+          
+          options
+        end
+
         def initialize(connection, table_name)
           @connection = connection
           @name = table_name.to_s
@@ -87,9 +108,14 @@ module MassiveRecord
         end
       
         def format_options_for_scanner(opts = {})
+          opts = self.class.warn_and_change_deprecated_finder_options(opts)
+
+          start = opts[:starts_with] && opts[:starts_with].dup.force_encoding(Encoding::BINARY)
+          offset = opts[:offset] && opts[:offset].dup.force_encoding(Encoding::BINARY)
+
           {
-            :start_key  => opts[:start],
-            :offset_key => opts[:offset],
+            :start_key  => start,
+            :offset_key => offset,
             :created_at => opts[:created_at],
             :columns    => opts[:select], # list of column families to fetch from hbase
             :limit      => opts[:limit] || opts[:batch_size]
@@ -115,8 +141,16 @@ module MassiveRecord
         # table.get("my_id", :info, :name) # => "Bob"
         #
         def get(id, column_family_name, column_name)
-          if value = connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}").first.try(:value)
-            MassiveRecord::Wrapper::Cell.new(:value => value).value # might seems a bit strange.. Just to "enforice" that the value is a supported type
+          get_cell(id, column_family_name, column_name).try :value
+        end
+
+
+        #
+        # Fast way of fetching one cell
+        #
+        def get_cell(id, column_family_name, column_name)
+          if cell = connection.get(name, id.dup.force_encoding(Encoding::BINARY), "#{column_family_name.to_s}:#{column_name.to_s}").first
+            MassiveRecord::Wrapper::Cell.populate_from_tcell(cell)
           end
         end
         
@@ -126,17 +160,20 @@ module MassiveRecord
         # Returns nil if id is not found
         #
         def find(*args)
-          what_to_find = args.first
           options = args.extract_options!.symbolize_keys
+          what_to_find = args.first
 
-          if what_to_find.is_a?(Array)
-            what_to_find.collect { |id| find(id, options) }
-          else
-            if column_families_to_find = options[:select]
-              column_families_to_find = column_families_to_find.collect { |c| c.to_s }
+          if column_families_to_find = options[:select]
+            column_families_to_find = column_families_to_find.collect { |c| c.to_s }
+          end
+
+          if what_to_find.is_a? Array
+            what_to_find.collect! { |id| id.dup.force_encoding(Encoding::BINARY) }
+            connection.getRowsWithColumns(name, what_to_find, column_families_to_find).collect do |t_row_result|
+              Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
-
-            if t_row_result = connection.getRowWithColumns(name, what_to_find, column_families_to_find).first
+          else
+            if t_row_result = connection.getRowWithColumns(name, what_to_find.dup.force_encoding(Encoding::BINARY), column_families_to_find).first
               Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
           end

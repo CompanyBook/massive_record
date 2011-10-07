@@ -37,14 +37,22 @@ module MassiveRecord
       def attributes=(new_attributes)
         return unless new_attributes.is_a?(Hash)
 
+        multiparameter_attributes = []
+
         sanitize_for_mass_assignment(new_attributes).each do |attr, value|
-          writer_method = "#{attr}="
-          if respond_to? writer_method
-            send(writer_method, value)
+          if multiparameter? attr
+            multiparameter_attributes << [attr, value]
           else
-            raise UnknownAttributeError.new("Unkown attribute: #{attr}")
+            writer_method = "#{attr}="
+            if respond_to? writer_method
+              send(writer_method, value)
+            else
+              raise UnknownAttributeError.new("Unkown attribute: #{attr}")
+            end
           end
         end
+
+        assign_multiparameter_attributes(multiparameter_attributes)
       end
 
       
@@ -84,9 +92,73 @@ module MassiveRecord
       end
 
       def fill_attributes_with_default_values_where_nil_is_not_allowed
-        attributes_schema.reject { |attr_name, field| field.allow_nil? || self[attr_name].present? }.each do |attr_name, field|
+        attributes_to_fill = attributes_schema.reject do |attr_name, field|
+          field.allow_nil? || self[attr_name].present? || (field.type == :boolean && self[attr_name] == false)
+        end
+
+        attributes_to_fill.each do |attr_name, field|
           self[attr_name] = field.default
         end
+      end
+
+
+
+
+
+
+      def multiparameter?(attr)
+        attr.to_s.include?('(')
+      end
+
+      def assign_multiparameter_attributes(attribute_pairs)
+        convert_multiparameter_pairs_to_hash_with_initializer_arguments(attribute_pairs).each do |attr_name, initialize_values|
+          if field = attributes_schema[attr_name]
+            value = begin
+                      if initialize_values.any?
+                        case field.type
+                        when :date
+                          initialize_values = initialize_values[0, 3]
+                          initialize_values.collect! { |v| v.nil? ? 1 : v }
+                          Date.new(*initialize_values)
+                        when :time
+                          initialize_values = initialize_values[0, 6]
+                          initialize_values.collect! { |v| v.nil? ? 0 : v }
+                          Time.new(*initialize_values)
+                        end
+                      end
+                    rescue ArgumentError
+                      nil
+                    end
+
+            self[attr_name] = value
+          end
+        end
+      end
+
+      def convert_multiparameter_pairs_to_hash_with_initializer_arguments(attribute_pairs)
+        out = Hash.new { |h, k| h[k] = [] }.tap do |hash|
+          attribute_pairs.each do |pair|
+            name, value = pair
+            attr_name = name.split('(').first
+            hash[attr_name] << [multiparameter_position(name), type_cast_multiparameter_value(name, value)]
+          end
+        end
+
+        out.each do |attr_name, positions_and_values|
+          out[attr_name] = positions_and_values.sort_by(&:first).collect(&:last)
+        end
+
+        out
+      end
+
+      def type_cast_multiparameter_value(name, value)
+        unless value.empty?
+          name =~ /\([0-9]*([if])\)/ ? value.send("to_" + $1) : value
+        end
+      end
+
+      def multiparameter_position(name)
+        name.scan(/\(([0-9]*).*\)/).first.first
       end
     end
   end

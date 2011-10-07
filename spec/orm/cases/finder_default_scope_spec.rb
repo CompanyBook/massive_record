@@ -56,5 +56,9 @@ describe "Default scope in" do
       Person.default_scoping.should be_instance_of MassiveRecord::ORM::Finders::Scope
       TestClass.default_scoping.should be_nil
     end
+
+    it "returns a new scope object when default_scope are set" do
+      Person.finder_scope.should_not eq Person.finder_scope
+    end
   end
 end

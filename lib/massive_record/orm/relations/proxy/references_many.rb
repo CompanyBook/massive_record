@@ -2,41 +2,21 @@ module MassiveRecord
   module ORM
     module Relations
       class Proxy
-        class ReferencesMany < Proxy
-          #
-          # Loading proxy_targets will merge it with records found currently in proxy,
-          # to make sure we don't remove any pushed proxy_targets only cause we load the
-          # proxy_targets.
-          #
-          # TODO  - Implement methods like:
-          #         * find_in_batches
-          #         * find_each
-          #         * etc :-)
-          #
-          #       - A counter cache is also nice.
-          #
-          def load_proxy_target
-            proxy_target_before_load = proxy_target
-            proxy_target_after_load = super
+        class ReferencesMany < ProxyCollection
 
-            self.proxy_target = (proxy_target_before_load + proxy_target_after_load).uniq
+          #
+          # Raised when we are in a references many relationship where the
+          # target's foreign keys are persisted in the owner and you try to
+          # do a person.cars.all(:limit => 1, :offset => "something") and
+          # some of these options are unsupported. The reason for these being
+          # unsupported is that we have to implement offset and limitiation
+          # in pure Ruby working on that car_ids array in the person. Its
+          # nothing close to impossible; it just has not been done yet.
+          #
+          class UnsupportedFinderOption < MassiveRecordError
+            OPTIONS = %w(limit offset starts_with)
           end
 
-          def reset
-            super
-            @proxy_target = []
-          end
-
-          def replace(*records)
-            records.flatten!
-
-            if records.length == 1 and records.first.nil?
-              reset
-            else
-              delete_all
-              concat(records)
-            end
-          end
 
 
           #
@@ -63,74 +43,49 @@ module MassiveRecord
           alias_method :push, :<<
           alias_method :concat, :<<
 
-          #
-          # Destroy record(s) from the collection
-          # Each record will be asked to destroy itself as well
-          #
-          def destroy(*records)
-            delete_or_destroy *records, :destroy
-          end
-
-          #
-          # Deletes record(s) from the collection
-          #
-          def delete(*records)
-            delete_or_destroy *records, :delete
-          end
-
-          #
-          # Destroys all records
-          #
-          def destroy_all
-            destroy(load_proxy_target)
-            reset
-            loaded!
-          end
-
-          #
-          # Deletes all records from the relationship.
-          # Does not destroy the records
-          #
-          def delete_all
-            delete(load_proxy_target)
-            reset
-            loaded!
-          end
 
           #
           # Checks if record is included in collection
           #
-          # TODO  This needs a bit of work, depending on if proxy's proxy_target
-          #       has been loaded or not. For now, we are just checking
-          #       what we currently have in @proxy_target
-          #
-          def include?(record)
-            load_proxy_target.include? record
+          def include?(record_or_id)
+            id = record_or_id.respond_to?(:id) ? record_or_id.id : record_or_id
+
+            if loaded? || find_with_proc?
+              !!find(id)
+            else
+              foreign_key_in_proxy_owner_exists? id
+            end
+          rescue RecordNotFound
+            false
           end
 
           #
           # Returns the length of targes
           #
-          # TODO  This can be smarter as well. For instance; if we have not
-          #       loaded targets, and we have foreign keys in the owner we
-          #       can simply do a owner's foreign keys and ask for it's length.
-          #
           def length
-            load_proxy_target.length
+            if loaded?
+              proxy_target.length
+            elsif find_with_proc?
+              load_proxy_target.length
+            else
+              foreign_keys_in_proxy_owner.length
+            end
           end
           alias_method :count, :length
           alias_method :size, :length
 
-          def empty?
-            length == 0
+          def any?
+            if !loaded? && find_with_proc?
+              !!first
+            else
+              !empty?
+            end
           end
+          alias_method :present?, :any?
 
-          def first
-            limit(1).first
-          end
 
           def find(id)
-            if loaded?
+            if loaded? || proxy_owner.new_record?
               record = proxy_target.find { |record| record.id == id }
             elsif find_with_proc?
               if id.starts_with? proxy_owner.send(metadata.records_starts_from)
@@ -145,6 +100,53 @@ module MassiveRecord
             record
           end
 
+          def all(options = {})
+            options = MassiveRecord::Adapters::Thrift::Table.warn_and_change_deprecated_finder_options(options)
+
+            load_proxy_target(options)
+          end
+
+          #
+          # Find records in batches, yields batch into your block
+          #
+          # Options:
+          #   <tt>:batch_size</tt>    The number of records you want per batch. Defaults to 1000
+          #   <tt>:starts_with</tt>         The ids starts with this
+          #
+          def find_in_batches(options = {}, &block)
+            options = MassiveRecord::Adapters::Thrift::Table.warn_and_change_deprecated_finder_options(options)
+
+            options[:batch_size] ||= 1000
+
+            if loaded?
+              collection =  if options[:starts_with]
+                              proxy_target.select { |r| r.id.starts_with? options[:starts_with] }
+                            else
+                              proxy_target
+                            end
+              collection.in_groups_of(options[:batch_size], false, &block)
+            elsif find_with_proc?
+              find_proxy_target_with_proc(options.merge(:finder_method => :find_in_batches), &block)
+            else
+              all_ids = proxy_owner.send(metadata.foreign_key)
+              all_ids = all_ids.select { |id| id.starts_with? options[:starts_with] } if options[:starts_with]
+              all_ids.in_groups_of(options[:batch_size]).each do |ids_in_batch|
+                yield Array(find_proxy_target(:ids => ids_in_batch))
+              end
+            end
+          end
+
+          #
+          # Fetches records in batches of 1000 (by default), iterates over each batch
+          # and yields one and one record in to given block. See find_in_batches for
+          # options.
+          #
+          def find_each(options = {})
+            find_in_batches(options) do |batch|
+              batch.each { |record| yield record }
+            end
+          end
+
           #
           # Returns a limited result set of target records.
           #
@@ -153,25 +155,31 @@ module MassiveRecord
           #       than foreign keys length.
           #
           def limit(limit)
-            if loaded?
+            if loaded? || proxy_owner.new_record?
               proxy_target.slice(0, limit)
             elsif find_with_proc?
               find_proxy_target_with_proc(:limit => limit)
             else
               ids = proxy_owner.send(metadata.foreign_key).slice(0, limit)
               ids = ids.first if ids.length == 1
-              [find_proxy_target(ids)].flatten
+              Array(find_proxy_target(:ids => ids))
             end
           end
 
 
+          def is_a?(klass)
+            klass == Array
+          end
 
           private
 
 
           def delete_or_destroy(*records, method)
+            removed = []
+
             records.flatten.each do |record|
               if include? record
+                removed << record
                 remove_foreign_key_in_proxy_owner(record.id)
                 proxy_target.delete(record)
                 record.destroy if method.to_sym == :destroy
@@ -179,17 +187,29 @@ module MassiveRecord
             end
 
             proxy_owner.save if proxy_owner.persisted?
+            removed
           end
 
 
 
-          def find_proxy_target(ids = nil)
-            ids = proxy_owner.send(metadata.foreign_key) if ids.nil?
+          def find_proxy_target(options = {})
+            ids = options.delete(:ids) || proxy_owner.send(metadata.foreign_key)
+            unsupported_finder_options = UnsupportedFinderOption::OPTIONS & options.keys.collect(&:to_s)
+
+            if unsupported_finder_options.any?
+              raise UnsupportedFinderOption.new(
+                <<-TXT
+                  Sorry, option(s): #{unsupported_finder_options.join(', ')} are not supported when foreign
+                  keys are persisted in proxy owner #{proxy_owner.class}
+                TXT
+              )
+            end
+
             proxy_target_class.find(ids, :skip_expected_result_check => true)
           end
 
-          def find_proxy_target_with_proc(options = {})
-            [super].compact.flatten
+          def find_proxy_target_with_proc(options = {}, &block)
+            Array(super).compact
           end
 
           def can_find_proxy_target?
@@ -215,7 +235,11 @@ module MassiveRecord
           end
 
           def foreign_key_in_proxy_owner_exists?(id)
-            proxy_owner.send(metadata.foreign_key).include? id
+            foreign_keys_in_proxy_owner.include? id
+          end
+
+          def foreign_keys_in_proxy_owner
+            proxy_owner.send(metadata.foreign_key)
           end
 
           def notify_of_change_in_proxy_owner_foreign_key
