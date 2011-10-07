@@ -56,7 +56,12 @@ describe MassiveRecord::ORM::Persistence::Operations::Embedded::Destroy do
           person.save!
         end
         
-        it "removes record from collection owner" do
+        it "removes record from collection owher" do
+          subject.execute
+          person.addresses.should be_empty
+        end
+
+        it "persists the removal of record from collection owner" do
           subject.execute
           person.reload.addresses.should be_empty
         end

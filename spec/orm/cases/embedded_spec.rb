@@ -176,6 +176,11 @@ describe MassiveRecord::ORM::Embedded do
             subject.should be_destroyed
           end
 
+          it "is removed from embeds_many collection" do
+            subject.destroy
+            person.addresses.should be_empty
+          end
+
           it "is actually removed from collection" do
             subject.destroy
             person.reload.addresses.should be_empty
