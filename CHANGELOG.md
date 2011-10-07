@@ -1,5 +1,13 @@
 # v0.2.2 (git develop)
 
+
+# v0.2.2.rc1 (git master)
+
+- ProxyCollection destroy_all and delete_all returns removed records.
+- Changes are better detected on new records. user = User.new :email => "me@gmail.com"; user.email_changed?
+  returns true.
+- Mass assignment of attributes now support multi parameter so we should be able to support form helpers
+  for date and time.
 - Added support for embeds_many and embedded_in.
 - IdFactory is now configurable per class. Some classes may use IdFactory::AtomicIncrementation,
   others might use IdFactory::Timestamp. By default we are using AtomicIncrementation.
@@ -49,7 +57,7 @@
   (Or, it will find it, but it will be filtered away before result are returned. Even beter if this could have been done in the database..)
 - Atomic decrements where added to the Thrift adapter and the ORM.
 
-# v0.2.1 (git master)
+# v0.2.1
 
 - Models without any default_id will now by default get an id via next_id(). You can turn it off
   via the setting set_id_from_factory_before_create on ORM::Base or on the Model class itself.

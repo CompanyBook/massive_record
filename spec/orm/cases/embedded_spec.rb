@@ -176,6 +176,11 @@ describe MassiveRecord::ORM::Embedded do
             subject.should be_destroyed
           end
 
+          it "is removed from embeds_many collection" do
+            subject.destroy
+            person.addresses.should be_empty
+          end
+
           it "is actually removed from collection" do
             subject.destroy
             person.reload.addresses.should be_empty
@@ -218,25 +223,25 @@ describe MassiveRecord::ORM::Embedded do
         it "gets one on explicit save" do
           subject.person = person
           subject.save
-          subject.database_id.should eq [base_class, subject.id].join('-|-')
+          subject.database_id.should eq [base_class, subject.id].join(MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR)
         end
 
         it "gets one when saved through persisted parent" do
           person.save
           person.addresses << subject
-          subject.database_id.should eq [base_class, subject.id].join('-|-')
+          subject.database_id.should eq [base_class, subject.id].join(MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR)
         end
       end
 
       describe "writer" do
         it "splits base_class and id and assigns id to id" do
-          subject.database_id = "address-|-166"
+          subject.database_id = "address#{MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR}166"
           subject.id.should eq "166"
         end
 
         it "raises an error if database id could not be parsed" do
           expect {
-            subject.database_id = "address-|166"
+            subject.database_id = "address-166"
           }.to raise_error MassiveRecord::ORM::InvalidEmbeddedDatabaseId
         end
       end

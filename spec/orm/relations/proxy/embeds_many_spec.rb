@@ -61,7 +61,7 @@ describe TestEmbedsManyProxy do
 
       it "ignores values which kees seems to belong to other collections" do
         raw_data_with_car = proxy_owner.instance_variable_get(:@raw_data)['addresses'].merge(
-          {'car-|-123' => MassiveRecord::ORM::RawData.new(value: Car.new.attributes_db_raw_data_hash, created_at: Time.now)
+          {"car#{MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR}123" => MassiveRecord::ORM::RawData.new(value: Car.new.attributes_db_raw_data_hash, created_at: Time.now)
         })
 
         proxy_owner.instance_variable_set(:@raw_data, {'addresses' => raw_data_with_car})
@@ -88,8 +88,8 @@ describe TestEmbedsManyProxy do
       proxy_owner.raw_data[metadata.store_in] = {}
       subject.send(:reload_raw_data)
       Hash[proxy_owner.raw_data[metadata.store_in].collect { |k,v| [k, v.to_s] }].should eq({
-        "address-|-address-1" => "{\"street\":\"Asker\",\"number\":1,\"nice_place\":\"true\",\"postal_code\":null}",
-        "address-|-address-2" => "{\"street\":\"Asker\",\"number\":2,\"nice_place\":\"true\",\"postal_code\":null}"
+        "address#{MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR}address-1" => "{\"street\":\"Asker\",\"number\":1,\"nice_place\":\"true\",\"postal_code\":null}",
+        "address#{MassiveRecord::ORM::Embedded::DATABASE_ID_SEPARATOR}address-2" => "{\"street\":\"Asker\",\"number\":2,\"nice_place\":\"true\",\"postal_code\":null}"
       })
     end
 
@@ -126,16 +126,16 @@ describe TestEmbedsManyProxy do
         end
 
         it "is possible to add invalid record if parent is not persisted" do
-          proxy_owner.should_receive(:new_record?).any_number_of_times.and_return(true)
           subject.send add_method, proxy_target
           subject.should include proxy_target
         end
 
-        it "does not accept invalid records" do
-          proxy_owner.should_receive(:new_record?).any_number_of_times.and_return(false)
+        it "accepts invalid records, but does not save them" do
+          proxy_owner.save
           proxy_target.should_receive(:valid?).and_return false
-          subject.send(add_method, proxy_target).should be_false
-          subject.should be_empty
+          subject.send add_method, proxy_target
+          subject.should include proxy_target
+          proxy_target.should be_new_record
         end
 
 
@@ -196,6 +196,24 @@ describe TestEmbedsManyProxy do
     end
   end
 
+  describe "#destroy_all" do
+    before do
+      subject << proxy_target << proxy_target_2 << proxy_target_3
+      proxy_owner.save!
+    end
+
+    it "destroys all records" do
+      subject.destroy_all
+      subject.should_not include proxy_target, proxy_target_2, proxy_target_3
+    end
+
+    it "returns all destroyed records" do
+      removed = subject.destroy_all
+      removed.should include proxy_target, proxy_target_2, proxy_target_3
+      removed.each { |r| r.should be_destroyed }
+    end
+  end
+
   describe "#delete" do
     before do
       subject << proxy_target
@@ -236,6 +254,24 @@ describe TestEmbedsManyProxy do
       subject.delete(proxy_target)
       proxy_owner.save
       proxy_target.should be_destroyed
+    end
+  end
+
+  describe "#delete_all" do
+    before do
+      subject << proxy_target << proxy_target_2 << proxy_target_3
+      proxy_owner.save!
+    end
+
+    it "deletes all records" do
+      subject.delete_all
+      subject.should_not include proxy_target, proxy_target_2, proxy_target_3
+    end
+
+    it "returns all removed records" do
+      removed = subject.delete_all
+      removed.should include proxy_target, proxy_target_2, proxy_target_3
+      removed.each { |r| r.should_not be_destroyed }
     end
   end
 
@@ -576,9 +612,8 @@ describe TestEmbedsManyProxy do
 
   describe "#changes" do
     before do
+      proxy_owner.save!
       subject << proxy_target
-      proxy_target.stub(:destroyed?).and_return false
-      proxy_target.stub(:new_record?).and_return false
     end
 
     it "has no changes when no changes has been made" do

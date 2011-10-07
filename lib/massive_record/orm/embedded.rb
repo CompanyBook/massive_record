@@ -5,6 +5,9 @@ module MassiveRecord
     class Embedded < Base
       include Schema::EmbeddedInterface
 
+      DATABASE_ID_SEPARATOR = '|'
+
+
       # TODO  Embedded does not support these kind of methods
       class << self
         undef_method :first, :last, :all, :exists?, :destroy_all
@@ -12,20 +15,20 @@ module MassiveRecord
 
 
       def self.parse_database_id(database_id)
-        if splitted = database_id.split('-|-') and splitted.length == 2
+        if splitted = database_id.split(DATABASE_ID_SEPARATOR) and splitted.length == 2
           splitted
         else
           fail InvalidEmbeddedDatabaseId.new(
             <<-TXT
               Expected database id '#{database_id}' to be on a format like
-              base_class_here-|-record_id_here
+              base_class_here#{DATABASE_ID_SEPARATOR}record_id_here
             TXT
           )
         end
       end
 
       def self.database_id(klass, id)
-        [klass.base_class.to_s.underscore, id].join('-|-')
+        [klass.base_class.to_s.underscore, id].join(DATABASE_ID_SEPARATOR)
       end
 
       #
@@ -36,8 +39,8 @@ module MassiveRecord
       #
       # | key           | attributes                                            |
       # --------------------------------------------------------------------------
-      # | "address-123" | { :street => "Askerveien", :number => "12", etc... }  |
-      # | "address-124" | { :street => "Askerveien", :number => "12", etc... }  |
+      # | "address|123" | { :street => "Askerveien", :number => "12", etc... }  |
+      # | "address|124" | { :street => "Askerveien", :number => "12", etc... }  |
       # | "name"        | "Thorbjorn Hermansen"                                 |
       # | "age"         | "30"                                                  |
       #

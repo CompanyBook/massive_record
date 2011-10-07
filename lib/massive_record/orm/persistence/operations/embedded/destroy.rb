@@ -10,7 +10,10 @@ module MassiveRecord
 
             def execute
               embedded_in_proxies.each do |proxy|
-                update_embedded(proxy, nil) if proxy.load_proxy_target && proxy.load_proxy_target.persisted?
+                if proxy.load_proxy_target && proxy.load_proxy_target.persisted?
+                  inverse_proxy_for(proxy).delete(record)
+                  update_embedded(proxy, nil)
+                end
               end
 
               true

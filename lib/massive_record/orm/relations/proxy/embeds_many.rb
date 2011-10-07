@@ -22,25 +22,21 @@ module MassiveRecord
           # Adding record(s) to the collection.
           #
           def <<(*records)
-            records.flatten!
-
-            if proxy_owner.new_record? || records.all?(&:valid?)
-              records.each do |record|
-                unless include? record
-                  raise_if_type_mismatch(record)
-                  proxy_target << record
-                  record.send(metadata.inverse_of).replace(proxy_owner, false)
-                end
+            records.flatten.each do |record|
+              unless include? record
+                raise_if_type_mismatch(record)
+                proxy_target << record
+                record.send(metadata.inverse_of).replace(proxy_owner, false)
               end
-
-              if proxy_owner.persisted?
-                proxy_owner.save
-              else
-                proxy_target.sort_by! &:id
-              end
-
-              self
             end
+
+            if proxy_owner.persisted?
+              proxy_owner.save
+            else
+              proxy_target.sort_by! &:id
+            end
+
+            self
           end
           alias_method :push, :<<
           alias_method :concat, :<<
@@ -191,9 +187,11 @@ module MassiveRecord
           end
 
           def delete_or_destroy(*records, method)
+            records.flatten!
             self.proxy_target -= records
             to_be_destroyed.concat(records).uniq!
             proxy_owner.save if proxy_owner.persisted? && method == :destroy
+            records
           end
 
           def can_find_proxy_target?

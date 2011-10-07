@@ -5,6 +5,7 @@ class Person < MassiveRecord::ORM::Table
     field :age, :integer
     field :carma, :float
     field :date_of_birth, :date
+    field :last_signed_in_at, :time
     field :dictionary, :hash, :default => {}
     field :type
   end

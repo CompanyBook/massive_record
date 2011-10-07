@@ -115,9 +115,9 @@ module MassiveRecord
           # Attributes will be serialized by the Base.coder, by default will be JSON, but it really can be anything.
           # The way records are stored inside of a column family will be:
           #
-          # | key         |   attributes                                        |
+          # | key           | attributes                                        |
           # ---------------------------------------------------------------------
-          # | "address-|-id1"  | { :street => "Askerveien", :number => "12", etc... }
+          # | "address|id1" | { :street => "Askerveien", :number => "12", etc... }
           #
           #
           #

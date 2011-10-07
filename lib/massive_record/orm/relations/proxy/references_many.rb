@@ -175,8 +175,11 @@ module MassiveRecord
 
 
           def delete_or_destroy(*records, method)
+            removed = []
+
             records.flatten.each do |record|
               if include? record
+                removed << record
                 remove_foreign_key_in_proxy_owner(record.id)
                 proxy_target.delete(record)
                 record.destroy if method.to_sym == :destroy
@@ -184,6 +187,7 @@ module MassiveRecord
             end
 
             proxy_owner.save if proxy_owner.persisted?
+            removed
           end
 
 
