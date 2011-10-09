@@ -93,7 +93,7 @@ module MassiveRecord
                 if record.destroyed?
                   proxy_targets_update_hash[record.database_id] = nil
                 elsif record.new_record? || record.changed?
-                  record.save 
+                  record.save(:validate => false) unless record.in_the_middle_of_saving?
                   proxy_targets_update_hash[record.database_id] = Base.coder.dump(record.attributes_db_raw_data_hash)
                 end
               end
