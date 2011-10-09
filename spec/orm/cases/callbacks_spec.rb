@@ -3,7 +3,7 @@ require 'orm/models/callback_testable'
 require 'orm/models/person'
 require 'orm/models/address'
 
-describe "callbacks" do
+describe "callbacks on" do
   include SetUpHbaseConnectionBeforeAll
   include SetTableNamesToTestTable
 
@@ -18,6 +18,7 @@ describe "callbacks" do
   end
 
   describe CallbackDeveloperTable do
+    let(:new_record) { described_class.new "1" }
     let(:created_record) { described_class.create "dummy" }
     let(:persisted_record) do
       described_class.create! "1"
@@ -39,11 +40,14 @@ describe "callbacks" do
   end
 
   describe CallbackDeveloperEmbedded do
-    let(:owner) { CallbackDeveloperTable.create! "1" }
+    let(:owner_new_record) {  CallbackDeveloperTable.new "1" }
+    let(:owner) { owner_new_record.save! ; owner_new_record }
 
-    let(:created_record) { described_class.create "dummy", :callback_developer_table => owner }
+    let(:new_record) { described_class.new "1", :callback_developer_table => owner_new_record }
+    let(:created_record) { described_class.create "dummy", :callback_developer_table => owner_new_record }
     let(:persisted_record) do
       owner.callback_developer_embeddeds << described_class.new("1-1")
+      owner.callback_developer_embeddeds.reset # Resets to drop all proxy cached records, force reload from DB
       owner.callback_developer_embeddeds.find("1-1")
     end
 

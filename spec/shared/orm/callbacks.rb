@@ -90,6 +90,51 @@ shared_examples_for "a model with callbacks" do
         ]
       end
     end
+
+    describe "save callbacks" do
+      subject { new_record }
+
+      it "runs in correct order" do
+        subject.save
+        subject.history.should eq [
+          [:after_initialize, :method],
+          [:after_initialize, :string],
+          [:after_initialize, :proc  ],
+          [:after_initialize, :object],
+          [:after_initialize, :block ],
+          [:before_validation, :method],
+          [:before_validation, :string],
+          [:before_validation, :proc  ],
+          [:before_validation, :object],
+          [:before_validation, :block ],
+          [:after_validation, :method],
+          [:after_validation, :string],
+          [:after_validation, :proc  ],
+          [:after_validation, :object],
+          [:after_validation, :block ],
+          [:before_save, :method],
+          [:before_save, :string],
+          [:before_save, :proc  ],
+          [:before_save, :object],
+          [:before_save, :block ],
+          [:before_create, :method],
+          [:before_create, :string],
+          [:before_create, :proc  ],
+          [:before_create, :object],
+          [:before_create, :block ],
+          [:after_create, :method],
+          [:after_create, :string],
+          [:after_create, :proc  ],
+          [:after_create, :object],
+          [:after_create, :block ],
+          [:after_save, :method],
+          [:after_save, :string],
+          [:after_save, :proc  ],
+          [:after_save, :object],
+          [:after_save, :block ]
+        ]
+      end
+    end
   end
 
 
