@@ -68,7 +68,7 @@ module MassiveRecord
         yield
       ensure
         @in_the_middle_of_saving = false
-        @valid_in_the_middle_of_saving = nil
+        @last_valid_value_inside_of_current_save = nil
       end
     end
   end
