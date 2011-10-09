@@ -52,6 +52,102 @@ describe "callbacks on" do
     end
 
     it_should_behave_like "a model with callbacks"
+
+
+    describe "saved via owner" do
+      context "when owner is new record" do
+        subject { new_record }
+        before { subject } # Tap to initialize
+
+        describe "save callbacks" do
+          it "runs in correct order" do
+            owner_new_record.save
+            subject.history.should eq [
+              [:after_initialize, :method],
+              [:after_initialize, :string],
+              [:after_initialize, :proc  ],
+              [:after_initialize, :object],
+              [:after_initialize, :block ],
+              [:before_validation, :method],
+              [:before_validation, :string],
+              [:before_validation, :proc  ],
+              [:before_validation, :object],
+              [:before_validation, :block ],
+              [:after_validation, :method],
+              [:after_validation, :string],
+              [:after_validation, :proc  ],
+              [:after_validation, :object],
+              [:after_validation, :block ],
+              [:before_save, :method],
+              [:before_save, :string],
+              [:before_save, :proc  ],
+              [:before_save, :object],
+              [:before_save, :block ],
+              [:before_create, :method],
+              [:before_create, :string],
+              [:before_create, :proc  ],
+              [:before_create, :object],
+              [:before_create, :block ],
+              [:after_create, :method],
+              [:after_create, :string],
+              [:after_create, :proc  ],
+              [:after_create, :object],
+              [:after_create, :block ],
+              [:after_save, :method],
+              [:after_save, :string],
+              [:after_save, :proc  ],
+              [:after_save, :object],
+              [:after_save, :block ]
+            ]
+          end
+        end
+      end
+
+      context "when owner is persisted" do
+        subject { persisted_record; owner.callback_developer_embeddeds.first }
+        before { subject } # Tap to initialize
+
+        describe "update callbacks" do
+          it "is run in correct order" do
+            subject.name += "_NEW"
+            subject.history.clear
+            owner.save
+            subject.history.should eq [
+              [:before_validation, :method],
+              [:before_validation, :string],
+              [:before_validation, :proc  ],
+              [:before_validation, :object],
+              [:before_validation, :block ],
+              [:after_validation, :method],
+              [:after_validation, :string],
+              [:after_validation, :proc  ],
+              [:after_validation, :object],
+              [:after_validation, :block ],
+              [:before_save, :method],
+              [:before_save, :string],
+              [:before_save, :proc  ],
+              [:before_save, :object],
+              [:before_save, :block ],
+              [:before_update, :method],
+              [:before_update, :string],
+              [:before_update, :proc  ],
+              [:before_update, :object],
+              [:before_update, :block ],
+              [:after_update, :method],
+              [:after_update, :string],
+              [:after_update, :proc  ],
+              [:after_update, :object],
+              [:after_update, :block ],
+              [:after_save, :method],
+              [:after_save, :string],
+              [:after_save, :proc  ],
+              [:after_save, :object],
+              [:after_save, :block ]
+            ]
+          end
+        end
+      end
+    end
   end
 end
 
