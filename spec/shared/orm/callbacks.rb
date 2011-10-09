@@ -48,7 +48,7 @@ shared_examples_for "a model with callbacks" do
     end
 
     describe "create callbacks" do
-      subject { described_class.create "dummy" }
+      subject { created_record }
 
       it "runs in correct order" do
         subject.history.should eq [
@@ -94,8 +94,7 @@ shared_examples_for "a model with callbacks" do
 
 
   context "persisted record" do
-    subject { described_class.find "1" }
-    before { described_class.create! "1" }
+    subject { persisted_record }
 
     describe "find callbacks" do
       it "runs in correct order" do
