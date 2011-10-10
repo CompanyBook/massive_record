@@ -32,10 +32,17 @@ module MassiveRecord
       module Operations
         class << self
           def suppress
-            @suppressed = true
+            suppressed_was, @suppressed = @suppressed, true
             yield
           ensure
-            @suppressed = false
+            @suppressed = suppressed_was
+          end
+
+          def force
+            suppressed_was, @suppressed = @suppressed, false
+            yield
+          ensure
+            @suppressed = suppressed_was
           end
 
           def suppressed?
