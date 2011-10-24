@@ -1,10 +1,10 @@
 # v0.2.2 (git develop)
 
 
-# v0.2.2.rc2 (git develop)
+# v0.2.2.rc2 (git master)
 - Fixed some issues related to callbacks on embedded records.
 
-# v0.2.2.rc1 (git master)
+# v0.2.2.rc1
 
 - ProxyCollection destroy_all and delete_all returns removed records.
 - Changes are better detected on new records. user = User.new :email => "me@gmail.com"; user.email_changed?
