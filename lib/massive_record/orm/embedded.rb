@@ -1,9 +1,11 @@
 require 'massive_record/orm/schema/embedded_interface'
+require 'massive_record/orm/in_the_middle_of_saving_tracker'
 
 module MassiveRecord
   module ORM
     class Embedded < Base
       include Schema::EmbeddedInterface
+      include InTheMiddleOfSavingTracker
 
       DATABASE_ID_SEPARATOR = '|'
 

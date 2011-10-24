@@ -1,6 +1,9 @@
 # v0.2.2 (git develop)
 
 
+# v0.2.2.rc2 (git develop)
+- Fixed some issues related to callbacks on embedded records.
+
 # v0.2.2.rc1 (git master)
 
 - ProxyCollection destroy_all and delete_all returns removed records.
