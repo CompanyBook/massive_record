@@ -28,6 +28,17 @@ module MassiveRecord
           errors.add(:name, :taken) if fields.try(:attribute_name_taken?, name)
         end
 
+
+        def self.type_to_classes
+          unless @type_to_classes
+            @type_to_classes = Hash.new { |h,k| h[k] = [] }
+
+            @type_to_classes[:boolean] << TrueClass << FalseClass
+            @type_to_classes[:integer] << Fixnum << Bignum
+          end
+
+          @type_to_classes
+        end
       
         #
         # Creates a new field based on arguments from DSL
@@ -162,11 +173,8 @@ module MassiveRecord
         end
 
         def classes
-          classes = case type
-                    when :boolean
-                      [TrueClass, FalseClass]
-                    when :integer
-                      [Fixnum, Bignum]
+          classes = if self.class.type_to_classes.has_key? type
+                      self.class.type_to_classes[type]
                     else
                       klass = type.to_s.classify
                       if ::Object.const_defined?(klass)
