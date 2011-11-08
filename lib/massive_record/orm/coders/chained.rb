@@ -59,7 +59,7 @@ module MassiveRecord
           loaders.each do |coder|
             begin
               return coder.load(data)
-            rescue
+            rescue StandardError, SyntaxError
             end
           end
 

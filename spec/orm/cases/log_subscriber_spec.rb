@@ -7,7 +7,7 @@ describe "log subscriber" do
   include SetUpHbaseConnectionBeforeAll
   include SetTableNamesToTestTable
 
-  let(:level) { DEBUG }
+  let(:level) { ActiveSupport::BufferedLogger::Severity::DEBUG }
   subject { ActiveSupport::LogSubscriber::TestHelper::MockLogger.new(level) }
 
   before do
@@ -122,7 +122,7 @@ describe "log subscriber" do
 
 
   context "info" do
-    let(:level) { INFO }
+    let(:level) { ActiveSupport::BufferedLogger::Severity::INFO }
 
     it "should have nothing logged to begin with" do
       subject.logged(:debug).size.should be_zero
