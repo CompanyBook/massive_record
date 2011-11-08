@@ -166,7 +166,7 @@ module MassiveRecord
                     when :boolean
                       [TrueClass, FalseClass]
                     when :integer
-                      [Fixnum]
+                      [Fixnum, Bignum]
                     else
                       klass = type.to_s.classify
                       if ::Object.const_defined?(klass)
