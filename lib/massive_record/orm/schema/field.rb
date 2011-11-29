@@ -120,6 +120,10 @@ module MassiveRecord
 
 
         def decode(value)
+          if(value.is_a? Symbol)
+            value = value.to_s
+          end
+
           value = value.force_encoding(Encoding::UTF_8) if utf_8_encoded? && !value.frozen? && value.respond_to?(:force_encoding) 
 
           return value if value.nil? || value_is_already_decoded?(value)

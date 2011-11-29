@@ -31,6 +31,8 @@ module MassiveRecord
       end
 
       def delete_all_tables
+        notifier = ActiveSupport::Notifications::Fanout.new
+        ActiveSupport::Notifications.notifier = notifier
         tables = MassiveRecord::ORM::Base.connection.tables
         each_orm_class do |klass|
           if tables.include? klass.table.name

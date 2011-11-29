@@ -175,7 +175,7 @@ describe "persistence" do
       describe "create" do
         describe "when table does not exists" do
           before do
-            @new_class = "Person_new_#{ActiveSupport::SecureRandom.hex(5)}"
+            @new_class = "Person_new_#{SecureRandom.hex(5)}"
             @new_class = Object.const_set(@new_class, Class.new(MassiveRecord::ORM::Table))
             
             @new_class.instance_eval do
