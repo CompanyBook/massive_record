@@ -2,8 +2,8 @@ require 'spec_helper'
 require 'orm/models/model_without_default_id'
 
 describe ModelWithoutDefaultId do
-  include MockMassiveRecordConnection
-  #include SetUpHbaseConnectionBeforeAll
+  #include MockMassiveRecordConnection
+  include SetUpHbaseConnectionBeforeAll
   #include SetTableNamesToTestTable
 
   context "with auto increment id" do

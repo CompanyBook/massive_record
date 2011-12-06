@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'orm/models/person'
 
 describe "attribute methods" do
+  include MockMassiveRecordConnection
   include TimeZoneHelper
 
   subject { Person.new "5", :name => "John", :age => "15" }

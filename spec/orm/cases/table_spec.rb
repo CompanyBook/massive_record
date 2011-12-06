@@ -3,6 +3,7 @@ require 'orm/models/person'
 require 'orm/models/test_class'
 
 describe "table classes" do
+  include MockMassiveRecordConnection
   before do
     @subject = MassiveRecord::ORM::Table
     

@@ -5,14 +5,14 @@ module MassiveRecord
         include ActiveModel::Validations
 
         TYPES_DEFAULTS_TO = {
-          :string => '',
-          :integer => 0,
-          :float => 0.0,
-          :boolean => false,
-          :array => [],
-          :hash => {},
-          :date => lambda { Date.today },
-          :time => lambda { Time.now }
+            :string => '',
+            :integer => 0,
+            :float => 0.0,
+            :boolean => false,
+            :array => [],
+            :hash => {},
+            :date => lambda { Date.today },
+            :time => lambda { Time.now }
         }.freeze
 
         TYPES = TYPES_DEFAULTS_TO.keys.freeze
@@ -31,7 +31,7 @@ module MassiveRecord
 
         def self.type_to_classes
           unless @type_to_classes
-            @type_to_classes = Hash.new { |h,k| h[k] = [] }
+            @type_to_classes = Hash.new { |h, k| h[k] = [] }
 
             @type_to_classes[:boolean] << TrueClass << FalseClass
             @type_to_classes[:integer] << Fixnum << Bignum
@@ -39,7 +39,7 @@ module MassiveRecord
 
           @type_to_classes
         end
-      
+
         #
         # Creates a new field based on arguments from DSL
         # args: name, type, options
@@ -51,7 +51,6 @@ module MassiveRecord
 
           new(field_options)
         end
-
 
 
         def initialize(*args)
@@ -74,6 +73,7 @@ module MassiveRecord
         def ==(other)
           other.instance_of?(self.class) && other.hash == hash
         end
+
         alias_method :eql?, :==
 
         def hash
@@ -98,7 +98,7 @@ module MassiveRecord
           end
         end
 
-        
+
         def unique_name
           raise "Can't generate a unique name as I don't have a column family!" if column_family.nil?
           [column_family.name, column].join(":")
@@ -118,45 +118,44 @@ module MassiveRecord
         end
 
 
-
         def decode(value)
-          if(value.is_a? Symbol)
+          if (value.is_a? Symbol)
             value = value.to_s
           end
 
-          value = value.force_encoding(Encoding::UTF_8) if utf_8_encoded? && !value.frozen? && value.respond_to?(:force_encoding) 
+          value = value.force_encoding(Encoding::UTF_8) if utf_8_encoded? && !value.frozen? && value.respond_to?(:force_encoding)
 
           return value if value.nil? || value_is_already_decoded?(value)
-          
-          value = case type
-                  when :boolean
-                    value.blank? || value == @@encoded_nil_value ? nil : !value.to_s.match(/^(true|1)$/i).nil?
-                  when :date
-                    value.blank? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
-                  when :time
-                    value.blank? ? nil : (Time.parse(value) rescue nil)
-                  when :string
-                    if value.present?
-                      value = value.to_s if value.is_a? Symbol
-                      coder.load(value)
-                    end
-                  when :integer
-                    value = value.force_encoding(Encoding::BINARY)
 
-                    if value =~ /\A\d*\Z/
+          value = case type
+                    when :boolean
+                      value.blank? || value == @@encoded_nil_value ? nil : !value.to_s.match(/^(true|1)$/i).nil?
+                    when :date
+                      value.blank? || value.to_s == "0" ? nil : (Date.parse(value) rescue nil)
+                    when :time
+                      value.blank? ? nil : (Time.parse(value) rescue nil)
+                    when :string
+                      if value.present?
+                        value = value.to_s if value.is_a? Symbol
+                        coder.load(value)
+                      end
+                    when :integer
+                      value = value.force_encoding(Encoding::BINARY)
+
+                      if value =~ /\A\d*\Z/
+                        coder.load(value) if value.present?
+                      else
+                        hex_string_to_integer(value)
+                      end
+                    when :float, :array, :hash
                       coder.load(value) if value.present?
                     else
-                      hex_string_to_integer(value)
-                    end
-                  when :float, :array, :hash
-                    coder.load(value) if value.present?
-                  else
-                    raise "Unable to decode #{value}, class: #{value}"
+                      raise "Unable to decode #{value}, class: #{value}"
                   end
-          ensure
-            unless loaded_value_is_of_valid_class?(value)
-              raise SerializationTypeMismatch.new("Expected #{value} (class: #{value.class}) to be any of: #{classes.join(', ')}.")
-            end
+        ensure
+          unless loaded_value_is_of_valid_class?(value)
+            raise SerializationTypeMismatch.new("Expected #{value} (class: #{value.class}) to be any of: #{classes.join(', ')}.")
+          end
         end
 
         def encode(value)
@@ -169,7 +168,6 @@ module MassiveRecord
         end
 
 
-
         private
 
         def name=(name)
@@ -177,16 +175,21 @@ module MassiveRecord
         end
 
         def classes
-          classes = if self.class.type_to_classes.has_key? type
-                      self.class.type_to_classes[type]
-                    else
-                      klass = type.to_s.classify
-                      if ::Object.const_defined?(klass)
-                        [klass.constantize]
-                      end
-                    end
-
+          classes = (self.class.type_to_classes.has_key? type) ? self.class.type_to_classes[type] : self.class.known_klass_constants(type)
           classes || []
+        end
+
+        def self.known_klass_constants(type_name)
+          unless @known_contants
+            @known_contants = Hash.new
+          end
+
+          if @known_contants[type_name].nil?
+            klass = type_name.to_s.classify
+            @known_contants[type_name] = [klass.constantize] if ::Object.const_defined?(klass)
+          end
+
+          @known_contants[type_name]
         end
 
         def value_is_already_decoded?(value)

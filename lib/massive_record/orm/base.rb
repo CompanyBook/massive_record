@@ -137,7 +137,7 @@ module MassiveRecord
         private
         
         def class_of_descendant(klass)
-          if klass.superclass.superclass == Base
+          if klass.superclass.superclass == Base || klass.superclass == Base
             klass
           else
             class_of_descendant(klass.superclass)

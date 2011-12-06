@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe MassiveRecord::ORM::Persistence::Operations::Insert do
-  include MockMassiveRecordConnection
+  include SetUpHbaseConnectionBeforeAll
 
   let(:record) { TestClass.new("id-1") }
   let(:options) { {:this => 'hash', :has => 'options'} }
