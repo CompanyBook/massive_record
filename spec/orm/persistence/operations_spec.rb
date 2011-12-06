@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'orm/models/test_class'
 
 describe MassiveRecord::ORM::Persistence::Operations do
+  include SetUpHbaseConnectionBeforeAll
   let(:options) { {:this => 'hash', :has => 'options'} }
 
   describe "factory method" do
