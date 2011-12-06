@@ -17,7 +17,25 @@ module MassiveRecord
           # is the value.
           #
           def attributes_schema
-            schema_source.present? ? schema_source.to_hash : {}
+            (self.superclass.superclass == Base) ? schema_by_klass : schema_source.to_hash
+          end
+
+          def schema_by_klass
+            unless @schema_by_klass
+              @schema_by_klass = Hash.new
+            end
+
+            if @schema_by_klass[class_column_key].nil? || @schema_by_klass[class_column_key] == {}
+              @schema_by_klass[class_column_key] = schema_source.present? ? schema_source.to_hash : {}
+            end
+
+            @schema_by_klass[class_column_key]
+          end
+
+          def clear_schema_cache
+            if @schema_by_klass
+              @schema_by_klass[class_column_key] = nil
+            end
           end
 
           #
@@ -33,9 +51,15 @@ module MassiveRecord
           # Returns a hash with attribute name as keys, default values read from field as value.
           #
           def default_attributes_from_schema
-            Hash[attributes_schema.collect { |attribute_name, field| 
+            Hash[attributes_schema.collect { |attribute_name, field|
               [attribute_name, field.default]
             }]
+          end
+
+          private
+
+          def class_column_key
+            self.table.name
           end
         end
 

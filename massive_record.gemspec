@@ -15,9 +15,10 @@ Gem::Specification.new do |s|
 
 
   s.add_dependency "thrift", "= 0.6.0"
-  s.add_dependency "activesupport", "~> 3.0.7"
-  s.add_dependency "activemodel", "~> 3.0.7"
+  s.add_dependency "activesupport", "3.1.1"
+  s.add_dependency "activemodel", "3.1.1"
   s.add_dependency "tzinfo"
+  s.add_dependency "yajl-ruby"
 
   s.add_development_dependency "rspec"
 

@@ -87,7 +87,7 @@ describe MassiveRecord::ORM::Base do
 
     it "should initialize an object via init_with()" do
       model = TestClass.allocate
-      model.init_with 'attributes' => {:foo => 'bar'}
+      model.init_with 'attributes' => {:foo => :bar}
       model.foo.should == 'bar'
     end
 
@@ -115,7 +115,7 @@ describe MassiveRecord::ORM::Base do
 
     it "should stringify keys set on attributes" do
       model = TestClass.allocate
-      model.init_with 'attributes' => {:foo => :bar}
+      model.init_with 'attributes' => {:foo => 'bar'}
       model.attributes.keys.should include("foo")
     end
 

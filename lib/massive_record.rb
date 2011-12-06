@@ -14,3 +14,7 @@ require 'massive_record/orm/raw_data'
 if defined?(::Rails) && ::Rails::VERSION::MAJOR == 3
   require 'massive_record/rails/railtie'
 end
+
+require 'active_support/core_ext'
+
+ActiveSupport::JSON.backend = :yajl

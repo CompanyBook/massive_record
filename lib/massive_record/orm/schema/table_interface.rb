@@ -50,7 +50,7 @@ module MassiveRecord
 
             field = Field.new_with_arguments_from_dsl(*field_args)
             column_families.family_by_name_or_new(family_name) << field
-
+            clear_schema_cache
             undefine_attribute_methods if respond_to? :undefine_attribute_methods
 
             field
