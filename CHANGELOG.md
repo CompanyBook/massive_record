@@ -1,9 +1,14 @@
-# v0.2.2.rc3 (git develop)
+# v0.2.3 (git develop)
+
+-
+
+
+# v0.2.2 (git master)
 
 - Experimental support for 1.9.3 (all tests do pass).
 
 
-# v0.2.2.rc2 (git master)
+# v0.2.2.rc2
 
 - Fixed some issues related to callbacks on embedded records.
 
