@@ -260,7 +260,6 @@ It is however adviced to use the ORM as the interface to the adapter is not yet 
 
 ## Planned work
 
-- Embedded objects.
 - Cache the decoded values of attributes, not use the value_is_already_decoded?. This will fix possible problem with YAML as coder backend.
 - Implement other Adapters, for instance using jruby and the Java API.
 

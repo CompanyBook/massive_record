@@ -154,6 +154,13 @@ describe MassiveRecord::ORM::Schema::Field do
       MassiveRecord::ORM::Base.backward_compatibility_integers_might_be_persisted_as_strings = old_combatibility
     end
 
+    it "accepts Bignum as a substitute for Fixnum" do
+      @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
+      bignum = 9999999999999999999999
+      bignum.should be_instance_of Bignum
+      expect { @subject.decode(bignum) }.to_not raise_error MassiveRecord::ORM::SerializationTypeMismatch
+    end
+
     it "decodes an integer value is represented as a binary string" do
       @subject = MassiveRecord::ORM::Schema::Field.new(:name => :status, :type => :integer)
       @subject.decode(nil).should be_nil
