@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    massive_record (0.2.2.rc3)
+    massive_record (0.2.3)
       activemodel (~> 3.0.7)
       activesupport (~> 3.0.7)
       thrift (= 0.6.0)
