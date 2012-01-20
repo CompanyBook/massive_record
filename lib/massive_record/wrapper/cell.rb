@@ -10,7 +10,7 @@ module MassiveRecord
       #
       # Packs an integer as a 64-bit signed integer, native endian (int64_t)
       # Reverse it as the byte order in hbase are reversed
-      p #
+      #
       def self.integer_to_hex_string(int)
         [int].pack('q').reverse
       end
