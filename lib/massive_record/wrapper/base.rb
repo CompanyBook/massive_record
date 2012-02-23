@@ -13,7 +13,7 @@ module MassiveRecord
       
       def self.config
         config = YAML.load_file(::Rails.root.join('config', 'hbase.yml'))[::Rails.env]
-        { :host => config['host'], :port => config['port'] }        
+        { :host => config['host'], :port => config['port'], :timeout => config['timeout'] }
       end
 
       def self.connection(opts = {})
@@ -22,6 +22,6 @@ module MassiveRecord
         conn
       end
       
-    end  
+    end
   end
 end

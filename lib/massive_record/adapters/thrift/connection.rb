@@ -8,7 +8,7 @@ module MassiveRecord
         attr_accessor :host, :port, :timeout
     
         def initialize(opts = {})
-          @timeout = 4000
+          @timeout = opts[:timeout] || 4
           @host    = opts[:host]
           @port    = opts[:port] || 9090
           @instrumenter = ActiveSupport::Notifications.instrumenter
