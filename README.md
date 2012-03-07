@@ -36,6 +36,7 @@ that Massive Record works on that Ruby version, and we know it has some problems
 
 ### Ruby on Rails
     
+MassiveRecord is compatible with Rails 3.0. It is not yet fully compatible with 3.1 or any higher versions.
 Add the following Gems in your Gemfile:
     
     gem 'massive_record'
