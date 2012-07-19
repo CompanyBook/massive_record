@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "massive_record"
 
 
-  s.add_dependency "thrift", "= 0.6.0"
+  s.add_dependency "thrift", "~> 0.8.0"
   s.add_dependency "activesupport", "~> 3.0.7"
   s.add_dependency "activemodel", "~> 3.0.7"
   s.add_dependency "tzinfo"
