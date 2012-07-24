@@ -32,7 +32,7 @@ Start Thrift (HBase service interface):
 First of all: Please make sure you are using Ruby 1.9.2. For now, we are only ensuring
 that Massive Record works on that Ruby version, and we know it has some problems with 1.8.7.
 
-  gem install massive_record
+    gem install massive_record
 
 ### Ruby on Rails
     
@@ -59,8 +59,7 @@ Create an config/hbase.yml file with the following content:
 
 ## Usage
 
-There are two ways for using the Massive Record library. At the highest level we have ORM. This is Active Model compliant and makes
-it easy to use. The second way of doing things is working directly against the adapter.
+There are two ways for using the Massive Record library. At the highest level we have ORM. This is Active Model compliant and makes it easy to use. The second way of doing things is working directly against the adapter (simple API).
 
 
 ### ORM
