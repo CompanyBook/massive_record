@@ -304,6 +304,14 @@ describe "A table" do
     it "should find 5 rows using the :starts_with option" do
       @table.all(:starts_with => "A").size.should == 5
     end
+    
+    it "should find 1 row using the :start_prefix option" do
+      @table.all(:start_prefix => "A1").size.should == 1
+    end
+  
+    it "should find 5 rows using the :start_prefix option" do
+      @table.all(:start_prefix => "A").size.should == 5
+    end
   
     it "should find 9 rows using the :offset option" do
       @table.all(:offset => "A2").size.should == 9

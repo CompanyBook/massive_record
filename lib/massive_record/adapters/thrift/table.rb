@@ -111,10 +111,12 @@ module MassiveRecord
           opts = self.class.warn_and_change_deprecated_finder_options(opts)
 
           start = opts[:starts_with] && opts[:starts_with].dup.force_encoding(Encoding::BINARY)
+          start_prefix = opts[:start_prefix] && opts[:start_prefix].dup.force_encoding(Encoding::BINARY)
           offset = opts[:offset] && opts[:offset].dup.force_encoding(Encoding::BINARY)
 
           {
             :start_key  => start,
+            :start_prefix  => start_prefix,
             :offset_key => offset,
             :created_at => opts[:created_at],
             :columns    => opts[:select], # list of column families to fetch from hbase
