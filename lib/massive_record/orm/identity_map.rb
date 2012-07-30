@@ -186,32 +186,30 @@ module MassiveRecord
 
 
 
-      module InstanceMethods
-        def reload
-          IdentityMap.remove(self) if IdentityMap.enabled?
-          super
-        end
+      def reload
+        IdentityMap.remove(self) if IdentityMap.enabled?
+        super
+      end
 
-        def destroy
-          return super unless IdentityMap.enabled?
+      def destroy
+        return super unless IdentityMap.enabled?
 
-          super.tap { IdentityMap.remove(self) }
-        end
-        alias_method :delete, :destroy
+        super.tap { IdentityMap.remove(self) }
+      end
+      alias_method :delete, :destroy
 
-        def change_id!(new_id)
-          IdentityMap.remove(self)
-          super
-        end
+      def change_id!(new_id)
+        IdentityMap.remove(self)
+        super
+      end
 
-        private
+      private
 
 
-        def create
-          return super unless IdentityMap.enabled?
+      def create
+        return super unless IdentityMap.enabled?
 
-          super.tap { IdentityMap.add(self) }
-        end
+        super.tap { IdentityMap.add(self) }
       end
 
 

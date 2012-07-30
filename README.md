@@ -199,7 +199,7 @@ Used by Devise. I guess we'll might release the code used to get Devise support 
 
 #### Database Cleaner
 https://github.com/CompanyBook/database_cleaner
-User by for instance Cucumber and ourself with Rspec.
+User by for instance Cucumber and ourself with RSpec.
 
 #### Sunspot Rails
 https://github.com/CompanyBook/sunspot_massive_record
@@ -303,7 +303,7 @@ Checkout the massive_record project and install it as a Gem :
     
 ### Clean HBase database between each test
 
-We have created a helper module MassiveRecord::Rspec::SimpleDatabaseCleaner which, when included into rspec tests, will clean
+We have created a helper module MassiveRecord::RSpec::SimpleDatabaseCleaner which, when included into rspec tests, will clean
 the database for ORM records between each test case. You can also take a look into spec/support/mock_massive_record_connection.rb
 for some functionality which will mock a hbase connection making it easier (faster) to test code where no real database is needed.
 

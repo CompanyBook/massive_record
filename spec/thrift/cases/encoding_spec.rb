@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe "encoding" do
   before :all do
-    @table_name = "encoding_test" + ActiveSupport::SecureRandom.hex(3)
+    @table_name = "encoding_test" + SecureRandom.hex(3)
   end
 
   before do
