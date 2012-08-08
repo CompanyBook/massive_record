@@ -10,7 +10,7 @@ module MassiveRecord
       # Make Rails handle RecordNotFound correctly in production
       initializer "massive_record.action_dispatch" do
         ActiveSupport.on_load :action_controller do
-          config.action_dispatch.rescue_responses.update('MassiveRecord::ORM::RecordNotFound' => :not_found)
+          ActionDispatch::ShowExceptions.rescue_responses.update('MassiveRecord::ORM::RecordNotFound' => :not_found)
         end
       end
 
