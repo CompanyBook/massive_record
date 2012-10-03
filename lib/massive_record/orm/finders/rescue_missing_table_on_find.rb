@@ -14,23 +14,21 @@ module MassiveRecord
         create_table_and_retry_if_table_missing { super }
       end
 
-
-
       private
-
 
       #
       # Yields the block and if any errors occur we will check if table does exist or not.
       # Create it if it's missing and try again.
       #
       # Errors which we'll retry on are:
-      #   Apache::Hadoop::Hbase::Thrift::IOError          -> Raised on simple find(id) calls
-      #   Apache::Hadoop::Hbase::Thrift::IllegalArgument  -> Raised when a scanner is used
+      #   Apache::Hadoop::Hbase::Thrift::IOError            -> Raised on simple find(id) calls
+      #   Apache::Hadoop::Hbase::Thrift::IllegalArgument    -> Raised when a scanner is used
+      #   Thrift::TransportException -> Raised on timeout
       #
       def create_table_and_retry_if_table_missing # :nodoc:
         begin
           yield
-        rescue Apache::Hadoop::Hbase::Thrift::IOError, Apache::Hadoop::Hbase::Thrift::IllegalArgument => error
+        rescue Apache::Hadoop::Hbase::Thrift::IOError, Apache::Hadoop::Hbase::Thrift::IllegalArgument, ::Thrift::TransportException => error
           if table.exists?
             raise error
           else

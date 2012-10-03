@@ -5,9 +5,9 @@
 #
 
 module Apache
-	module Hadoop
-		module Hbase
-			module Thrift
+  module Hadoop
+    module Hbase
+      module Thrift
       end
     end
   end

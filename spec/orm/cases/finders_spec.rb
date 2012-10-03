@@ -157,9 +157,6 @@ describe "finders" do
     end
   end
 
-
-
-
   describe "#find database test" do
     include CreatePersonBeforeEach
 
@@ -179,7 +176,7 @@ describe "finders" do
       lambda { Person.find("not_found") }.should raise_error MassiveRecord::ORM::RecordNotFound
     end
 
-    it "should raise MassiveRecord::ORM::RecordNotFound error if table does not exist" do
+    it "should raise record not found error if table does not exist" do
       Person.table.destroy
       expect { Person.find("id") }.to raise_error MassiveRecord::ORM::RecordNotFound
     end

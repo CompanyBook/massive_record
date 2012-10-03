@@ -13,8 +13,8 @@ http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 MassiveRecord is following the Cloudera packages of HBase:
 http://www.cloudera.com
 
-Currently, MassiveRecord is tested against HBase 0.90.3, which can be found at the following address:
-https://ccp.cloudera.com/display/SUPPORT/CDH3+Downloadable+Tarballs
+Currently, MassiveRecord is tested against HBase 0.92.1 (CDH4.1), which can be found at the following address:
+https://ccp.cloudera.com/display/SUPPORT/CDH4+Downloadable+Tarballs
 
 Install HBase (OSX):  
 Download the package 'HBase 0.90.3+15.3' and extract it.  
