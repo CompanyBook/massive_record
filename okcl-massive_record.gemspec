@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 require "massive_record/version"
 
 Gem::Specification.new do |s|
-  s.name              = "massive_record"
+  s.name              = "okcl-massive_record"
   s.version           = MassiveRecord::VERSION
   s.platform          = Gem::Platform::RUBY
   s.authors           = ["Companybook"]
