@@ -39,7 +39,7 @@ module MassiveRecord
         end
       
         def close
-          @transport.close.nil?
+          @transport.nil? || @transport.close.nil?
         end
           
         def client
@@ -63,14 +63,20 @@ module MassiveRecord
     
         # Wrapp HBase API to be able to catch errors and try reconnect
         def method_missing(method, *args)
-          begin
-            open if not @client
-            client.send(method, *args) if @client
-          rescue ::Thrift::TransportException => error
+          open if not client
+          client.send(method, *args) if client
+        rescue => e
+          # Unstable or closed connection:
+          # IOError: unable to perform a read or write
+          # TransportException: some packets where lost
+          if (e.is_a?(Apache::Hadoop::Hbase::Thrift::IOError) && e.message =~ /closed stream/) || e.is_a?(::Thrift::TransportException)
+            close
             @transport = nil
             @client = nil
-            open(:reconnecting => true, :reason => error.class)
-            client.send(method, *args) if @client
+            open(:reconnecting => true, :reason => e.class)
+            client.send(method, *args) if client    
+          else
+            raise e
           end
         end
     

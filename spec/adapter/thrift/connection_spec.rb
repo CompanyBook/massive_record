@@ -29,11 +29,6 @@ describe "A connection" do
     @connection.open?.should be_false
   end
   
-  it "should not be able to open a new connection with a wrong configuration and Raise an error" do
-    @connection.port = 1234
-    lambda{@connection.open}.should raise_error(MassiveRecord::Wrapper::Errors::ConnectionException)
-  end
-  
   it "should be open if opened" do
     @connection.open.should be_true
     @connection.open?.should be_true
@@ -48,5 +43,34 @@ describe "A connection" do
   it "should have a collection of tables" do
     @connection.open
     @connection.tables.should be_a_kind_of(MassiveRecord::Wrapper::TablesCollection)
+  end
+
+  it "shouldn't trigger any error if we try to close a close connection" do
+    @connection.close.should be_true
+  end
+
+  describe "catching errors" do
+    it "should not be able to open a new connection with a wrong configuration and Raise an error" do
+      @connection.port = 1234
+      lambda { @connection.open }.should raise_error(MassiveRecord::Wrapper::Errors::ConnectionException)
+    end
+
+    it "should try to open a new connection when an IO error occured" do
+      @connection.open
+      Apache::Hadoop::Hbase::Thrift::Hbase::Client.any_instance.stub(:scannerGetList) do 
+        raise Apache::Hadoop::Hbase::Thrift::IOError, "closed stream"
+      end
+      @connection.should_receive(:open).with(:reconnecting => true, :reason => Apache::Hadoop::Hbase::Thrift::IOError)
+      @connection.scannerGetList("arg1", "arg2")
+    end
+
+    it "should try to open a new connection when some packets are lost" do
+      @connection.open
+      Apache::Hadoop::Hbase::Thrift::Hbase::Client.any_instance.stub(:scannerGetList) do 
+        raise ::Thrift::TransportException
+      end
+      @connection.should_receive(:open).with(:reconnecting => true, :reason => ::Thrift::TransportException)
+      @connection.scannerGetList("arg1", "arg2")
+    end
   end
 end
