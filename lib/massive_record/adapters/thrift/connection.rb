@@ -86,11 +86,11 @@ module MassiveRecord
         # Unstable or closed connection:
         # IOError: unable to perform a read or write
         # TransportException: some packets where lost
-        # ApplicationException: connection problem to get data
+        # ApplicationException: issue to get data
         def reconnect?(e)
           (e.is_a?(Apache::Hadoop::Hbase::Thrift::IOError) && e.message.include?("closed stream")) || 
           e.is_a?(::Thrift::TransportException) || 
-          (e.is_a?(::Thrift::ApplicationException) && e.message.include?("getTableNames failed: unknown result"))
+          e.is_a?(::Thrift::ApplicationException)
         end
 
         def reconnect!(e)
