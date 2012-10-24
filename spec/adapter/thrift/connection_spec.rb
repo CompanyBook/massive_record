@@ -72,5 +72,14 @@ describe "A connection" do
       @connection.should_receive(:open).with(:reconnecting => true, :reason => ::Thrift::TransportException)
       @connection.scannerGetList("arg1", "arg2")
     end
+
+    it "should try to open a new connection when getting table names fails" do
+      @connection.open
+      Apache::Hadoop::Hbase::Thrift::Hbase::Client.any_instance.stub(:getTableNames) do 
+        raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getTableNames failed: unknown result')
+      end
+      @connection.should_receive(:open).with(:reconnecting => true, :reason => ::Thrift::ApplicationException)
+      @connection.tables
+    end
   end
 end

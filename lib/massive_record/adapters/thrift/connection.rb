@@ -53,8 +53,15 @@ module MassiveRecord
         def tables
           collection = MassiveRecord::Wrapper::TablesCollection.new
           collection.connection = self
-          getTableNames().each{|table_name| collection.push(table_name)}
+          (getTableNames() || {}).each{|table_name| collection.push(table_name)}
           collection
+        rescue => e
+          if reconnect?(e)
+            reconnect!(e)
+            tables if client    
+          else
+            raise e
+          end
         end
     
         def load_table(table_name)
@@ -66,18 +73,32 @@ module MassiveRecord
           open if not client
           client.send(method, *args) if client
         rescue => e
-          # Unstable or closed connection:
-          # IOError: unable to perform a read or write
-          # TransportException: some packets where lost
-          if (e.is_a?(Apache::Hadoop::Hbase::Thrift::IOError) && e.message =~ /closed stream/) || e.is_a?(::Thrift::TransportException)
-            close
-            @transport = nil
-            @client = nil
-            open(:reconnecting => true, :reason => e.class)
+          if reconnect?(e)
+            reconnect!(e)
             client.send(method, *args) if client    
           else
             raise e
           end
+        end
+
+        private
+
+        # Unstable or closed connection:
+        # IOError: unable to perform a read or write
+        # TransportException: some packets where lost
+        # ApplicationException: connection problem to get data
+        def reconnect?(e)
+          (e.is_a?(Apache::Hadoop::Hbase::Thrift::IOError) && e.message.include?("closed stream")) || 
+          e.is_a?(::Thrift::TransportException) || 
+          (e.is_a?(::Thrift::ApplicationException) && e.message.include?("getTableNames failed: unknown result"))
+        end
+
+        def reconnect!(e)
+          close
+          sleep 0.5
+          @transport = nil
+          @client = nil
+          open(:reconnecting => true, :reason => e.class)
         end
     
       end
