@@ -26,8 +26,6 @@ describe MassiveRecord::Wrapper::Row do
     end
   end
 
-
-
   after do
     table.all.each &:destroy
   end
@@ -36,10 +34,6 @@ describe MassiveRecord::Wrapper::Row do
     table.destroy
     connection.close
   end
-
-  
-
-
 
   describe "ids utf-8 encoded" do
     context "new record" do

@@ -8,7 +8,7 @@ module MassiveRecord
         attr_accessor :host, :port, :timeout
     
         def initialize(opts = {})
-          @timeout = 4000
+          @timeout = opts[:timeout] || 4
           @host    = opts[:host]
           @port    = opts[:port] || 9090
           @instrumenter = ActiveSupport::Notifications.instrumenter
@@ -39,7 +39,7 @@ module MassiveRecord
         end
       
         def close
-          @transport.close.nil?
+          @transport.nil? || @transport.close.nil?
         end
           
         def client
@@ -53,8 +53,15 @@ module MassiveRecord
         def tables
           collection = MassiveRecord::Wrapper::TablesCollection.new
           collection.connection = self
-          getTableNames().each{|table_name| collection.push(table_name)}
+          (getTableNames() || {}).each{|table_name| collection.push(table_name)}
           collection
+        rescue => e
+          if reconnect?(e)
+            reconnect!(e)
+            tables if client    
+          else
+            raise e
+          end
         end
     
         def load_table(table_name)
@@ -63,15 +70,35 @@ module MassiveRecord
     
         # Wrapp HBase API to be able to catch errors and try reconnect
         def method_missing(method, *args)
-          begin
-            open if not @client
-            client.send(method, *args) if @client
-          rescue ::Thrift::TransportException => error
-            @transport = nil
-            @client = nil
-            open(:reconnecting => true, :reason => error.class)
-            client.send(method, *args) if @client
+          open if not client
+          client.send(method, *args) if client
+        rescue => e
+          if reconnect?(e)
+            reconnect!(e)
+            client.send(method, *args) if client    
+          else
+            raise e
           end
+        end
+
+        private
+
+        # Unstable or closed connection:
+        # IOError: unable to perform a read or write
+        # TransportException: some packets where lost
+        # ApplicationException: issue to get data
+        def reconnect?(e)
+          (e.is_a?(Apache::Hadoop::Hbase::Thrift::IOError) && e.message.include?("closed stream")) || 
+          e.is_a?(::Thrift::TransportException) || 
+          e.is_a?(::Thrift::ApplicationException)
+        end
+
+        def reconnect!(e)
+          close
+          sleep 0.5
+          @transport = nil
+          @client = nil
+          open(:reconnecting => true, :reason => e.class)
         end
     
       end

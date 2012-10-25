@@ -1,6 +1,6 @@
 # v0.2.3 (git develop)
 
--
+- Thirft timeout can be configured
 
 
 # v0.2.2 (git master)

@@ -40,6 +40,8 @@ module CreatePersonBeforeEach
       @table = MassiveRecord::Wrapper::Table.new(@connection, Person.table_name)
       @table.column_families.create(:info)
       @table.column_families.create(:base)
+      @table.column_families.create(:addresses)
+      @table.column_families.create(:addresses_with_timestamp)
       @table.save
       
       @row = MassiveRecord::Wrapper::Row.new
