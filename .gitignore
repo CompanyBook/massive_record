@@ -6,3 +6,4 @@ spec/config.yml
 rdoc/
 .project
 .idea/
+Gemfile.lock
