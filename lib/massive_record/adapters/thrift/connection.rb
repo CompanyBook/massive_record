@@ -75,7 +75,7 @@ module MassiveRecord
         rescue => e
           if reconnect?(e)
             reconnect!(e)
-            client.send(method, *args) if client    
+            send(method, *args) if client    
           else
             raise e
           end
@@ -95,7 +95,7 @@ module MassiveRecord
 
         def reconnect!(e)
           close
-          sleep 0.5
+          sleep 0.4
           @transport = nil
           @client = nil
           open(:reconnecting => true, :reason => e.class)
