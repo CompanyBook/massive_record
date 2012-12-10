@@ -6,7 +6,7 @@ module MassiveRecord
       class Retryable < MassiveRecord::Wrapper::Retryable
 
         def initialize(opts = {}, &block)
-          opts[:on] ||= Apache::Hadoop::Hbase::Thrift::IOError
+          opts[:on] ||= ::Apache::Hadoop::Hbase::Thrift::IOError
           super
         end
 

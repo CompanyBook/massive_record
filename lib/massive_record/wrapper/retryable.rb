@@ -4,7 +4,7 @@
 # In the case of a plain Ruby application running as a daemon, the same error could
 # shutdown your application. This class helps you to keep trying if you loose the 
 # connection with Thrift.
-# The exception Apache::Hadoop::Hbase::Thrift::IOError will be catched and the 
+# The exception ::Apache::Hadoop::Hbase::Thrift::IOError will be catched and the 
 # block inside will be tried again.
 #
 # Retryable.new do
@@ -20,7 +20,7 @@ module MassiveRecord
 
       #
       # Options:
-      # on     => Class of the Exception, Apache::Hadoop::Hbase::Thrift::IOError by default
+      # on     => Class of the Exception, ::Apache::Hadoop::Hbase::Thrift::IOError by default
       # retry  => Maximum amount of time the code is trying to run
       # logger => Initialized Ruby Logger object
       #

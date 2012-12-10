@@ -240,13 +240,11 @@ describe "A table" do
   end
   
   describe "can be scanned" do
-    before do
+    before(:all) do
       @table = MassiveRecord::Wrapper::Table.new(@connection, MR_CONFIG['table'])
-      @table.column_families.create(:info)
-      @table.column_families.create(:misc)
-      
+      @table.create_column_families([:info, :misc])
       @table.save
-      
+
       ["A", "B"].each do |prefix|
         1.upto(5).each do |i|
           row = MassiveRecord::Wrapper::Row.new
@@ -258,10 +256,10 @@ describe "A table" do
       end
     end
     
-    after do
+    after(:all) do
       @table.destroy
     end
-    
+
     it "should contains 10 rows" do
       @table.all.size.should == 10
       @table.all.collect(&:id).size.should == 10
