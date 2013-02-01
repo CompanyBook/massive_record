@@ -97,7 +97,7 @@ module MassiveRecord
 
         def reconnect!(e)
           close
-          sleep 0.4
+          sleep 1
           @transport = nil
           @client = nil
           open(:reconnecting => true, :reason => e.class)
