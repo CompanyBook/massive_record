@@ -1,4 +1,4 @@
 # Please copy the content of this file to ./config.yml to be able to run all the tests
-host: somewhere.compute.amazonaws.com
+host: 127.0.0.1
 port: 9090
 table: massive_record_people_test

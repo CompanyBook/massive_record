@@ -40,6 +40,8 @@ module MassiveRecord
       
         def close
           @transport.nil? || @transport.close.nil?
+        rescue IOError
+          true          
         end
           
         def client
@@ -88,14 +90,14 @@ module MassiveRecord
         # TransportException: some packets where lost
         # ApplicationException: issue to get data
         def reconnect?(e)
-          (e.is_a?(Apache::Hadoop::Hbase::Thrift::IOError) && e.message.include?("closed stream")) || 
+          (e.is_a?(::Apache::Hadoop::Hbase::Thrift::IOError) && e.message.include?("closed stream")) || 
           e.is_a?(::Thrift::TransportException) || 
           e.is_a?(::Thrift::ApplicationException)
         end
 
         def reconnect!(e)
           close
-          sleep 0.4
+          sleep 1
           @transport = nil
           @client = nil
           open(:reconnecting => true, :reason => e.class)

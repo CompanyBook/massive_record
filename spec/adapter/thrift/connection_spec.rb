@@ -58,9 +58,9 @@ describe "A connection" do
     it "should try to open a new connection when an IO error occured" do
       @connection.open
       Apache::Hadoop::Hbase::Thrift::Hbase::Client.any_instance.stub(:scannerGetList) do 
-        raise Apache::Hadoop::Hbase::Thrift::IOError, "closed stream"
+        raise ::Apache::Hadoop::Hbase::Thrift::IOError, "closed stream"
       end
-      @connection.should_receive(:open).with(:reconnecting => true, :reason => Apache::Hadoop::Hbase::Thrift::IOError)
+      @connection.should_receive(:open).with(:reconnecting => true, :reason => ::Apache::Hadoop::Hbase::Thrift::IOError)
       @connection.scannerGetList("arg1", "arg2")
     end
 
