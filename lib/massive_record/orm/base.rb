@@ -241,7 +241,7 @@ module MassiveRecord
 
       def id
         raw_id = read_attribute(:id)
-        if (raw_id.nil? or raw_id.empty?) && respond_to?(:default_id, true)
+        if (raw_id.nil? || raw_id.respond_to?(:empty?) && raw_id.empty?) && respond_to?(:default_id, true)
           @attributes["id"] = default_id
         end
 
