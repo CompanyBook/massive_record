@@ -1,3 +1,4 @@
+
 module MassiveRecord; end
 
 # Adapter
@@ -15,4 +16,6 @@ if defined?(::Rails) && ::Rails::VERSION::MAJOR == 3
   require 'massive_record/rails/railtie'
 end
 
-require 'active_support/core_ext/hash'
+require 'active_support/all'
+require 'awesome_print'
+require_relative '../lib/thrift/socket'
