@@ -56,11 +56,11 @@ module Thrift
     end
 
     def _read_nonblocking(sz)
+      # it's possible to interrupt select for something other than the timeout
+      # so we need to ensure we've waited long enough, but not too long
+      timespent = 0
+      start = Time.now
       begin
-        # it's possible to interrupt select for something other than the timeout
-        # so we need to ensure we've waited long enough, but not too long
-        start = Time.now
-        timespent = 0
         data = @handle.read_nonblock(sz)
 
       rescue Errno::EWOULDBLOCK, Errno::EAGAIN, IO::WaitReadable
