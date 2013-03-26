@@ -84,6 +84,16 @@ describe "A connection" do
 
     it "should timeout" do
       @connection.open
+      handle = @connection.transport.instance_eval { @transport }.handle
+      handle.stub(:read_nonblock) do
+        raise Errno::EAGAIN
+      end
+      @connection.should_receive(:open).with(:reconnecting => true, :reason => ::Thrift::TransportException)
+      @connection.tables
+    end
+
+    xit "should timeout" do
+      @connection.open
 
       system('sudo ipfw pipe 1 config bw 1Byte/s')
       system('sudo ipfw add 1 pipe 1 src-port 9090')
