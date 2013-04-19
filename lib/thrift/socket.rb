@@ -63,8 +63,8 @@ module Thrift
       begin
         data = @handle.read_nonblock(sz)
 
-      rescue Errno::EWOULDBLOCK, Errno::EAGAIN, IO::WaitReadable
-        if timespent < @timeout && IO.select([@handle], nil, nil, @timeout)
+      rescue IO::WaitReadable
+        if timespent < @timeout && IO.select([@handle], nil, nil, @timeout - timespent)
           timespent = Time.now - start
           retry
         else
@@ -75,6 +75,5 @@ module Thrift
     rescue EOFError
       raise Errno::ECONNRESET
     end
-
   end
 end
