@@ -53,7 +53,7 @@ module MassiveRecord
 
         def populate_rows(results)
           results.collect do |result|
-            populate_row(result) unless result.row.match(/^#{start_key.gsub("|", "\\|")}/).nil?
+            populate_row(result)
           end.select { |r| !r.nil? }
         end
 
