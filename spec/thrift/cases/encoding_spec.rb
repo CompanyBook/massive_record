@@ -8,7 +8,7 @@ describe "encoding" do
 
   before do
     transport = Thrift::BufferedTransport.new(Thrift::Socket.new(MR_CONFIG['host'], 9090))
-    protocol  = Thrift::BinaryProtocol.new(transport)
+    protocol  = Thrift::BinaryProtocolAccelerated.new(transport)
     @client   = Apache::Hadoop::Hbase::Thrift::Hbase::Client.new(protocol)
     
     transport.open()

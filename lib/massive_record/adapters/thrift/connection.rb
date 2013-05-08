@@ -26,7 +26,7 @@ module MassiveRecord
                                   })
 
           @instrumenter.instrument "adapter_connecting.massive_record", options do
-            protocol = ::Thrift::BinaryProtocol.new(transport)
+            protocol = ::Thrift::BinaryProtocolAccelerated.new(transport)
             @client = Apache::Hadoop::Hbase::Thrift::Hbase::Client.new(protocol)
 
             begin
