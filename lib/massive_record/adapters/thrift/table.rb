@@ -2,9 +2,9 @@ module MassiveRecord
   module Adapters
     module Thrift
       class Table
-        
+
         attr_accessor :connection, :name, :column_families
-    
+
         #
         # TODO
         # Helper method to inform about changed options. Remove this in next version..
@@ -12,7 +12,7 @@ module MassiveRecord
         #
         def self.warn_and_change_deprecated_finder_options(options)
           deprecations = {
-            :start => :starts_with
+              :start => :starts_with
           }
 
           deprecations.each do |deprecated, current|
@@ -22,7 +22,7 @@ module MassiveRecord
               options[current] = options.delete deprecated
             end
           end
-          
+
           options
         end
 
@@ -31,70 +31,70 @@ module MassiveRecord
           @name = table_name.to_s
           init_column_families
         end
-    
-        def init_column_families      
+
+        def init_column_families
           @column_families = MassiveRecord::Wrapper::ColumnFamiliesCollection.new
           @column_families.table = self
         end
-    
+
         def self.create(connection, table_name, column_families = [])
           table = self.new(connection, table_name)
           table.column_families = column_families
           table.save
         end
-    
+
         def save
           begin
-            client.createTable(name, @column_families.collect{|cf| cf.descriptor}).nil?
+            client.createTable(name, @column_families.collect { |cf| cf.descriptor }).nil?
           rescue ::Apache::Hadoop::Hbase::Thrift::AlreadyExists => ex
             "The table already exists."
           rescue => ex
             raise ex
           end
         end
-    
+
         def client
           connection
-        end    
-    
+        end
+
         def disable
           client.disableTable(name).nil?
         end
-    
+
         def destroy
           disable
           @table_exists = false
           client.deleteTable(name).nil?
         end
-    
+
         def create_column_families(column_family_names)
-          column_family_names.each{|name| @column_families.push(ColumnFamily.new(name))}
+          column_family_names.each { |name| @column_families.push(ColumnFamily.new(name)) }
         end
-    
+
         def fetch_column_families
           @column_families.clear
-          client.getColumnDescriptors(name).each do |column_name, description| 
+          client.getColumnDescriptors(name).each do |column_name, description|
             @column_families.push(ColumnFamily.new(column_name.split(":").first))
           end
           @column_families
         end
-    
+
         def column_family_names
-          @column_families.collect{|column_family| column_family.name.to_s}
+          @column_families.collect { |column_family| column_family.name.to_s }
         end
-    
+
         def fetch_column_family_names
           fetch_column_families
           column_family_names
         end
-      
+
         def column_names
           first.column_names
         end
-    
+
         def scanner(opts = {})
           scanner = Scanner.new(connection, name, column_family_names, format_options_for_scanner(opts))
-        
+
           if block_given?
             begin
               scanner.open
@@ -106,38 +106,41 @@ module MassiveRecord
             scanner
           end
         end
-      
+
         def format_options_for_scanner(opts = {})
           opts = self.class.warn_and_change_deprecated_finder_options(opts)
 
-          start = opts[:starts_with] && opts[:starts_with].dup.force_encoding(Encoding::BINARY)
+          start = opts[:starts_with] || opts[:start_key]
+          start = start && start.dup.force_encoding(Encoding::BINARY)
+          stop = opts[:stop_key] && opts[:stop_key].dup.force_encoding(Encoding::BINARY)
           start_prefix = opts[:start_prefix] && opts[:start_prefix].dup.force_encoding(Encoding::BINARY)
           offset = opts[:offset] && opts[:offset].dup.force_encoding(Encoding::BINARY)
 
           {
-            :start_key  => start,
-            :start_prefix  => start_prefix,
-            :offset_key => offset,
-            :created_at => opts[:created_at],
-            :columns    => opts[:select], # list of column families to fetch from hbase
-            :limit      => opts[:limit] || opts[:batch_size]
+              :start_key => start,
+              :stop_key => stop,
+              :start_prefix => start_prefix,
+              :offset_key => offset,
+              :created_at => opts[:created_at],
+              :columns => opts[:select], # list of column families to fetch from hbase
+              :limit => opts[:limit] || opts[:batch_size]
           }
         end
-      
+
         def all(opts = {})
           rows = []
-          
+
           find_in_batches(opts) do |batch|
             rows |= batch
           end
-          
+
           rows
         end
-      
+
         def first(opts = {})
           all(opts.merge(:limit => 1)).first
         end
-        
+
         #
         # Fast way of fetching the value of the cell
         # table.get("my_id", :info, :name) # => "Bob"
@@ -155,7 +158,7 @@ module MassiveRecord
             MassiveRecord::Wrapper::Cell.populate_from_tcell(cell)
           end
         end
-        
+
         #
         # Finds one or multiple ids
         #
@@ -164,7 +167,7 @@ module MassiveRecord
         def find(*args)
           options = args.extract_options!.symbolize_keys
           what_to_find = args.first
-          
+
           if column_families_to_find = options[:select]
             column_families_to_find = column_families_to_find.collect { |c| c.to_s }
           end
@@ -181,14 +184,14 @@ module MassiveRecord
           end
         end
 
-        def find_in_batches(opts = {})        
+        def find_in_batches(opts = {})
           results_limit = opts[:limit]
           results_found = 0
-          
+
           scanner(opts) do |s|
             while (true) do
               s.limit = results_limit - results_found if !results_limit.nil? && results_limit <= results_found + s.limit
-              
+
               rows = s.fetch_rows
               if rows.empty?
                 break
@@ -199,19 +202,19 @@ module MassiveRecord
             end
           end
         end
-    
+
         def exists?
           @table_exists ||= connection.tables.include?(name)
         end
-    
+
         def regions
           connection.getTableRegions(name).collect do |r|
             {
-              :start_key => r.startKey,
-              :end_key => r.endKey,
-              :id => r.id,
-              :name => r.name,
-              :version => r.version
+                :start_key => r.startKey,
+                :end_key => r.endKey,
+                :id => r.id,
+                :name => r.name,
+                :version => r.version
             }
           end
         end

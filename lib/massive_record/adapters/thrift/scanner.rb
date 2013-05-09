@@ -4,7 +4,7 @@ module MassiveRecord
       class Scanner
 
         attr_accessor :connection, :table_name, :column_family_names, :opened_scanner
-        attr_accessor :start_key, :start_prefix, :offset_key, :created_at, :limit
+        attr_accessor :start_key, :stop_key, :start_prefix, :offset_key, :created_at, :limit
         attr_accessor :formatted_column_family_names, :column_family_names
 
         def initialize(connection, table_name, column_family_names, opts = {})
@@ -14,6 +14,7 @@ module MassiveRecord
           @column_family_names = opts[:columns] unless opts[:columns].nil?
           @formatted_column_family_names = @column_family_names.collect { |n| "#{n.split(":").first}:" }
           @start_key = opts[:start_key].to_s
+          @stop_key = opts[:stop_key].to_s
           @start_prefix = opts[:start_prefix].to_s
           @offset_key = opts[:offset_key].to_s
           @created_at = opts[:created_at].to_s
@@ -25,7 +26,9 @@ module MassiveRecord
         end
 
         def open
-          if !start_prefix.empty?
+          if !stop_key.empty?
+            self.opened_scanner = connection.scannerOpenWithStop(table_name, start_key, stop_key, formatted_column_family_names)
+          elsif !start_prefix.empty?
             self.opened_scanner = connection.scannerOpenWithPrefix(table_name, start_prefix, formatted_column_family_names)
           elsif created_at.empty?
             self.opened_scanner = connection.scannerOpen(table_name, key, formatted_column_family_names)
