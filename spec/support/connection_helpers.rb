@@ -19,7 +19,7 @@ module SetTableNamesToTestTable
   extend ActiveSupport::Concern
 
   included do
-    include MassiveRecord::Rspec::SimpleDatabaseCleaner
+    include MassiveRecord::RSpec::SimpleDatabaseCleaner
 
     after do
       MassiveRecord::ORM::Base.reset_connection!

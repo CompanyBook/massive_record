@@ -24,7 +24,6 @@ describe "log subscriber" do
 
   after do
     MassiveRecord::ORM::Base.logger = @old_logger
-    ActiveSupport::Notifications.notifier = nil
   end
 
 

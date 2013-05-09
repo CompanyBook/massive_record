@@ -3,12 +3,12 @@ require 'spec_helper'
 
 describe "encoding" do
   before :all do
-    @table_name = "encoding_test" + ActiveSupport::SecureRandom.hex(3)
+    @table_name = "encoding_test" + SecureRandom.hex(3)
   end
 
   before do
     transport = Thrift::BufferedTransport.new(Thrift::Socket.new(MR_CONFIG['host'], 9090))
-    protocol  = Thrift::BinaryProtocol.new(transport)
+    protocol  = Thrift::BinaryProtocolAccelerated.new(transport)
     @client   = Apache::Hadoop::Hbase::Thrift::Hbase::Client.new(protocol)
     
     transport.open()

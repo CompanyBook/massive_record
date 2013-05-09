@@ -1,5 +1,3 @@
-require 'active_support/secure_random'
-
 #
 # This module does a couple of things:
 #   1.  Iterates over all tables and adds a prefix to
@@ -9,7 +7,7 @@ require 'active_support/secure_random'
 #   3.  Destroy tables after all
 #
 module MassiveRecord
-  module Rspec
+  module RSpec
     module SimpleDatabaseCleaner
       extend ActiveSupport::Concern
 

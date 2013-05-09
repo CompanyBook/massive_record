@@ -9,7 +9,7 @@ module MassiveRecord
       end
 
       module ClassMethods
-        extend ActiveSupport::Memoizable
+        extend Memoist
         @@connection = nil
 
         def connection

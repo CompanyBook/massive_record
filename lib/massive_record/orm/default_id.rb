@@ -8,12 +8,10 @@ module MassiveRecord
       end
 
 
-      module InstanceMethods
-        private
+      private
 
-        def ensure_record_has_id
-          self.id = next_id if id.blank?
-        end
+      def ensure_record_has_id
+        self.id = next_id if id.blank?
       end
     end
   end

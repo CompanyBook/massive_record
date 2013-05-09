@@ -5,7 +5,7 @@ require 'active_support/core_ext/class/subclasses'
 require 'active_support/core_ext/module'
 require 'active_support/core_ext/string'
 require 'active_support/core_ext/array'
-require 'active_support/memoizable'
+require 'memoist'
 
 require 'massive_record/orm/schema'
 require 'massive_record/orm/coders'
@@ -240,7 +240,8 @@ module MassiveRecord
 
 
       def id
-        if read_attribute(:id).blank? && respond_to?(:default_id, true)
+        raw_id = read_attribute(:id)
+        if (raw_id.nil? || raw_id.respond_to?(:empty?) && raw_id.empty?) && respond_to?(:default_id, true)
           @attributes["id"] = default_id
         end
 

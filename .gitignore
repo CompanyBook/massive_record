@@ -4,3 +4,6 @@ pkg/*
 .DS_Store
 spec/config.yml
 rdoc/
+.project
+.idea/
+Gemfile.lock

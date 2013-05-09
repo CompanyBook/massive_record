@@ -3,10 +3,6 @@ module MassiveRecord
     module AttributeMethods
       module Read
         extend ActiveSupport::Concern
-
-        included do
-          attribute_method_suffix ""
-        end
         
 
         module ClassMethods
