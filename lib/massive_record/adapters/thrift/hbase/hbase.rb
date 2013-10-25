@@ -168,13 +168,13 @@ module Apache
               return
             end
 
-            def get(tableName, row, column)
-              send_get(tableName, row, column)
+            def get(tableName, row, column, attributes)
+              send_get(tableName, row, column, attributes)
               return recv_get()
             end
 
-            def send_get(tableName, row, column)
-              send_message('get', Get_args, :tableName => tableName, :row => row, :column => column)
+            def send_get(tableName, row, column, attributes)
+              send_message('get', Get_args, :tableName => tableName, :row => row, :column => column, :attributes => attributes)
             end
 
             def recv_get()
@@ -184,13 +184,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'get failed: unknown result')
             end
 
-            def getVer(tableName, row, column, numVersions)
-              send_getVer(tableName, row, column, numVersions)
+            def getVer(tableName, row, column, numVersions, attributes)
+              send_getVer(tableName, row, column, numVersions, attributes)
               return recv_getVer()
             end
 
-            def send_getVer(tableName, row, column, numVersions)
-              send_message('getVer', GetVer_args, :tableName => tableName, :row => row, :column => column, :numVersions => numVersions)
+            def send_getVer(tableName, row, column, numVersions, attributes)
+              send_message('getVer', GetVer_args, :tableName => tableName, :row => row, :column => column, :numVersions => numVersions, :attributes => attributes)
             end
 
             def recv_getVer()
@@ -200,13 +200,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getVer failed: unknown result')
             end
 
-            def getVerTs(tableName, row, column, timestamp, numVersions)
-              send_getVerTs(tableName, row, column, timestamp, numVersions)
+            def getVerTs(tableName, row, column, timestamp, numVersions, attributes)
+              send_getVerTs(tableName, row, column, timestamp, numVersions, attributes)
               return recv_getVerTs()
             end
 
-            def send_getVerTs(tableName, row, column, timestamp, numVersions)
-              send_message('getVerTs', GetVerTs_args, :tableName => tableName, :row => row, :column => column, :timestamp => timestamp, :numVersions => numVersions)
+            def send_getVerTs(tableName, row, column, timestamp, numVersions, attributes)
+              send_message('getVerTs', GetVerTs_args, :tableName => tableName, :row => row, :column => column, :timestamp => timestamp, :numVersions => numVersions, :attributes => attributes)
             end
 
             def recv_getVerTs()
@@ -216,13 +216,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getVerTs failed: unknown result')
             end
 
-            def getRow(tableName, row)
-              send_getRow(tableName, row)
+            def getRow(tableName, row, attributes)
+              send_getRow(tableName, row, attributes)
               return recv_getRow()
             end
 
-            def send_getRow(tableName, row)
-              send_message('getRow', GetRow_args, :tableName => tableName, :row => row)
+            def send_getRow(tableName, row, attributes)
+              send_message('getRow', GetRow_args, :tableName => tableName, :row => row, :attributes => attributes)
             end
 
             def recv_getRow()
@@ -232,13 +232,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRow failed: unknown result')
             end
 
-            def getRowWithColumns(tableName, row, columns)
-              send_getRowWithColumns(tableName, row, columns)
+            def getRowWithColumns(tableName, row, columns, attributes)
+              send_getRowWithColumns(tableName, row, columns, attributes)
               return recv_getRowWithColumns()
             end
 
-            def send_getRowWithColumns(tableName, row, columns)
-              send_message('getRowWithColumns', GetRowWithColumns_args, :tableName => tableName, :row => row, :columns => columns)
+            def send_getRowWithColumns(tableName, row, columns, attributes)
+              send_message('getRowWithColumns', GetRowWithColumns_args, :tableName => tableName, :row => row, :columns => columns, :attributes => attributes)
             end
 
             def recv_getRowWithColumns()
@@ -248,13 +248,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRowWithColumns failed: unknown result')
             end
 
-            def getRowTs(tableName, row, timestamp)
-              send_getRowTs(tableName, row, timestamp)
+            def getRowTs(tableName, row, timestamp, attributes)
+              send_getRowTs(tableName, row, timestamp, attributes)
               return recv_getRowTs()
             end
 
-            def send_getRowTs(tableName, row, timestamp)
-              send_message('getRowTs', GetRowTs_args, :tableName => tableName, :row => row, :timestamp => timestamp)
+            def send_getRowTs(tableName, row, timestamp, attributes)
+              send_message('getRowTs', GetRowTs_args, :tableName => tableName, :row => row, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_getRowTs()
@@ -264,13 +264,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRowTs failed: unknown result')
             end
 
-            def getRowWithColumnsTs(tableName, row, columns, timestamp)
-              send_getRowWithColumnsTs(tableName, row, columns, timestamp)
+            def getRowWithColumnsTs(tableName, row, columns, timestamp, attributes)
+              send_getRowWithColumnsTs(tableName, row, columns, timestamp, attributes)
               return recv_getRowWithColumnsTs()
             end
 
-            def send_getRowWithColumnsTs(tableName, row, columns, timestamp)
-              send_message('getRowWithColumnsTs', GetRowWithColumnsTs_args, :tableName => tableName, :row => row, :columns => columns, :timestamp => timestamp)
+            def send_getRowWithColumnsTs(tableName, row, columns, timestamp, attributes)
+              send_message('getRowWithColumnsTs', GetRowWithColumnsTs_args, :tableName => tableName, :row => row, :columns => columns, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_getRowWithColumnsTs()
@@ -280,13 +280,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRowWithColumnsTs failed: unknown result')
             end
 
-            def getRows(tableName, rows)
-              send_getRows(tableName, rows)
+            def getRows(tableName, rows, attributes)
+              send_getRows(tableName, rows, attributes)
               return recv_getRows()
             end
 
-            def send_getRows(tableName, rows)
-              send_message('getRows', GetRows_args, :tableName => tableName, :rows => rows)
+            def send_getRows(tableName, rows, attributes)
+              send_message('getRows', GetRows_args, :tableName => tableName, :rows => rows, :attributes => attributes)
             end
 
             def recv_getRows()
@@ -296,13 +296,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRows failed: unknown result')
             end
 
-            def getRowsWithColumns(tableName, rows, columns)
-              send_getRowsWithColumns(tableName, rows, columns)
+            def getRowsWithColumns(tableName, rows, columns, attributes)
+              send_getRowsWithColumns(tableName, rows, columns, attributes)
               return recv_getRowsWithColumns()
             end
 
-            def send_getRowsWithColumns(tableName, rows, columns)
-              send_message('getRowsWithColumns', GetRowsWithColumns_args, :tableName => tableName, :rows => rows, :columns => columns)
+            def send_getRowsWithColumns(tableName, rows, columns, attributes)
+              send_message('getRowsWithColumns', GetRowsWithColumns_args, :tableName => tableName, :rows => rows, :columns => columns, :attributes => attributes)
             end
 
             def recv_getRowsWithColumns()
@@ -312,13 +312,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRowsWithColumns failed: unknown result')
             end
 
-            def getRowsTs(tableName, rows, timestamp)
-              send_getRowsTs(tableName, rows, timestamp)
+            def getRowsTs(tableName, rows, timestamp, attributes)
+              send_getRowsTs(tableName, rows, timestamp, attributes)
               return recv_getRowsTs()
             end
 
-            def send_getRowsTs(tableName, rows, timestamp)
-              send_message('getRowsTs', GetRowsTs_args, :tableName => tableName, :rows => rows, :timestamp => timestamp)
+            def send_getRowsTs(tableName, rows, timestamp, attributes)
+              send_message('getRowsTs', GetRowsTs_args, :tableName => tableName, :rows => rows, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_getRowsTs()
@@ -328,13 +328,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRowsTs failed: unknown result')
             end
 
-            def getRowsWithColumnsTs(tableName, rows, columns, timestamp)
-              send_getRowsWithColumnsTs(tableName, rows, columns, timestamp)
+            def getRowsWithColumnsTs(tableName, rows, columns, timestamp, attributes)
+              send_getRowsWithColumnsTs(tableName, rows, columns, timestamp, attributes)
               return recv_getRowsWithColumnsTs()
             end
 
-            def send_getRowsWithColumnsTs(tableName, rows, columns, timestamp)
-              send_message('getRowsWithColumnsTs', GetRowsWithColumnsTs_args, :tableName => tableName, :rows => rows, :columns => columns, :timestamp => timestamp)
+            def send_getRowsWithColumnsTs(tableName, rows, columns, timestamp, attributes)
+              send_message('getRowsWithColumnsTs', GetRowsWithColumnsTs_args, :tableName => tableName, :rows => rows, :columns => columns, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_getRowsWithColumnsTs()
@@ -344,13 +344,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRowsWithColumnsTs failed: unknown result')
             end
 
-            def mutateRow(tableName, row, mutations)
-              send_mutateRow(tableName, row, mutations)
+            def mutateRow(tableName, row, mutations, attributes)
+              send_mutateRow(tableName, row, mutations, attributes)
               recv_mutateRow()
             end
 
-            def send_mutateRow(tableName, row, mutations)
-              send_message('mutateRow', MutateRow_args, :tableName => tableName, :row => row, :mutations => mutations)
+            def send_mutateRow(tableName, row, mutations, attributes)
+              send_message('mutateRow', MutateRow_args, :tableName => tableName, :row => row, :mutations => mutations, :attributes => attributes)
             end
 
             def recv_mutateRow()
@@ -360,13 +360,13 @@ module Apache
               return
             end
 
-            def mutateRowTs(tableName, row, mutations, timestamp)
-              send_mutateRowTs(tableName, row, mutations, timestamp)
+            def mutateRowTs(tableName, row, mutations, timestamp, attributes)
+              send_mutateRowTs(tableName, row, mutations, timestamp, attributes)
               recv_mutateRowTs()
             end
 
-            def send_mutateRowTs(tableName, row, mutations, timestamp)
-              send_message('mutateRowTs', MutateRowTs_args, :tableName => tableName, :row => row, :mutations => mutations, :timestamp => timestamp)
+            def send_mutateRowTs(tableName, row, mutations, timestamp, attributes)
+              send_message('mutateRowTs', MutateRowTs_args, :tableName => tableName, :row => row, :mutations => mutations, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_mutateRowTs()
@@ -376,13 +376,13 @@ module Apache
               return
             end
 
-            def mutateRows(tableName, rowBatches)
-              send_mutateRows(tableName, rowBatches)
+            def mutateRows(tableName, rowBatches, attributes)
+              send_mutateRows(tableName, rowBatches, attributes)
               recv_mutateRows()
             end
 
-            def send_mutateRows(tableName, rowBatches)
-              send_message('mutateRows', MutateRows_args, :tableName => tableName, :rowBatches => rowBatches)
+            def send_mutateRows(tableName, rowBatches, attributes)
+              send_message('mutateRows', MutateRows_args, :tableName => tableName, :rowBatches => rowBatches, :attributes => attributes)
             end
 
             def recv_mutateRows()
@@ -392,13 +392,13 @@ module Apache
               return
             end
 
-            def mutateRowsTs(tableName, rowBatches, timestamp)
-              send_mutateRowsTs(tableName, rowBatches, timestamp)
+            def mutateRowsTs(tableName, rowBatches, timestamp, attributes)
+              send_mutateRowsTs(tableName, rowBatches, timestamp, attributes)
               recv_mutateRowsTs()
             end
 
-            def send_mutateRowsTs(tableName, rowBatches, timestamp)
-              send_message('mutateRowsTs', MutateRowsTs_args, :tableName => tableName, :rowBatches => rowBatches, :timestamp => timestamp)
+            def send_mutateRowsTs(tableName, rowBatches, timestamp, attributes)
+              send_message('mutateRowsTs', MutateRowsTs_args, :tableName => tableName, :rowBatches => rowBatches, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_mutateRowsTs()
@@ -425,13 +425,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'atomicIncrement failed: unknown result')
             end
 
-            def deleteAll(tableName, row, column)
-              send_deleteAll(tableName, row, column)
+            def deleteAll(tableName, row, column, attributes)
+              send_deleteAll(tableName, row, column, attributes)
               recv_deleteAll()
             end
 
-            def send_deleteAll(tableName, row, column)
-              send_message('deleteAll', DeleteAll_args, :tableName => tableName, :row => row, :column => column)
+            def send_deleteAll(tableName, row, column, attributes)
+              send_message('deleteAll', DeleteAll_args, :tableName => tableName, :row => row, :column => column, :attributes => attributes)
             end
 
             def recv_deleteAll()
@@ -440,13 +440,13 @@ module Apache
               return
             end
 
-            def deleteAllTs(tableName, row, column, timestamp)
-              send_deleteAllTs(tableName, row, column, timestamp)
+            def deleteAllTs(tableName, row, column, timestamp, attributes)
+              send_deleteAllTs(tableName, row, column, timestamp, attributes)
               recv_deleteAllTs()
             end
 
-            def send_deleteAllTs(tableName, row, column, timestamp)
-              send_message('deleteAllTs', DeleteAllTs_args, :tableName => tableName, :row => row, :column => column, :timestamp => timestamp)
+            def send_deleteAllTs(tableName, row, column, timestamp, attributes)
+              send_message('deleteAllTs', DeleteAllTs_args, :tableName => tableName, :row => row, :column => column, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_deleteAllTs()
@@ -455,13 +455,13 @@ module Apache
               return
             end
 
-            def deleteAllRow(tableName, row)
-              send_deleteAllRow(tableName, row)
+            def deleteAllRow(tableName, row, attributes)
+              send_deleteAllRow(tableName, row, attributes)
               recv_deleteAllRow()
             end
 
-            def send_deleteAllRow(tableName, row)
-              send_message('deleteAllRow', DeleteAllRow_args, :tableName => tableName, :row => row)
+            def send_deleteAllRow(tableName, row, attributes)
+              send_message('deleteAllRow', DeleteAllRow_args, :tableName => tableName, :row => row, :attributes => attributes)
             end
 
             def recv_deleteAllRow()
@@ -470,13 +470,43 @@ module Apache
               return
             end
 
-            def deleteAllRowTs(tableName, row, timestamp)
-              send_deleteAllRowTs(tableName, row, timestamp)
+            def increment(increment)
+              send_increment(increment)
+              recv_increment()
+            end
+
+            def send_increment(increment)
+              send_message('increment', Increment_args, :increment => increment)
+            end
+
+            def recv_increment()
+              result = receive_message(Increment_result)
+              raise result.io unless result.io.nil?
+              return
+            end
+
+            def incrementRows(increments)
+              send_incrementRows(increments)
+              recv_incrementRows()
+            end
+
+            def send_incrementRows(increments)
+              send_message('incrementRows', IncrementRows_args, :increments => increments)
+            end
+
+            def recv_incrementRows()
+              result = receive_message(IncrementRows_result)
+              raise result.io unless result.io.nil?
+              return
+            end
+
+            def deleteAllRowTs(tableName, row, timestamp, attributes)
+              send_deleteAllRowTs(tableName, row, timestamp, attributes)
               recv_deleteAllRowTs()
             end
 
-            def send_deleteAllRowTs(tableName, row, timestamp)
-              send_message('deleteAllRowTs', DeleteAllRowTs_args, :tableName => tableName, :row => row, :timestamp => timestamp)
+            def send_deleteAllRowTs(tableName, row, timestamp, attributes)
+              send_message('deleteAllRowTs', DeleteAllRowTs_args, :tableName => tableName, :row => row, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_deleteAllRowTs()
@@ -485,13 +515,13 @@ module Apache
               return
             end
 
-            def scannerOpenWithScan(tableName, scan)
-              send_scannerOpenWithScan(tableName, scan)
+            def scannerOpenWithScan(tableName, scan, attributes)
+              send_scannerOpenWithScan(tableName, scan, attributes)
               return recv_scannerOpenWithScan()
             end
 
-            def send_scannerOpenWithScan(tableName, scan)
-              send_message('scannerOpenWithScan', ScannerOpenWithScan_args, :tableName => tableName, :scan => scan)
+            def send_scannerOpenWithScan(tableName, scan, attributes)
+              send_message('scannerOpenWithScan', ScannerOpenWithScan_args, :tableName => tableName, :scan => scan, :attributes => attributes)
             end
 
             def recv_scannerOpenWithScan()
@@ -501,13 +531,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'scannerOpenWithScan failed: unknown result')
             end
 
-            def scannerOpen(tableName, startRow, columns)
-              send_scannerOpen(tableName, startRow, columns)
+            def scannerOpen(tableName, startRow, columns, attributes)
+              send_scannerOpen(tableName, startRow, columns, attributes)
               return recv_scannerOpen()
             end
 
-            def send_scannerOpen(tableName, startRow, columns)
-              send_message('scannerOpen', ScannerOpen_args, :tableName => tableName, :startRow => startRow, :columns => columns)
+            def send_scannerOpen(tableName, startRow, columns, attributes)
+              send_message('scannerOpen', ScannerOpen_args, :tableName => tableName, :startRow => startRow, :columns => columns, :attributes => attributes)
             end
 
             def recv_scannerOpen()
@@ -517,13 +547,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'scannerOpen failed: unknown result')
             end
 
-            def scannerOpenWithStop(tableName, startRow, stopRow, columns)
-              send_scannerOpenWithStop(tableName, startRow, stopRow, columns)
+            def scannerOpenWithStop(tableName, startRow, stopRow, columns, attributes)
+              send_scannerOpenWithStop(tableName, startRow, stopRow, columns, attributes)
               return recv_scannerOpenWithStop()
             end
 
-            def send_scannerOpenWithStop(tableName, startRow, stopRow, columns)
-              send_message('scannerOpenWithStop', ScannerOpenWithStop_args, :tableName => tableName, :startRow => startRow, :stopRow => stopRow, :columns => columns)
+            def send_scannerOpenWithStop(tableName, startRow, stopRow, columns, attributes)
+              send_message('scannerOpenWithStop', ScannerOpenWithStop_args, :tableName => tableName, :startRow => startRow, :stopRow => stopRow, :columns => columns, :attributes => attributes)
             end
 
             def recv_scannerOpenWithStop()
@@ -533,13 +563,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'scannerOpenWithStop failed: unknown result')
             end
 
-            def scannerOpenWithPrefix(tableName, startAndPrefix, columns)
-              send_scannerOpenWithPrefix(tableName, startAndPrefix, columns)
+            def scannerOpenWithPrefix(tableName, startAndPrefix, columns, attributes)
+              send_scannerOpenWithPrefix(tableName, startAndPrefix, columns, attributes)
               return recv_scannerOpenWithPrefix()
             end
 
-            def send_scannerOpenWithPrefix(tableName, startAndPrefix, columns)
-              send_message('scannerOpenWithPrefix', ScannerOpenWithPrefix_args, :tableName => tableName, :startAndPrefix => startAndPrefix, :columns => columns)
+            def send_scannerOpenWithPrefix(tableName, startAndPrefix, columns, attributes)
+              send_message('scannerOpenWithPrefix', ScannerOpenWithPrefix_args, :tableName => tableName, :startAndPrefix => startAndPrefix, :columns => columns, :attributes => attributes)
             end
 
             def recv_scannerOpenWithPrefix()
@@ -549,13 +579,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'scannerOpenWithPrefix failed: unknown result')
             end
 
-            def scannerOpenTs(tableName, startRow, columns, timestamp)
-              send_scannerOpenTs(tableName, startRow, columns, timestamp)
+            def scannerOpenTs(tableName, startRow, columns, timestamp, attributes)
+              send_scannerOpenTs(tableName, startRow, columns, timestamp, attributes)
               return recv_scannerOpenTs()
             end
 
-            def send_scannerOpenTs(tableName, startRow, columns, timestamp)
-              send_message('scannerOpenTs', ScannerOpenTs_args, :tableName => tableName, :startRow => startRow, :columns => columns, :timestamp => timestamp)
+            def send_scannerOpenTs(tableName, startRow, columns, timestamp, attributes)
+              send_message('scannerOpenTs', ScannerOpenTs_args, :tableName => tableName, :startRow => startRow, :columns => columns, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_scannerOpenTs()
@@ -565,13 +595,13 @@ module Apache
               raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'scannerOpenTs failed: unknown result')
             end
 
-            def scannerOpenWithStopTs(tableName, startRow, stopRow, columns, timestamp)
-              send_scannerOpenWithStopTs(tableName, startRow, stopRow, columns, timestamp)
+            def scannerOpenWithStopTs(tableName, startRow, stopRow, columns, timestamp, attributes)
+              send_scannerOpenWithStopTs(tableName, startRow, stopRow, columns, timestamp, attributes)
               return recv_scannerOpenWithStopTs()
             end
 
-            def send_scannerOpenWithStopTs(tableName, startRow, stopRow, columns, timestamp)
-              send_message('scannerOpenWithStopTs', ScannerOpenWithStopTs_args, :tableName => tableName, :startRow => startRow, :stopRow => stopRow, :columns => columns, :timestamp => timestamp)
+            def send_scannerOpenWithStopTs(tableName, startRow, stopRow, columns, timestamp, attributes)
+              send_message('scannerOpenWithStopTs', ScannerOpenWithStopTs_args, :tableName => tableName, :startRow => startRow, :stopRow => stopRow, :columns => columns, :timestamp => timestamp, :attributes => attributes)
             end
 
             def recv_scannerOpenWithStopTs()
@@ -629,6 +659,38 @@ module Apache
               raise result.io unless result.io.nil?
               raise result.ia unless result.ia.nil?
               return
+            end
+
+            def getRowOrBefore(tableName, row, family)
+              send_getRowOrBefore(tableName, row, family)
+              return recv_getRowOrBefore()
+            end
+
+            def send_getRowOrBefore(tableName, row, family)
+              send_message('getRowOrBefore', GetRowOrBefore_args, :tableName => tableName, :row => row, :family => family)
+            end
+
+            def recv_getRowOrBefore()
+              result = receive_message(GetRowOrBefore_result)
+              return result.success unless result.success.nil?
+              raise result.io unless result.io.nil?
+              raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRowOrBefore failed: unknown result')
+            end
+
+            def getRegionInfo(row)
+              send_getRegionInfo(row)
+              return recv_getRegionInfo()
+            end
+
+            def send_getRegionInfo(row)
+              send_message('getRegionInfo', GetRegionInfo_args, :row => row)
+            end
+
+            def recv_getRegionInfo()
+              result = receive_message(GetRegionInfo_result)
+              return result.success unless result.success.nil?
+              raise result.io unless result.io.nil?
+              raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getRegionInfo failed: unknown result')
             end
 
           end
@@ -754,7 +816,7 @@ module Apache
               args = read_args(iprot, Get_args)
               result = Get_result.new()
               begin
-                result.success = @handler.get(args.tableName, args.row, args.column)
+                result.success = @handler.get(args.tableName, args.row, args.column, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -765,7 +827,7 @@ module Apache
               args = read_args(iprot, GetVer_args)
               result = GetVer_result.new()
               begin
-                result.success = @handler.getVer(args.tableName, args.row, args.column, args.numVersions)
+                result.success = @handler.getVer(args.tableName, args.row, args.column, args.numVersions, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -776,7 +838,7 @@ module Apache
               args = read_args(iprot, GetVerTs_args)
               result = GetVerTs_result.new()
               begin
-                result.success = @handler.getVerTs(args.tableName, args.row, args.column, args.timestamp, args.numVersions)
+                result.success = @handler.getVerTs(args.tableName, args.row, args.column, args.timestamp, args.numVersions, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -787,7 +849,7 @@ module Apache
               args = read_args(iprot, GetRow_args)
               result = GetRow_result.new()
               begin
-                result.success = @handler.getRow(args.tableName, args.row)
+                result.success = @handler.getRow(args.tableName, args.row, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -798,7 +860,7 @@ module Apache
               args = read_args(iprot, GetRowWithColumns_args)
               result = GetRowWithColumns_result.new()
               begin
-                result.success = @handler.getRowWithColumns(args.tableName, args.row, args.columns)
+                result.success = @handler.getRowWithColumns(args.tableName, args.row, args.columns, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -809,7 +871,7 @@ module Apache
               args = read_args(iprot, GetRowTs_args)
               result = GetRowTs_result.new()
               begin
-                result.success = @handler.getRowTs(args.tableName, args.row, args.timestamp)
+                result.success = @handler.getRowTs(args.tableName, args.row, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -820,7 +882,7 @@ module Apache
               args = read_args(iprot, GetRowWithColumnsTs_args)
               result = GetRowWithColumnsTs_result.new()
               begin
-                result.success = @handler.getRowWithColumnsTs(args.tableName, args.row, args.columns, args.timestamp)
+                result.success = @handler.getRowWithColumnsTs(args.tableName, args.row, args.columns, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -831,7 +893,7 @@ module Apache
               args = read_args(iprot, GetRows_args)
               result = GetRows_result.new()
               begin
-                result.success = @handler.getRows(args.tableName, args.rows)
+                result.success = @handler.getRows(args.tableName, args.rows, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -842,7 +904,7 @@ module Apache
               args = read_args(iprot, GetRowsWithColumns_args)
               result = GetRowsWithColumns_result.new()
               begin
-                result.success = @handler.getRowsWithColumns(args.tableName, args.rows, args.columns)
+                result.success = @handler.getRowsWithColumns(args.tableName, args.rows, args.columns, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -853,7 +915,7 @@ module Apache
               args = read_args(iprot, GetRowsTs_args)
               result = GetRowsTs_result.new()
               begin
-                result.success = @handler.getRowsTs(args.tableName, args.rows, args.timestamp)
+                result.success = @handler.getRowsTs(args.tableName, args.rows, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -864,7 +926,7 @@ module Apache
               args = read_args(iprot, GetRowsWithColumnsTs_args)
               result = GetRowsWithColumnsTs_result.new()
               begin
-                result.success = @handler.getRowsWithColumnsTs(args.tableName, args.rows, args.columns, args.timestamp)
+                result.success = @handler.getRowsWithColumnsTs(args.tableName, args.rows, args.columns, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -875,7 +937,7 @@ module Apache
               args = read_args(iprot, MutateRow_args)
               result = MutateRow_result.new()
               begin
-                @handler.mutateRow(args.tableName, args.row, args.mutations)
+                @handler.mutateRow(args.tableName, args.row, args.mutations, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               rescue ::Apache::Hadoop::Hbase::Thrift::IllegalArgument => ia
@@ -888,7 +950,7 @@ module Apache
               args = read_args(iprot, MutateRowTs_args)
               result = MutateRowTs_result.new()
               begin
-                @handler.mutateRowTs(args.tableName, args.row, args.mutations, args.timestamp)
+                @handler.mutateRowTs(args.tableName, args.row, args.mutations, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               rescue ::Apache::Hadoop::Hbase::Thrift::IllegalArgument => ia
@@ -901,7 +963,7 @@ module Apache
               args = read_args(iprot, MutateRows_args)
               result = MutateRows_result.new()
               begin
-                @handler.mutateRows(args.tableName, args.rowBatches)
+                @handler.mutateRows(args.tableName, args.rowBatches, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               rescue ::Apache::Hadoop::Hbase::Thrift::IllegalArgument => ia
@@ -914,7 +976,7 @@ module Apache
               args = read_args(iprot, MutateRowsTs_args)
               result = MutateRowsTs_result.new()
               begin
-                @handler.mutateRowsTs(args.tableName, args.rowBatches, args.timestamp)
+                @handler.mutateRowsTs(args.tableName, args.rowBatches, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               rescue ::Apache::Hadoop::Hbase::Thrift::IllegalArgument => ia
@@ -940,7 +1002,7 @@ module Apache
               args = read_args(iprot, DeleteAll_args)
               result = DeleteAll_result.new()
               begin
-                @handler.deleteAll(args.tableName, args.row, args.column)
+                @handler.deleteAll(args.tableName, args.row, args.column, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -951,7 +1013,7 @@ module Apache
               args = read_args(iprot, DeleteAllTs_args)
               result = DeleteAllTs_result.new()
               begin
-                @handler.deleteAllTs(args.tableName, args.row, args.column, args.timestamp)
+                @handler.deleteAllTs(args.tableName, args.row, args.column, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -962,18 +1024,40 @@ module Apache
               args = read_args(iprot, DeleteAllRow_args)
               result = DeleteAllRow_result.new()
               begin
-                @handler.deleteAllRow(args.tableName, args.row)
+                @handler.deleteAllRow(args.tableName, args.row, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
               write_result(result, oprot, 'deleteAllRow', seqid)
             end
 
+            def process_increment(seqid, iprot, oprot)
+              args = read_args(iprot, Increment_args)
+              result = Increment_result.new()
+              begin
+                @handler.increment(args.increment)
+              rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
+                result.io = io
+              end
+              write_result(result, oprot, 'increment', seqid)
+            end
+
+            def process_incrementRows(seqid, iprot, oprot)
+              args = read_args(iprot, IncrementRows_args)
+              result = IncrementRows_result.new()
+              begin
+                @handler.incrementRows(args.increments)
+              rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
+                result.io = io
+              end
+              write_result(result, oprot, 'incrementRows', seqid)
+            end
+
             def process_deleteAllRowTs(seqid, iprot, oprot)
               args = read_args(iprot, DeleteAllRowTs_args)
               result = DeleteAllRowTs_result.new()
               begin
-                @handler.deleteAllRowTs(args.tableName, args.row, args.timestamp)
+                @handler.deleteAllRowTs(args.tableName, args.row, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -984,7 +1068,7 @@ module Apache
               args = read_args(iprot, ScannerOpenWithScan_args)
               result = ScannerOpenWithScan_result.new()
               begin
-                result.success = @handler.scannerOpenWithScan(args.tableName, args.scan)
+                result.success = @handler.scannerOpenWithScan(args.tableName, args.scan, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -995,7 +1079,7 @@ module Apache
               args = read_args(iprot, ScannerOpen_args)
               result = ScannerOpen_result.new()
               begin
-                result.success = @handler.scannerOpen(args.tableName, args.startRow, args.columns)
+                result.success = @handler.scannerOpen(args.tableName, args.startRow, args.columns, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -1006,7 +1090,7 @@ module Apache
               args = read_args(iprot, ScannerOpenWithStop_args)
               result = ScannerOpenWithStop_result.new()
               begin
-                result.success = @handler.scannerOpenWithStop(args.tableName, args.startRow, args.stopRow, args.columns)
+                result.success = @handler.scannerOpenWithStop(args.tableName, args.startRow, args.stopRow, args.columns, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -1017,7 +1101,7 @@ module Apache
               args = read_args(iprot, ScannerOpenWithPrefix_args)
               result = ScannerOpenWithPrefix_result.new()
               begin
-                result.success = @handler.scannerOpenWithPrefix(args.tableName, args.startAndPrefix, args.columns)
+                result.success = @handler.scannerOpenWithPrefix(args.tableName, args.startAndPrefix, args.columns, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -1028,7 +1112,7 @@ module Apache
               args = read_args(iprot, ScannerOpenTs_args)
               result = ScannerOpenTs_result.new()
               begin
-                result.success = @handler.scannerOpenTs(args.tableName, args.startRow, args.columns, args.timestamp)
+                result.success = @handler.scannerOpenTs(args.tableName, args.startRow, args.columns, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -1039,7 +1123,7 @@ module Apache
               args = read_args(iprot, ScannerOpenWithStopTs_args)
               result = ScannerOpenWithStopTs_result.new()
               begin
-                result.success = @handler.scannerOpenWithStopTs(args.tableName, args.startRow, args.stopRow, args.columns, args.timestamp)
+                result.success = @handler.scannerOpenWithStopTs(args.tableName, args.startRow, args.stopRow, args.columns, args.timestamp, args.attributes)
               rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
                 result.io = io
               end
@@ -1083,6 +1167,28 @@ module Apache
                 result.ia = ia
               end
               write_result(result, oprot, 'scannerClose', seqid)
+            end
+
+            def process_getRowOrBefore(seqid, iprot, oprot)
+              args = read_args(iprot, GetRowOrBefore_args)
+              result = GetRowOrBefore_result.new()
+              begin
+                result.success = @handler.getRowOrBefore(args.tableName, args.row, args.family)
+              rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
+                result.io = io
+              end
+              write_result(result, oprot, 'getRowOrBefore', seqid)
+            end
+
+            def process_getRegionInfo(seqid, iprot, oprot)
+              args = read_args(iprot, GetRegionInfo_args)
+              result = GetRegionInfo_result.new()
+              begin
+                result.success = @handler.getRegionInfo(args.row)
+              rescue ::Apache::Hadoop::Hbase::Thrift::IOError => io
+                result.io = io
+              end
+              write_result(result, oprot, 'getRegionInfo', seqid)
             end
 
           end
@@ -1435,6 +1541,7 @@ module Apache
             TABLENAME = 1
             ROW = 2
             COLUMN = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -1442,7 +1549,9 @@ module Apache
               # row key
               ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
               # column name
-              COLUMN => {:type => ::Thrift::Types::STRING, :name => 'column', :binary => true}
+              COLUMN => {:type => ::Thrift::Types::STRING, :name => 'column', :binary => true},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1477,6 +1586,7 @@ module Apache
             ROW = 2
             COLUMN = 3
             NUMVERSIONS = 4
+            ATTRIBUTES = 5
 
             FIELDS = {
               # name of table
@@ -1486,7 +1596,9 @@ module Apache
               # column name
               COLUMN => {:type => ::Thrift::Types::STRING, :name => 'column', :binary => true},
               # number of versions to retrieve
-              NUMVERSIONS => {:type => ::Thrift::Types::I32, :name => 'numVersions'}
+              NUMVERSIONS => {:type => ::Thrift::Types::I32, :name => 'numVersions'},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1522,6 +1634,7 @@ module Apache
             COLUMN = 3
             TIMESTAMP = 4
             NUMVERSIONS = 5
+            ATTRIBUTES = 6
 
             FIELDS = {
               # name of table
@@ -1533,7 +1646,9 @@ module Apache
               # timestamp
               TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
               # number of versions to retrieve
-              NUMVERSIONS => {:type => ::Thrift::Types::I32, :name => 'numVersions'}
+              NUMVERSIONS => {:type => ::Thrift::Types::I32, :name => 'numVersions'},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1566,12 +1681,15 @@ module Apache
             include ::Thrift::Struct, ::Thrift::Struct_Union
             TABLENAME = 1
             ROW = 2
+            ATTRIBUTES = 3
 
             FIELDS = {
               # name of table
               TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName', :binary => true},
               # row key
-              ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true}
+              ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1605,6 +1723,7 @@ module Apache
             TABLENAME = 1
             ROW = 2
             COLUMNS = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -1612,7 +1731,9 @@ module Apache
               # row key
               ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
               # List of columns to return, null for all columns
-              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}}
+              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1646,6 +1767,7 @@ module Apache
             TABLENAME = 1
             ROW = 2
             TIMESTAMP = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of the table
@@ -1653,7 +1775,9 @@ module Apache
               # row key
               ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
               # timestamp
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1688,6 +1812,7 @@ module Apache
             ROW = 2
             COLUMNS = 3
             TIMESTAMP = 4
+            ATTRIBUTES = 5
 
             FIELDS = {
               # name of table
@@ -1696,7 +1821,9 @@ module Apache
               ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
               # List of columns to return, null for all columns
               COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1729,12 +1856,15 @@ module Apache
             include ::Thrift::Struct, ::Thrift::Struct_Union
             TABLENAME = 1
             ROWS = 2
+            ATTRIBUTES = 3
 
             FIELDS = {
               # name of table
               TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName', :binary => true},
               # row keys
-              ROWS => {:type => ::Thrift::Types::LIST, :name => 'rows', :element => {:type => ::Thrift::Types::STRING, :binary => true}}
+              ROWS => {:type => ::Thrift::Types::LIST, :name => 'rows', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1768,6 +1898,7 @@ module Apache
             TABLENAME = 1
             ROWS = 2
             COLUMNS = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -1775,7 +1906,9 @@ module Apache
               # row keys
               ROWS => {:type => ::Thrift::Types::LIST, :name => 'rows', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
               # List of columns to return, null for all columns
-              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}}
+              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1809,6 +1942,7 @@ module Apache
             TABLENAME = 1
             ROWS = 2
             TIMESTAMP = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of the table
@@ -1816,7 +1950,9 @@ module Apache
               # row keys
               ROWS => {:type => ::Thrift::Types::LIST, :name => 'rows', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
               # timestamp
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1851,6 +1987,7 @@ module Apache
             ROWS = 2
             COLUMNS = 3
             TIMESTAMP = 4
+            ATTRIBUTES = 5
 
             FIELDS = {
               # name of table
@@ -1859,7 +1996,9 @@ module Apache
               ROWS => {:type => ::Thrift::Types::LIST, :name => 'rows', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
               # List of columns to return, null for all columns
               COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Get attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1893,6 +2032,7 @@ module Apache
             TABLENAME = 1
             ROW = 2
             MUTATIONS = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -1900,7 +2040,9 @@ module Apache
               # row key
               ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
               # list of mutation commands
-              MUTATIONS => {:type => ::Thrift::Types::LIST, :name => 'mutations', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::Mutation}}
+              MUTATIONS => {:type => ::Thrift::Types::LIST, :name => 'mutations', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::Mutation}},
+              # Mutation attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1935,6 +2077,7 @@ module Apache
             ROW = 2
             MUTATIONS = 3
             TIMESTAMP = 4
+            ATTRIBUTES = 5
 
             FIELDS = {
               # name of table
@@ -1944,7 +2087,9 @@ module Apache
               # list of mutation commands
               MUTATIONS => {:type => ::Thrift::Types::LIST, :name => 'mutations', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::Mutation}},
               # timestamp
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Mutation attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -1977,12 +2122,15 @@ module Apache
             include ::Thrift::Struct, ::Thrift::Struct_Union
             TABLENAME = 1
             ROWBATCHES = 2
+            ATTRIBUTES = 3
 
             FIELDS = {
               # name of table
               TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName', :binary => true},
               # list of row batches
-              ROWBATCHES => {:type => ::Thrift::Types::LIST, :name => 'rowBatches', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::BatchMutation}}
+              ROWBATCHES => {:type => ::Thrift::Types::LIST, :name => 'rowBatches', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::BatchMutation}},
+              # Mutation attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2016,6 +2164,7 @@ module Apache
             TABLENAME = 1
             ROWBATCHES = 2
             TIMESTAMP = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -2023,7 +2172,9 @@ module Apache
               # list of row batches
               ROWBATCHES => {:type => ::Thrift::Types::LIST, :name => 'rowBatches', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::BatchMutation}},
               # timestamp
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Mutation attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2103,6 +2254,7 @@ module Apache
             TABLENAME = 1
             ROW = 2
             COLUMN = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -2110,7 +2262,9 @@ module Apache
               # Row to update
               ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
               # name of column whose value is to be deleted
-              COLUMN => {:type => ::Thrift::Types::STRING, :name => 'column', :binary => true}
+              COLUMN => {:type => ::Thrift::Types::STRING, :name => 'column', :binary => true},
+              # Delete attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2143,6 +2297,7 @@ module Apache
             ROW = 2
             COLUMN = 3
             TIMESTAMP = 4
+            ATTRIBUTES = 5
 
             FIELDS = {
               # name of table
@@ -2152,7 +2307,9 @@ module Apache
               # name of column whose value is to be deleted
               COLUMN => {:type => ::Thrift::Types::STRING, :name => 'column', :binary => true},
               # timestamp
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Delete attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2183,12 +2340,15 @@ module Apache
             include ::Thrift::Struct, ::Thrift::Struct_Union
             TABLENAME = 1
             ROW = 2
+            ATTRIBUTES = 3
 
             FIELDS = {
               # name of table
               TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName', :binary => true},
               # key of the row to be completely deleted.
-              ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true}
+              ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
+              # Delete attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2215,11 +2375,78 @@ module Apache
             ::Thrift::Struct.generate_accessors self
           end
 
+          class Increment_args
+            include ::Thrift::Struct, ::Thrift::Struct_Union
+            INCREMENT = 1
+
+            FIELDS = {
+              # The single increment to apply
+              INCREMENT => {:type => ::Thrift::Types::STRUCT, :name => 'increment', :class => ::Apache::Hadoop::Hbase::Thrift::TIncrement}
+            }
+
+            def struct_fields; FIELDS; end
+
+            def validate
+            end
+
+            ::Thrift::Struct.generate_accessors self
+          end
+
+          class Increment_result
+            include ::Thrift::Struct, ::Thrift::Struct_Union
+            IO = 1
+
+            FIELDS = {
+              IO => {:type => ::Thrift::Types::STRUCT, :name => 'io', :class => ::Apache::Hadoop::Hbase::Thrift::IOError}
+            }
+
+            def struct_fields; FIELDS; end
+
+            def validate
+            end
+
+            ::Thrift::Struct.generate_accessors self
+          end
+
+          class IncrementRows_args
+            include ::Thrift::Struct, ::Thrift::Struct_Union
+            INCREMENTS = 1
+
+            FIELDS = {
+              # The list of increments
+              INCREMENTS => {:type => ::Thrift::Types::LIST, :name => 'increments', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::TIncrement}}
+            }
+
+            def struct_fields; FIELDS; end
+
+            def validate
+            end
+
+            ::Thrift::Struct.generate_accessors self
+          end
+
+          class IncrementRows_result
+            include ::Thrift::Struct, ::Thrift::Struct_Union
+            IO = 1
+
+            FIELDS = {
+              IO => {:type => ::Thrift::Types::STRUCT, :name => 'io', :class => ::Apache::Hadoop::Hbase::Thrift::IOError}
+            }
+
+            def struct_fields; FIELDS; end
+
+            def validate
+            end
+
+            ::Thrift::Struct.generate_accessors self
+          end
+
           class DeleteAllRowTs_args
             include ::Thrift::Struct, ::Thrift::Struct_Union
             TABLENAME = 1
             ROW = 2
             TIMESTAMP = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -2227,7 +2454,9 @@ module Apache
               # key of the row to be completely deleted.
               ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
               # timestamp
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Delete attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2258,12 +2487,15 @@ module Apache
             include ::Thrift::Struct, ::Thrift::Struct_Union
             TABLENAME = 1
             SCAN = 2
+            ATTRIBUTES = 3
 
             FIELDS = {
               # name of table
               TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName', :binary => true},
               # Scan instance
-              SCAN => {:type => ::Thrift::Types::STRUCT, :name => 'scan', :class => ::Apache::Hadoop::Hbase::Thrift::TScan}
+              SCAN => {:type => ::Thrift::Types::STRUCT, :name => 'scan', :class => ::Apache::Hadoop::Hbase::Thrift::TScan},
+              # Scan attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2297,6 +2529,7 @@ module Apache
             TABLENAME = 1
             STARTROW = 2
             COLUMNS = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -2307,7 +2540,9 @@ module Apache
               # columns to scan. If column name is a column family, all
 # columns of the specified column family are returned. It's also possible
 # to pass a regex in the column qualifier.
-              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}}
+              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
+              # Scan attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2342,6 +2577,7 @@ module Apache
             STARTROW = 2
             STOPROW = 3
             COLUMNS = 4
+            ATTRIBUTES = 5
 
             FIELDS = {
               # name of table
@@ -2355,7 +2591,9 @@ module Apache
               # columns to scan. If column name is a column family, all
 # columns of the specified column family are returned. It's also possible
 # to pass a regex in the column qualifier.
-              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}}
+              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
+              # Scan attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2389,6 +2627,7 @@ module Apache
             TABLENAME = 1
             STARTANDPREFIX = 2
             COLUMNS = 3
+            ATTRIBUTES = 4
 
             FIELDS = {
               # name of table
@@ -2396,7 +2635,9 @@ module Apache
               # the prefix (and thus start row) of the keys you want
               STARTANDPREFIX => {:type => ::Thrift::Types::STRING, :name => 'startAndPrefix', :binary => true},
               # the columns you want returned
-              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}}
+              COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
+              # Scan attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2431,6 +2672,7 @@ module Apache
             STARTROW = 2
             COLUMNS = 3
             TIMESTAMP = 4
+            ATTRIBUTES = 5
 
             FIELDS = {
               # name of table
@@ -2443,7 +2685,9 @@ module Apache
 # to pass a regex in the column qualifier.
               COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
               # timestamp
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Scan attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2479,6 +2723,7 @@ module Apache
             STOPROW = 3
             COLUMNS = 4
             TIMESTAMP = 5
+            ATTRIBUTES = 6
 
             FIELDS = {
               # name of table
@@ -2494,7 +2739,9 @@ module Apache
 # to pass a regex in the column qualifier.
               COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}},
               # timestamp
-              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'}
+              TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
+              # Scan attributes
+              ATTRIBUTES => {:type => ::Thrift::Types::MAP, :name => 'attributes', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRING, :binary => true}}
             }
 
             def struct_fields; FIELDS; end
@@ -2625,6 +2872,82 @@ module Apache
             FIELDS = {
               IO => {:type => ::Thrift::Types::STRUCT, :name => 'io', :class => ::Apache::Hadoop::Hbase::Thrift::IOError},
               IA => {:type => ::Thrift::Types::STRUCT, :name => 'ia', :class => ::Apache::Hadoop::Hbase::Thrift::IllegalArgument}
+            }
+
+            def struct_fields; FIELDS; end
+
+            def validate
+            end
+
+            ::Thrift::Struct.generate_accessors self
+          end
+
+          class GetRowOrBefore_args
+            include ::Thrift::Struct, ::Thrift::Struct_Union
+            TABLENAME = 1
+            ROW = 2
+            FAMILY = 3
+
+            FIELDS = {
+              # name of table
+              TABLENAME => {:type => ::Thrift::Types::STRING, :name => 'tableName', :binary => true},
+              # row key
+              ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
+              # column name
+              FAMILY => {:type => ::Thrift::Types::STRING, :name => 'family', :binary => true}
+            }
+
+            def struct_fields; FIELDS; end
+
+            def validate
+            end
+
+            ::Thrift::Struct.generate_accessors self
+          end
+
+          class GetRowOrBefore_result
+            include ::Thrift::Struct, ::Thrift::Struct_Union
+            SUCCESS = 0
+            IO = 1
+
+            FIELDS = {
+              SUCCESS => {:type => ::Thrift::Types::LIST, :name => 'success', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::TCell}},
+              IO => {:type => ::Thrift::Types::STRUCT, :name => 'io', :class => ::Apache::Hadoop::Hbase::Thrift::IOError}
+            }
+
+            def struct_fields; FIELDS; end
+
+            def validate
+            end
+
+            ::Thrift::Struct.generate_accessors self
+          end
+
+          class GetRegionInfo_args
+            include ::Thrift::Struct, ::Thrift::Struct_Union
+            ROW = 1
+
+            FIELDS = {
+              # row key
+              ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true}
+            }
+
+            def struct_fields; FIELDS; end
+
+            def validate
+            end
+
+            ::Thrift::Struct.generate_accessors self
+          end
+
+          class GetRegionInfo_result
+            include ::Thrift::Struct, ::Thrift::Struct_Union
+            SUCCESS = 0
+            IO = 1
+
+            FIELDS = {
+              SUCCESS => {:type => ::Thrift::Types::STRUCT, :name => 'success', :class => ::Apache::Hadoop::Hbase::Thrift::TRegionInfo},
+              IO => {:type => ::Thrift::Types::STRUCT, :name => 'io', :class => ::Apache::Hadoop::Hbase::Thrift::IOError}
             }
 
             def struct_fields; FIELDS; end

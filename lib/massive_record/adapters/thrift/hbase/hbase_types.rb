@@ -73,13 +73,17 @@ module Apache
           ID = 3
           NAME = 4
           VERSION = 5
+          SERVERNAME = 6
+          PORT = 7
 
           FIELDS = {
             STARTKEY => {:type => ::Thrift::Types::STRING, :name => 'startKey', :binary => true},
             ENDKEY => {:type => ::Thrift::Types::STRING, :name => 'endKey', :binary => true},
             ID => {:type => ::Thrift::Types::I64, :name => 'id'},
             NAME => {:type => ::Thrift::Types::STRING, :name => 'name', :binary => true},
-            VERSION => {:type => ::Thrift::Types::BYTE, :name => 'version'}
+            VERSION => {:type => ::Thrift::Types::BYTE, :name => 'version'},
+            SERVERNAME => {:type => ::Thrift::Types::STRING, :name => 'serverName', :binary => true},
+            PORT => {:type => ::Thrift::Types::I32, :name => 'port'}
           }
 
           def struct_fields; FIELDS; end
@@ -96,11 +100,13 @@ module Apache
           ISDELETE = 1
           COLUMN = 2
           VALUE = 3
+          WRITETOWAL = 4
 
           FIELDS = {
             ISDELETE => {:type => ::Thrift::Types::BOOL, :name => 'isDelete', :default => false},
             COLUMN => {:type => ::Thrift::Types::STRING, :name => 'column', :binary => true},
-            VALUE => {:type => ::Thrift::Types::STRING, :name => 'value', :binary => true}
+            VALUE => {:type => ::Thrift::Types::STRING, :name => 'value', :binary => true},
+            WRITETOWAL => {:type => ::Thrift::Types::BOOL, :name => 'writeToWAL', :default => true}
           }
 
           def struct_fields; FIELDS; end
@@ -130,15 +136,60 @@ module Apache
           ::Thrift::Struct.generate_accessors self
         end
 
+        # For increments that are not incrementColumnValue
+# equivalents.
+        class TIncrement
+          include ::Thrift::Struct, ::Thrift::Struct_Union
+          TABLE = 1
+          ROW = 2
+          COLUMN = 3
+          AMMOUNT = 4
+
+          FIELDS = {
+            TABLE => {:type => ::Thrift::Types::STRING, :name => 'table', :binary => true},
+            ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
+            COLUMN => {:type => ::Thrift::Types::STRING, :name => 'column', :binary => true},
+            AMMOUNT => {:type => ::Thrift::Types::I64, :name => 'ammount'}
+          }
+
+          def struct_fields; FIELDS; end
+
+          def validate
+          end
+
+          ::Thrift::Struct.generate_accessors self
+        end
+
+        # Holds column name and the cell.
+        class TColumn
+          include ::Thrift::Struct, ::Thrift::Struct_Union
+          COLUMNNAME = 1
+          CELL = 2
+
+          FIELDS = {
+            COLUMNNAME => {:type => ::Thrift::Types::STRING, :name => 'columnName', :binary => true},
+            CELL => {:type => ::Thrift::Types::STRUCT, :name => 'cell', :class => ::Apache::Hadoop::Hbase::Thrift::TCell}
+          }
+
+          def struct_fields; FIELDS; end
+
+          def validate
+          end
+
+          ::Thrift::Struct.generate_accessors self
+        end
+
         # Holds row name and then a map of columns to cells.
         class TRowResult
           include ::Thrift::Struct, ::Thrift::Struct_Union
           ROW = 1
           COLUMNS = 2
+          SORTEDCOLUMNS = 3
 
           FIELDS = {
             ROW => {:type => ::Thrift::Types::STRING, :name => 'row', :binary => true},
-            COLUMNS => {:type => ::Thrift::Types::MAP, :name => 'columns', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::TCell}}
+            COLUMNS => {:type => ::Thrift::Types::MAP, :name => 'columns', :key => {:type => ::Thrift::Types::STRING, :binary => true}, :value => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::TCell}, :optional => true},
+            SORTEDCOLUMNS => {:type => ::Thrift::Types::LIST, :name => 'sortedColumns', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Apache::Hadoop::Hbase::Thrift::TColumn}, :optional => true}
           }
 
           def struct_fields; FIELDS; end
@@ -158,6 +209,8 @@ module Apache
           COLUMNS = 4
           CACHING = 5
           FILTERSTRING = 6
+          BATCHSIZE = 7
+          SORTCOLUMNS = 8
 
           FIELDS = {
             STARTROW => {:type => ::Thrift::Types::STRING, :name => 'startRow', :binary => true, :optional => true},
@@ -165,7 +218,9 @@ module Apache
             TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp', :optional => true},
             COLUMNS => {:type => ::Thrift::Types::LIST, :name => 'columns', :element => {:type => ::Thrift::Types::STRING, :binary => true}, :optional => true},
             CACHING => {:type => ::Thrift::Types::I32, :name => 'caching', :optional => true},
-            FILTERSTRING => {:type => ::Thrift::Types::STRING, :name => 'filterString', :binary => true, :optional => true}
+            FILTERSTRING => {:type => ::Thrift::Types::STRING, :name => 'filterString', :binary => true, :optional => true},
+            BATCHSIZE => {:type => ::Thrift::Types::I32, :name => 'batchSize', :optional => true},
+            SORTCOLUMNS => {:type => ::Thrift::Types::BOOL, :name => 'sortColumns', :optional => true}
           }
 
           def struct_fields; FIELDS; end
