@@ -107,11 +107,9 @@ module MassiveRecord
               end
             end
           end
-
-          @table.client.mutateRow(@table.name, id.to_s.dup.force_encoding(Encoding::BINARY), mutations).nil?
+          
+          @table.client.mutateRow(@table.name, id.to_s.dup.force_encoding(Encoding::BINARY), mutations, {}).nil?
         end
-
-
         
         def atomic_increment(column_name, by = 1)
           @table.client.atomicIncrement(@table.name, id.to_s, column_name, by) 
@@ -140,7 +138,7 @@ module MassiveRecord
         end
     
         def destroy
-          @table.client.deleteAllRow(@table.name, @id).nil?
+          @table.client.deleteAllRow(@table.name, @id, {}).nil?
         end
     
         def new_record?

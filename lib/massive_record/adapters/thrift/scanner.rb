@@ -25,9 +25,9 @@ module MassiveRecord
       
         def open
           if created_at.empty?
-            self.opened_scanner = connection.scannerOpen(table_name, key, formatted_column_family_names)
+            self.opened_scanner = connection.scannerOpen(table_name, key, formatted_column_family_names, {})
           else
-            self.opened_scanner = connection.scannerOpenTs(table_name, key, formatted_column_family_names, created_at)
+            self.opened_scanner = connection.scannerOpenTs(table_name, key, formatted_column_family_names, created_at, {})
           end
         end
       

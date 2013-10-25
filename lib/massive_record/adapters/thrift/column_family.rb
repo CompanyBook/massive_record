@@ -7,7 +7,7 @@ module MassiveRecord
     
         def initialize(column_name, opts = {})
           @name = column_name
-          @max_versions = opts[:max_versions] || 10
+          @max_versions = opts[:max_versions] || 1
           @columns = opts[:columns] || []
         end
     

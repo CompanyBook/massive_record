@@ -8,7 +8,7 @@ describe "A connection" do
   it "should populate the port" do
     conn.port.should == MR_CONFIG['port']
   end
-  
+
   it "should have a default timeout of 4 seconds" do
     conn.timeout.should == 4
   end
@@ -18,30 +18,47 @@ describe "A connection" do
     conn.timeout.should be 5
   end
   
-  it "should not be open be default" do
-    conn.open?.should be_false
-  end
-  
-  it "should be open if opened" do
-    conn.open.should be_true
-    conn.open?.should be_true
-    conn.close
-  end
-  
-  it "should not be open if closed" do
-    conn.open.should be_true
-    conn.close.should be_true
-    conn.open?.should be_false
-  end
-  
-  it "should have a collection of tables" do
-    conn.open
-    conn.tables.should be_a_kind_of(MassiveRecord::Wrapper::TablesCollection)
-    conn.close
-  end
+  describe "open / close" do
 
-  it "shouldn't trigger any error if we try to close a close connection and there is no open connection" do
-    conn.close.should be_true
+    it "should not be open be default" do
+      conn.open?.should be_false
+    end
+    
+    it "should be open if opened" do
+      conn.open.should be_true
+      conn.open?.should be_true
+      conn.close
+    end
+    
+    it "should not be open if closed" do
+      conn.open.should be_true
+      conn.close.should be_true
+      conn.open?.should be_false
+    end
+
+    it "shouldn't trigger any error if we try to close a close connection and there is no open connection" do
+      conn.close.should be_true
+    end
+
+  end
+    
+  describe "tables" do
+    
+    before do
+      conn.stub(:getTableNames) { [MR_CONFIG['table']] }
+    end
+
+    it "should have a collection of tables" do
+      conn.open
+      conn.tables.should be_a_kind_of(MassiveRecord::Wrapper::TablesCollection)
+      conn.close
+    end
+
+    it "should load a table" do
+      conn.load_table(MR_CONFIG['table']).class.should eql(MassiveRecord::Wrapper::Table)
+      conn.tables.load(MR_CONFIG['table']).class.should eql(MassiveRecord::Wrapper::Table)
+    end
+
   end
 
   describe "catching errors" do
@@ -113,4 +130,5 @@ describe "A connection" do
       conn.current_host.should == nextSelectedHost
     end
   end
+
 end

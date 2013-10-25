@@ -21,13 +21,13 @@ describe MassiveRecord::Wrapper::Row do
   subject do
     MassiveRecord::Wrapper::Row.new.tap do |row|
       row.id = id
-      row.values = {:misc => {:name => name}}
+      row.values = { :misc => { :name => name } }
       row.table = table
     end
   end
 
   after do
-    table.all.each &:destroy
+    table.all.each(&:destroy)
   end
 
   after :all do

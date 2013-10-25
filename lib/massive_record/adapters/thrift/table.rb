@@ -49,7 +49,11 @@ module MassiveRecord
           rescue ::Apache::Hadoop::Hbase::Thrift::AlreadyExists => ex
             "The table already exists."
           rescue => ex
-            raise ex
+            if ex.is_a?(::Apache::Hadoop::Hbase::Thrift::IOError) && ex.message.include?("TableExistsException")
+              "The table already exists."
+            else
+              raise ex
+            end
           end
         end
     
@@ -65,6 +69,12 @@ module MassiveRecord
           disable
           @table_exists = false
           client.deleteTable(name).nil?
+        rescue => e
+          if (e.is_a?(::Apache::Hadoop::Hbase::Thrift::IOError) && e.message.include?("table does not exist"))
+            true
+          else
+            raise e
+          end       
         end
     
         def create_column_families(column_family_names)
@@ -144,12 +154,11 @@ module MassiveRecord
           get_cell(id, column_family_name, column_name).try :value
         end
 
-
         #
         # Fast way of fetching one cell
         #
         def get_cell(id, column_family_name, column_name)
-          if cell = connection.get(name, id.dup.force_encoding(Encoding::BINARY), "#{column_family_name.to_s}:#{column_name.to_s}").first
+          if cell = connection.get(name, id.dup.force_encoding(Encoding::BINARY), "#{column_family_name.to_s}:#{column_name.to_s}", {}).first
             MassiveRecord::Wrapper::Cell.populate_from_tcell(cell)
           end
         end
@@ -169,11 +178,11 @@ module MassiveRecord
 
           if what_to_find.is_a?(Array)
             what_to_find.collect! { |id| id.dup.force_encoding(Encoding::BINARY) }
-            connection.getRowsWithColumns(name, what_to_find, column_families_to_find).collect do |t_row_result|
+            connection.getRowsWithColumns(name, what_to_find, column_families_to_find, {}).collect do |t_row_result|
               Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
           else
-            if t_row_result = connection.getRowWithColumns(name, what_to_find.dup.force_encoding(Encoding::BINARY), column_families_to_find).first
+            if t_row_result = connection.getRowWithColumns(name, what_to_find.dup.force_encoding(Encoding::BINARY), column_families_to_find, {}).first
               Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
           end

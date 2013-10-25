@@ -11,17 +11,16 @@ describe MassiveRecord::Adapters::Thrift::Table do
     MassiveRecord::Wrapper::Table.new(connection, MR_CONFIG['table'])
   end
 
-
   before :all do
+    subject.destroy if subject.exists?
     subject.column_families.create(:base)
     subject.save
   end
   
   after :all do
     subject.destroy
-  end
-
-  
+    connection.close
+  end  
 
   before do
     2.times do |index|
