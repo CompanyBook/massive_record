@@ -5,24 +5,27 @@ module MassiveRecord
     module Thrift
       class Connection
   
-        attr_accessor :host, :port, :timeout
+        attr_accessor :host, :hosts, :port, :timeout, :current_host
     
         def initialize(opts = {})
-          @timeout = opts[:timeout] || 4
-          @host    = opts[:host]
-          @port    = opts[:port] || 9090
+          @timeout      = opts[:timeout] || 4
+          @host         = opts[:host]
+          @hosts        = opts[:hosts]
+          @port         = opts[:port] || 9090
           @instrumenter = ActiveSupport::Notifications.instrumenter
         end
       
         def transport
-          @transport ||= ::Thrift::BufferedTransport.new(::Thrift::Socket.new(@host, @port, @timeout))
+          @transport ||= ::Thrift::BufferedTransport.new(::Thrift::Socket.new(current_host, port, timeout))
         end
       
         def open(options = {})
+          populateCurrentHost
+
           options = options.merge({
             :adapter => 'Thrift',
-            :host => @host,
-            :port => @port
+            :host => current_host,
+            :port => port
           })
 
           @instrumenter.instrument "adapter_connecting.massive_record", options do
@@ -33,7 +36,7 @@ module MassiveRecord
               transport.open()
               true
             rescue
-              raise MassiveRecord::Wrapper::Errors::ConnectionException.new, "Unable to connect to HBase on #{@host}, port #{@port}"
+              raise MassiveRecord::Wrapper::Errors::ConnectionException.new, "Unable to connect to HBase on #{current_host}, port #{port}"
             end
           end
         end
@@ -101,6 +104,20 @@ module MassiveRecord
           @transport = nil
           @client = nil
           open(:reconnecting => true, :reason => e.class)
+        end
+
+        # Pick up a host:
+        # - host
+        # or
+        # - host part of the hosts pool
+        def populateCurrentHost
+          if host.present?
+            self.current_host = host
+          else
+            hosts_to_pick = hosts.clone
+            hosts_to_pick.delete(current_host)
+            self.current_host = hosts_to_pick.sample
+          end
         end
     
       end

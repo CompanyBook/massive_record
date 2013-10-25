@@ -2,84 +2,115 @@ require 'spec_helper'
 
 describe "A connection" do
   
-  before do
-    @connection = MassiveRecord::Wrapper::Connection.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port'])
+  let(:subject) { MassiveRecord::Wrapper::Connection }
+  let(:conn) { subject.new(:host => MR_CONFIG['host'], :port => MR_CONFIG['port']) }  
+
+  it "should populate the port" do
+    conn.port.should == MR_CONFIG['port']
   end
   
-  after do
-    @connection.close if @connection.open?
-  end
-  
-  it "should have a host, port, and timeout attributes" do
-    connections = [@connection, MassiveRecord::Wrapper::Connection.new(:host => "somewhere")]
-    
-    connections.each do |conn|
-      conn.host.to_s.should_not be_empty
-      conn.port.to_s.should_not be_empty
-      conn.timeout.to_s.should_not be_empty
-    end
+  it "should have a default timeout of 4 seconds" do
+    conn.timeout.should == 4
   end
   
   it "should allow configurable timeouts" do
-    connection = MassiveRecord::Wrapper::Connection.new(:host => "somewhere", :timeout => 5)
-    connection.timeout.should be 5
+    conn = subject.new(:timeout => 5)
+    conn.timeout.should be 5
   end
   
-  it "should not be open" do
-    @connection.open?.should be_false
+  it "should not be open be default" do
+    conn.open?.should be_false
   end
   
   it "should be open if opened" do
-    @connection.open.should be_true
-    @connection.open?.should be_true
+    conn.open.should be_true
+    conn.open?.should be_true
+    conn.close
   end
   
   it "should not be open if closed" do
-    @connection.open.should be_true
-    @connection.close.should be_true
-    @connection.open?.should be_false
+    conn.open.should be_true
+    conn.close.should be_true
+    conn.open?.should be_false
   end
   
   it "should have a collection of tables" do
-    @connection.open
-    @connection.tables.should be_a_kind_of(MassiveRecord::Wrapper::TablesCollection)
+    conn.open
+    conn.tables.should be_a_kind_of(MassiveRecord::Wrapper::TablesCollection)
+    conn.close
   end
 
-  it "shouldn't trigger any error if we try to close a close connection" do
-    @connection.close.should be_true
+  it "shouldn't trigger any error if we try to close a close connection and there is no open connection" do
+    conn.close.should be_true
   end
 
   describe "catching errors" do
     it "should not be able to open a new connection with a wrong configuration and Raise an error" do
-      @connection.port = 1234
-      lambda { @connection.open }.should raise_error(MassiveRecord::Wrapper::Errors::ConnectionException)
+      conn.port = 1234
+      lambda { conn.open }.should raise_error(MassiveRecord::Wrapper::Errors::ConnectionException)
     end
 
     it "should try to open a new connection when an IO error occured" do
-      @connection.open
+      conn.open
       Apache::Hadoop::Hbase::Thrift::Hbase::Client.any_instance.stub(:scannerGetList) do 
         raise ::Apache::Hadoop::Hbase::Thrift::IOError, "closed stream"
       end
-      @connection.should_receive(:open).with(:reconnecting => true, :reason => ::Apache::Hadoop::Hbase::Thrift::IOError)
-      @connection.scannerGetList("arg1", "arg2")
+      conn.should_receive(:open).with(:reconnecting => true, :reason => ::Apache::Hadoop::Hbase::Thrift::IOError)
+      conn.scannerGetList("arg1", "arg2")
     end
 
     it "should try to open a new connection when some packets are lost" do
-      @connection.open
+      conn.open
       Apache::Hadoop::Hbase::Thrift::Hbase::Client.any_instance.stub(:scannerGetList) do 
         raise ::Thrift::TransportException
       end
-      @connection.should_receive(:open).with(:reconnecting => true, :reason => ::Thrift::TransportException)
-      @connection.scannerGetList("arg1", "arg2")
+      conn.should_receive(:open).with(:reconnecting => true, :reason => ::Thrift::TransportException)
+      conn.scannerGetList("arg1", "arg2")
     end
 
     it "should try to open a new connection when getting table names fails" do
-      @connection.open
+      conn.open
       Apache::Hadoop::Hbase::Thrift::Hbase::Client.any_instance.stub(:getTableNames) do 
         raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getTableNames failed: unknown result')
       end
-      @connection.should_receive(:open).with(:reconnecting => true, :reason => ::Thrift::ApplicationException)
-      @connection.tables
+      conn.should_receive(:open).with(:reconnecting => true, :reason => ::Thrift::ApplicationException)
+      conn.tables
+    end
+  end
+
+  describe "host(s)" do
+    it "should have a host populated" do
+      conn = subject.new(:host => "12.34.56.78")
+      conn.host.should == "12.34.56.78"
+    end    
+
+    it "should have a pool of hosts" do
+      conn = subject.new(:hosts => ["12.34.56.78", "34.56.78.90"])
+      conn.hosts.should == ["12.34.56.78", "34.56.78.90"]
+    end
+
+    it "should have a current_host empty by default" do
+      conn = subject.new(:host => "12.34.56.78")
+      conn.current_host.should be_nil
+    end
+
+    it "should populate current_host according to host" do
+      conn = subject.new(:host => "12.34.56.78")
+      conn.send(:populateCurrentHost)
+      conn.current_host.should == "12.34.56.78"
+    end
+
+    it "should populate current_host according to hosts" do
+      conn = subject.new(:hosts => ["90.34.56.78", "34.56.78.90"])
+      conn.send(:populateCurrentHost)
+      ["90.34.56.78", "34.56.78.90"].should include(conn.current_host)
+      selectedHost = conn.current_host
+
+      nextSelectedHost = ["90.34.56.78", "34.56.78.90"]
+      nextSelectedHost.delete(conn.current_host)
+      nextSelectedHost = nextSelectedHost.first
+      conn.send(:populateCurrentHost)      
+      conn.current_host.should == nextSelectedHost
     end
   end
 end
