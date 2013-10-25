@@ -27,7 +27,7 @@ describe "encoding" do
     m.value  = "Vincent".force_encoding(Encoding::BINARY)
     
     m.value.encoding.should == Encoding::BINARY
-    @client.mutateRow(@table_name, "ID1", [m]).should be_nil
+    @client.mutateRow(@table_name, "ID1", [m], {}).should be_nil
   end
   
   it "should save UTF8 caracteres" do
@@ -36,7 +36,7 @@ describe "encoding" do
     m.value  = "Thorbjørn".force_encoding(Encoding::BINARY)
     
     m.value.encoding.should == Encoding::BINARY
-    @client.mutateRow(@table_name, "ID1", [m]).should be_nil
+    @client.mutateRow(@table_name, "ID1", [m], {}).should be_nil
   end
   
   it "should save JSON" do
@@ -45,7 +45,7 @@ describe "encoding" do
     m.value  = { :p1 => "Vincent", :p2 => "Thorbjørn"}.to_json.force_encoding(Encoding::BINARY)
     
     m.value.encoding.should == Encoding::BINARY
-    @client.mutateRow(@table_name, "ID1", [m]).should be_nil   
+    @client.mutateRow(@table_name, "ID1", [m], {}).should be_nil   
   end
   
   it "should take care of several encodings" do
@@ -59,7 +59,7 @@ describe "encoding" do
     # because m1 is binary and m2 is UTF-8
     m2.value  = "Thorbjørn".force_encoding(Encoding::BINARY)
     
-    @client.mutateRow(@table_name, "ID1", [m1, m2]).should be_nil
+    @client.mutateRow(@table_name, "ID1", [m1, m2], {}).should be_nil
   end
   
   it "should destroy the table" do
