@@ -4,6 +4,7 @@ PATH
     massive_record (0.2.3)
       activemodel (~> 3.0.7)
       activesupport (~> 3.0.7, < 3.0.20)
+      thin
       thrift (~> 0.9.0)
       tzinfo
 
@@ -46,4 +47,3 @@ PLATFORMS
 DEPENDENCIES
   massive_record!
   rspec
-  thin
