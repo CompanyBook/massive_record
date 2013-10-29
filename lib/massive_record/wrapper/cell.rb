@@ -31,7 +31,6 @@ module MassiveRecord
         })
       end
 
-
       def initialize(opts = {})
         self.value = opts[:value]
         self.created_at = opts[:created_at]
@@ -46,7 +45,7 @@ module MassiveRecord
       def value_to_thrift
         case value
         when String
-          value.force_encoding(Encoding::BINARY)
+          value.force_encoding(Encoding::UTF_8)
         when Fixnum, Bignum
           self.class.integer_to_hex_string(value)
         when NilClass

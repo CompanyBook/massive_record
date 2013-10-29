@@ -13,12 +13,13 @@ Gem::Specification.new do |s|
   s.description       = %q{HBase Ruby client API}
   s.rubyforge_project = "massive_record"
 
-  s.add_dependency "thrift", "= 0.8.0"
-  s.add_dependency "activesupport", "~> 3.0.7"
+  s.add_dependency "thrift", "~> 0.9.0"
+  s.add_dependency "activesupport", "~> 3.0.7", "< 3.0.20"
   s.add_dependency "activemodel", "~> 3.0.7"
   s.add_dependency "tzinfo"
 
   s.add_development_dependency "rspec"
+  s.add_development_dependency "thin"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

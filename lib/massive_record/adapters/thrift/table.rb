@@ -45,7 +45,10 @@ module MassiveRecord
     
         def save
           begin
-            client.createTable(name, @column_families.collect{|cf| cf.descriptor}).nil?
+            result = client.createTable(name, @column_families.collect{|cf| cf.descriptor}).nil?
+            sleep 0.5
+            @table_exists = true
+            result
           rescue ::Apache::Hadoop::Hbase::Thrift::AlreadyExists => ex
             "The table already exists."
           rescue => ex
@@ -67,14 +70,15 @@ module MassiveRecord
     
         def destroy
           disable
-          @table_exists = false
-          client.deleteTable(name).nil?
-        rescue => e
-          if (e.is_a?(::Apache::Hadoop::Hbase::Thrift::IOError) && e.message.include?("table does not exist"))
+          if client.deleteTable(name).nil?
+            @table_exists = false
             true
           else
-            raise e
-          end       
+            false
+          end
+        rescue => e
+          @table_exists = nil
+          exists? ? raise(e) : true
         end
     
         def create_column_families(column_family_names)
@@ -120,8 +124,8 @@ module MassiveRecord
         def format_options_for_scanner(opts = {})
           opts = self.class.warn_and_change_deprecated_finder_options(opts)
 
-          start = opts[:starts_with] && opts[:starts_with].dup.force_encoding(Encoding::BINARY)
-          offset = opts[:offset] && opts[:offset].dup.force_encoding(Encoding::BINARY)
+          start = opts[:starts_with] && opts[:starts_with]
+          offset = opts[:offset] && opts[:offset]
 
           {
             :start_key  => start,
@@ -158,7 +162,7 @@ module MassiveRecord
         # Fast way of fetching one cell
         #
         def get_cell(id, column_family_name, column_name)
-          if cell = connection.get(name, id.dup.force_encoding(Encoding::BINARY), "#{column_family_name.to_s}:#{column_name.to_s}", {}).first
+          if cell = connection.get(name, id, "#{column_family_name.to_s}:#{column_name.to_s}", {}).first
             MassiveRecord::Wrapper::Cell.populate_from_tcell(cell)
           end
         end
@@ -169,6 +173,8 @@ module MassiveRecord
         # Returns nil if id is not found
         #
         def find(*args)
+          return nil unless exists?
+
           options = args.extract_options!.symbolize_keys
           what_to_find = args.first
           
@@ -177,18 +183,19 @@ module MassiveRecord
           end
 
           if what_to_find.is_a?(Array)
-            what_to_find.collect! { |id| id.dup.force_encoding(Encoding::BINARY) }
             connection.getRowsWithColumns(name, what_to_find, column_families_to_find, {}).collect do |t_row_result|
               Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
           else
-            if t_row_result = connection.getRowWithColumns(name, what_to_find.dup.force_encoding(Encoding::BINARY), column_families_to_find, {}).first
+            if t_row_result = connection.getRowWithColumns(name, what_to_find, column_families_to_find, {}).first
               Row.populate_from_trow_result(t_row_result, connection, name, column_families_to_find)
             end
           end
         end
 
-        def find_in_batches(opts = {})        
+        def find_in_batches(opts = {})   
+          return nil unless exists?
+
           results_limit = opts[:limit]
           results_found = 0
           

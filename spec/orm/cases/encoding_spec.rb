@@ -43,7 +43,7 @@ describe "encoding" do
     end
 
     it "should return string as UTF-8 encoded strings" do
-      @row_from_db.values["info:name"].encoding.should == Encoding::BINARY
+      @row_from_db.values["info:name"].encoding.should == Encoding::UTF_8
     end
   end
 end

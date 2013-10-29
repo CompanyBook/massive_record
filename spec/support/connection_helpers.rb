@@ -6,7 +6,10 @@ module SetUpHbaseConnectionBeforeAll
   included do
     before(:all) do
       unless @connection
-        @connection_configuration = {:host => MR_CONFIG['host'], :port => MR_CONFIG['port']}
+        @connection_configuration = {
+          :host => MR_CONFIG['host'], 
+          :port => MR_CONFIG['port']
+        }
         MassiveRecord::ORM::Base.connection_configuration = @connection_configuration
         @connection = MassiveRecord::Wrapper::Connection.new(@connection_configuration)
         @connection.open

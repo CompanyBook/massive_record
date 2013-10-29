@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 describe "A table" do
@@ -19,7 +20,6 @@ describe "A table" do
     t.column_families.create(MassiveRecord::Wrapper::ColumnFamily.new(:info, :max_versions => 3))
     t.column_families.create(:misc)
     t.save
-    sleep 0.5
     t
   end
 
@@ -102,7 +102,8 @@ describe "A table" do
               "Washing" => "Boring 6/10",
               "Ironing" => "Boring 8/10"
             }.to_json,
-            :empty => {}.to_json
+            :empty => {}.to_json,
+            :friend => "Thorbjørn".force_encoding(Encoding::BINARY)
           }
         }
         row.table = table
@@ -114,7 +115,7 @@ describe "A table" do
       end
             
       it "should list all column names" do
-        table.column_names.size.should == 8
+        table.column_names.size.should == 9
       end
       
       it "should only load one column" do
@@ -144,6 +145,16 @@ describe "A table" do
         
         row.update_column(:info, :email, "bob@base.com")
         row.values["info:email"].should eql("bob@base.com")
+      end
+
+      it "should encode everything to UTF-8" do
+        row = table.first
+
+        row.values["misc:dislike"].encoding.should == Encoding::UTF_8
+        row.values["misc:dislike"].should == "{\"Washing\":\"Boring 6/10\",\"Ironing\":\"Boring 8/10\"}"
+
+        row.values["misc:friend"].encoding.should == Encoding::UTF_8
+        row.values["misc:friend"].should == "Thorbjørn"
       end
 
       it "should persist integer values as binary" do
@@ -189,7 +200,7 @@ describe "A table" do
         row = table.first
         row.update_columns({ :misc => { :super_power => "Eating"} })
         row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should(
-          eql(["misc:null_test", "misc:integer", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
+          eql(["misc:null_test", "misc:integer", "misc:friend", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
         )
       end
       
