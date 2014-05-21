@@ -77,14 +77,18 @@ module MassiveRecord
     
         # Wrapp HBase API to be able to catch errors and try reconnect
         def method_missing(method, *args)
-          open if not client
-          client.send(method, *args) if client
-        rescue => e
-          if @reconnect && reconnect?(e)
-            reconnect!(e)
-            send(method, *args) if client    
-          else
-            raise e
+          @instrumenter.instrument "adapter_query.massive_record", { :method_name => method } do
+            begin
+              open if not client
+              client.send(method, *args) if client
+            rescue => e
+              if @reconnect && reconnect?(e)
+                reconnect!(e)
+                send(method, *args) if client    
+              else
+                raise e
+              end
+            end
           end
         end
 
