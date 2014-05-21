@@ -12,6 +12,8 @@ module MassiveRecord
           @host         = opts[:host]
           @hosts        = opts[:hosts]
           @port         = opts[:port] || 9090
+          @reconnect    = opts[:reconnect].nil? ? true : opts[:reconnect]
+
           @instrumenter = ActiveSupport::Notifications.instrumenter
         end
       
@@ -61,7 +63,7 @@ module MassiveRecord
           (getTableNames() || {}).each{|table_name| collection.push(table_name)}
           collection
         rescue => e
-          if reconnect?(e)
+          if @reconnect && reconnect?(e)
             reconnect!(e)
             tables if client    
           else
@@ -78,7 +80,7 @@ module MassiveRecord
           open if not client
           client.send(method, *args) if client
         rescue => e
-          if reconnect?(e)
+          if @reconnect && reconnect?(e)
             reconnect!(e)
             send(method, *args) if client    
           else
