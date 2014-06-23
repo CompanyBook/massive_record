@@ -88,8 +88,12 @@ describe "A table" do
     end
 
     describe "with a saved row" do
-      
-      before do
+
+      before(:all) do
+        @myTable = table
+      end
+
+      before(:each) do
         row = MassiveRecord::Wrapper::Row.new
         row.id = "ID1"
         row.values = { 
@@ -106,38 +110,43 @@ describe "A table" do
             :friend => "Thorbjørn".force_encoding(Encoding::BINARY)
           }
         }
-        row.table = table
+        row.table = @myTable
         row.save
       end
 
-      after do
-        table.destroy
+      after(:each) do
+        row = @myTable.first
+        row.try(:destroy)
+      end
+
+      after(:all) do
+        @myTable.destroy
       end
             
       it "should list all column names" do
-        table.column_names.size.should == 9
+        @myTable.column_names.size.should == 9
       end
       
       it "should only load one column" do
-        table.get("ID1", :info, :first_name).should == "John"
+        @myTable.get("ID1", :info, :first_name).should == "John"
       end
 
       it "should return nil if column does not exist" do
-        table.get("ID1", :info, :unkown_column).should be_nil
+        @myTable.get("ID1", :info, :unkown_column).should be_nil
       end
       
       it "should only load a given column family" do
-        table.first(:select => ["info"]).column_families.should == ["info"]
-        table.all(:limit => 1, :select => ["info"]).first.column_families.should == ["info"]
-        table.find("ID1", :select => ["info"]).column_families.should == ["info"]
+        @myTable.first(:select => ["info"]).column_families.should == ["info"]
+        @myTable.all(:limit => 1, :select => ["info"]).first.column_families.should == ["info"]
+        @myTable.find("ID1", :select => ["info"]).column_families.should == ["info"]
       end
 
       it "should return nil if id is not found" do
-        table.find("not_exist_FOO").should be_nil
+        @myTable.find("not_exist_FOO").should be_nil
       end
 
       it "should update row values" do
-        row = table.first
+        row = @myTable.first
         row.values["info:first_name"].should eql("John")
         
         row.update_columns({ :info =>  { :first_name => "Bob" } })
@@ -148,7 +157,7 @@ describe "A table" do
       end
 
       it "should encode everything to UTF-8" do
-        row = table.first
+        row = @myTable.first
 
         row.values["misc:dislike"].encoding.should == Encoding::UTF_8
         row.values["misc:dislike"].should == "{\"Washing\":\"Boring 6/10\",\"Ironing\":\"Boring 8/10\"}"
@@ -158,46 +167,45 @@ describe "A table" do
       end
 
       it "should persist integer values as binary" do
-        row = table.first
+        row = @myTable.first
         row.values["misc:integer"].should eq [1234567].pack('q').reverse
       end
       
       it "should persist row changes" do
-        row = table.first
+        row = @myTable.first
         row.update_columns({ :info => { :first_name => "Bob" } })
         row.save.should be_true
 
-        row = table.first
+        row = @myTable.first
         row.values["info:first_name"].should == "Bob"
       end
 
       it "should have a updated_at for a row" do
-        row = table.first
+        row = @myTable.first
         row.updated_at.should be_a_kind_of Time
       end
 
       it "should have an updated_at for the row which is taken from the last updated attribute" do
-        row = table.first
+        row = @myTable.first
         row.update_columns({ :info =>  { :first_name => "New Bob" } })
         row.save
 
-        row = table.first
+        row = @myTable.first
         row.columns["info:first_name"].created_at.should == row.updated_at
       end
 
       it "should have a new updated at for a row" do
-        row = table.first
+        row = @myTable.first
         updated_at_was = row.updated_at
         row.update_columns({ :info =>  { :first_name => "Bob" } })
-        sleep 1
         row.save
 
-        row = table.first        
+        row = @myTable.first        
         updated_at_was.should_not == row.updated_at
       end
       
       it "should merge data" do
-        row = table.first
+        row = @myTable.first
         row.update_columns({ :misc => { :super_power => "Eating"} })
         row.columns.collect{|k, v| k if k.include?("misc:")}.delete_if{|v| v.nil?}.sort.should(
           eql(["misc:null_test", "misc:integer", "misc:friend", "misc:like", "misc:empty", "misc:dislike", "misc:super_power"].sort)
@@ -205,30 +213,30 @@ describe "A table" do
       end
       
       it "should deserialize Array / Hash values from YAML automatically" do
-        row = table.first
+        row = @myTable.first
         ActiveSupport::JSON.decode(row.values["misc:like"]).class.should eql(Array)
         ActiveSupport::JSON.decode(row.values["misc:dislike"]).class.should eql(Hash)
         ActiveSupport::JSON.decode(row.values["misc:empty"]).class.should eql(Hash)
       end
       
       it "should be able to perform partial updates" do
-        row = table.first(:select => ["misc"])
+        row = @myTable.first(:select => ["misc"])
         row.update_columns({ :misc => { :genre => "M" } })
         row.save
 
-        row = table.first
+        row = @myTable.first
         row.values["misc:genre"].should == "M"
       end
 
       it "should be able to do atomic increment call on new cell" do
-        row = table.first
+        row = @myTable.first
 
         result = row.atomic_increment("misc:value_to_increment")
         result.should == 1
       end
 
       it "should be able to pass in what to incremet the new cell by" do
-        row = table.first
+        row = @myTable.first
         result = row.atomic_increment("misc:value_to_increment")
         result = row.atomic_increment("misc:value_to_increment", 2)
 
@@ -236,26 +244,26 @@ describe "A table" do
       end
 
       it "should be able to do atomic increment on existing values" do
-        row = table.first
+        row = @myTable.first
 
         result = row.atomic_increment("misc:integer")
         result.should == 1234568
       end
 
       it "should be settable to nil" do
-        row = table.first
+        row = @myTable.first
 
         row.values["misc:null_test"].should_not be_nil
 
         row.update_column(:misc, :null_test, nil)
         row.save
 
-        row = table.first
+        row = @myTable.first
         row.values["misc:null_test"].should be_nil
       end
       
       it "should delete a row" do
-        table.first.destroy.should be_true
+        @myTable.first.destroy.should be_true
       end
             
     end

@@ -61,6 +61,38 @@ describe "A connection" do
 
   end
 
+  describe "caching" do
+
+    before do
+      conn.stub(:getTableNames) { ["table_name_1"] }
+    end
+
+    it "should cache the list of tables" do
+      conn.open
+      conn.tables.should == ["table_name_1"]
+      conn.tables_collection.should == ["table_name_1"]
+    end
+
+    it "should not expire tables collection unless a table is modified" do
+      conn.tables_collection = ["test"]
+      conn.send(:expire_tables_collection_if_needed, "updateRow")
+      conn.tables_collection.should == ["test"]
+    end
+
+    it "should expire the cache when another table is created" do
+      conn.tables_collection = ["test"]
+      conn.send(:expire_tables_collection_if_needed, "createTable")
+      conn.tables_collection.should be_nil
+    end
+
+    it "should expire the cache when another table is deleted" do
+      conn.tables_collection = ["test"]
+      conn.send(:expire_tables_collection_if_needed, "deleteTable")
+      conn.tables_collection.should be_nil
+    end
+
+  end
+
   describe "catching errors" do
     it "should not be able to open a new connection with a wrong configuration and Raise an error" do
       conn.port = 1234

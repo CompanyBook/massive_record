@@ -5,7 +5,7 @@ module MassiveRecord
     module Thrift
       class Connection
   
-        attr_accessor :host, :hosts, :port, :timeout, :current_host
+        attr_accessor :host, :hosts, :port, :timeout, :current_host, :tables_collection
     
         def initialize(opts = {})
           @timeout      = opts[:timeout] || 4
@@ -58,10 +58,11 @@ module MassiveRecord
         end
       
         def tables
-          collection = MassiveRecord::Wrapper::TablesCollection.new
-          collection.connection = self
-          (getTableNames() || {}).each{|table_name| collection.push(table_name)}
-          collection
+          return @tables_collection unless @tables_collection.nil?
+          @tables_collection ||= MassiveRecord::Wrapper::TablesCollection.new
+          @tables_collection.connection = self
+          (getTableNames() || {}).each{|table_name| @tables_collection.push(table_name)}
+          @tables_collection
         rescue => e
           if @reconnect && reconnect?(e)
             reconnect!(e)
@@ -79,6 +80,7 @@ module MassiveRecord
         def method_missing(method, *args)
           @instrumenter.instrument "adapter_query.massive_record", { :method_name => method } do
             begin
+              expire_tables_collection_if_needed(method)
               open if not client
               client.send(method, *args) if client
             rescue => e
@@ -123,6 +125,14 @@ module MassiveRecord
             hosts_to_pick = hosts.clone
             hosts_to_pick.delete(current_host)
             self.current_host = hosts_to_pick.sample
+          end
+        end
+
+        # The connection is caching the list of tables
+        # We need to expire the list if one is added/removed
+        def expire_tables_collection_if_needed(method_name)
+          if ["createTable", "deleteTable"].include?(method_name)
+            self.tables_collection = nil
           end
         end
     

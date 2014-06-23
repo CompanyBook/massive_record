@@ -71,6 +71,7 @@ module MassiveRecord
         def destroy
           disable
           if client.deleteTable(name).nil?
+            sleep 0.5
             @table_exists = false
             true
           else
