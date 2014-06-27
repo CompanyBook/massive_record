@@ -65,7 +65,9 @@ module MassiveRecord
         end    
     
         def disable
-          client.disableTable(name).nil?
+          if client.isTableEnabled(name)
+            client.disableTable(name).nil?
+          end
         end
     
         def destroy
@@ -81,7 +83,7 @@ module MassiveRecord
           @table_exists = nil
           exists? ? raise(e) : true
         end
-    
+      
         def create_column_families(column_family_names)
           column_family_names.each{|name| @column_families.push(ColumnFamily.new(name))}
         end
@@ -216,7 +218,7 @@ module MassiveRecord
         end
     
         def exists?
-          @table_exists ||= connection.tables.include?(name)
+          @table_exists = connection.tables.include?(name)
         end
     
         def regions

@@ -59,7 +59,7 @@ module MassiveRecord
       
         def tables
           return @tables_collection unless @tables_collection.nil?
-          @tables_collection ||= MassiveRecord::Wrapper::TablesCollection.new
+          @tables_collection = MassiveRecord::Wrapper::TablesCollection.new
           @tables_collection.connection = self
           (getTableNames() || {}).each{|table_name| @tables_collection.push(table_name)}
           @tables_collection
@@ -131,7 +131,7 @@ module MassiveRecord
         # The connection is caching the list of tables
         # We need to expire the list if one is added/removed
         def expire_tables_collection_if_needed(method_name)
-          if ["createTable", "deleteTable"].include?(method_name)
+          if ["createTable", "deleteTable"].include?(method_name.to_s)
             self.tables_collection = nil
           end
         end

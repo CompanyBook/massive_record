@@ -20,17 +20,22 @@ describe "A table" do
     t.column_families.create(MassiveRecord::Wrapper::ColumnFamily.new(:info, :max_versions => 3))
     t.column_families.create(:misc)
     t.save
+    sleep 1
     t
   end
 
   describe "default" do
 
+    before do
+      @myRawTable = rawTable
+    end
+
     it "should not exists in the database" do
-      rawTable.exists?.should be_false
+      @myRawTable.exists?.should be_false
     end
   
     it "should not have any column families" do
-      rawTable.column_families.should be_empty
+      @myRawTable.column_families.should be_empty
     end
 
   end
@@ -40,22 +45,14 @@ describe "A table" do
     describe "presence" do
   
       it "should destroy the test table" do
-        table.destroy.should be_true
+        t = table
+        t.destroy.should be_true
       end
 
       it "should exists in the database" do
-        table.exists?.should be_true
-        table.destroy
-      end
-
-      it "should only check for existance once" do
-        connection = mock(Object)
-        connection.should_receive(:tables).and_return [MR_CONFIG['table']] 
-        
-        rawTable.connection = connection
-        rawTable.should_receive(:connection).and_return(connection)
-
-        2.times { rawTable.exists? }
+        t = table
+        t.exists?.should be_true
+        t.destroy
       end
   
     end
@@ -63,13 +60,15 @@ describe "A table" do
     describe "column families" do
 
       it "should contains two column families" do
-        table.column_families.size.should == 2
-        table.destroy
+        t = table
+        t.column_families.size.should == 2
+        t.destroy
       end
     
       it "should fetch column families from the database" do
-        table.fetch_column_families.size.should == 2
-        table.destroy
+        t = table
+        t.fetch_column_families.size.should == 2
+        t.destroy
       end
     
     end
@@ -271,49 +270,52 @@ describe "A table" do
   end
   
   describe "can be scanned" do
+
     before(:all) do
+      @myTable = table
+
       ["A", "B"].each do |prefix|
         1.upto(5).each do |i|
           row = MassiveRecord::Wrapper::Row.new
           row.id = "#{prefix}#{i}"
           row.values = { :info => { :first_name => "John #{i}", :last_name => "Doe #{i}" } }
-          row.table = table
+          row.table = @myTable
           row.save
         end
       end
     end
-    
-    after(:all) do
-      table.destroy
-    end
 
+    after(:all) do
+      @myTable.destroy
+    end
+    
     it "should contains 10 rows" do
-      table.all.size.should == 10
-      table.all.collect(&:id).size.should == 10
+      @myTable.all.size.should == 10
+      @myTable.all.collect(&:id).size.should == 10
     end
     
     it "should load the first row" do
-      table.first.should be_a_kind_of(MassiveRecord::Wrapper::Row)
+      @myTable.first.should be_a_kind_of(MassiveRecord::Wrapper::Row)
     end
     
     it "should find rows from a list of IDs" do
       ids_list = [["A1"], ["A1", "A2", "A3"]]
       ids_list.each do |ids|
-        table.find(ids).each do |row|
+        @myTable.find(ids).each do |row|
           ids.include?(row.id).should be_true
         end
       end
     end
   
     it "should iterate through a collection of rows" do
-      table.all.each do |row|
+      @myTable.all.each do |row|
         row.id.should_not be_nil
       end
     end
   
     it "should iterate through a collection of rows using a batch process" do
       group_number = 0
-      table.find_in_batches(:batch_size => 2, :select => ["info"]) do |group|
+      @myTable.find_in_batches(:batch_size => 2, :select => ["info"]) do |group|
         group_number += 1
         group.each do |row|
           row.id.should_not be_nil
@@ -323,19 +325,19 @@ describe "A table" do
     end
   
     it "should find 1 row using the :starts_with option" do
-      table.all(:starts_with => "A1").size.should == 1
+      @myTable.all(:starts_with => "A1").size.should == 1
     end
   
     it "should find 5 rows using the :starts_with option" do
-      table.all(:starts_with => "A").size.should == 5
+      @myTable.all(:starts_with => "A").size.should == 5
     end
   
     it "should find 9 rows using the :offset option" do
-      table.all(:offset => "A2").size.should == 9
+      @myTable.all(:offset => "A2").size.should == 9
     end
     
     it "should find 4 rows using both :offset and :starts_with options" do
-      table.all(:offset => "A2", :starts_with => "A").size.should == 4
+      @myTable.all(:offset => "A2", :starts_with => "A").size.should == 4
     end
   end
 end

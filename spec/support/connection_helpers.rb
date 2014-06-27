@@ -66,11 +66,12 @@ module CreatePeopleBeforeEach
     before do
       @table = MassiveRecord::Wrapper::Table.new(@connection, Person.table_name)
       @table.column_families.create(:info)
+      @table.column_families.create(:base)
+      @table.column_families.create(:addresses)
+      @table.column_families.create(:addresses_with_timestamp)
       @table.save
       
-      @table_size = 9
-      
-      @table_size.times.each do |id|
+      9.times.each do |id|
         @row = MassiveRecord::Wrapper::Row.new
         @row.id = id + 1
         @row.values = {:info => {:name => "John Doe", :email => "john@doe.com", :age => "20"}}
