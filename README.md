@@ -5,7 +5,7 @@ Massive Record is a Ruby client for HBase. It provides a basic API through Thrif
 See introduction to HBase model architecture:  
 http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture  
 Understanding terminology of Table / Row / Column family / Column / Cell:  
-http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
+https://dzone.com/articles/understanding-hbase-and-bigtab
 
 
 ## HBase requirement
