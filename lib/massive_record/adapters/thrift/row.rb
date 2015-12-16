@@ -108,7 +108,7 @@ module MassiveRecord
             end
           end
 
-          @table.client.mutateRow(@table.name, id.to_s.dup.force_encoding(Encoding::BINARY), mutations).nil?
+          @table.client.mutateRow(@table.name, id.to_s.dup.force_encoding(Encoding::BINARY), mutations,{}).nil?
         end
 
 
