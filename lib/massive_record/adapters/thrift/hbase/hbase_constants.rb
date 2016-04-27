@@ -5,7 +5,7 @@
 #
 
 require 'thrift'
-require 'hbase1_types'
+require 'hbase_types'
 
 module Apache
   module Hadoop
