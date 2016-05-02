@@ -29,13 +29,17 @@ module MassiveRecord
           else
             self.opened_scanner = connection.scannerOpenTs(table_name, key, formatted_column_family_names, created_at, {})
           end
+          # puts "opened_scanner #{self.opened_scanner}"
+          self.opened_scanner
         end
       
         def close
+          # puts "scannerClosed #{opened_scanner}"
           connection.scannerClose(opened_scanner)
         end
       
         def fetch_trows(opts = {})
+          # puts "fetch_trows scanner=#{opened_scanner} opts=#{opts}"
           connection.scannerGetList(opened_scanner, limit)
         end
       
@@ -44,6 +48,7 @@ module MassiveRecord
         end
       
         def populate_rows(results)
+          # puts "populate_rows results=#{results}"
           results.collect do |result|
             populate_row(result) unless result.row.match(/^#{start_key.gsub("|", "\\|")}/).nil?
           end.select{|r| !r.nil?}

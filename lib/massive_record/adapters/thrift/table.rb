@@ -196,13 +196,17 @@ module MassiveRecord
           end
         end
 
-        def find_in_batches(opts = {})   
-          return nil unless exists?
-
+        def find_in_batches(opts = {})
+          # puts "find_in_batches called #{opts} name=#{name}"
+          # puts "find_in_batches connection #{connection}"
+          # puts "find_in_batches connection.tables #{connection.tables}"
+          # puts "find_in_batches connection.tables.include?(name) = #{connection.tables.include?(name)}"
+          # puts "find_in_batches is exists"
+          return nil unless exists
           results_limit = opts[:limit]
           results_found = 0
           
-          scanner(opts) do |s|
+          rr = scanner(opts) do |s|
             while (true) do
               s.limit = results_limit - results_found if !results_limit.nil? && results_limit <= results_found + s.limit
               
@@ -215,9 +219,12 @@ module MassiveRecord
               end
             end
           end
+          connection.close
+
+          rr
         end
     
-        def exists?
+        def exists
           @table_exists = connection.tables.include?(name)
         end
     

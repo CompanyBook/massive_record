@@ -44,6 +44,7 @@ module MassiveRecord
         end
       
         def close
+          # puts "close connection"
           @transport.nil? || @transport.close.nil?
         rescue IOError
           true          
