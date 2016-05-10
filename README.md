@@ -7,25 +7,17 @@ http://wiki.apache.org/hadoop/Hbase/HbaseArchitecture
 Understanding terminology of Table / Row / Column family / Column / Cell:  
 http://jimbojw.com/wiki/index.php?title=Understanding_Hbase_and_BigTable
 
-
 ## HBase requirement
 
-MassiveRecord is following the Cloudera packages of HBase:
-http://www.cloudera.com
+MassiveRecord is tested with Hortonworks Sandbox:
+http://hortonworks.com/products/sandbox
 
-Currently, MassiveRecord is tested against HBase 0.94.6, which can be found at the following address:
-http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDHTarballs/3.25.2013/CDH4-Downloadable-Tarballs/CDH4-Downloadable-Tarballs.html
+Currently, MassiveRecord is tested against HBase 1.1.4 which is pre-installed in the sandbox.
 
-Install HBase (OSX):  
-Download the package 'hbase-0.94.6+132' and extract it.  
-Start HBase using the following command:
-
-    path_to_hbase/bin/start-hbase.sh
-
-Start Thrift (HBase service interface):
-
-    path_to_hbase/bin/hbase thrift -b 127.0.0.1 start
-    
+    1. Download the Sandbox (VirtualBox Image)
+    2. Follow the steps to create a user
+    3. Start HBase through the Ambari interface, log in through http://localhost:8080
+    4. Start Thrift: /usr/bin/hbase thrift start
 
 ## Installation
 
@@ -211,7 +203,7 @@ You can, if you'd like, work directly against the adapter.
 It is however adviced to use the ORM as the interface to the adapter is not yet very well defined.
   
     # Init a new connection with HBase
-    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
+    conn = MassiveRecord::Wrapper::Connection.new(:host => '127.0.0.1', :port => 9090)
     conn.open
     
     # OR init a connection using the config/hbase.yml file with Rails
@@ -318,7 +310,7 @@ The generated Ruby files can be found under lib/massive_record/thrift/
 The whole API (CRUD and more) is present in the Client object (Apache::Hadoop::Hbase::Thrift::Hbase::Client).  
 The client can be easily initialized using the MassiveRecord connection :
 
-    conn = MassiveRecord::Wrapper::Connection.new(:host => 'localhost', :port => 9090)
+    conn = MassiveRecord::Wrapper::Connection.new(:host => '127.0.0.1', :port => 9090)
     conn.open
     
     client = conn.client
