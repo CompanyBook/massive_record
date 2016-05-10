@@ -12,7 +12,7 @@ module MassiveRecord
           @table_name = table_name
           @column_family_names = column_family_names.collect{|n| n.split(":").first}
           @column_family_names = opts[:columns] unless opts[:columns].nil?
-          @formatted_column_family_names = @column_family_names.collect{|n| "#{n.split(":").first}:"}
+          @formatted_column_family_names = @column_family_names.collect{|n| "#{n.split(":").first}"}
           @start_key = opts[:start_key].to_s
           @offset_key = opts[:offset_key].to_s
           @created_at = opts[:created_at].to_s

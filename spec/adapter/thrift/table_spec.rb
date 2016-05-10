@@ -19,8 +19,7 @@ describe "A table" do
     t = rawTable
     t.column_families.create(MassiveRecord::Wrapper::ColumnFamily.new(:info, :max_versions => 3))
     t.column_families.create(:misc)
-    t.save
-    sleep 1
+    t.save    
     t
   end
 
