@@ -101,7 +101,11 @@ module MassiveRecord
         # TransportException: some packets where lost
         # ApplicationException: issue to get data
         def reconnect?(e)
-          MassiveRecord::ORM::Base.logger.info "reconnect error: #{e.inspect}"
+          unless MassiveRecord::ORM::Base.logger.nil?
+            MassiveRecord::ORM::Base.logger.info e.inspect
+            e.backtrace.each {|l| MassiveRecord::ORM::Base.logger.info l}
+          end
+          
           (e.is_a?(::Apache::Hadoop::Hbase::Thrift::IOError) && e.message.include?("closed stream")) || 
           e.is_a?(::Thrift::TransportException) || 
           e.is_a?(::Thrift::ApplicationException)
